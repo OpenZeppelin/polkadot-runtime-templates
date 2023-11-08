@@ -1,16 +1,16 @@
-# Contributing to OpenZeppelin Contracts for Cairo
+# Contributing to OpenZeppelin Substrate Template
 
-We really appreciate and value contributions to OpenZeppelin Contracts for Cairo. Please take 5' to review the items listed below to make sure that your contributions are merged as soon as possible.
+We really appreciate and value contributions to OpenZeppelin Substrate Template. Please take 5' to review the items listed below to make sure that your contributions are merged as soon as possible.
+
+For ANY of the items below, if they seem too complicated or hard, you can always ask for help from us. We love that you are helping us, and we would love to help you back!
 
 ## Contribution guidelines
 
-Before starting development, please [create an issue](https://github.com/OpenZeppelin/cairo-contracts/issues/new/choose) to open the discussion, validate that the PR is wanted, and coordinate overall implementation details.
+Before starting development, please [create an issue](https://github.com/OpenZeppelin/substrate-vanilla-template/issues/new/choose) to open the discussion, validate that the PR is wanted, and coordinate overall implementation details.
 
 ### Coding style
 
-After a few radical changes in the Cairo language (mainly the transition to Cairo 1), our coding style guidelines became automatically deprecated.
-That's why [we're working on setting new ones](https://github.com/OpenZeppelin/cairo-contracts/issues/696).
-Feel free to read, contribute, discuss, and ask questions in the issue.
+`rustfmt.toml`
 
 ## Creating Pull Requests (PRs)
 
@@ -21,13 +21,13 @@ As a contributor, you are expected to fork this repository, work on your own for
 1. Make sure your fork is up to date with the main repository:
 
     ```sh
-    cd cairo-contracts
-    git remote add upstream https://github.com/OpenZeppelin/cairo-contracts.git
+    cd substrate-runtime-template
+    git remote add upstream https://github.com/OpenZeppelin/substrate-runtime-template.git
     git fetch upstream
     git pull --rebase upstream main
     ```
 
-    > NOTE: The directory `cairo-contracts` represents your fork's local copy.
+    > NOTE: The directory `substrate-runtime-template` represents your fork's local copy.
 
 2. Branch out from `main` into `fix/some-bug-short-description-#123` (ex: `fix/typos-in-docs-#123`):
 
@@ -40,7 +40,7 @@ As a contributor, you are expected to fork this repository, work on your own for
 3. Make your changes, add your files, update documentation ([see Documentation section](#documentation)), commit, and push to your fork.
 
     ```sh
-    git add src/file.cairo
+    git add .
     git commit "Fix some bug short description #123"
     git push origin fix/some-bug-short-description-#123
     ```
@@ -49,49 +49,36 @@ As a contributor, you are expected to fork this repository, work on your own for
 
     ```bash
     # run tests
-    scarb test
+    cargo test
 
     # run linter
-    scarb fmt --check
+    cargo clippy --all-targets --all-features -- -D warnings
+
+    # run formatter
+    cargo fmt --all -- --check
+
+    # run documentation checks
+    cargo doc --all --no-deps
     ```
 
-5. Go to [OpenZeppelin/cairo-contracts](https://github.com/OpenZeppelin/cairo-contracts) in your web browser and issue a new pull request.
+5. Go to [OpenZeppelin/substrate-runtime-template](https://github.com/OpenZeppelin/substrate-runtime-template) in your web browser and issue a new pull request.
     Begin the body of the PR with "Fixes #123" or "Resolves #123" to link the PR to the issue that it is resolving.
     *IMPORTANT* Read the PR template very carefully and make sure to follow all the instructions. These instructions
     refer to some very important conditions that your PR must meet in order to be accepted, such as making sure that all PR checks pass.
 
-6. Maintainers will review your code and possibly ask for changes before your code is pulled in to the main repository. We'll check that all tests pass, review the coding style, and check for general code correctness. If everything is OK, we'll merge your pull request and your code will be part of OpenZeppelin Contracts for Cairo.
+6. Maintainers will review your code and possibly ask for changes before your code is pulled in to the main repository. We'll check that all tests pass, review the coding style, and check for general code correctness. If everything is OK, we'll merge your pull request and your code will be part of OpenZeppelin Substrate Runtime Template.
 
     *IMPORTANT* Please pay attention to the maintainer's feedback, since it's a necessary step to keep up with the standards OpenZeppelin Contracts attains to.
 
-## Documentation
 
-Before submitting the PR, you must update the corresponding documentation entries in the docs folder. In the future we may use something similar to solidity-docgen to automatically generate docs, but for now we are updating .adoc entries manually.
+## Tests
 
-If you want to run the documentation UI locally:
-
-1. Change directory into docs inside the project and run npm install.
-
-    ```bash
-    cd docs && npm i
-    ```
-
-2. Build the docs and run the local server (default to localhost:8080). This will watch for changes in the docs/module folder, and update the UI accordingly.
-
-    ```bash
-    npm run docs:watch
-    ```
-
-## Integration tests
-
-Currently, Starknet's test suite has important differences with public networks. We strongly suggest testing new features against a testnet before submitting the PR, to make sure that everything works as expected in a real environment.
-
-We are looking into defining a better process for these integration tests, but for now the PR author/contributor must suggest an approach to test the feature when applicable, which has to be agreed and reproduced by the reviewer.
+If you are introducing a new feature, please add a new test to ensure that it works as expected. Unit tests are mandatory for each new feature. If you are unsure about whether to write an integration test, you can wait for the maintainer's feedback.
 
 ## All set
 
-If you have any questions, feel free to post them as an [issue](https://github.com/OpenZeppelin/cairo-contracts/issues).
+If you have any questions, feel free to post them as an [issue](https://github.com/OpenZeppelin/substrate-runtime-template/issues).
 
-Finally, if you're looking to collaborate and want to find easy tasks to start, look at the issues we marked as ["Good first issue"](https://github.com/OpenZeppelin/cairo-contracts/labels/good%20first%20issue).
+Finally, if you're looking to collaborate and want to find easy tasks to start, look at the issues we marked as ["Good first issue"](https://github.com/OpenZeppelin/substrate-runtime-template/labels/good%20first%20issue).
 
 Thanks for your time and code!
