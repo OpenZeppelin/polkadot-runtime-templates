@@ -6,7 +6,7 @@ For ANY of the items below, if they seem too complicated or hard, you can always
 
 ## Contribution guidelines
 
-Before starting development, please [create an issue](https://github.com/OpenZeppelin/substrate-vanilla-template/issues/new/choose) to open the discussion, validate that the PR is wanted, and coordinate overall implementation details.
+Before starting development, please [create an issue](https://github.com/OpenZeppelin/substrate-runtime-template/issues/new/choose) to open the discussion, validate that the PR is wanted, and coordinate overall implementation details.
 
 ### Coding style
 
