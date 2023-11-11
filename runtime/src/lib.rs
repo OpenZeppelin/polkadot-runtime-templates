@@ -6,6 +6,8 @@
 #[cfg(feature = "std")]
 include!(concat!(env!("OUT_DIR"), "/wasm_binary.rs"));
 
+pub mod constants;
+use constants::currency::*;
 mod weights;
 pub mod xcm_config;
 
@@ -27,6 +29,7 @@ use frame_system::{
     limits::{BlockLength, BlockWeights},
     EnsureRoot,
 };
+pub use pallet_multisig;
 /// Import the template pallet.
 pub use pallet_parachain_template;
 use pallet_xcm::{EnsureXcm, IsVoiceOfBody};
@@ -427,6 +430,24 @@ impl cumulus_pallet_dmp_queue::Config for Runtime {
 }
 
 parameter_types! {
+    // One storage item; key size is 32; value is size 4+4+16+32 bytes = 56 bytes.
+    pub const DepositBase: Balance = deposit(1, 88);
+    // Additional storage item size of 32 bytes.
+    pub const DepositFactor: Balance = deposit(0, 32);
+    pub const MaxSignatories: u16 = 100;
+}
+
+impl pallet_multisig::Config for Runtime {
+    type Currency = Balances;
+    type DepositBase = DepositBase;
+    type DepositFactor = DepositFactor;
+    type MaxSignatories = MaxSignatories;
+    type RuntimeCall = RuntimeCall;
+    type RuntimeEvent = RuntimeEvent;
+    type WeightInfo = weights::pallet_multisig::WeightInfo<Runtime>; // TODO: others should check too, I copied this from: https://github.com/paritytech/statemint/blob/master/runtime/statemine/src/weights/pallet_multisig.rs
+}
+
+parameter_types! {
     pub const Period: u32 = 6 * HOURS;
     pub const Offset: u32 = 0;
 }
@@ -506,6 +527,7 @@ construct_runtime!(
 
         // Governance
         Sudo: pallet_sudo = 15,
+        Multisig: pallet_multisig,
 
         // Collator support. The order of these 4 are important and shall not change.
         Authorship: pallet_authorship = 20,
