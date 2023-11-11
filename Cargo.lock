@@ -7380,6 +7380,7 @@ dependencies = [
  "pallet-authorship",
  "pallet-balances",
  "pallet-collator-selection",
+ "pallet-multisig",
  "pallet-parachain-template",
  "pallet-session",
  "pallet-sudo",
