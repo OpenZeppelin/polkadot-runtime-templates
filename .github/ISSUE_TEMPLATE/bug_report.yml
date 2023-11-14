@@ -37,7 +37,7 @@ body:
     id: terms
     attributes:
       label: Contribution Guidelines
-      description: By submitting this issue, you agree to follow our [Contribution Guidelines](https://github.com/OpenZeppelin/substrate-generic-vanilla/blob/main/CONTRIBUTING.md)
+      description: By submitting this issue, you agree to follow our [Contribution Guidelines](https://github.com/OpenZeppelin/substrate-runtime-template/blob/main/CONTRIBUTING.md)
       options:
         - label: I agree to follow this project's Contribution Guidelines
           required: true
