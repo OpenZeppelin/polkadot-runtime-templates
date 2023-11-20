@@ -7,7 +7,6 @@
 include!(concat!(env!("OUT_DIR"), "/wasm_binary.rs"));
 
 pub mod constants;
-use constants::currency::*;
 mod weights;
 pub mod xcm_config;
 
@@ -378,9 +377,13 @@ impl InstanceFilter<RuntimeCall> for ProxyType {
         match self {
             ProxyType::Any => true,
             ProxyType::NonTransfer => !matches!(c, RuntimeCall::Balances { .. }),
-            ProxyType::CancelProxy =>
-                matches!(c, RuntimeCall::Proxy(pallet_proxy::Call::reject_announcement { .. })),
-            ProxyType::Collator => matches!(c, RuntimeCall::CollatorSelection { .. }),
+            ProxyType::CancelProxy => matches!(
+                c,
+                RuntimeCall::Proxy(pallet_proxy::Call::reject_announcement { .. })
+                    | RuntimeCall::Multisig { .. }
+            ),
+            ProxyType::Collator =>
+                matches!(c, RuntimeCall::CollatorSelection { .. } | RuntimeCall::Multisig { .. }),
         }
     }
 }
