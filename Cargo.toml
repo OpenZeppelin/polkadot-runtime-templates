@@ -6,3 +6,8 @@ resolver = "2"
 
 [profile.release]
 panic = "unwind"
+
+
+[workspace.lints.clippy]
+type_complexity = "allow"
+too_many_arguments = "allow"
