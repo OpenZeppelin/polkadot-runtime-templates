@@ -444,7 +444,7 @@ impl pallet_multisig::Config for Runtime {
     type MaxSignatories = MaxSignatories;
     type RuntimeCall = RuntimeCall;
     type RuntimeEvent = RuntimeEvent;
-    type WeightInfo = weights::pallet_multisig::WeightInfo<Runtime>; // TODO: others should check too, I copied this from: https://github.com/paritytech/statemint/blob/master/runtime/statemine/src/weights/pallet_multisig.rs
+    type WeightInfo = pallet_multisig::weights::SubstrateWeight<Runtime>;
 }
 
 parameter_types! {
