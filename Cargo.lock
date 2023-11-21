@@ -1522,13 +1522,6 @@ dependencies = [
 [[package]]
 name = "common"
 version = "0.1.0"
-dependencies = [
- "polkadot-core-primitives",
-]
-
-[[package]]
-name = "common"
-version = "0.1.0"
 source = "git+https://github.com/w3f/ring-proof#edd1e90b847e560bf60fc2e8712235ccfa11a9a9"
 dependencies = [
  "ark-ec",
@@ -7311,7 +7304,6 @@ version = "0.1.0"
 dependencies = [
  "clap",
  "color-print",
- "common 0.1.0",
  "cumulus-client-cli",
  "cumulus-client-collator",
  "cumulus-client-consensus-aura",
@@ -7367,7 +7359,6 @@ dependencies = [
 name = "parachain-template-runtime"
 version = "0.1.0"
 dependencies = [
- "common 0.1.0",
  "cumulus-pallet-aura-ext",
  "cumulus-pallet-dmp-queue",
  "cumulus-pallet-parachain-system",
@@ -9493,7 +9484,7 @@ dependencies = [
  "ark-serialize",
  "ark-std",
  "blake2 0.10.6",
- "common 0.1.0 (git+https://github.com/w3f/ring-proof)",
+ "common",
  "fflonk",
  "merlin 3.0.0",
 ]

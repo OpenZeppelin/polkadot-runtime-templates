@@ -20,7 +20,6 @@ futures = "0.3.28"
 
 # Local
 parachain-template-runtime = { path = "../runtime" }
-common = { path = "../common" }
 
 # Substrate
 frame-benchmarking = { git = "https://github.com/paritytech/polkadot-sdk", branch = "release-polkadot-v1.3.0", default-features = false }
