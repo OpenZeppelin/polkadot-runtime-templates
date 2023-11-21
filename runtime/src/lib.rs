@@ -11,7 +11,6 @@ mod weights;
 pub mod xcm_config;
 
 use codec::{Decode, Encode, MaxEncodedLen};
-use constants::currency::{deposit, EXISTENTIAL_DEPOSIT, MICROCENTS, MILLICENTS};
 use cumulus_pallet_parachain_system::RelayNumberStrictlyIncreases;
 use cumulus_primitives_core::ParaId;
 use frame_support::{
@@ -55,11 +54,15 @@ use sp_std::prelude::*;
 #[cfg(feature = "std")]
 use sp_version::NativeVersion;
 use sp_version::RuntimeVersion;
-use weights::{BlockExecutionWeight, ExtrinsicBaseWeight, RocksDbWeight};
 // XCM Imports
 use xcm::latest::prelude::BodyId;
-use xcm_config::{RelayLocation, XcmConfig, XcmOriginToTransactDispatchOrigin};
 use xcm_executor::XcmExecutor;
+
+use crate::{
+    constants::currency::{deposit, EXISTENTIAL_DEPOSIT, MICROCENTS, MILLICENTS},
+    weights::{BlockExecutionWeight, ExtrinsicBaseWeight, RocksDbWeight},
+    xcm_config::{RelayLocation, XcmConfig, XcmOriginToTransactDispatchOrigin},
+};
 
 /// Alias to 512-bit hash when used in the context of a transaction signature on
 /// the chain.
@@ -345,7 +348,7 @@ parameter_types! {
 }
 
 /// The type used to represent the kinds of proxying allowed.
-/// If you are adding new pallets, consider adding new proxy type
+/// If you are adding new pallets, consider adding new ProxyType variant
 #[derive(
     Copy,
     Clone,
