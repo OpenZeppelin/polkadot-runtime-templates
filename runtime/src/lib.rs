@@ -7,10 +7,10 @@
 include!(concat!(env!("OUT_DIR"), "/wasm_binary.rs"));
 
 pub mod constants;
-use constants::currency::*;
 mod weights;
 pub mod xcm_config;
 
+use codec::{Decode, Encode, MaxEncodedLen};
 use cumulus_pallet_parachain_system::RelayNumberStrictlyIncreases;
 use cumulus_primitives_core::ParaId;
 use frame_support::{
@@ -18,7 +18,7 @@ use frame_support::{
     dispatch::DispatchClass,
     genesis_builder_helper::{build_config, create_default_config},
     parameter_types,
-    traits::{ConstBool, ConstU32, ConstU64, ConstU8, EitherOfDiverse, Everything},
+    traits::{ConstBool, ConstU32, ConstU64, ConstU8, EitherOfDiverse, Everything, InstanceFilter},
     weights::{
         constants::WEIGHT_REF_TIME_PER_SECOND, ConstantMultiplier, Weight, WeightToFeeCoefficient,
         WeightToFeeCoefficients, WeightToFeePolynomial,
@@ -36,6 +36,7 @@ use pallet_xcm::{EnsureXcm, IsVoiceOfBody};
 use polkadot_runtime_common::xcm_sender::NoPriceForMessageDelivery;
 // Polkadot imports
 use polkadot_runtime_common::{BlockHashCount, SlowAdjustingFeeUpdate};
+use scale_info::TypeInfo;
 use smallvec::smallvec;
 use sp_api::impl_runtime_apis;
 pub use sp_consensus_aura::sr25519::AuthorityId as AuraId;
@@ -46,18 +47,22 @@ use sp_runtime::{
     create_runtime_str, generic, impl_opaque_keys,
     traits::{AccountIdLookup, BlakeTwo256, Block as BlockT, IdentifyAccount, Verify},
     transaction_validity::{TransactionSource, TransactionValidity},
-    ApplyExtrinsicResult, MultiSignature,
+    ApplyExtrinsicResult, MultiSignature, RuntimeDebug,
 };
 pub use sp_runtime::{MultiAddress, Perbill, Permill};
 use sp_std::prelude::*;
 #[cfg(feature = "std")]
 use sp_version::NativeVersion;
 use sp_version::RuntimeVersion;
-use weights::{BlockExecutionWeight, ExtrinsicBaseWeight, RocksDbWeight};
 // XCM Imports
 use xcm::latest::prelude::BodyId;
-use xcm_config::{RelayLocation, XcmConfig, XcmOriginToTransactDispatchOrigin};
 use xcm_executor::XcmExecutor;
+
+use crate::{
+    constants::currency::{deposit, EXISTENTIAL_DEPOSIT, MICROCENTS, MILLICENTS},
+    weights::{BlockExecutionWeight, ExtrinsicBaseWeight, RocksDbWeight},
+    xcm_config::{RelayLocation, XcmConfig, XcmOriginToTransactDispatchOrigin},
+};
 
 /// Alias to 512-bit hash when used in the context of a transaction signature on
 /// the chain.
@@ -138,7 +143,7 @@ impl WeightToFeePolynomial for WeightToFee {
     fn polynomial() -> WeightToFeeCoefficients<Self::Balance> {
         // in Rococo, extrinsic base weight (smallest non-zero weight) is mapped to 1
         // MILLIUNIT: in our template, we map to 1/10 of that, or 1/10 MILLIUNIT
-        let p = MILLIUNIT / 10;
+        let p = MILLICENTS / 10;
         let q = 100 * Balance::from(ExtrinsicBaseWeight::get().ref_time());
         smallvec![WeightToFeeCoefficient {
             degree: 1,
@@ -206,14 +211,6 @@ pub const SLOT_DURATION: u64 = MILLISECS_PER_BLOCK;
 pub const MINUTES: BlockNumber = 60_000 / (MILLISECS_PER_BLOCK as BlockNumber);
 pub const HOURS: BlockNumber = MINUTES * 60;
 pub const DAYS: BlockNumber = HOURS * 24;
-
-// Unit = the base number of indivisible units for balances
-pub const UNIT: Balance = 1_000_000_000_000;
-pub const MILLIUNIT: Balance = 1_000_000_000;
-pub const MICROUNIT: Balance = 1_000_000;
-
-/// The existential deposit. Set to 1/10 of the Connected Relay Chain.
-pub const EXISTENTIAL_DEPOSIT: Balance = MILLIUNIT;
 
 /// We assume that ~5% of the block weight is consumed by `on_initialize`
 /// handlers. This is used to limit the maximal weight of a single extrinsic.
@@ -342,6 +339,74 @@ impl pallet_authorship::Config for Runtime {
 }
 
 parameter_types! {
+    pub const MaxProxies: u32 = 32;
+    pub const MaxPending: u32 = 32;
+    pub const ProxyDepositBase: Balance = deposit(1, 40);
+    pub const AnnouncementDepositBase: Balance = deposit(1, 48);
+    pub const ProxyDepositFactor: Balance = deposit(0, 33);
+    pub const AnnouncementDepositFactor: Balance = deposit(0, 66);
+}
+
+/// The type used to represent the kinds of proxying allowed.
+/// If you are adding new pallets, consider adding new ProxyType variant
+#[derive(
+    Copy,
+    Clone,
+    Decode,
+    Default,
+    Encode,
+    Eq,
+    MaxEncodedLen,
+    Ord,
+    PartialEq,
+    PartialOrd,
+    RuntimeDebug,
+    TypeInfo,
+)]
+pub enum ProxyType {
+    /// Allows to proxy all calls
+    #[default]
+    Any,
+    /// Allows all non-transfer calls
+    NonTransfer,
+    /// Allows to finish the proxy
+    CancelProxy,
+    /// Allows to operate with collators list (invulnerables, candidates, etc.)
+    Collator,
+}
+
+impl InstanceFilter<RuntimeCall> for ProxyType {
+    fn filter(&self, c: &RuntimeCall) -> bool {
+        match self {
+            ProxyType::Any => true,
+            ProxyType::NonTransfer => !matches!(c, RuntimeCall::Balances { .. }),
+            ProxyType::CancelProxy => matches!(
+                c,
+                RuntimeCall::Proxy(pallet_proxy::Call::reject_announcement { .. })
+                    | RuntimeCall::Multisig { .. }
+            ),
+            ProxyType::Collator =>
+                matches!(c, RuntimeCall::CollatorSelection { .. } | RuntimeCall::Multisig { .. }),
+        }
+    }
+}
+
+impl pallet_proxy::Config for Runtime {
+    type AnnouncementDepositBase = AnnouncementDepositBase;
+    type AnnouncementDepositFactor = AnnouncementDepositFactor;
+    type CallHasher = BlakeTwo256;
+    type Currency = Balances;
+    type MaxPending = MaxPending;
+    type MaxProxies = MaxProxies;
+    type ProxyDepositBase = ProxyDepositBase;
+    type ProxyDepositFactor = ProxyDepositFactor;
+    type ProxyType = ProxyType;
+    type RuntimeCall = RuntimeCall;
+    type RuntimeEvent = RuntimeEvent;
+    type WeightInfo = pallet_proxy::weights::SubstrateWeight<Runtime>;
+}
+
+parameter_types! {
     pub const ExistentialDeposit: Balance = EXISTENTIAL_DEPOSIT;
 }
 
@@ -366,7 +431,7 @@ impl pallet_balances::Config for Runtime {
 
 parameter_types! {
     /// Relay Chain `TransactionByteFee` / 10
-    pub const TransactionByteFee: Balance = 10 * MICROUNIT;
+    pub const TransactionByteFee: Balance = 10 * MICROCENTS;
 }
 
 impl pallet_transaction_payment::Config for Runtime {
@@ -520,6 +585,7 @@ construct_runtime!(
         ParachainSystem: cumulus_pallet_parachain_system = 1,
         Timestamp: pallet_timestamp = 2,
         ParachainInfo: parachain_info = 3,
+        Proxy: pallet_proxy = 4,
 
         // Monetary stuff.
         Balances: pallet_balances = 10,

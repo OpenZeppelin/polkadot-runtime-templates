@@ -7382,6 +7382,7 @@ dependencies = [
  "pallet-collator-selection",
  "pallet-multisig",
  "pallet-parachain-template",
+ "pallet-proxy",
  "pallet-session",
  "pallet-sudo",
  "pallet-timestamp",
