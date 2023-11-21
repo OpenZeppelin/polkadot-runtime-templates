@@ -11,7 +11,7 @@ mod weights;
 pub mod xcm_config;
 
 use codec::{Decode, Encode, MaxEncodedLen};
-use common::{deposit, EXISTENTIAL_DEPOSIT, MICROUNIT, MILLIUNIT};
+use constants::currency::{deposit, EXISTENTIAL_DEPOSIT, MICROCENTS, MILLICENTS};
 use cumulus_pallet_parachain_system::RelayNumberStrictlyIncreases;
 use cumulus_primitives_core::ParaId;
 use frame_support::{
@@ -140,7 +140,7 @@ impl WeightToFeePolynomial for WeightToFee {
     fn polynomial() -> WeightToFeeCoefficients<Self::Balance> {
         // in Rococo, extrinsic base weight (smallest non-zero weight) is mapped to 1
         // MILLIUNIT: in our template, we map to 1/10 of that, or 1/10 MILLIUNIT
-        let p = MILLIUNIT / 10;
+        let p = MILLICENTS / 10;
         let q = 100 * Balance::from(ExtrinsicBaseWeight::get().ref_time());
         smallvec![WeightToFeeCoefficient {
             degree: 1,
@@ -428,7 +428,7 @@ impl pallet_balances::Config for Runtime {
 
 parameter_types! {
     /// Relay Chain `TransactionByteFee` / 10
-    pub const TransactionByteFee: Balance = 10 * MICROUNIT;
+    pub const TransactionByteFee: Balance = 10 * MICROCENTS;
 }
 
 impl pallet_transaction_payment::Config for Runtime {
