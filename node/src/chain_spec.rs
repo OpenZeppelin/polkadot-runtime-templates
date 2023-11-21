@@ -1,6 +1,7 @@
-use common::EXISTENTIAL_DEPOSIT;
 use cumulus_primitives_core::ParaId;
-use parachain_template_runtime::{AccountId, AuraId, Signature};
+use parachain_template_runtime::{
+    constants::currency::EXISTENTIAL_DEPOSIT, AccountId, AuraId, Signature,
+};
 use sc_chain_spec::{ChainSpecExtension, ChainSpecGroup};
 use sc_service::ChainType;
 use serde::{Deserialize, Serialize};
