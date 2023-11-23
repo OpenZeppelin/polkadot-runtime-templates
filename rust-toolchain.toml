@@ -1,2 +1,3 @@
 [toolchain]
 channel = "stable-2023-11-16"
+targets = ["wasm32-unknown-unknown"]
