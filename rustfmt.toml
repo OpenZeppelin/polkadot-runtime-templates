@@ -9,3 +9,6 @@ group_imports = "StdExternalCrate"
 use_field_init_shorthand = true
 use_small_heuristics = "Max"
 wrap_comments = true
+
+# most of these are unstable, so we enable them
+unstable_features = true
