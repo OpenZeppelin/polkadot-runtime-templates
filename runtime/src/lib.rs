@@ -385,8 +385,9 @@ impl InstanceFilter<RuntimeCall> for ProxyType {
                 RuntimeCall::Proxy(pallet_proxy::Call::reject_announcement { .. })
                     | RuntimeCall::Multisig { .. }
             ),
-            ProxyType::Collator =>
-                matches!(c, RuntimeCall::CollatorSelection { .. } | RuntimeCall::Multisig { .. }),
+            ProxyType::Collator => {
+                matches!(c, RuntimeCall::CollatorSelection { .. } | RuntimeCall::Multisig { .. })
+            }
         }
     }
 }
