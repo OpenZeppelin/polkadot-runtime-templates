@@ -100,12 +100,15 @@ pub fn new_partial(
 
     let executor = ParachainExecutor::new_with_wasm_executor(wasm);
 
-    let (client, backend, keystore_container, task_manager) =
-        sc_service::new_full_parts::<Block, RuntimeApi, _>(
-            config,
-            telemetry.as_ref().map(|(_, telemetry)| telemetry.handle()),
-            executor,
-        )?;
+    let (client, backend, keystore_container, task_manager) = sc_service::new_full_parts::<
+        Block,
+        RuntimeApi,
+        _,
+    >(
+        config,
+        telemetry.as_ref().map(|(_, telemetry)| telemetry.handle()),
+        executor,
+    )?;
     let client = Arc::new(client);
 
     let telemetry_worker_handle = telemetry.as_ref().map(|(worker, _)| worker.handle());
@@ -115,13 +118,14 @@ pub fn new_partial(
         telemetry
     });
 
-    let transaction_pool = sc_transaction_pool::BasicPool::new_full(
-        config.transaction_pool.clone(),
-        config.role.is_authority().into(),
-        config.prometheus_registry(),
-        task_manager.spawn_essential_handle(),
-        client.clone(),
-    );
+    let transaction_pool =
+        sc_transaction_pool::BasicPool::new_full(
+            config.transaction_pool.clone(),
+            config.role.is_authority().into(),
+            config.prometheus_registry(),
+            task_manager.spawn_essential_handle(),
+            client.clone(),
+        );
 
     let block_import = ParachainBlockImport::new(client.clone(), backend.clone());
 
@@ -208,9 +212,9 @@ async fn start_node_impl(
                 runtime_api_provider: client.clone(),
                 keystore: Some(params.keystore_container.keystore()),
                 offchain_db: backend.offchain_storage(),
-                transaction_pool: Some(OffchainTransactionPoolFactory::new(
-                    transaction_pool.clone(),
-                )),
+                transaction_pool: Some(
+                    OffchainTransactionPoolFactory::new(transaction_pool.clone())
+                ),
                 network_provider: network.clone(),
                 is_validator: parachain_config.role.is_authority(),
                 enable_http_requests: false,
