@@ -1,4 +1,4 @@
-format_code_in_doc_comments = true
+
 format_macro_bodies = true
 format_macro_matchers = true
 format_strings = true
@@ -8,7 +8,11 @@ reorder_impl_items = true
 group_imports = "StdExternalCrate"
 use_field_init_shorthand = true
 use_small_heuristics = "Max"
-wrap_comments = true
 
 # most of these are unstable, so we enable them
 unstable_features = true
+
+
+# wanted to enable below, but they are removing the documentation comments if there is an empty line in between
+# wrap_comments = true
+# format_code_in_doc_comments = true
