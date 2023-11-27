@@ -58,10 +58,10 @@ jobs:
       - name: cargo fmt
         run: cargo fmt --all -- --check
 
-      - name: cargo test --locked
+      - name: cargo test --release --locked
         run: cargo test
 
-      - name: cargo clippy --locked
+      - name: cargo clippy --release --locked
         run: cargo clippy --locked --all-targets -- -D warnings
 
       - name: Check Documentation
