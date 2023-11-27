@@ -1,0 +1,70 @@
+name: "ci tests"
+
+on:
+  push:
+    branches:
+      - main
+      - plain-cumulus-template
+    paths-ignore:
+      - "**.md"
+  pull_request:
+    paths-ignore:
+      - "**.md"
+  workflow_dispatch:
+    inputs:
+      test-macos-and-windows:
+        description: "run macOS and Windows tests"
+        required: true
+        default: false
+        type: boolean
+
+env:
+  # Not needed in CI, should make things a bit faster
+  CARGO_INCREMENTAL: 0
+  CARGO_TERM_COLOR: always
+  # Remove unnecessary WASM build artefacts
+  WASM_BUILD_CLEAN_TARGET: 1
+
+jobs:
+  clippy-fmt-test:
+    strategy:
+      fail-fast: false
+      matrix:
+        os:
+          - ubuntu-22.04
+          - macos-12
+          - windows-2022
+        run-all:
+          - ${{ inputs.test-macos-and-windows == true || github.ref == 'refs/heads/main' }}
+        exclude: # exclude macos-12 and windows-2022 when the condition is false
+          - run-all: false
+            os: macos-12
+          - run-all: false
+            os: windows-2022
+
+    runs-on: ${{ matrix.os }}
+    steps:
+      - name: git checkout
+        uses: actions/checkout@v4
+
+      - name: Install Protoc
+        uses: arduino/setup-protoc@9b1ee5b22b0a3f1feb8c2ff99b32c89b3c3191e9 # v2.0.0
+        with:
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: install rust toolchain
+        uses: actions-rust-lang/setup-rust-toolchain@v1
+
+      - name: cargo fmt
+        run: cargo fmt --all -- --check
+
+      - name: cargo test --release --locked
+        run: cargo test
+
+      - name: cargo clippy --release --locked
+        run: cargo clippy --locked --all-targets -- -D warnings
+
+      - name: Check Documentation
+        run: cargo doc --locked --all --no-deps
+        env:
+          RUSTDOCFLAGS: "-D rustdoc::broken-intra-doc-links -D rustdoc::private_intra_doc_links"

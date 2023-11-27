@@ -10,7 +10,10 @@ Before starting development, please [create an issue](https://github.com/OpenZep
 
 ### Coding style
 
-`rustfmt.toml`
+You can check out `[rustfmt.toml](https://github.com/OpenZeppelin/polkadot-runtime-template/blob/main/rustfmt.toml)`.
+
+Also, we suggest enabling `format-on-save` feature of your code editor.
+
 
 ## Creating Pull Requests (PRs)
 
