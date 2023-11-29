@@ -68,3 +68,8 @@ jobs:
         run: cargo doc --locked --all --no-deps
         env:
           RUSTDOCFLAGS: "-D rustdoc::broken-intra-doc-links -D rustdoc::private_intra_doc_links"
+
+      - name: Upload coverage reports to Codecov
+        uses: codecov/codecov-action@v3
+        env:
+          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
