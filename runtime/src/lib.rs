@@ -576,6 +576,13 @@ impl pallet_parachain_template::Config for Runtime {
     type RuntimeEvent = RuntimeEvent;
 }
 
+impl pallet_utility::Config for Runtime {
+    type PalletsOrigin = OriginCaller;
+    type RuntimeCall = RuntimeCall;
+    type RuntimeEvent = RuntimeEvent;
+    type WeightInfo = ();
+}
+
 // Create the runtime by composing the FRAME pallets that were previously
 // configured.
 construct_runtime!(
@@ -587,6 +594,7 @@ construct_runtime!(
         Timestamp: pallet_timestamp = 2,
         ParachainInfo: parachain_info = 3,
         Proxy: pallet_proxy = 4,
+        Utility: pallet_utility = 5,
 
         // Monetary stuff.
         Balances: pallet_balances = 10,
