@@ -102,7 +102,6 @@ std = [
 	"frame-system-benchmarking?/std",
 	"frame-system-rpc-runtime-api/std",
 	"frame-system/std",
-	"pallet-proxy/std",
 	"frame-try-runtime?/std",
 	"log/std",
 	"pallet-aura/std",
