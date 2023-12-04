@@ -22,7 +22,7 @@ env:
   # Not needed in CI, should make things a bit faster
   CARGO_INCREMENTAL: 0
   CARGO_TERM_COLOR: always
-  # Remove unnecessary WASM build artefacts
+  # Remove unnecessary WASM build artifacts
   WASM_BUILD_CLEAN_TARGET: 1
 
 jobs:
@@ -55,13 +55,16 @@ jobs:
       - name: install rust toolchain
         uses: actions-rust-lang/setup-rust-toolchain@v1
 
-      - name: cargo fmt
+      - name: Check format
         run: cargo fmt --all -- --check
 
-      - name: cargo test --release --locked
+      - name: Run tests
         run: cargo test
 
-      - name: cargo clippy --release --locked
+      - name: Check build
+        run: cargo check --release
+
+      - name: Check clippy
         run: cargo clippy --locked --all-targets -- -D warnings
 
       - name: Check Documentation
