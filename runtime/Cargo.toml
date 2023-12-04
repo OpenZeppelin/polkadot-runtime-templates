@@ -82,6 +82,9 @@ cumulus-primitives-utility = { git = "https://github.com/paritytech/polkadot-sdk
 pallet-collator-selection = { git = "https://github.com/paritytech/polkadot-sdk", branch = "release-polkadot-v1.3.0", default-features = false }
 parachain-info = { git = "https://github.com/paritytech/polkadot-sdk", branch = "release-polkadot-v1.3.0", default-features = false }
 
+[dev-dependencies]
+sp-io = { git = "https://github.com/paritytech/polkadot-sdk", branch = "release-polkadot-v1.3.0" }
+
 [features]
 default = ["std"]
 std = [
