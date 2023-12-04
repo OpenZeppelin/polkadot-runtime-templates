@@ -602,7 +602,7 @@ construct_runtime!(
 
         // Governance
         Sudo: pallet_sudo = 15,
-        Multisig: pallet_multisig,
+        Multisig: pallet_multisig = 16,
 
         // Collator support. The order of these 4 are important and shall not change.
         Authorship: pallet_authorship = 20,
