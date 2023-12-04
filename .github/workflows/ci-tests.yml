@@ -62,7 +62,7 @@ jobs:
         run: cargo test
 
       - name: Check build
-        run: cargo build --release
+        run: cargo check --release
 
       - name: Check clippy
         run: cargo clippy --locked --all-targets -- -D warnings
