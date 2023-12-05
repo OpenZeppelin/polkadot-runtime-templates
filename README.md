@@ -19,7 +19,7 @@ Refer to [SECURITY.md](SECURITY.md) for more details.
 
 ## License
 
-OpenZeppelin Runtime Template for Substrate is released under the [MIT License](LICENSE).
+OpenZeppelin Runtime Template for Substrate is released under the [GNU v3 License](LICENSE).
 
 
 
