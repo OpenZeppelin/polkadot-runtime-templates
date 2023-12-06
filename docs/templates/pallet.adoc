@@ -1,0 +1,36 @@
+:source-highlighter: highlight.js
+:highlightjs-languages: rust
+:github-icon: pass:[<svg class="icon"><use href="#github-icon"/></svg>]
+= Pallet Name
+
+== Purpose
+
+This is a freeform description of the tasks that this pallet fulfills
+
+== Config
+
+* `ConfigType` -- desription of config. Include the possible values if there is a set of them.
+
+== Dispatchables
+
+[[add_proxy]]
+=== `++dispatchable_name++` link:https://google.com[{github-icon},role=heading-link]
+```rust
+pub fn dispatchable_name(
+    param1: Type1,
+    param2: Type2
+) -> DispatchResult
+```
+Freeform description of the dispatchable. It is good to include the important things that should be included there.
+
+**Params:**
+
+* `param1: Type1` -- description of the parameter
+
+**Errors:**
+
+* `ErrorName` -- description of conditions, when this error happens
+
+**Events:**
+
+* `EventName(param1, param2)` -- description of event, if needed (they are often self-explanatory)

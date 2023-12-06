@@ -1,0 +1,8 @@
+name: substrate-runtimes
+title: Substrate Runtime Templates
+version: 0.8.0
+nav:
+  - modules/ROOT/nav.adoc
+asciidoc:
+  attributes:
+    page-sidebar-collapse-default: true

@@ -1,0 +1,3 @@
+* Runtime Descriptions
+* Pallet guides
+** xref:pallets/pallet.adoc[pallet2]
