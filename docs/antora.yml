@@ -1,6 +1,6 @@
 name: substrate-runtimes
-title: Substrate Runtime Templates
-version: 0.8.0
+title: Substrate Runtime
+version: 0.1.0
 nav:
   - modules/ROOT/nav.adoc
 asciidoc:
