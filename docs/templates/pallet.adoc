@@ -13,7 +13,7 @@ This is a freeform description of the tasks that this pallet fulfills
 
 == Dispatchables
 
-[[add_proxy]]
+[[dispatchable_name]]
 === `++dispatchable_name++` link:https://google.com[{github-icon},role=heading-link]
 ```rust
 pub fn dispatchable_name(

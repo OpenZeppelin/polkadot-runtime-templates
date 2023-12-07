@@ -1,0 +1,30 @@
+:source-highlighter: highlight.js
+:highlightjs-languages: rust
+:github-icon: pass:[<svg class="icon"><use href="#github-icon"/></svg>]
+= Pallet Name
+
+== Purpose
+
+Freeform description of runtime purpose
+
+== Configuration
+
+// List of pallets with their config description
+
+=== `++pallet_name++` link:https://google.com[{github-icon},role=heading-link]
+
+Freeform description of the reason why this pallet was added.
+
+```rust
+impl pallet_name::Config for Runtime {
+    type Config1 = Type1;
+    type Config2 = Type2;
+}
+```
+
+* Description of `Type1` if needed
+* Description of `Type2` if needed
+
+**Relations**
+
+Description of which pallets will get affected if this pallet is going to be removed or changed
