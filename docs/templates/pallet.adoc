@@ -7,6 +7,10 @@
 
 This is a freeform description of the tasks that this pallet fulfills
 
+== Glossary
+
+* _Term_ -- definition of the term
+
 == Config
 
 * `ConfigType` -- desription of config. Include the possible values if there is a set of them.
