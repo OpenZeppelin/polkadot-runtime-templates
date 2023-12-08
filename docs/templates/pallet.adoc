@@ -30,6 +30,8 @@ pub fn dispatchable_name(
 ----
 Freeform description of the dispatchable. It is good to include the important things that should be included there.
 
+// four following blocks show how to make a higlight of some information. It will become a styled block
+
 NOTE: This is how you state important information that should be acknowledged
 
 IMPORTANT: This is how you put some information that should not be missed
