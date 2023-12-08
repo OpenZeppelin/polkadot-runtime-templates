@@ -17,15 +17,25 @@ This is a freeform description of the tasks that this pallet fulfills
 
 == Dispatchables
 
+[.contract]
 [[dispatchable_name]]
 === `++dispatchable_name++` link:https://google.com[{github-icon},role=heading-link]
-```rust
+[source,rust]
+----
 pub fn dispatchable_name(
     param1: Type1,
     param2: Type2
 ) -> DispatchResult
-```
+----
 Freeform description of the dispatchable. It is good to include the important things that should be included there.
+
+NOTE: This is how you state important information that should be acknowledged
+
+IMPORTANT: This is how you put some information that should not be missed
+
+WARNING: This thing is for important information missing which may lead to dangerous consequences
+
+TIP: This is how you should give some useful advice
 
 **Params:**
 
@@ -38,3 +48,7 @@ Freeform description of the dispatchable. It is good to include the important th
 **Events:**
 
 * `EventName(param1, param2)` -- description of event, if needed (they are often self-explanatory)
+
+== Important Mentions and FAQ's
+
+Here you may put a freeform information about any aspect of the pallet.
