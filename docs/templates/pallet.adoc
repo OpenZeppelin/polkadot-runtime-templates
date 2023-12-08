@@ -1,7 +1,8 @@
 :source-highlighter: highlight.js
 :highlightjs-languages: rust
 :github-icon: pass:[<svg class="icon"><use href="#github-icon"/></svg>]
-= Pallet Name
+
+= Pallet Name link:https://google.com[{github-icon},role=heading-link]
 
 == Purpose
 
@@ -17,9 +18,9 @@ This is a freeform description of the tasks that this pallet fulfills
 
 == Dispatchables
 
-[.contract]
+[.contract-item]
 [[dispatchable_name]]
-=== `++dispatchable_name++` link:https://google.com[{github-icon},role=heading-link]
+==== `[.contract-item-name]#++dispatchable_name++#`
 [source,rust]
 ----
 pub fn dispatchable_name(
