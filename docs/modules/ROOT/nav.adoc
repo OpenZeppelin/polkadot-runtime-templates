@@ -1,3 +1,4 @@
 * General Guides
 * Runtime Descriptions
 * Pallet Specifications
+* [Pallet Transaction Payment](./pages/pallet_transaction_payment.adoc)

@@ -1,0 +1,86 @@
+:source-highlighter: highlight.js
+:highlightjs-languages: rust
+:github-icon: pass:[<svg class="icon"><use href="#github-icon"/></svg>]
+
+= Transaction Payment link:https://github.com/paritytech/polkadot-sdk/tree/master/substrate/frame/transaction-payment[{github-icon},role=heading-link]
+
+== Purpose
+
+`pallet-transaction-payment` implements transaction fee logic.
+
+To implement this pallet, the runtime configures a mapping between the minimum unit of computation/block space (*Weight*) and the minimum unit of fees ([`Config::WeightToFee`]).
+
+This pallet also exposes 
+- how to update fees for the next block based on past fees ([`Config::FeeMultiplierUpdate`]).
+- how fees are paid ([`Config::OnChargeTransaction`]).
+
+The base fee and adjusted weight and length fees constitute the _inclusion fee_, which is
+the minimum fee for a transaction to be included in a block.
+The formula of final fee:
+```ignore
+inclusion_fee = base_fee + length_fee + [targeted_fee_adjustment * weight_fee];
+final_fee = inclusion_fee + tip;
+```
+- `targeted_fee_adjustment`: This is a multiplier that can tune the final fee based on
+the congestion of the network.
+- `weight_fee`: A fee proportional to amount of weight a transaction consumes.
+- `length_fee`: A fee proportional to the encoded length of the transaction.
+- `tip`: An optional tip. Tip increases the priority of the transaction, giving it a higher
+chance to be included by the transaction queue.
+
+== Glossary
+
+- _weight_: time it takes to execute a transaction in the body of a block. By controlling the execution time that a block can consume, weight bounds the storage changes and computation per block.
+- _weight fee_: A fee proportional to amount of weight a transaction consumes.
+- _length fee_: A fee proportional to the encoded length of the transaction.
+- _tip_: An optional tip. Tip increases the priority of the transaction, giving it a higher chance to be included by the transaction queue.
+
+== config
+
+- [`Config::WeightToFee`]: The mapping between one unit of weight to one unit of fee.
+- [`Config::FeeMultiplierUpdate`]: A means of updating the fee for the next block, via defining a multiplier, based on the
+final state of the chain at the end of the previous block. Possible values include `ConstantFee`, SlowAdjustingFee`, FastAdjustingFee`, etc.
+- [`Config::OnChargeTransaction`]: A means of defining the storage and state changes associated with paying transaction fees.
+
+== Dispatchables
+
+[.contract-item]
+[[dispatchable_name]]
+==== `[.contract-item-name]#++dispatchable_name++#`
+[source,rust]
+----
+pub fn dispatchable_name(
+    param1: Type1,
+    param2: Type2
+) -> DispatchResult
+----
+Freeform description of the dispatchable. It is good to include the important things that should be included there.
+
+// four following blocks show how to make a higlight of some information. It will become a styled block
+
+NOTE: This is how you state important information that should be acknowledged
+
+IMPORTANT: This is how you put some information that should not be missed
+
+WARNING: This thing is for important information missing which may lead to dangerous consequences
+
+TIP: This is how you should give some useful advice
+
+**Params:**
+
+* `param1: Type1` -- description of the parameter
+
+**Errors:**
+
+* `ErrorName` -- description of conditions, when this error happens
+
+**Events:**
+
+* `EventName(param1, param2)` -- description of event, if needed (they are often self-explanatory)
+
+== More Reading
+
+- [Substrate Weight & Fees](https://www.shawntabrizi.com/blog/substrate/substrate-weight-and-fees/) by Shawn Tabrizi
+* [Substrate Docs: Transaction Weight & Fees]https://docs.substrate.io/build/tx-weights-fees/
+* [Substrate Docs: How to Calculate Fees](https://docs.substrate.io/reference/how-to-guides/weights/calculate-fees/#:~:text=Weight%20fee%20%2D%20A%20fee%20calculated,change%20as%20the%20chain%20progresses)
+
