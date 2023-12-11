@@ -1,0 +1,67 @@
+:source-highlighter: highlight.js
+:highlightjs-languages: rust
+:github-icon: pass:[<svg class="icon"><use href="#github-icon"/></svg>]
+
+= Pallet Name link:https://github.com/paritytech/polkadot-sdk/blob/release-polkadot-v1.5.0/substrate/frame/message-queue/src/lib.rs[{github-icon},role=heading-link]
+
+== Branch/Release: `release-polkadot-v{1.5.0}`
+
+== Purpose
+
+Flexible FRAME pallet for implementing message queues. This pallet can also initiate message processing using the `MessageProcessor` (see `Config`).
+
+== Glossary
+
+* _Term_ -- definition of the term
+
+== Config
+* `RuntimeEvent: From<Event<Self>> + IsType<<Self as frame_system::Config>::RuntimeEvent>` -- The overarching event type.
+* `WeightInfo: WeightInfo;` -- Weight information for extrinsics in this pallet.
+* `MessageProcessor: ProcessMessage` -- Processor for messages
+* `Size: BaseArithmetic + Unsigned + Copy + Into<u32> + Member + Encode + Decode + MaxEncodedLen + TypeInfo + Default` -- Page/heap size type.
+* `QueueChangeHandler: OnQueueChanged<<Self::MessageProcessor as ProcessMessage>::Origin>` -- Code to be called when a message queue changes - either with items introduced or removed.
+* `QueuePausedQuery: QueuePausedQuery<<Self::MessageProcessor as ProcessMessage>::Origin>` -- Queried by the pallet to check whether a queue can be serviced.
+* `type HeapSize: Get<Self::Size>` -- The size of the page; this also serves as the maximum message size which can be sent.
+* `MaxStale: Get<u32>` -- The maximum number of stale pages (i.e. of overweight messages) allowed before culling can happen. Once there are more stale pages than this, then historical pages may be dropped, even if they contain unprocessed overweight messages.
+* `ServiceWeight: Get<Option<Weight>>` -- The amount of weight (if any) which should be provided to the message queue for servicing enqueued items. This may be legitimately `None` in the case that you will call `ServiceQueues::service_queues` manually.
+
+
+== Dispatchables
+
+[.contract-item]
+[[dispatchable_name]]
+==== `[.contract-item-name]#++dispatchable_name++#`
+[source,rust]
+----
+pub fn dispatchable_name(
+    param1: Type1,
+    param2: Type2
+) -> DispatchResult
+----
+Freeform description of the dispatchable. It is good to include the important things that should be included there.
+
+// four following blocks show how to make a highlight of some information. It will become a styled block
+
+NOTE: This is how you state important information that should be acknowledged
+
+IMPORTANT: This is how you put some information that should not be missed
+
+WARNING: This thing is for important information missing which may lead to dangerous consequences
+
+TIP: This is how you should give some useful advice
+
+**Params:**
+
+* `param1: Type1` -- description of the parameter
+
+**Errors:**
+
+* `ErrorName` -- description of conditions, when this error happens
+
+**Events:**
+
+* `EventName(param1, param2)` -- description of event, if needed (they are often self-explanatory)
+
+== Important Mentions and FAQ's
+
+Here you may put a freeform information about any aspect of the pallet.
