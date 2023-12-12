@@ -22,7 +22,7 @@ This pallet enables delegation of rights to execute certain call types from one 
 
 == Config
 
-* Pallet-specific configs
+* Pallet-specific configs:
 ** `ProxyType` -- a type that describes different variants of proxy. It must implement `Default` trait and `InstanceFilter<RuntimeCall>` trait.
 ** `ProxyDepositBase` -- a base amount of currency that defines a deposit for proxy creation.
 ** `ProxyDepositFactor` -- an amount of currency that will be frozen along with the `ProxyDepositBase` for each additional proxy.
