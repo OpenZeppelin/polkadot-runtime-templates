@@ -1,0 +1,357 @@
+:source-highlighter: highlight.js
+:highlightjs-languages: rust
+:github-icon: pass:[<svg class="icon"><use href="#github-icon"/></svg>]
+
+= pallet_proxy link:https://github.com/paritytech/polkadot-sdk/tree/release-polkadot-v1.5.0/substrate/frame/proxy[{github-icon},role=heading-link]
+
+Branch/Release: `release-polkadot-v1.5.0`
+
+== Purpose
+
+This pallet gives an ability to delegate the rights to execute some certain calls types from one origin to another. 
+
+== Glossary
+
+* _Announcement_ — a statement of call hash for the proxy to execute in some future block. Required for some proxies where delay is specified
+* _Delay_ — number of block that should pass from announcement before call execution
+* _Delegatee_ — account that was granted call execution rights with proxy creation
+* _Delegator_ — account that granted call execution rights with proxy creation
+* _Proxy_ — statement of call execution rights transfer from delegator to delegatee. Specified by proxy type and delay.
+* _Proxy type_ — type of calls that can be executed using this proxy.
+* _Pure account_ — accounted that was spawned only to be a delegatee for some proxy.
+
+== Config
+
+* Pallet-specific configs
+** `ProxyType` -- a type that describes different variants of proxy. It must implement `Default` trait and `InstanceFilter<RuntimeCall>` trait.
+** `ProxyDepositBase` -- a base amount of currency that defines a deposit for proxy creation.
+** `ProxyDepositFactor` -- an amount of currency that will be frozen along with the `ProxyDepositBase` for each additional proxy.
+** `MaxProxies` -- maximum number of proxies that single account can create.
+** `MaxPending` -- maximum number of announcements that can be made per account.
+** `AnnouncementDepositBase` -- a base amount of currency that defines a deposit for announcement creation.
+** `AnnouncementDepositFactor` -- an amount of currency that will be frozen along with the `AnnouncementDepositBase` for each additional announcement.
+* Commong configs:
+** `RuntimeEvent`
+** `RuntimeCall`
+** `Currency`
+** `CallHasher`
+
+== Dispatchables
+
+[.contract-item]
+[[add_proxy]]
+==== `[.contract-item-name]#++add_proxy++#`
+[source,rust]
+----
+pub fn add_proxy<T: Config>(
+    delegate: <<T as Config>::Lookup as StaticLookup>::Source,
+    proxy_type: T::ProxyType,
+    delay: BlockNumberFor<T>
+)
+----
+Create a new `Proxy`  that allows `delegate` to execute calls that fulfill `proxy_type` check on your origin’s behalf.
+
+The origin must be signed for this call.
+
+This call will take (or modify) a deposit based on number of proxies created by delegator and calculated by this formula: `ProxyDepositBase + ProxyDepositFactor * <number of proxies>`
+
+There may not be more proxies than `MaxProxies`
+
+**Params:**
+
+- `delegate` — account that will become a proxy for the origin
+- `proxy_type` — type of calls that will be allowed for the delegate
+- `delay` — number of blocks that needs to happen between announcement and call for this proxy
+
+**Errors:**
+
+- `BadOrigin` — request not signed
+- `LookupError` — delegate not found
+- `NoSelfProxy` — delegate and call origin is the same account
+- `Duplicate` — proxy already exists
+- `TooMany` — too many proxies created for this delegate with this type and the same delay
+- `InsufficientBalance` — delegator does not have enough funds for deposit for proxy creation
+- `LiquidityRestrictions` —  account restrictions (like frozen funds or vesting) prevent from creating a deposit
+- `Overflow` — reserved funds overflow the currency type. Should not happen in usual scenarios.
+
+**Events:**
+
+- `ProxyAdded(delegator, delegatee, proxy_type, delay)`
+
+[.contract-item]
+[[announce]]
+==== `[.contract-item-name]#++announce++#`
+[source,rust]
+----
+pub fn announce
+    real: AccountIdLookupOf<T>,
+    call_hash: CallHashOf<T>,
+)
+----
+Announce a call that will be executed using a proxy. As a result announcement will be created. You must create an announcement if the proxy you are using specified a delay greater than zero. In that case you will be able to execute a call after the number of blocks specified by delay.
+
+The origin must be signed for this call.
+
+This call will take (or modify) a deposit calculated by this formula: `AnnouncementDepositBase + AnnouncementDepositFactor * <number of announcements present>` 
+
+There may not be more announcements than `MaxPending`
+
+**Params:**
+
+- `real` — the account on which behalf this call will be made
+- `call_hash` — hash of the call that is going to be made
+
+**Errors:**
+
+- `BadOrigin` — request not signed
+- `LookupError` — `real` account not found
+- `NotProxy` — there is no proxy between the caller and real
+- `TooMany` — there is more announcements for this sender than specified in `MaxPending`
+- `InsufficientBalance` — caller does not have enough funds for deposit for announcement creation
+- `LiquidityRestrictions` —  account restrictions (like frozen funds or vesting) prevent from creating a deposit
+- `Overflow` — reserved funds overflow the currency type. Should not happen in usual scenarios.
+
+**Events:**
+
+- `Announced(real, proxy, call_hash)`
+
+[.contract-item]
+[[proxy]]
+==== `[.contract-item-name]#++proxy++#`
+[source,rust]
+----
+pub fn proxy(
+    real: AccountIdLookupOf<T>,
+    force_proxy_type: Option<T::ProxyType>,
+    call: Box<<T as Config>::RuntimeCall>,
+)
+----
+
+Dispatch a `call` on behalf of `real` account using a proxy that was created in advance. Proxy must be created for the call sender to execute the call.
+
+The origin must be signed for this call.
+
+If the proxy requires an announcement before the call, this dispatchable will fail.
+
+**Params:**
+
+- `real` — the account on which behalf this call will be made
+- `force_proxy_type` — specific proxy type to get proxy for. If not specified, first one found in the storage will be used.
+- `call` — a call to execute
+
+**Errors:**
+
+- `BadOrigin` — request not signed
+- `LookupError` — `real` account not found
+- `NotProxy` — there is no proxy between the caller and real
+- `Unannounced` — there was a delay specified but not fulfilled
+
+**Events:**
+
+- `ProxyExecuted(result)`
+
+[.contract-item]
+[[proxy_announced]]
+==== `[.contract-item-name]#++proxy_announced++#`
+[source,rust]
+----
+pub fn proxy_announced<T: Config>(
+    delegate: <<T as Config>::Lookup as StaticLookup>::Source,
+    real: <<T as Config>::Lookup as StaticLookup>::Source,
+    force_proxy_type: Option<T::ProxyType>,
+    call: Box<<T as Config>::RuntimeCall>
+)
+----
+
+Execute previously announced call using a proxy and remove the announcement. Proxy must be created for the call sender to execute the call. 
+
+The origin must be signed for this call.
+
+This call will fail if delay after announcement have not passed or call was not announced.
+
+**Params:**
+
+- `delegate` — the account proxy was given to and who announced the call
+- `real` — delegator of the proxy, on whose behalf call will be executed
+- `force_proxy_type` — specific proxy type to get proxy for. If not specified, first one found in the storage will be used.
+- `call` — a call to execute
+
+**Errors:**
+
+- `BadOrigin` — request not signed
+- `LookupError` — `real` or `delegate` account not found
+- `NotProxy` — there is no proxy between the `delegate` and `real`
+- `Unannounced` — there was a delay specified but not fulfilled or call was not announced
+
+**Events:**
+
+- `ProxyExecuted(result)`
+
+[.contract-item]
+[[reject_announcement]]
+==== `[.contract-item-name]#++reject_announcement++#`
+[source,rust]
+----
+pub fn reject_announcement<T: Config>(
+    delegate: <<T as Config>::Lookup as StaticLookup>::Source,
+    call_hash: <<T as Config>::CallHasher as Hash>::Output
+)
+----
+
+Remove the given announcement. Deposit is returned in case of success.
+
+May be called from delegator of the proxy to remove announcement made by delegatee.
+
+The origin must be signed for this call.
+
+**Params:**
+
+- `delegate` — account that created an announcement
+- `call_hash` — hash that was created for the announcement
+
+**Errors:**
+
+- `BadOrigin` — request not signed
+- `LookupError` — `delegate` account not found
+- `NotFound` —  proxy not found for this delegator and delegatee
+
+[.contract-item]
+[[remove_announcement]]
+==== `[.contract-item-name]#++remove_announcement++#`
+[source,rust]
+----
+pub fn remove_announcement<T: Config>(
+    real: <<T as Config>::Lookup as StaticLookup>::Source,
+    call_hash: <<T as Config>::CallHasher as Hash>::Output
+)
+----
+
+Remove the given announcement. Deposit is returned in case of success.
+
+May be called from delegatee of the proxy to remove announcement made by them.
+
+The origin must be signed for this call.
+
+**Params:**
+
+- `real` — delegator of the proxy for the announcement to remove
+- `call_hash` — hash of announced call
+
+**Errors:**
+
+- `BadOrigin` — request not signed
+- `LookupError` — `delegate` account not found
+- `NotFound` —  proxy not found for this delegator and delegatee
+
+[.contract-item]
+[[remove_proxies]]
+==== `[.contract-item-name]#++remove_proxies++#`
+[source,rust]
+----
+pub fn remove_proxies()
+----
+
+Removes all proxies _issued to_ the caller. The origin must be signed for this call.
+
+**Errors:**
+
+- `BadOrigin` — request not signed
+
+[.contract-item]
+[[remove_proxy]]
+==== `[.contract-item-name]#++remove_proxy++#`
+[source,rust]
+----
+pub fn remove_proxy<T: Config>(
+    delegate: <<T as Config>::Lookup as StaticLookup>::Source,
+    proxy_type: T::ProxyType,
+    delay: BlockNumberFor<T>
+)
+----
+
+Remove the proxy issued by the caller. Deposit is returned to the delegator.
+
+Origin must be signed for this call.
+
+**Params:**
+
+- `delegate` — account to whom this proxy was issued
+- `proxy_type` — type of the issued proxy
+- `delay` — delay of the issued proxy
+
+**Errors:**
+
+- `BadOrigin` — request not signed
+- `LookupError` — `delegate` account not found
+- `NotFound` — no such proxy exists
+
+**Events:**
+
+- `ProxyRemoved(delegator, delegatee, proxy_type, delay)`
+
+[.contract-item]
+[[create_pure]]
+==== `[.contract-item-name]#++create_pure++#`
+[source,rust]
+----
+pub fn create_pure<T: Config>(
+    proxy_type: T::ProxyType,
+    delay: BlockNumberFor<T>,
+    index: u16
+)
+----
+
+This call creates a new account with a proxy issued to it from the call’s origin. 
+
+The origin must be signed for this call.
+
+**Params:**
+
+- `proxy_type` — type of calls that will be allowed for the proxy
+- `delay` — number of blocks that needs to happen between announcement and call for this proxy
+- `index` — A disambiguation index, in case this is called multiple times in the same
+transaction (e.g. with `utility::batch`). Unless you’re using `batch` you probably just
+want to use `0`.
+
+**Errors:**
+
+- `BadOrigin` — request not signed
+- `Duplicate` — `create_pure` was called more than once with the same parameters in the same transaction
+- `TooMany` — there is more announcements for this sender than specified in `MaxPending`
+- `InsufficientBalance` — delegator does not have enough funds for deposit for proxy creation
+- `LiquidityRestrictions` —  account restrictions (like frozen funds or vesting) prevent from creating a deposit
+- `Overflow` — reserved funds overflow the currency type. Should not happen in usual scenarios.
+
+**Events:**
+
+- `PureCreated(pure, who, proxy_type, disambiguation_index)`
+
+[.contract-item]
+[[kill_pure]]
+==== `[.contract-item-name]#++kill_pure++#`
+[source,rust]
+----
+==== `[.contract-item-name]#++kill_pure++#`
+
+----
+
+Remove a previously created pure account.
+
+Requires a `Signed` origin, and the sender account must have been created by a call to
+`pure` with corresponding parameters.
+
+WARNING: All access to this account will be lost.
+
+**Params:**
+
+- `spawner` — account who created a proxy and pure account
+- `proxy_type` — type of proxy used for it
+- `index` — the disambiguation index used for pure account creation
+- `height` — the height of the chain when the call to `pure` was processed.
+- `ext_index` — the extrinsic index in which the call to `pure` was processed.
+
+**Errors:**
+
+- `BadOrigin` — request not signed
+- `LookupError` — `spawner` account not found
+- `NoPermission` — emitted when account tries to remove somebody but not itself

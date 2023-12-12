@@ -4,7 +4,7 @@
 
 = Pallet Name link:https://google.com[{github-icon},role=heading-link]
 
-== Branch/Release: `release-polkadot-v{x.x.x}`
+Branch/Release: `release-polkadot-v{x.x.x}`
 
 == Purpose
 
