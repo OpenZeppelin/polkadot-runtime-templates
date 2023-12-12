@@ -13,7 +13,7 @@ Flexible FRAME pallet for implementing message queues. This pallet can also init
 == Config
 * Pallet-specific configs:
 ** `MessageProcessor: ProcessMessage` -- Processor for messages
-** `Size: BaseArithmetic + Unsigned + Copy + Into<u32> + Member + Encode + Decode + MaxEncodedLen + TypeInfo + Default` -- Page/heap size type.
+** `Size: Into<u32>` -- Page/heap size type.
 ** `QueueChangeHandler: OnQueueChanged<<Self::MessageProcessor as ProcessMessage>::Origin>` -- Code to be called when a message queue changes - either with items introduced or removed.
 ** `QueuePausedQuery: QueuePausedQuery<<Self::MessageProcessor as ProcessMessage>::Origin>` -- Queried by the pallet to check whether a queue can be serviced.
 ** `type HeapSize: Get<Self::Size>` -- The size of the page; this also serves as the maximum message size which can be sent.
@@ -63,13 +63,10 @@ of the message. This weight limit does not affect other parts of the pallet, and
 * `Queued` -- if the overweight message is already scheduled for future execution.
 For a message to be labeled as overweight, the pallet must have previously attempted execution and
 encountered failure due to insufficient weight for processing. Once marked as overweight, the message
-is excluded from the queue for future execution. However, if the overweight message is unexpectedly
-found in the queue of pending items, it indicates an anomaly. In such instances, an error is raised,
-as the message should have been excluded from future execution attempts following its initial failure
-due to being overweight.
+is excluded from the queue for future execution.
 * `AlreadyProcessed` -- if the overweight message is already processed.
 * `InsufficientWeight` -- if the `weight_limit` is not enough to execute the overweight message.
-* `TemporarilyUnprocessable` -- if the message processor `Yield`s execution of this message. This means, processing should be reattempted later.
+* `TemporarilyUnprocessable` -- if the message processor `Yield`s execution of this message. This means processing should be reattempted later.
 
 **Events:**
 
