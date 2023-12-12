@@ -2,13 +2,13 @@
 :highlightjs-languages: rust
 :github-icon: pass:[<svg class="icon"><use href="#github-icon"/></svg>]
 
-= pallet_proxy link:https://github.com/paritytech/polkadot-sdk/tree/release-polkadot-v1.5.0/substrate/frame/proxy[{github-icon},role=heading-link]
+= pallet_proxy link:https://github.com/paritytech/polkadot-sdk/tree/release-polkadot-v1.3.0/substrate/frame/proxy[{github-icon},role=heading-link]
 
-Branch/Release: `release-polkadot-v1.5.0`
+Branch/Release: `release-polkadot-v1.3.0`
 
 == Purpose
 
-This pallet gives an ability to delegate the rights to execute some certain calls types from one origin to another. 
+This pallet enables delegation of rights to execute certain call types from one origin to another. 
 
 == Glossary
 
@@ -18,7 +18,7 @@ This pallet gives an ability to delegate the rights to execute some certain call
 * _Delegator_ — account that granted call execution rights with proxy creation
 * _Proxy_ — statement of call execution rights transfer from delegator to delegatee. Specified by proxy type and delay.
 * _Proxy type_ — type of calls that can be executed using this proxy.
-* _Pure account_ — accounted that was spawned only to be a delegatee for some proxy.
+* _Pure account_ — account that was spawned only to be a delegatee for some proxy.
 
 == Config
 
@@ -28,13 +28,13 @@ This pallet gives an ability to delegate the rights to execute some certain call
 ** `ProxyDepositFactor` -- an amount of currency that will be frozen along with the `ProxyDepositBase` for each additional proxy.
 ** `MaxProxies` -- maximum number of proxies that single account can create.
 ** `MaxPending` -- maximum number of announcements that can be made per account.
+** `CallHasher` -- a type implementing a `Hash` trait. Will be used to hash the executed call.
 ** `AnnouncementDepositBase` -- a base amount of currency that defines a deposit for announcement creation.
 ** `AnnouncementDepositFactor` -- an amount of currency that will be frozen along with the `AnnouncementDepositBase` for each additional announcement.
-* Commong configs:
+* Common configs:
 ** `RuntimeEvent`
 ** `RuntimeCall`
 ** `Currency`
-** `CallHasher`
 
 == Dispatchables
 
@@ -331,8 +331,13 @@ want to use `0`.
 ==== `[.contract-item-name]#++kill_pure++#`
 [source,rust]
 ----
-==== `[.contract-item-name]#++kill_pure++#`
-
+pub fn kill_pure<T: Config>(
+    spawner: <<T as Config>::Lookup as StaticLookup>::Source,
+    proxy_type: T::ProxyType,
+    index: u16,
+    height: BlockNumberFor<T>,
+    ext_index: u32
+)
 ----
 
 Remove a previously created pure account.

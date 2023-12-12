@@ -16,7 +16,10 @@ This is a freeform description of the tasks that this pallet fulfills
 
 == Config
 
-* `ConfigType` -- description of config. Include the possible values if there is a set of them.
+* Pallet-specific configs
+** `ConfigType` -- description of config. Include the possible values if there is a set of them.
+* Common configs
+** `ConfigType` -- description of config, if needed
 
 == Dispatchables
 
