@@ -29,34 +29,55 @@ Flexible FRAME pallet for implementing message queues. This pallet can also init
 == Dispatchables
 
 [.contract-item]
-[[dispatchable_name]]
-==== `[.contract-item-name]#++dispatchable_name++#`
+[[execute_overweight]]
+==== `[.contract-item-name]#++execute_overweight++#`
 [source,rust]
 ----
-pub fn dispatchable_name(
-    param1: Type1,
-    param2: Type2
-) -> DispatchResult
+pub fn execute_overweight(
+    origin: OriginFor<T>,
+    message_origin: MessageOriginOf<T>,
+    page: PageIndex,
+    index: T::Size,
+    weight_limit: Weight,
+) -> DispatchResultWithPostInfo
 ----
-Freeform description of the dispatchable. It is good to include the important things that should be included there.
+Execute an overweight message.
+
+Benchmark complexity considerations: O(index + weight_limit).
 
 // four following blocks show how to make a highlight of some information. It will become a styled block
 
-NOTE: This is how you state important information that should be acknowledged
+NOTE: Temporary processing errors will be propagated whereas permanent errors are treated
+as success condition.
 
-IMPORTANT: This is how you put some information that should not be missed
-
-WARNING: This thing is for important information missing which may lead to dangerous consequences
-
-TIP: This is how you should give some useful advice
+IMPORTANT: The `weight_limit` passed to this function does not affect the `weight_limit` set in other parts of the pallet.
 
 **Params:**
 
 * `param1: Type1` -- description of the parameter
-
+* `origin: OriginFor<T>` -- Must be `Signed`.
+* `message_origin: MessageOriginOf<T>` -- The origin from which the message to be executed arrived.
+* `page: PageIndex` -- The page in the queue in which the message to be executed is sitting.
+* `index: T::Size` -- The index into the queue of the message to be executed.
+* `weight_limit: Weight` -- The maximum amount of weight allowed to be consumed in the execution
+of the message. This weight limit does not affect other parts of the pallet, and it is only used for this call of `execute_overweight`.
 **Errors:**
 
-* `ErrorName` -- description of conditions, when this error happens
+* `QueuePaused` -- if the queue that overweight message to be executed belongs to is paused.
+* `NoPage` -- if the page that overweight message to be executed belongs to does not exist.
+* `NoMessage` -- if the overweight message could not be found.
+* `Queued` -- if the overweight message is already scheduled for future execution.
+For a message to be labeled as overweight, the pallet must have previously attempted execution and
+encountered failure due to insufficient weight for processing. Once marked as overweight, the message
+is excluded from the queue for future execution. However, if the overweight message is unexpectedly
+found in the queue of pending items, it indicates an anomaly. In such instances, an error is raised,
+as the message should have been excluded from future execution attempts following its initial failure
+due to being overweight.
+* `AlreadyProcessed` -- if the overweight message is already processed.
+* `InsufficientWeight` -- if the `weight_limit` is not enough to execute the overweight message.
+* `TemporarilyUnprocessable` -- if the message processor `Yield`s execution of this message. This means, processing should be reattempted later.
+
+
 
 **Events:**
 
