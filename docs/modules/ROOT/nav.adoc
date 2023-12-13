@@ -1,3 +1,4 @@
 * General Guides
 * Runtime Descriptions
 * Pallet Specifications
+** xref:pallets/proxy.adoc[pallet_proxy]
