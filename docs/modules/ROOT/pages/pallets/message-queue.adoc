@@ -16,7 +16,7 @@ Flexible FRAME pallet for implementing message queues. This pallet can also init
 ** `Size` -- Page/heap size type.
 ** `QueueChangeHandler` -- Code to be called when a message queue changes - either with items introduced or removed.
 ** `QueuePausedQuery` -- Queried by the pallet to check whether a queue can be serviced.
-** `type HeapSize` -- The size of the page; this also serves as the maximum message size which can be sent.
+** `HeapSize` -- The size of the page; this also serves as the maximum message size which can be sent.
 ** `MaxStale` -- The maximum number of stale pages (i.e. of overweight messages) allowed before culling can happen. Once there are more stale pages than this, then historical pages may be dropped, even if they contain unprocessed overweight messages.
 ** `ServiceWeight` -- The amount of weight (if any) which should be provided to the message queue for servicing enqueued items. This may be legitimately `None` in the case that you will call `ServiceQueues::service_queues` manually.
 * Common configs:
