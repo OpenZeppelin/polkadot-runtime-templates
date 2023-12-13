@@ -2,11 +2,11 @@
 :highlightjs-languages: rust
 :github-icon: pass:[<svg class="icon"><use href="#github-icon"/></svg>]
 
-= pallet_proxy link:https://github.com/paritytech/polkadot-sdk/tree/release-polkadot-v1.3.0/substrate/frame/proxy[{github-icon},role=heading-link]
+= pallet_proxy
 
-Branch/Release: `release-polkadot-v1.3.0`
+Branch/Release: `release-polkadot-v1.3.0` 
 
-== Purpose
+== Purpose 
 
 This pallet enables delegation of rights to execute certain call types from one origin to another.
 
@@ -20,7 +20,7 @@ This pallet enables delegation of rights to execute certain call types from one 
 * _Proxy type_ — type of calls that can be executed using this proxy.
 * _Pure account_ — account that was spawned only to be a delegatee for some proxy.
 
-== Config
+== Config link:https://github.com/paritytech/polkadot-sdk/blob/release-polkadot-v1.3.0/substrate/frame/proxy/src/lib.rs#L107[{github-icon},role=heading-link]
 
 * Pallet-specific configs:
 ** `ProxyType` -- a type that describes different variants of proxy. It must implement `Default` trait and `InstanceFilter<RuntimeCall>` trait.
@@ -36,7 +36,7 @@ This pallet enables delegation of rights to execute certain call types from one 
 ** `RuntimeCall`
 ** `Currency`
 
-== Dispatchables
+== Dispatchables link:https://github.com/paritytech/polkadot-sdk/blob/release-polkadot-v1.3.0/substrate/frame/proxy/src/lib.rs#L179[{github-icon},role=heading-link]
 
 [.contract-item]
 [[add_proxy]]
@@ -59,9 +59,9 @@ There may not be more proxies than `MaxProxies`
 
 **Params:**
 
-- `delegate` — account that will become a proxy for the origin
-- `proxy_type` — type of calls that will be allowed for the delegate
-- `delay` — number of blocks that needs to happen between announcement and call for this proxy
+- `delegate: <<T as Config>::Lookup as StaticLookup>::Source` — account that will become a proxy for the origin
+- `proxy_type: T::ProxyType` — type of calls that will be allowed for the delegate
+- `delay: BlockNumberFor<T>` — number of blocks that needs to happen between announcement and call for this proxy
 
 **Errors:**
 
@@ -98,8 +98,8 @@ There may not be more announcements than `MaxPending`
 
 **Params:**
 
-- `real` — the account on which behalf this call will be made
-- `call_hash` — hash of the call that is going to be made
+- `real: AccountIdLookupOf<T>` — the account on which behalf this call will be made
+- `call_hash: CallHashOf<T>` — hash of the call that is going to be made
 
 **Errors:**
 
@@ -135,9 +135,9 @@ If the proxy requires an announcement before the call, this dispatchable will fa
 
 **Params:**
 
-- `real` — the account on which behalf this call will be made
-- `force_proxy_type` — specific proxy type to get proxy for. If not specified, first one found in the storage will be used.
-- `call` — a call to execute
+- `real: AccountIdLookupOf<T>` — the account on which behalf this call will be made
+- `force_proxy_type: Option<T::ProxyType>` — specific proxy type to get proxy for. If not specified, first one found in the storage will be used.
+- `call: Box<<T as Config>::RuntimeCall>` — a call to execute
 
 **Errors:**
 
@@ -171,10 +171,10 @@ This call will fail if delay after announcement have not passed or call was not 
 
 **Params:**
 
-- `delegate` — the account proxy was given to and who announced the call
-- `real` — delegator of the proxy, on whose behalf call will be executed
-- `force_proxy_type` — specific proxy type to get proxy for. If not specified, first one found in the storage will be used.
-- `call` — a call to execute
+- `delegate: <<T as Config>::Lookup as StaticLookup>::Source` — the account proxy was given to and who announced the call
+- `real: <<T as Config>::Lookup as StaticLookup>::Source` — delegator of the proxy, on whose behalf call will be executed
+- `force_proxy_type: Option<T::ProxyType>` — specific proxy type to get proxy for. If not specified, first one found in the storage will be used.
+- `call: Box<<T as Config>::RuntimeCall>` — a call to execute
 
 **Errors:**
 
@@ -206,8 +206,8 @@ The origin must be signed for this call.
 
 **Params:**
 
-- `delegate` — account that created an announcement
-- `call_hash` — hash that was created for the announcement
+- `delegate: <<T as Config>::Lookup as StaticLookup>::Source` — account that created an announcement
+- `call_hash: <<T as Config>::CallHasher as Hash>::Output` — hash that was created for the announcement
 
 **Errors:**
 
@@ -234,8 +234,8 @@ The origin must be signed for this call.
 
 **Params:**
 
-- `real` — delegator of the proxy for the announcement to remove
-- `call_hash` — hash of announced call
+- `real: <<T as Config>::Lookup as StaticLookup>::Source` — delegator of the proxy for the announcement to remove
+- `call_hash: <<T as Config>::CallHasher as Hash>::Output` — hash of announced call
 
 **Errors:**
 
@@ -275,9 +275,9 @@ Origin must be signed for this call.
 
 **Params:**
 
-- `delegate` — account to whom this proxy was issued
-- `proxy_type` — type of the issued proxy
-- `delay` — delay of the issued proxy
+- `delegate: <<T as Config>::Lookup as StaticLookup>::Source` — account to whom this proxy was issued
+- `proxy_type: T::ProxyType` — type of the issued proxy
+- `delay: BlockNumberFor<T>` — delay of the issued proxy
 
 **Errors:**
 
@@ -307,9 +307,9 @@ The origin must be signed for this call.
 
 **Params:**
 
-- `proxy_type` — type of calls that will be allowed for the proxy
-- `delay` — number of blocks that needs to happen between announcement and call for this proxy
-- `index` — A disambiguation index, in case this is called multiple times in the same
+- `proxy_type: T::ProxyType` — type of calls that will be allowed for the proxy
+- `delay: BlockNumberFor<T>` — number of blocks that needs to happen between announcement and call for this proxy
+- `index: u16` — A disambiguation index, in case this is called multiple times in the same
 transaction (e.g. with `utility::batch`). Unless you’re using `batch` you probably just
 want to use `0`.
 
