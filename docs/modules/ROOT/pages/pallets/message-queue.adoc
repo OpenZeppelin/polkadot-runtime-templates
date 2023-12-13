@@ -121,35 +121,35 @@ the required limit. This implies that the message processor hook can calculate t
 
 *Execution:*
 
-- `service_queues` → returns the weight that is consumed by this function
-    - we will process a queue, till either:
-        - there is no more message left
-            - if there is no more message left in the queue, we won’t stop, service_head will proceed with the next queue
-        - or weight is insufficient
-            - if weight is insufficient for the next message in the queue, service_head will try to switch to next queue, and try to process message from that queue. This will go on, until it visits every queue, and no message can be processed. Only then, it will stop.
-    - each call to `service_queues`, we will bump the header, and start processing the next queue instead of the previous one to prevent starvation
-        - Example:
-            1. service head is on queue 2
-            2. we called `service_queues`, which bumped the service head to queue 3
-            3. we processed messages from queue 3,
-                1. but weight was insufficient for the next message in queue 3,
-                2. so we switched to queue 4, (we don’t bump the service head for that)
-                3. weight was insufficient for queue 4 and other queues as well, and we made a round trip across queues, till we reach queue 3, and we stopped.
-            4. `service_queues` call finished
-            5. service head is on queue 3
-            6. we called `service_queue` again, which bumped the service head to queue 4 (although there are still messages left in queue 3)
-            7. we continue processing from queue 4.
-        - but, to preserve priority, if we made a switch to a new queue due to weight, we don’t bump the service head. So, the next call, will be starting on the queue where we left off.
-        - Example:
-            1. service head is on queue 2
-            2. we called `service_queues`, which bumped the service head to queue 3
-            3. we processed messages from queue 3,
-                1. but weight was insufficient for the next message in queue 3,
-                2. so we switched to queue 4, (we don’t bump the service head for that)
-                3. we processed a message from queue 4
-                4. weight was insufficient for queue 4 and other queues as well, and we made a round trip across queues, till we reach queue 3, and we stopped.
-            4. `service_queues` call finished
-            5. service head is on queue 3 (there are still messages in queue 3)
-            6. we called `service_queue` again, which bumped the service head to queue 4
-            7. we continue processing from queue 4, although we were processing queue 4 in the last call
+* `service_queues` → returns the weight that is consumed by this function
+    ** we will process a queue, till either:
+        *** there is no more message left
+            **** if there is no more message left in the queue, we won’t stop, service_head will proceed with the next queue
+        *** or weight is insufficient
+            **** if weight is insufficient for the next message in the queue, service_head will try to switch to next queue, and try to process message from that queue. This will go on, until it visits every queue, and no message can be processed. Only then, it will stop.
+    ** each call to `service_queues`, we will bump the header, and start processing the next queue instead of the previous one to prevent starvation
+        *** Example:
+            **** service head is on queue 2
+            **** we called `service_queues`, which bumped the service head to queue 3
+            **** we processed messages from queue 3,
+                ***** but weight was insufficient for the next message in queue 3,
+                ***** so we switched to queue 4, (we don’t bump the service head for that)
+                ***** weight was insufficient for queue 4 and other queues as well, and we made a round trip across queues, till we reach queue 3, and we stopped.
+            **** `service_queues` call finished
+            **** service head is on queue 3
+            **** we called `service_queue` again, which bumped the service head to queue 4 (although there are still messages left in queue 3)
+            **** we continue processing from queue 4.
+        *** but, to preserve priority, if we made a switch to a new queue due to weight, we don’t bump the service head. So, the next call, will be starting on the queue where we left off.
+        *** Example:
+            **** service head is on queue 2
+            **** we called `service_queues`, which bumped the service head to queue 3
+            **** we processed messages from queue 3,
+                ***** but weight was insufficient for the next message in queue 3,
+                ***** so we switched to queue 4, (we don’t bump the service head for that)
+                ***** we processed a message from queue 4
+                ***** weight was insufficient for queue 4 and other queues as well, and we made a round trip across queues, till we reach queue 3, and we stopped.
+            **** `service_queues` call finished
+            **** service head is on queue 3 (there are still messages in queue 3)
+            **** we called `service_queue` again, which bumped the service head to queue 4
+            **** we continue processing from queue 4, although we were processing queue 4 in the last call
 
