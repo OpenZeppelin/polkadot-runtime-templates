@@ -8,7 +8,7 @@ Branch/Release: `release-polkadot-v1.3.0`
 
 == Purpose
 
-This pallet enables delegation of rights to execute certain call types from one origin to another. 
+This pallet enables delegation of rights to execute certain call types from one origin to another.
 
 == Glossary
 
@@ -92,7 +92,7 @@ Announce a call that will be executed using a proxy. As a result announcement wi
 
 The origin must be signed for this call.
 
-This call will take (or modify) a deposit calculated by this formula: `AnnouncementDepositBase + AnnouncementDepositFactor * <number of announcements present>` 
+This call will take (or modify) a deposit calculated by this formula: `AnnouncementDepositBase + AnnouncementDepositFactor * <number of announcements present>`
 
 There may not be more announcements than `MaxPending`
 
@@ -163,7 +163,7 @@ pub fn proxy_announced<T: Config>(
 )
 ----
 
-Execute previously announced call using a proxy and remove the announcement. Proxy must be created for the call sender to execute the call. 
+Execute previously announced call using a proxy and remove the announcement. Proxy must be created for the call sender to execute the call.
 
 The origin must be signed for this call.
 
@@ -301,7 +301,7 @@ pub fn create_pure<T: Config>(
 )
 ----
 
-This call creates a new account with a proxy issued to it from the call’s origin. 
+This call creates a new account with a proxy issued to it from the call’s origin.
 
 The origin must be signed for this call.
 

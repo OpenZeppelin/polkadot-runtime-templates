@@ -2,3 +2,4 @@
 * Runtime Descriptions
 * Pallet Specifications
 ** xref:pallets/proxy.adoc[pallet_proxy]
+** xref:pallets/message-queue.adoc[pallet_message_queue]
