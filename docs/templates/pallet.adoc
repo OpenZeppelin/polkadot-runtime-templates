@@ -2,7 +2,7 @@
 :highlightjs-languages: rust
 :github-icon: pass:[<svg class="icon"><use href="#github-icon"/></svg>]
 
-= Pallet Name link:https://google.com[{github-icon},role=heading-link]
+= Pallet Name
 
 Branch/Release: `release-polkadot-v{x.x.x}`
 
@@ -14,14 +14,14 @@ This is a freeform description of the tasks that this pallet fulfills
 
 * _Term_ -- definition of the term
 
-== Config
+== Config link:https://google.com[{github-icon},role=heading-link]
 
 * Pallet-specific configs
 ** `ConfigType` -- description of config. Include the possible values if there is a set of them.
 * Common configs
 ** `ConfigType` -- description of config, if needed
 
-== Dispatchables
+== Dispatchables link:https://google.com[{github-icon},role=heading-link]
 
 [.contract-item]
 [[dispatchable_name]]
