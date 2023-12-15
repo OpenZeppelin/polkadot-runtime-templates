@@ -220,7 +220,7 @@ A real use case scenario could be for example a business that has a bank account
         *** or, use `multi_account_id` in the source code
     ** fund the account by simply sending some money to the derived public key
 
-    👉 check this documentation if you have questions about accounts and their creation xref:misc/multisig-accounts.adoc[multisig_accounts]
+    ** 👉 check this documentation if you have questions about accounts and their creation xref:misc/multisig-accounts.adoc[multisig_accounts]
 
 * `m-out-of-n multisig account` example:
     ** Alice, Bob, Charlie, and Dylan  want to create a shared account, and the threshold for this shared account should be 3 (at least 3 person should approve the transactions for this account).
