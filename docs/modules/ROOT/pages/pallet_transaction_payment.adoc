@@ -8,16 +8,18 @@
 
 `pallet-transaction-payment` implements transaction fee logic.
 
-To implement this pallet, the runtime configures a mapping between the minimum unit of computation/block space (*Weight*) and the minimum unit of fees ([`Config::WeightToFee`]).
+In substrate, every transaction has an associated `pallet::call`, and each `pallet::call` has a weight function. The weight function estimates the time it takes to execute the call.
 
-This pallet also exposes 
+[`Config::WeightToFee`] is set to a mapping between the smallest unit of compute (*Weight*) and smallest unit of fee.
+
+The pallet also exposes 
 - how to update fees for the next block based on past fees ([`Config::FeeMultiplierUpdate`]).
 - how fees are paid ([`Config::OnChargeTransaction`]).
 
 The base fee and adjusted weight and length fees constitute the _inclusion fee_, which is
 the minimum fee for a transaction to be included in a block.
 The formula of final fee:
-```ignore
+```rust,ignore
 inclusion_fee = base_fee + length_fee + [targeted_fee_adjustment * weight_fee];
 final_fee = inclusion_fee + tip;
 ```
@@ -37,7 +39,7 @@ chance to be included by the transaction queue.
 
 == config
 
-- [`Config::WeightToFee`]: The mapping between one unit of weight to one unit of fee.
+- [`Config::WeightToFee`]: mapping between the smallest unit of weight and smallest unit of fee
 - [`Config::FeeMultiplierUpdate`]: A means of updating the fee for the next block, via defining a multiplier, based on the
 final state of the chain at the end of the previous block. Possible values include `ConstantFee`, SlowAdjustingFee`, FastAdjustingFee`, etc.
 - [`Config::OnChargeTransaction`]: A means of defining the storage and state changes associated with paying transaction fees.
