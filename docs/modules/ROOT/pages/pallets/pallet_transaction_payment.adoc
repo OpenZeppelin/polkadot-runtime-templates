@@ -34,7 +34,7 @@ The inputs are defined below in the glossary and config sections.
 
 * Pallet-specific handlers:
 ** `OnChargeTransaction` -- Handler for withdrawing, refunding and depositing the transaction fee. Type must implement the trait  `OnChargeTransaction<Self>`.
-** `FeeMultiplierUpdate` -- Handler to define how base fees change over time (over blocks). Type must implement the trait `MultiplierUpdate`. Possible assignments include `ConstantFee`, SlowAdjustingFee`, and  `FastAdjustingFee`.
+** `FeeMultiplierUpdate` -- Handler to define how base fees change over time (over blocks). Type must implement the trait `MultiplierUpdate`. Possible assignments include `ConstantFee`, `SlowAdjustingFee`, and  `FastAdjustingFee`.
 * Pallet-specific converters:
 ** `WeightToFee` -- Mapping between the smallest unit of weight and smallest unit of fee. Type must implement the trait `WeightToFee<Balance = BalanceOf<Self>>`.
 ** `LengthToFee` -- Convert a length value into a deductible fee based on the currency type. Type must implement the trait `WeightToFee<Balance = BalanceOf<Self>>`.
