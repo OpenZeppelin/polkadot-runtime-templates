@@ -1,4 +1,9 @@
 * General Guides
 * Runtime Descriptions
 * Pallet Specifications
-* [Pallet Transaction Payment](./pages/pallet_transaction_payment.adoc)
+** xref:pallets/pallet_transaction_payment.adoc[pallet_transaction_payment]
+** xref:pallets/proxy.adoc[pallet_proxy]
+** xref:pallets/message-queue.adoc[pallet_message_queue]
+** xref:pallets/aura_ext.adoc[cumulus_aura_ext]
+** xref:pallets/collator-selection.adoc[collator_selection]
+** xref:pallets/parachain-system.adoc[parachain_system]

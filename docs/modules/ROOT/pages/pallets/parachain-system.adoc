@@ -1,0 +1,136 @@
+:source-highlighter: highlight.js
+:highlightjs-languages: rust
+:github-icon: pass:[<svg class="icon"><use href="#github-icon"/></svg>]
+
+= parachain_system
+
+Branch/Release: `release-polkadot-v1.3.0`
+
+== Purpose
+
+This pallet is a core element of each parachain. It will:
+
+- Aggregate information about built blocks
+- Process binary code upgrades
+- Process incoming messages from both relay chain and other parachains (if a channel is established between them)
+- Send outgoing messages to relay chain and other parachains
+- Build collation info when requested by collator
+
+== Glossary
+
+- _Validation Code_ — the runtime binary that runs in the parachain
+- _Validation Data_ — information passed from the relay chain to validate the next block
+- _(Aggregated) Unincluded Segment_ — sequence of blocks that were not yet included into the relay chain state transition
+
+== Config link:https://github.com/paritytech/polkadot-sdk/blob/release-polkadot-v1.3.0/cumulus/pallets/parachain-system/src/lib.rs#L207[{github-icon},role=heading-link]
+
+* Pallet-specific configs:
+** `OnSystemEvent` — a handler that will be called when new validation data will be set (once each block). New validation data will also be passed to it. Look to `trait OnSystemEvent` for more details.
+** `SelfParaId` — getter for a parachain id of this chain
+** `OutboundXcmpMessageSource` — source of  outgoing XCMP messages. It is queried in `finalize_block` and later included into collation information
+// it was added after 1.3.0. I am leaving it commented for the future updates 
+// ** `DmpQueue` — a handler for the incoming *downward* messages from relay chain
+** `ReservedDmpWeight` — weight reserved for DMP message processing. This config seems to be is not used as the function that processes these messages (`enqueue_inbound_downward_messages`) returns used weight.
+** `XcmpMessageHandler` — a handler for the incoming _horizontal_ messages from other parachains
+** `ReservedXcmpWeight` — default weight limit for the for the XCMP message processing. May be overriden by storage `ReservedXcmpWeightOverride` . If incoming messages in block will exceed the weight limit, they won’t be processed.
+** `CheckAssociatedRelayNumber` — type that implements `trait CheckAssociatedRelayNumber` . Currently there are three implementations: no check (`AnyRelayNumber`), strict increase (`RelayNumberStrictlyIncreases`), monotonic increase (`RelayNumberMonotonicallyIncreases`). It is needed to maintain some order between blocks in relay chain and parachain.
+** `ConsensusHook` — this is a feature-enabled config ( for the management of the unincluded segment. Requires the implementation of `trait ConsensusHook`. There are several implementations of it, in `parachain-system` crate (`FixedCapacityUnincludedSegment`) and in `aura-ext` crate (`FixedVelocityConsensusHook`). It is needed to maintain the logic of segment length handling.
+* Common parameters for all pallets:
+** `RuntimeEvent`
+** `WeightInfo`
+
+== Dispatchables link:https://github.com/paritytech/polkadot-sdk/blob/release-polkadot-v1.3.0/cumulus/pallets/parachain-system/src/lib.rs#L506[{github-icon},role=heading-link]
+
+[.contract-item]
+[[set_validation_data]]
+==== `[.contract-item-name]#++set_validation_data++#`
+[source,rust]
+----
+pub fn set_validation_data(
+    data: ParachainInherentData,
+)
+----
+This call is an inherent, you can’t call this from another dispatchable or from client side. This call sets up validation data for collation, processes code upgrades and updates unincluded segments.
+
+[.contract-item]
+[[sudo_send_upward_message]]
+==== `[.contract-item-name]#++sudo_send_upward_message++#`
+[source,rust]
+----
+pub fn sudo_send_upward_message(
+    message: UpwardMessage,
+)
+----
+Send a message to relay as a sudo.
+
+**Params:**
+
+- `message` — a vec of bytes that represents a message that you send to the relay
+
+**Errors:**
+
+- `BadOrigin` — call was made not from a sudo
+
+[.contract-item]
+[[authorize_upgrade]]
+==== `[.contract-item-name]#++authorize_upgrade++#`
+[source,rust]
+----
+pub fn authorize_upgrade(
+    code_hash: T::Hash,
+    check_version: bool,
+)
+----
+
+Authorize the upgrade. This call will put the hash and flag to the storage `AuthorizedUpgrade`. This call must be made as a sudo.
+
+**Params:**
+
+- `code_hash` — hash of the authorized runtime binary
+- `check_version` — flag that indicates that the code should be checked for the possibility to upgrade. It will happen during the upgrade process itself.
+
+**Errors:**
+
+- `BadOrigin` — call was made not from a sudo
+
+**Events:**
+
+- `UpgradeAuthorized(code_hash)`
+
+[.contract-item]
+[[enact_authorized_upgrade]]
+==== `[.contract-item-name]#++enact_authorized_upgrade++#`
+[source,rust]
+----
+pub fn enact_authorized_upgrade(
+    code: Vec<u8>,
+)
+----
+
+Validate and perform the authorized upgrade.
+
+**Params:**
+
+- `code` — runtime binary for the upgrade
+
+**Errors:**
+
+- `NothingAuthorized` — there is no authorized upgrade, call `authorize_upgrade` in advance
+- `Unauthorized` — there is another upgrade authorized
+
+== Important Mentions and FAQ's
+
+=== Pallet's workflow
+
+* Block Initialization
+** Remove already processed validation code
+** Update `UnincludedSegment` with latest parent hash
+** Cleans up `ValidationData` and other functions.
+** Calculate weights for everything that was done in `on_finalize` hook
+* Inherents — `set_validation_data` call
+** Clean the included segments from `UnincludedSegment` and update the `AggregatedUnincludedSegment`
+** Update `ValidationData`, `RelayStateProof` and other configs from relay.
+** Process the `ValidationCode` upgrade
+* Block Finalization
+** Enqueue all received messages from relay chain and other parachains
+** Update `UnincludedSegment` and `AggregatedUnincludedSegment` with the latest block data

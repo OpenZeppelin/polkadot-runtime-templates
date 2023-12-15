@@ -1,4 +1,4 @@
-name: "ci tests"
+name: "cargo tests"
 
 on:
   push:
@@ -7,9 +7,11 @@ on:
       - plain-cumulus-template
     paths-ignore:
       - "**.md"
+      - "**.adoc"
   pull_request:
     paths-ignore:
       - "**.md"
+      - "**.adoc"
   workflow_dispatch:
     inputs:
       test-macos-and-windows:

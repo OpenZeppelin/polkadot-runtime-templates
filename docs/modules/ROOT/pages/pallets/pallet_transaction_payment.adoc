@@ -37,12 +37,17 @@ chance to be included by the transaction queue.
 - _length fee_: A fee proportional to the encoded length of the transaction.
 - _tip_: An optional tip. Tip increases the priority of the transaction, giving it a higher chance to be included by the transaction queue.
 
-== config
+== Config link:https://github.com/paritytech/polkadot-sdk/blob/release-polkadot-v1.3.0/substrate/frame/pallet-transaction-payment/src/lib.rs#L445[{github-icon},role=heading-link]
 
-- [`Config::WeightToFee`]: mapping between the smallest unit of weight and smallest unit of fee
-- [`Config::FeeMultiplierUpdate`]: A means of updating the fee for the next block, via defining a multiplier, based on the
+* Pallet-specific configs:
+** `WeightToFee` -- mapping between the smallest unit of weight and smallest unit of fee
+** `Config::FeeMultiplierUpdate` -- A means of updating the fee for the next block, via defining a multiplier, based on the
 final state of the chain at the end of the previous block. Possible values include `ConstantFee`, SlowAdjustingFee`, FastAdjustingFee`, etc.
-- [`Config::OnChargeTransaction`]: A means of defining the storage and state changes associated with paying transaction fees.
+** `Config::OnChargeTransaction` -- A means of defining the storage and state changes associated with paying transaction fees.
+* Common configs:
+** `RuntimeEvent`
+** `Currency`
+** `WeightInfo`
 
 == Dispatchables
 
