@@ -8,13 +8,13 @@ Branch/Release: `release-polkadot-v{1.3.0}`
 
 == Purpose
 
-This module enables multi-signature operations in your runtime. It allows multiple signed origins (accounts) to coordinate and dispatch a call. In order for call to execute, the threshold number of accounts from the set (signatories) must approve it.
+This module enables multi-signature operations in your runtime. It allows multiple signed origins (accounts) to coordinate and dispatch a call. For the call to execute, the threshold number of accounts from the set (signatories) must approve it.
 
 == Config link:https://github.com/paritytech/polkadot-sdk/blob/release-polkadot-v1.3.0/substrate/frame/multisig/src/lib.rs#L135[{github-icon},role=heading-link]
 
 * Pallet-specific configs
-** `DepositBase` -- The base amount of currency needed to reserve for creating a multisig execution or to store a dispatch call for later. Recall: Deposit to be made by the account that creates the multisig is: threshold * DepositFactor + DepositBase
-** `DepositFactor` -- The amount of currency needed per unit threshold when creating a multisig execution. Recall: Deposit to be made by the account that creates the multisig is: threshold * DepositFactor + DepositBase
+** `DepositBase` -- The base amount of currency needed to reserve for creating a multisig execution or to store a dispatch call for later. Recall: The deposit to be made by the account that creates the multisig is: threshold * DepositFactor + DepositBase
+** `DepositFactor` -- The amount of currency needed per unit threshold when creating a multisig execution. Recall: The deposit to be made by the account that creates the multisig is: threshold * DepositFactor + DepositBase
 ** `MaxSignatories` -- The maximum amount of signatories allowed in the multisig.
 * Common configs
 ** `RuntimeEvent` -- The overarching event type.
@@ -40,13 +40,13 @@ pub fn approve_as_multi<T: Config>(
 ----
 Register approval for a dispatch to be made from a deterministic composite account.
 
-Since the first register (from origin) count as a vote as well, only `threshold - 1` additional votes are necessary from `other_signatories`.
+Since the first register (from origin) counts as a vote as well, only `threshold - 1` additional votes are necessary from `other_signatories`.
 
-Payment: `DepositBase` will be reserved if this is the first approval, plus `threshold` times `DepositFactor`. It is returned once this dispatch happens or is cancelled.
+Payment: `DepositBase` will be reserved if this is the first approval, plus `threshold` times `DepositFactor`. It is returned once this dispatch happens or is canceled.
 
 The dispatch origin for this call must be *Signed*.
 
-Result is equivalent to the dispatched result if threshold is exactly 1. Otherwise on success, result is Ok and the result from the interior call, if it was executed, may be found in the deposited MultisigExecuted event.
+The result is equivalent to the dispatched result if the threshold is exactly 1. Otherwise on success, the result is Ok and the result from the interior call, if it was executed, may be found in the deposited MultisigExecuted event.
 
 TIP: If this is the final approval, you will want to use `as_multi` instead. `approve_as_multi` won’t trigger the dispatch, even if there are enough approvals.
 
@@ -96,13 +96,13 @@ TIP: Unless this is the final approval, you will generally want to use `approve
 
 Whereas, if `call` is supplied, and if we have enough approvals, the logic for execution will be triggered.
 
-`as_multi` is nearly identical with `approve_as_multi`, the only difference being `call` vs `call_hash`.
+`as_multi` is nearly identical to `approve_as_multi`, the only difference being `call` vs `call_hash`.
 
 Register approval for a dispatch to be made from a deterministic composite account if approved by a total of `threshold - 1` of `other_signatories`.
 
 If there are enough, then dispatch the call.
 
-Payment: `DepositBase` will be reserved if this is the first approval, plus `threshold` times `DepositFactor`. It is returned once this dispatch happens or is cancelled.
+Payment: `DepositBase` will be reserved if this is the first approval, plus `threshold` times `DepositFactor`. It is returned once this dispatch happens or is canceled.
 
 The dispatch origin for this call must be *Signed*.
 
@@ -146,10 +146,10 @@ pub fn cancel_as_multi<T: Config>(
     call_hash: [u8; 32]
 ) -> DispatchResult
 ----
-Cancel a pre-existing, on-going multisig transaction. Any deposit reserved previously for this operation will be unreserved on success.
+Cancel a pre-existing, ongoing multisig transaction. Any deposit reserved previously for this operation will be unreserved on success.
 
 IMPORTANT: Only the owner of the multisig operation can cancel it (not even other signatories).
-TIP: Cancel operation is not requiring multi-signature. Owner calling this function is enough on its own to cancel this.
+TIP: Cancel operation does not require multi-signature. The owner calling this function is enough on its own to cancel this.
 
 Multisig operations are stored in the storage with double keys, hence other_signatories and threshold are necessary for the identification of the multisig operation.
 
@@ -172,7 +172,7 @@ Multisig operations are stored in the storage with double keys, hence other_sign
 
 **Events:**
 
-* `MultisigCancelled(cancelling, timepoint, multisig, call_hash)` -- when multisig call is cancelled. This also gives information on who cancelled (`cancelling`), the `timepoint` of the call, id of the multisig call (`multisig`), hash of the multisig call (`call_hash`).
+* `MultisigCancelled(cancelling, timepoint, multisig, call_hash)` -- when multisig call is cancelled. This also gives information on who canceled (`cancelling`), the `timepoint` of the call, id of the multisig call (`multisig`), hash of the multisig call (`call_hash`).
 
 [.contract-item]
 [[as_multi_threshold_1]]
@@ -206,7 +206,7 @@ A real use case scenario could be for example a business that has a bank account
 
 **Events:**
 
-* `MultisigCancelled(cancelling, timepoint, multisig, call_hash)` -- when multisig call is cancelled. This also gives information on who cancelled (`cancelling`), the `timepoint` of the call, id of the multisig call (`multisig`), hash of the multisig call (`call_hash`).
+* `MultisigCancelled(cancelling, timepoint, multisig, call_hash)` -- when multisig call is cancelled. This also gives information on who canceled (`cancelling`), the `timepoint` of the call, id of the multisig call (`multisig`), hash of the multisig call (`call_hash`).
 
 
 
@@ -223,26 +223,26 @@ A real use case scenario could be for example a business that has a bank account
     ** 👉 check this documentation if you have questions about accounts and their creation xref:misc/multisig-accounts.adoc[multisig_accounts]
 
 * `m-out-of-n multisig account` example:
-    ** Alice, Bob, Charlie, and Dylan  want to create a shared account, and the threshold for this shared account should be 3 (at least 3 person should approve the transactions for this account).
+    ** Alice, Bob, Charlie, and Dylan want to create a shared account, and the threshold for this shared account should be 3 (at least 3 people should approve the transactions for this account).
     ** One of the signatories should create the multisig operation by calling `as_multi`, and should provide the necessary arguments
-    ** Others can approve this call using `approve_as_multi`, however, `approve_as_multi` will not dispatch the call. Will only increase the approval amount.
+    ** Others can approve this call using `approve_as_multi`, however, `approve_as_multi` will not dispatch the call. This will only increase the approval amount.
     ** If the approver wants to dispatch the call as well, they should use `as_multi` instead.
 
     ** *Niche Details:*
-        *** if a signatory tries to call `approve_as_multi`, after the threshold is surpassed, they will get an error:
+        *** if a signatory tries to call `approve_as_multi` after the threshold is surpassed, they will get an error:
         *** because, it is meaningless, and even harmful to allow this behavior
         *** `approve_as_multi` does not dispatch the call
-        *** and, if someone is approved the call (`as_multi` also counts as an approval), they cannot approve again
-        *** so, if the last signatory calls `approve_as_multi`, and if succeeds, the multisig operation is stuck (has to be cancelled and re-created).
-        *** Hence, it is creating an error to call `approve_as_mutli` after threshold is surpassed.
+        *** and, if someone approves the call (`as_multi` also counts as an approval), they cannot approve again
+        *** so, if the last signatory calls `approve_as_multi`, and if succeeds, the multisig operation is stuck (has to be canceled and re-created).
+        *** Hence, it is creating an error to call `approve_as_mutli` after the threshold is surpassed.
 
 * `1-out-of-n multisig account` example:
     ** Alice, Bob, and Charlie want to create a shared account, and the threshold for this shared account should be 1 (any person can spend from this account, without any approval).
-    ** any of them can call `as_multi_threshold_1`, and spend the money without requiring an approval from others
+    ** any of them can call `as_multi_threshold_1`, and spend the money without requiring approval from others
 
     ** *Niche Details:*
-        *** `as_multi_threshold_1` does not store multisig operation in storage. Because there is no need to do so.
-            **** Q: if we are not storing it, how can other signatories can use this shared account in the future?
-            **** A: the account’s balance is stored in blockchain. And the account’s public key is derived from the public key’s of the signatories, combined with the threshold. So, the caller has the permission to spend the balance that belongs to the derived public key.
+        *** `as_multi_threshold_1` does not store multisig operations in storage. Because there is no need to do so.
+            **** Q: if we are not storing it, how can other signatories use this shared account in the future?
+            **** A: the account’s balance is stored in blockchain. The account’s public key is derived from the public keys of the signatories, combined with the threshold. So, the caller has permission to spend the balance that belongs to the derived public key.
             **** we are not storing `1-out-of-n multisig operations`, but we are storing `m-out-of-n multisig operations`, since we have to keep track of the approvals.
-            **** It does not make sense to cancel `1-out-of-n multisig operations`, because `as_multi_threshold_1` immediately dispatches the call, there is no state in which cancelling is a viable option for `1-out-of-n multisig operations`.
+            **** It does not make sense to cancel `1-out-of-n multisig operations`, because `as_multi_threshold_1` immediately dispatches the call, there is no state in which canceling is a viable option for `1-out-of-n multisig operations`.
