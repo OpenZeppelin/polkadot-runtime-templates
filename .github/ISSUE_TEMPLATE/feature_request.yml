@@ -2,8 +2,6 @@ name: 🎁 Feature Request
 description: Suggest an idea for this project ⚡️
 title: "🎁 [Feature Request]: "
 labels: ["enhancement"]
-assignees:
-  - ozgunozerk
 body:
   - type: markdown
     attributes:
@@ -24,5 +22,3 @@ body:
       options:
         - label: I agree to follow this project's Contribution Guidelines
           required: true
-
-
