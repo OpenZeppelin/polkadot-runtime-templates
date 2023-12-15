@@ -42,8 +42,6 @@ The inputs are defined below in the glossary and config sections.
 ** `OperationalFeeMultiplier` -- A fee mulitiplier for `Operational` extrinsics to compute "virtual tip" to boost their `priority`. Type must implement the trait `Get<u32>`.
 * Common configs:
 ** `RuntimeEvent`
-** `Currency`
-** `WeightInfo`
 
 == Dispatchables
 
