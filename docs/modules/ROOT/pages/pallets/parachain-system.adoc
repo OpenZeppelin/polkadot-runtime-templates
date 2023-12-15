@@ -42,8 +42,8 @@ This pallet is a core element of each parachain. It will:
 == Dispatchables link:https://github.com/paritytech/polkadot-sdk/blob/release-polkadot-v1.3.0/cumulus/pallets/parachain-system/src/lib.rs#L506[{github-icon},role=heading-link]
 
 [.contract-item]
-[[dispatchable_name]]
-==== `[.contract-item-name]#++dispatchable_name++#`
+[[set_validation_data]]
+==== `[.contract-item-name]#++set_validation_data++#`
 [source,rust]
 ----
 pub fn set_validation_data(
