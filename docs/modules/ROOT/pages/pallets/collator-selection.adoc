@@ -1,0 +1,197 @@
+:source-highlighter: highlight.js
+:highlightjs-languages: rust
+:github-icon: pass:[<svg class="icon"><use href="#github-icon"/></svg>]
+
+= collator_selection
+
+Branch/Release: `release-polkadot-v1.3.0`
+
+== Purpose
+
+This pallet is needed to manage the set of collators for each session and to provision the next session with the actual list of collators.
+
+== Glossary
+
+- _Collator_ — a node that gathers collation information and communicates it to relay chain to make a block.
+- _Pot_ — stake that will reward block authors. Block author will get half of the current stake.
+- _Candidate_ — a self-promoted collator, who deposited a candidacy bond to participate in collation process
+- _Candidacy Bond_ — fixed amount to deposit to become a collator
+- _Invulnerable_ — permissioned collator, that will always be part of the collation process.
+
+== Config link:https://github.com/paritytech/polkadot-sdk/blob/release-polkadot-v1.3.0/cumulus/pallets/collator-selection/src/lib.rs#L118[{github-icon},role=heading-link]
+
+* Pallet-specific configs
+** `UpdateOrigin` — defines the list of origins that are able to modify the settings of collators (e.g. set and remove list of invulnerables, desired candidates, candidacy bond). This type should implement the trait `EnsureOrigin`.
+** `PotId` — id of account that will hold a Pot.
+** `MaxCandidates` — maximum number of candidates
+** `MinEligibleCollators` — minimum number of collators to collect for the session
+** `MaxInvulnerables` — maximum number of invulnerables
+** `KickThreshold` — number of blocks that should pass since the last block produced by a candidate collator for it to be removed from a candidates list and not participate in collation for the next session.
+** `ValidatorId` — type for validator id
+** `ValidatorIdOf` — type that allows to convert AccountId to ValidatorId
+** `ValidatorRegistration` — type that checks that AccountId has its validator keys registered.
+* Common configs:
+** `RuntimeEvent`
+** `Currency`
+** `WeightInfo`
+
+== Dispatchables link:https://github.com/paritytech/polkadot-sdk/blob/release-polkadot-v1.3.0/cumulus/pallets/collator-selection/src/lib.rs#L301[{github-icon},role=heading-link]
+
+[.contract-item]
+[[set_invulnerables]]
+==== `[.contract-item-name]#++set_invulnerables++#`
+[source,rust]
+----
+pub fn set_invulnerables(new: Vec<T::AccountId>)
+----
+Sets a new list of invulnerable collators. The call must be signed and origin of the call must fulfill the EnsureOrigin check. 
+
+IMPORTANT: This call does not maintain the mutual exclusiveness of candidates and invulnerables lists.
+
+**Params:**
+
+* `new: Vec<T::AccountId>` — a list of AccountIds of new invulnerables
+
+**Errors:**
+
+- `BadOrigin` — caller’s origin does not fulfill the `Config::EnsureOrigin` check.
+- `TooFewEligibleCollators` — empty list of invulnerables was submitted and the number of candidates is smaller than `Config::MinEligibleCollators`
+- `TooManyInvulnerables` — submitted list length is longer than `Config::MaxInvulnerables`
+
+**Events:**
+
+- `InvalidInvulnerableSkipped(account_id)` — submitted invulnerable does not have validator key or it is not registered
+- `NewInvulnerables(invulnerables)` — new invulnerable list was set
+
+[.contract-item]
+[[set_desired_candidates]]
+==== `[.contract-item-name]#++set_desired_candidates++#`
+[source,rust]
+----
+pub fn set_desired_candidates(max: u32)
+----
+Set a new maximum possible number of candidates. If it is higher than `Config::MaxCandidates`, you should consider to rerun the benchmarks. The caller’s origin should fulfill the `Config::EnsureOrigin` check.
+
+**Params:**
+
+- `max: u32` — new desired candidates number
+
+**Errors:**
+
+- `BadOrigin` — caller’s origin does not fulfill the `Config::EnsureOrigin` check.
+
+**Events:**
+
+- `NewDesiredCandidates(desired_candidates)`
+
+[.contract-item]
+[[set_candidacy_bond]]
+==== `[.contract-item-name]#++set_candidacy_bond++#`
+[source,rust]
+----
+pub fn set_candidacy_bond(max: u32)
+----
+Set the amount for the deposit to be a candidate for collator. 
+
+**Params:**
+
+- `bond: u32` — new amount for candidate deposit
+
+**Errors:**
+
+- `BadOrigin` — caller’s origin does not fulfill the `Config::EnsureOrigin` check.
+
+**Events:**
+
+- `NewCandidacyBond(bond_amount)`
+
+[.contract-item]
+[[register_as_candidate]]
+==== `[.contract-item-name]#++register_as_candidate++#`
+[source,rust]
+----
+pub fn register_as_candidate()
+----
+Register the caller as a collator candidate. Caller should be signed, have registered session keys and have amount needed for candidacy bond deposit. If successful, candidate will participate in collation process starting from the next session.
+
+**Errors:**
+
+- `BadOrigin` — call is not signed
+- `TooManyCandidates` — number of collators is already at its maximum (specified in `desired_candidates` getter)
+- `AlreadyInvulnerable` — caller is already in invulnerable collators list, it does not need to be a candidate to become a collator
+- `NoAssociatedValidatorId` — caller does not have a session key.
+- `ValidatorNotRegistered` — caller session key is not registered
+- `AlreadyCandidate` — caller is already in candidates list
+- `InsufficientBalance` — candidate does not have enough funds for deposit for candidacy bond
+- `LiquidityRestrictions` —  account restrictions (like frozen funds or vesting) prevent from creating a deposit
+- `Overflow` — reserved funds overflow the currency type. Should not happen in usual scenarios.
+
+**Events:**
+
+- `CandidateAdded(account_id, deposit)`
+
+[.contract-item]
+[[leave_intent]]
+==== `[.contract-item-name]#++leave_intent++#`
+[source,rust]
+----
+pub fn leave_intent()
+----
+Unregister the caller from being a collator candidate. If successful, deposit will be returned and during the next session change collator will no longer participate in collation process. This call must be signed.
+
+**Errors:**
+
+- `BadOrigin` — call is not signed
+- `TooFewEligibleCollators` — the number of collators for the next session will be less than `Config::MinEligibleCollators` in case of unregistration so the process is stopped.
+- `NotCandidate` — caller is not on candidate list, nothing to unregister
+
+**Events:**
+
+- `CandidateRemoved(account_id)`
+
+[.contract-item]
+[[add_invulnerable]]
+==== `[.contract-item-name]#++add_invulnerable++#`
+[source,rust]
+----
+pub fn add_invulnerable(who: T::AccountId)
+----
+Add a new invulnerable. Call must be signed and caller pass `Config::EnsureOrigin` check. If a new invulnerable was previously a candidate, it will be removed from them.
+
+*Params:*
+
+- `who: T::AccountId` — an account to add to invulnerables list
+
+**Errors:**
+
+- `BadOrigin` — caller’s origin does not fulfill the `Config::EnsureOrigin` check.
+- `NoAssociatedValidatorId` — new invulnerable does not have a session key.
+- `ValidatorNotRegistered` — new invulnerable session key is not registered
+- `AlreadyInvulnerable` — caller is already in invulnerable collators list
+
+**Events:**
+
+- `InvulnerableAdded(account_id)`
+
+[.contract-item]
+[[remove_invulnerable]]
+==== `[.contract-item-name]#++remove_invulnerable++#`
+[source,rust]
+----
+pub fn remove_invulnerable(who: T::AccountId)
+----
+Remove an invulnerable from the list. Call must be signed and caller pass `Config::EnsureOrigin` check.
+
+*Params:*
+
+- `who: T::AccountId` — an account to add to invulnerables list
+
+**Errors:**
+
+- `BadOrigin` — caller’s origin does not fulfill the `Config::EnsureOrigin` check.
+- `TooFewEligibleCollators` — the number of invulnerable will become less than `Config::MinEligibleCollators` after the removal.
+- `NotInvulnerable` — the `who` is not an invulnerable
+
+**Events:**
+
+- `InvulnerableRemoved(account_id)`

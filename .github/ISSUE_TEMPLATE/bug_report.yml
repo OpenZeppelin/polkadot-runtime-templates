@@ -1,9 +1,7 @@
 name: 🐞 Bug report
 description: Create a report to help us improve
-title: '🐞 [Bug]: '
+title: "🐞 [Bug]: "
 labels: ["bug"]
-assignees:
-  - ozgunozerk
 body:
   - type: markdown
     attributes:
@@ -20,7 +18,7 @@ body:
     id: platform
     attributes:
       label: platform
-      description: On which operating system did this bug emerged?
+      description: On which operating system did this bug emerge?
       options:
         - label: linux
           required: false
