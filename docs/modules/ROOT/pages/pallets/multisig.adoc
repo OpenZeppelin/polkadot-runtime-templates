@@ -1,0 +1,248 @@
+:source-highlighter: highlight.js
+:highlightjs-languages: rust
+:github-icon: pass:[<svg class="icon"><use href="#github-icon"/></svg>]
+
+= Pallet Name
+
+Branch/Release: `release-polkadot-v{1.3.0}`
+
+== Purpose
+
+This module enables multi-signature operations in your runtime. It allows multiple signed origins (accounts) to coordinate and dispatch a call. In order for call to execute, the threshold number of accounts from the set (signatories) must approve it.
+
+== Config link:https://github.com/paritytech/polkadot-sdk/blob/release-polkadot-v1.3.0/substrate/frame/multisig/src/lib.rs#L135[{github-icon},role=heading-link]
+
+* Pallet-specific configs
+** `DepositBase` -- The base amount of currency needed to reserve for creating a multisig execution or to store a dispatch call for later. Recall: Deposit to be made by the account that creates the multisig is: threshold * DepositFactor + DepositBase
+** `DepositFactor` -- The amount of currency needed per unit threshold when creating a multisig execution. Recall: Deposit to be made by the account that creates the multisig is: threshold * DepositFactor + DepositBase
+** `MaxSignatories` -- The maximum amount of signatories allowed in the multisig.
+* Common configs
+** `RuntimeEvent` -- The overarching event type.
+** `RuntimeCall` -- The overarching call type.
+** `Currency` -- The currency mechanism.
+** `WeightInfo` -- Weight information for extrinsics in this pallet.
+
+
+== Dispatchables link:https://github.com/paritytech/polkadot-sdk/blob/release-polkadot-v1.3.0/substrate/frame/multisig/src/lib.rs#L254[{github-icon},role=heading-link]
+
+[.contract-item]
+[[approve_as_multi]]
+==== `[.contract-item-name]#++approve_as_multi++#`
+[source,rust]
+----
+pub fn approve_as_multi<T: Config>(
+    threshold: u16,
+    other_signatories: Vec<T::AccountId>,
+    maybe_timepoint: Option<Timepoint<BlockNumberFor<T>>>,
+    call_hash: [u8; 32],
+    max_weight: Weight
+) -> DispatchResultWithPostInfo
+----
+Register approval for a dispatch to be made from a deterministic composite account.
+
+Since the first register (from origin) count as a vote as well, only `threshold - 1` additional votes are necessary from `other_signatories`.
+
+Payment: `DepositBase` will be reserved if this is the first approval, plus `threshold` times `DepositFactor`. It is returned once this dispatch happens or is cancelled.
+
+The dispatch origin for this call must be *Signed*.
+
+Result is equivalent to the dispatched result if threshold is exactly 1. Otherwise on success, result is Ok and the result from the interior call, if it was executed, may be found in the deposited MultisigExecuted event.
+
+TIP: If this is the final approval, you will want to use `as_multi` instead. `approve_as_multi` won’t trigger the dispatch, even if there are enough approvals.
+
+The reason is: `as_multi` needs `call` parameter, whereas `approve_as_mutli` needs `call_hash`. `call_hash` is enough to find the multisig operation entry in the storage, and increment the vote count. We don’t need the `call` itself to increment the vote count. Whereas, if `call` is supplied, and if we have enough approvals, the logic for execution will be triggered. This is a design choice.
+
+**Params:**
+
+* `threshold: u16` -- The total number of approvals for this dispatch before it is executed. Cannot be 1. If you want the threshold to be 1, use as_multi_threshold_1 instead.
+* `other_signatories: Vec<T::AccountID>` -- The accounts (other than the sender) who can approve this dispatch. May not be empty.
+* `maybe_timepoint: Option<Timepoint<BlockNumberFor<T>>>` -- Refers to the timepoint of the creation/registration of this call to the multisig storage. If this is the first approval, then this must be None (business logic derives it automatically). If it is not the first approval, then it must be Some, with the timepoint (block number and transaction index) of the first approval transaction.
+* `call_hash: [u8; 32]` -- The hash of the call to be executed.
+* `max_weight: Weight` -- Maximum weight limit for the call's execution.
+
+**Errors:**
+
+* `MaxWeightTooLow` -- when the call requires more weight to be executed, the call won't be executed and an error will be returned.
+* `MinimumThreshold` -- when the threshold is not greater than 1
+* `TooFewSignatories` -- when `other_signatories` list is empty
+* `TooManySignatories` -- when `other_signatories` length is greater than `MaxSignatories`
+* `NoTimepoint` -- when this is not the first call, and no timepoint is given
+* `WrongTimepoint` -- when this is not the first call, and the wrong timepoint is given
+* `UnexpectedTimepoint` -- when this is the first call, and a timepoint is given
+* `AlreadyApproved` -- when a signatory tries to approve more than once
+
+**Events:**
+
+* `MultisigApproved(approving, timepoint, multisig, call_hash)` -- when multisig call is approved. This also gives information on who was the last approver (`approving`), the `timepoint` of the call, id of the multisig call (`multisig`), hash of the multisig call (`call_hash`).
+* `NewMultisig (approving, multisig, call_hash`) -- when a multisig call is created. This also gives information on who was the creator (also the first approver) (`approving`), id of the multisig call (`multisig`), hash of the multisig call (`call_hash`).
+
+[.contract-item]
+[[as_multi]]
+==== `[.contract-item-name]#++as_multi++#`
+[source,rust]
+----
+pub fn as_multi<T: Config>(
+    threshold: u16,
+    other_signatories: Vec<T::AccountId>,
+    maybe_timepoint: Option<Timepoint<BlockNumberFor<T>>>,
+    call: Box<<T as Config>::RuntimeCall>,
+    max_weight: Weight
+) -> DispatchResultWithPostInfo
+----
+
+TIP: Unless this is the final approval, you will generally want to use `approve_as_multi` instead, since it only requires a hash of the call.
+
+`call_hash` is enough to find the multisig operation entry in the storage, and increment the vote count. We don’t need the `call` itself to increment the vote count.
+
+Whereas, if `call` is supplied, and if we have enough approvals, the logic for execution will be triggered.
+
+`as_multi` is nearly identical with `approve_as_multi`, the only difference being `call` vs `call_hash`.
+
+Register approval for a dispatch to be made from a deterministic composite account if approved by a total of `threshold - 1` of `other_signatories`.
+
+If there are enough, then dispatch the call.
+
+Payment: `DepositBase` will be reserved if this is the first approval, plus `threshold` times `DepositFactor`. It is returned once this dispatch happens or is cancelled.
+
+The dispatch origin for this call must be *Signed*.
+
+WARNING: When as_multi is called, if it succeeds (dispatches the call), the multisig operation will be removed from the storage. Meaning, another person cannot trigger the same multisig call. They need to create the same one from scratch again.
+
+**Params:**
+
+* `threshold: u16` -- The total number of approvals for this dispatch before it is executed. Cannot be 1. If you want the threshold to be 1, use as_multi_threshold_1 instead.
+* `other_signatories: Vec<T::AccountID>` -- The accounts (other than the sender) who can approve this dispatch. May not be empty.
+* `maybe_timepoint: Option<Timepoint<BlockNumberFor<T>>>` -- Refers to the timepoint of the creation/registration of this call to the multisig storage. If this is the first approval, then this must be None (business logic derives it automatically). If it is not the first approval, then it must be Some, with the timepoint (block number and transaction index) of the first approval transaction.
+* `call: Box<<T as Config>::RuntimeCall>` -- The call to be executed.
+* `max_weight: Weight` -- Maximum weight limit for the call's execution.
+
+**Errors:**
+
+* `MaxWeightTooLow` -- when the call requires more weight to be executed, the call won't be executed and an error will be returned.
+* `MinimumThreshold` -- when the threshold is not greater than 1
+* `TooFewSignatories` -- when `other_signatories` list is empty
+* `TooManySignatories` -- when `other_signatories` length is greater than `MaxSignatories`
+* `NoTimepoint` -- when this is not the first call, and no timepoint is given
+* `WrongTimepoint` -- when this is not the first call, and the wrong timepoint is given
+* `UnexpectedTimepoint` -- when this is the first call, and a timepoint is given
+* `AlreadyApproved` -- when a signatory tries to approve more than once
+
+**Events:**
+
+* `MultisigExecuted(approving, timepoint, multisig, call_hash, result)` -- when multisig call is executed. This also gives information on who was the last approver (`approving`), the `timepoint` of the call, id of the multisig call (`multisig`), hash of the multisig call (`call_hash`), and the `result`.
+* `MultisigApproved(approving, timepoint, multisig, call_hash)` -- when multisig call is approved. This also gives information on who was the last approver (`approving`), the `timepoint` of the call, id of the multisig call (`multisig`), hash of the multisig call (`call_hash`).
+* `NewMultisig (approving, multisig, call_hash`) -- when a multisig call is created. This also gives information on who was the creator (also the first approver) (`approving`), id of the multisig call (`multisig`), hash of the multisig call (`call_hash`).
+
+
+[.contract-item]
+[[cancel_as_multi]]
+==== `[.contract-item-name]#++cancel_as_multi++#`
+[source,rust]
+----
+pub fn cancel_as_multi<T: Config>(
+    threshold: u16,
+    other_signatories: Vec<T::AccountId>,
+    timepoint: Timepoint<BlockNumberFor<T>>,
+    call_hash: [u8; 32]
+) -> DispatchResult
+----
+Cancel a pre-existing, on-going multisig transaction. Any deposit reserved previously for this operation will be unreserved on success.
+
+IMPORTANT: Only the owner of the multisig operation can cancel it (not even other signatories).
+TIP: Cancel operation is not requiring multi-signature. Owner calling this function is enough on its own to cancel this.
+
+Multisig operations are stored in the storage with double keys, hence other_signatories and threshold are necessary for the identification of the multisig operation.
+
+
+**Params:**
+
+* `threshold: u16` -- The total number of approvals for this dispatch before it is executed. Cannot be 1. If you want the threshold to be 1, use as_multi_threshold_1 instead.
+* `other_signatories: Vec<T::AccountID>` -- The accounts (other than the sender) who can approve this dispatch. May not be empty.
+* `timepoint: Option<Timepoint<BlockNumberFor<T>>>` -- Refers to the timepoint of the creation/registration of this call to the multisig storage. If this is the first approval, then this must be None (business logic derives it automatically). If it is not the first approval, then it must be Some, with the timepoint (block number and transaction index) of the first approval transaction.
+* `call_hash: [u8; 32]` -- The hash of the call to be executed.
+
+**Errors:**
+
+* `MinimumThreshold` -- when the threshold is not greater than 1
+* `TooFewSignatories` -- when `other_signatories` list is empty
+* `TooManySignatories` -- when `other_signatories` length is greater than `MaxSignatories`
+* `WrongTimepoint` -- when this is not the first call, and the wrong timepoint is given
+* `NotFound` -- when the multisig call is not found in the storage
+* `NotOwner` -- when someone who is not the owner tried to cancel
+
+**Events:**
+
+* `MultisigCancelled(cancelling, timepoint, multisig, call_hash)` -- when multisig call is cancelled. This also gives information on who cancelled (`cancelling`), the `timepoint` of the call, id of the multisig call (`multisig`), hash of the multisig call (`call_hash`).
+
+[.contract-item]
+[[as_multi_threshold_1]]
+==== `[.contract-item-name]#++as_multi_threshold_1++#`
+[source,rust]
+----
+pub fn as_multi_threshold_1<T: Config>(
+    other_signatories: Vec<T::AccountId>,
+    call: Box<<T as Config>::RuntimeCall>
+) -> DispatchResultWithPostInfo
+----
+Immediately dispatch a multi-signature call using a single approval from the caller.
+
+The dispatch origin for this call must be *Signed*.
+
+A real use case scenario could be for example a business that has a bank account and says "any one of the 3 founders can authorize payments from this account".
+
+**Params:**
+
+* `other_signatories: Vec<T::AccountID>` -- The accounts (other than the sender) who can approve this dispatch. May not be empty.
+* `call: Box<<T as Config>::RuntimeCall>` -- The call to be executed.
+
+**Errors:**
+
+* `MinimumThreshold` -- when the threshold is not greater than 1
+* `TooFewSignatories` -- when `other_signatories` list is empty
+* `TooManySignatories` -- when `other_signatories` length is greater than `MaxSignatories`
+* `WrongTimepoint` -- when this is not the first call, and the wrong timepoint is given
+* `NotFound` -- when the multisig call is not found in the storage
+* `NotOwner` -- when someone who is not the owner tried to cancel
+
+**Events:**
+
+* `MultisigCancelled(cancelling, timepoint, multisig, call_hash)` -- when multisig call is cancelled. This also gives information on who cancelled (`cancelling`), the `timepoint` of the call, id of the multisig call (`multisig`), hash of the multisig call (`call_hash`).
+
+
+
+== Important Mentions and FAQ's
+
+*Big Picture Examples*
+
+* funding the multisig account (same for `1-out-of-n multisig accounts`, and `m-out-of-n multisig accounts`)
+    ** find the public key of the shared account
+        *** use polkadot JS to create a multisig account
+        *** or, use `multi_account_id` in the source code
+    ** fund the account by simply sending some money to the derived public key
+
+    👉 check this documentation if you have questions about accounts and their creation xref:misc/multisig-accounts.adoc[multisig_accounts]
+
+* `m-out-of-n multisig account` example:
+    ** Alice, Bob, Charlie, and Dylan  want to create a shared account, and the threshold for this shared account should be 3 (at least 3 person should approve the transactions for this account).
+    ** One of the signatories should create the multisig operation by calling `as_multi`, and should provide the necessary arguments
+    ** Others can approve this call using `approve_as_multi`, however, `approve_as_multi` will not dispatch the call. Will only increase the approval amount.
+    ** If the approver wants to dispatch the call as well, they should use `as_multi` instead.
+
+    ** *Niche Details:*
+        *** if a signatory tries to call `approve_as_multi`, after the threshold is surpassed, they will get an error:
+        *** because, it is meaningless, and even harmful to allow this behavior
+        *** `approve_as_multi` does not dispatch the call
+        *** and, if someone is approved the call (`as_multi` also counts as an approval), they cannot approve again
+        *** so, if the last signatory calls `approve_as_multi`, and if succeeds, the multisig operation is stuck (has to be cancelled and re-created).
+        *** Hence, it is creating an error to call `approve_as_mutli` after threshold is surpassed.
+
+* `1-out-of-n multisig account` example:
+    ** Alice, Bob, and Charlie want to create a shared account, and the threshold for this shared account should be 1 (any person can spend from this account, without any approval).
+    ** any of them can call `as_multi_threshold_1`, and spend the money without requiring an approval from others
+
+    ** *Niche Details:*
+        *** `as_multi_threshold_1` does not store multisig operation in storage. Because there is no need to do so.
+            **** Q: if we are not storing it, how can other signatories can use this shared account in the future?
+            **** A: the account’s balance is stored in blockchain. And the account’s public key is derived from the public key’s of the signatories, combined with the threshold. So, the caller has the permission to spend the balance that belongs to the derived public key.
+            **** we are not storing `1-out-of-n multisig operations`, but we are storing `m-out-of-n multisig operations`, since we have to keep track of the approvals.
+            **** It does not make sense to cancel `1-out-of-n multisig operations`, because `as_multi_threshold_1` immediately dispatches the call, there is no state in which cancelling is a viable option for `1-out-of-n multisig operations`.

@@ -4,3 +4,4 @@
 ** xref:pallets/proxy.adoc[pallet_proxy]
 ** xref:pallets/message-queue.adoc[pallet_message_queue]
 ** xref:pallets/aura_ext.adoc[cumulus_aura_ext]
+** xref:pallets/multisig.adoc[pallet_multisig]
