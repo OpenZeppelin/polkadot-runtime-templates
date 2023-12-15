@@ -2,48 +2,44 @@
 :highlightjs-languages: rust
 :github-icon: pass:[<svg class="icon"><use href="#github-icon"/></svg>]
 
-= Transaction Payment link:https://github.com/paritytech/polkadot-sdk/tree/master/substrate/frame/transaction-payment[{github-icon},role=heading-link]
+= Transaction Payment link:https://github.com/paritytech/polkadot-sdk/blob/release-polkadot-v1.3.0/substrate/frame/transaction-payment[{github-icon},role=heading-link]
 
 == Purpose
 
 `pallet-transaction-payment` implements transaction fee logic.
 
-In substrate, every transaction has an associated `pallet::call`, and each `pallet::call` has a weight function. The weight function estimates the time it takes to execute the call.
+In substrate, every transaction has an associated `call`, and each `call` has its own weight function. The weight function estimates the time it takes to execute the `call`.
 
-[`Config::WeightToFee`] is set to a mapping between the smallest unit of compute (*Weight*) and smallest unit of fee.
+`Config::WeightToFee` is a mapping between the smallest unit of compute (*Weight*) and smallest unit of fee.
 
-The pallet also exposes 
-- how to update fees for the next block based on past fees ([`Config::FeeMultiplierUpdate`]).
-- how fees are paid ([`Config::OnChargeTransaction`]).
+This pallet also exposes 
+- how to update fees for the next block based on past fees (`Config::FeeMultiplierUpdate`)
+- how fees are paid (`Config::OnChargeTransaction`)
 
-The base fee and adjusted weight and length fees constitute the _inclusion fee_, which is
-the minimum fee for a transaction to be included in a block.
-The formula of final fee:
-```rust,ignore
-inclusion_fee = base_fee + length_fee + [targeted_fee_adjustment * weight_fee];
+The base fee and adjusted weight and length fees constitute the _inclusion fee_, which is the minimum fee for a transaction to be included in a block. The formula of final fee:
+```rust, ignore
+inclusion_fee = base_fee + length_fee + [fee_multiplier_update * weight_fee];
 final_fee = inclusion_fee + tip;
 ```
-- `targeted_fee_adjustment`: This is a multiplier that can tune the final fee based on
-the congestion of the network.
-- `weight_fee`: A fee proportional to amount of weight a transaction consumes.
-- `length_fee`: A fee proportional to the encoded length of the transaction.
-- `tip`: An optional tip. Tip increases the priority of the transaction, giving it a higher
-chance to be included by the transaction queue.
+The inputs are defined below in the glossary and config sections.
 
 == Glossary
 
-- _weight_: time it takes to execute a transaction in the body of a block. By controlling the execution time that a block can consume, weight bounds the storage changes and computation per block.
-- _weight fee_: A fee proportional to amount of weight a transaction consumes.
-- _length fee_: A fee proportional to the encoded length of the transaction.
-- _tip_: An optional tip. Tip increases the priority of the transaction, giving it a higher chance to be included by the transaction queue.
+** `Weight` -- The time it takes to execute runtime logic. By controlling the execution time that a block can consume, weight bounds the storage changes and computation per block.
+** `WeightFee` -- A fee proportional to amount of weight a transaction consumes.
+** `LengthFee` -- A fee proportional to the encoded length of the transaction.
+** `Tip` -- An optional tip. Tip increases the priority of the transaction, giving it a higher chance to be included by the transaction queue.
 
 == Config link:https://github.com/paritytech/polkadot-sdk/blob/release-polkadot-v1.3.0/substrate/frame/pallet-transaction-payment/src/lib.rs#L445[{github-icon},role=heading-link]
 
-* Pallet-specific configs:
-** `WeightToFee` -- mapping between the smallest unit of weight and smallest unit of fee
-** `Config::FeeMultiplierUpdate` -- A means of updating the fee for the next block, via defining a multiplier, based on the
-final state of the chain at the end of the previous block. Possible values include `ConstantFee`, SlowAdjustingFee`, FastAdjustingFee`, etc.
-** `Config::OnChargeTransaction` -- A means of defining the storage and state changes associated with paying transaction fees.
+* Pallet-specific handlers:
+** `OnChargeTransaction` -- Handler for withdrawing, refunding and depositing the transaction fee. Type must implement the trait  `OnChargeTransaction<Self>`.
+** `FeeMultiplierUpdate` -- Handler to define how base fees change over time (over blocks). Type must implement the trait `MultiplierUpdate`. Possible assignments include `ConstantFee`, SlowAdjustingFee`, and  `FastAdjustingFee`.
+* Pallet-specific converters:
+** `WeightToFee` -- Mapping between the smallest unit of weight and smallest unit of fee. Type must implement the trait `WeightToFee<Balance = BalanceOf<Self>>`.
+** `LengthToFee` -- Convert a length value into a deductible fee based on the currency type. Type must implement the trait `WeightToFee<Balance = BalanceOf<Self>>`.
+* Pallet-specific constants:
+** `OperationalFeeMultiplier` -- A fee mulitiplier for `Operational` extrinsics to compute "virtual tip" to boost their `priority`. Type must implement the trait `Get<u32>`.
 * Common configs:
 ** `RuntimeEvent`
 ** `Currency`
@@ -51,39 +47,11 @@ final state of the chain at the end of the previous block. Possible values inclu
 
 == Dispatchables
 
-[.contract-item]
-[[dispatchable_name]]
-==== `[.contract-item-name]#++dispatchable_name++#`
-[source,rust]
-----
-pub fn dispatchable_name(
-    param1: Type1,
-    param2: Type2
-) -> DispatchResult
-----
-Freeform description of the dispatchable. It is good to include the important things that should be included there.
-
-// four following blocks show how to make a higlight of some information. It will become a styled block
-
-NOTE: This is how you state important information that should be acknowledged
-
-IMPORTANT: This is how you put some information that should not be missed
-
-WARNING: This thing is for important information missing which may lead to dangerous consequences
-
-TIP: This is how you should give some useful advice
-
-**Params:**
-
-* `param1: Type1` -- description of the parameter
-
-**Errors:**
-
-* `ErrorName` -- description of conditions, when this error happens
+There are no dispatchables (and no errors) in this pallet. This pallet is only intended to configure the transaction fee logic for a chain.
 
 **Events:**
 
-* `EventName(param1, param2)` -- description of event, if needed (they are often self-explanatory)
+* `TransactionFeePaid(who, actual_fee, tip)` -- a transaction fee was paid by account `who` with total amount of `actual_fee + tip`.
 
 == More Reading
 
