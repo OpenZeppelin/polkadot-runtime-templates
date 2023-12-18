@@ -42,7 +42,7 @@ Register approval for a dispatch to be made from a deterministic composite accou
 
 Since the first register (from origin) counts as a vote as well, only `threshold - 1` additional votes are necessary from `other_signatories`.
 
-Payment: `DepositBase` will be reserved if this is the first approval, plus `threshold` times `DepositFactor`. It is returned once this dispatch happens or is canceled.
+Payment: `DepositBase` will be reserved if this is the first approval, plus `threshold` times `DepositFactor`. It is returned once this dispatch happens or is cancelled.
 
 The dispatch origin for this call must be *Signed*.
 
@@ -102,7 +102,7 @@ Register approval for a dispatch to be made from a deterministic composite accou
 
 If there are enough, then dispatch the call.
 
-Payment: `DepositBase` will be reserved if this is the first approval, plus `threshold` times `DepositFactor`. It is returned once this dispatch happens or is canceled.
+Payment: `DepositBase` will be reserved if this is the first approval, plus `threshold` times `DepositFactor`. It is returned once this dispatch happens or is cancelled.
 
 The dispatch origin for this call must be *Signed*.
 
@@ -172,7 +172,7 @@ Multisig operations are stored in the storage with double keys, hence other_sign
 
 **Events:**
 
-* `MultisigCancelled(cancelling, timepoint, multisig, call_hash)` -- when multisig call is cancelled. This also gives information on who canceled (`cancelling`), the `timepoint` of the call, id of the multisig call (`multisig`), hash of the multisig call (`call_hash`).
+* `MultisigCancelled(cancelling, timepoint, multisig, call_hash)` -- when multisig call is cancelled. This also gives information on who cancelled (`cancelling`), the `timepoint` of the call, id of the multisig call (`multisig`), hash of the multisig call (`call_hash`).
 
 [.contract-item]
 [[as_multi_threshold_1]]
@@ -206,7 +206,7 @@ A real use case scenario could be for example a business that has a bank account
 
 **Events:**
 
-* `MultisigCancelled(cancelling, timepoint, multisig, call_hash)` -- when multisig call is cancelled. This also gives information on who canceled (`cancelling`), the `timepoint` of the call, id of the multisig call (`multisig`), hash of the multisig call (`call_hash`).
+* `MultisigCancelled(cancelling, timepoint, multisig, call_hash)` -- when multisig call is cancelled. This also gives information on who cancelled (`cancelling`), the `timepoint` of the call, id of the multisig call (`multisig`), hash of the multisig call (`call_hash`).
 
 
 
@@ -233,7 +233,7 @@ A real use case scenario could be for example a business that has a bank account
         *** because, it is meaningless, and even harmful to allow this behavior
         *** `approve_as_multi` does not dispatch the call
         *** and, if someone approves the call (`as_multi` also counts as an approval), they cannot approve again
-        *** so, if the last signatory calls `approve_as_multi`, and if succeeds, the multisig operation is stuck (has to be canceled and re-created).
+        *** so, if the last signatory calls `approve_as_multi`, and if succeeds, the multisig operation is stuck (has to be cancelled and re-created).
         *** Hence, it is creating an error to call `approve_as_mutli` after the threshold is surpassed.
 
 * `1-out-of-n multisig account` example:
