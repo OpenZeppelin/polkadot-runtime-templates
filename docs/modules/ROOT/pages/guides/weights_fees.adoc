@@ -1,0 +1,77 @@
+:source-highlighter: highlight.js
+:highlightjs-languages: rust
+:github-icon: pass:[<svg class="icon"><use href="#github-icon"/></svg>]
+
+= Weights & Fees
+
+Weight provides a metric to estimate the time it takes to execute code.
+
+By assigning a weight to every transaction, Substrate uses this metric to bound the time it takes to execute and verify each batch of transactions organized into a block.
+
+By converting the transaction's weight to fees, Substrate charges the transaction's caller with fees in proportion to the cost of execution.
+
+Table of Contents:
+** Limit and bound non-linear complexity
+** Weights should be conservative
+** Underestimating weight exposes DDOS
+** Steps To Generate Runtime-Specific Weights
+** References
+
+== Limit and bound non-linear complexity
+
+TODO
+
+== Weights should be conservative
+
+To limit the execution time for each block, runtime constraints on Weight implicitly enforce upper bounds on computation and storage changes per block. 
+
+TODO: which runtime constraints and how are they enforced?
+
+TODO
+
+== Underestimating weight exposes DDOS
+
+* Important that benchmarking hardware is not significantly more high performance than the hardware used by nodes participating in network consensus (i.e. validators, collators)
+
+* Using worse hardware (i.e. developer hardware) does take longer and, therefore, indirectly underestimates weights.
+
+
+== Steps to Generate Runtime-Specific Weights
+
+TODO: why are runtime-specific weights important
+
+1. Ensure Compilation With Runtime Benchmarks
+2. Generate Weights Using Production Hardware
+3. Write Weights to Runtime
+4. Automate via Bench Bot
+
+=== Ensure Compilation With Runtime Benchmarks
+
+* compile `cargo build --features runtime-benchmarks`
+* compile `cargo build --release --features runtime-benchmarks`
+* Enforce with CI
+
+=== Generate Weights Using Production Hardware
+
+Technically, *Weight* represents the time it takes to execute code on *production hardware* used by nodes actively participating in the network's consensus.
+
+```
+1 unit of weight = 1 picosecond of execution time on target reference hardware
+```
+
+https://wiki.polkadot.network/docs/maintain-guides-how-to-validate-polkadot#:~:text=Reference%20Hardware%E2%80%8B,instance%20on%20GCP%20and%20c6i.[Polkadot Reference Hardware Docs] provides more information on Polkadot validator hardware requirements.
+
+It is important to ONLY generate weights by running `cargo build --features runtime-benchmarks --release` on *production hardware*.
+
+=== Write Weights to Runtime.
+
+TODO: where/why
+
+=== Automate via Bench Bot
+
+* examples and references
+
+== References
+
+** *https://www.shawntabrizi.com/blog/substrate/substrate-weight-and-fees/[Substrate Weight & Fees] by https://github.com/shawntabrizi/[Shawn Tabrizi]*
+

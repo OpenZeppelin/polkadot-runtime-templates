@@ -1,4 +1,5 @@
 * General Guides
+** xref:guides/weights_fees.adoc[weights_fees]
 * Runtime Descriptions
 * Pallet Specifications
 ** xref:pallets/proxy.adoc[pallet_proxy]
