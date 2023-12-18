@@ -19,10 +19,35 @@ It is imperative for runtime developers to be conservative when approximating we
 Production runtimes should never set `WeightInfo = ()` in production because this configuration underestimates weight. Instead, every production runtime should generate and set its own weights specific to its runtime.
 
 Steps to generate Runtime-Specific Weights:
-1. Ensure compilation for runtime benchmarks by enforcing a passing CI status for the production benchmarking command `cargo build --release --features runtime-benchmarks`.
-2. Generate weights on https://wiki.polkadot.network/docs/maintain-guides-how-to-validate-polkadot#:~:text=Reference%20Hardware%E2%80%8B,instance%20on%20GCP%20and%20c6i.[Production Hardware].
-3. Write weights to the Runtime.
-4. Automate via a Benchmarking Bot. For an example, see https://github.com/paritytech/command-bot[Command Bot] and https://github.com/paritytech/pipeline-scripts/issues/54[an overview of its design].
+1. Ensure passing status for benchmarking compilation
+```
+cargo build --features runtime-benchmarks
+```
+
+
+2. Run the benchmarking command and write the output to the runtime. Here is the command via bash script:
+```
+#!/bin/sh
+
+# Build release runtime benchmarks
+cargo build --release --features=runtime-benchmarks
+
+# Collect all pallets needed for benchmarking
+# Makes the assumption all pallets are present at: /pallets/$PALLET_NAME
+pallets=$(ls pallets/)
+
+# Generate weights
+for pallet_name in $pallets; do
+    ./target/release/node benchmark pallet \
+        --pallet pallet_$pallet_name \
+        --extrinsic "*" \
+        --steps 50 \
+        --repeat 20 \
+        --output ./runtime/src/weights/$pallet_name.rs
+done
+```
+
+3. Enforce (1) in the CI, and automate (2) via a Benchmarking Bot. For example, see https://github.com/paritytech/command-bot[Parity's Command Bot].
 
 == More Reading
 
@@ -37,4 +62,5 @@ https://wiki.polkadot.network/docs/maintain-guides-how-to-validate-polkadot#:~:t
 It is important to ONLY generate weights by running `cargo build --features runtime-benchmarks --release` on *production hardware*.
 
 References:
-** *https://www.shawntabrizi.com/blog/substrate/substrate-weight-and-fees/[Substrate Weight & Fees] by https://github.com/shawntabrizi/[Shawn Tabrizi]*
+** https://www.shawntabrizi.com/blog/substrate/substrate-weight-and-fees/[Substrate Weight & Fees] by https://github.com/shawntabrizi/[Shawn Tabrizi]
+
