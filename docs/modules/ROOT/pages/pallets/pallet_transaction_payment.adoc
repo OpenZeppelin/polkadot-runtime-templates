@@ -2,7 +2,9 @@
 :highlightjs-languages: rust
 :github-icon: pass:[<svg class="icon"><use href="#github-icon"/></svg>]
 
-= Transaction Payment link:https://github.com/paritytech/polkadot-sdk/blob/release-polkadot-v1.3.0/substrate/frame/transaction-payment[{github-icon},role=heading-link]
+= pallet_transaction_payment
+
+Branch/Release: `release-polkadot-v{1.3.0}`
 
 == Purpose
 
