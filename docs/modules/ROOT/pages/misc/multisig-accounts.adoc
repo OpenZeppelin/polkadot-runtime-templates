@@ -1,0 +1,13 @@
+== Multisig Accounts
+
+* Multisig accounts do not have a private key. They are managed by their signatories.
+    ** Q: how can it be secure if it does not have a private key
+    ** A: substrate uses `origin` for accounts. Each account signs their transaction. Someone who does not belong to the signatories of a multisig account, cannot approve/dispatch calls in the name of the multisig account, even if they wanted to. Knowing the public key of the account is not enough, since the approval message needs to belong to signatories, and each message is signed by the private key. So, effectively, a multisig account indirectly has private keys as many as its signatory count, and thus, a multisig account does not need a separate private key.
+* Creating a multisig account is basically just deriving the public key of it. Just like the creation of a new personal account, we are just deriving the public key. We don’t store this public key on-chain for the creation of the account. The only difference between personal accounts and multisig accounts is, the public key derivation process:
+    ** for a single account, the process is roughly:
+        *** generating a private key,
+        *** deriving the public key from the private key.
+    ** for multisig accounts, the process is roughly:
+        *** supplying the public keys of the accounts that will belong to the multisig account
+        *** supplying the threshold for this multisig account (same signatories with different threshold qualifies as a different multisig account)
+        *** deriving the public key from combining and hashing threshold and signatories’ public keys
