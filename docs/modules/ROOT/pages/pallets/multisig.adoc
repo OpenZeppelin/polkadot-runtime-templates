@@ -2,7 +2,7 @@
 :highlightjs-languages: rust
 :github-icon: pass:[<svg class="icon"><use href="#github-icon"/></svg>]
 
-= Pallet Name
+= pallet_multisig
 
 Branch/Release: `release-polkadot-v1.3.0`
 
