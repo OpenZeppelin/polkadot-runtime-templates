@@ -53,7 +53,7 @@ There are no dispatchables (and no errors) in this pallet. This pallet is only i
 
 == More Reading
 
-- [Substrate Weight & Fees](https://www.shawntabrizi.com/blog/substrate/substrate-weight-and-fees/) by Shawn Tabrizi
-* [Substrate Docs: Transaction Weight & Fees]https://docs.substrate.io/build/tx-weights-fees/
-* [Substrate Docs: How to Calculate Fees](https://docs.substrate.io/reference/how-to-guides/weights/calculate-fees/#:~:text=Weight%20fee%20%2D%20A%20fee%20calculated,change%20as%20the%20chain%20progresses)
+** https://www.shawntabrizi.com/blog/substrate/substrate-weight-and-fees/[Substrate Weight & Fees] by Shawn Tabrizi
+* https://docs.substrate.io/build/tx-weights-fees/[Substrate Docs: Transaction Weight & Fees]
+** https://docs.substrate.io/reference/how-to-guides/weights/calculate-fees/#:~:text=Weight%20fee%20%2D%20A%20fee%20calculated,change%20as%20the%20chain%20progresses[Substrate Docs: How to Calculate Fees]
 
