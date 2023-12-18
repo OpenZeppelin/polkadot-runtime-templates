@@ -6,35 +6,16 @@
 
 Weight provides a metric to estimate the time it takes to execute code.
 
-By assigning a weight to every transaction, Substrate uses this metric to bound the time it takes to execute and verify each batch of transactions organized into a block.
+In Substrate, every transaction has a weight. By default, the block production algorithm selects the set of transactions from the transaction pool that achieve block saturation without exceeding `MaximumBlockWeight`. The `AvailableBlockRatio` ensures only a fraction of `MaximumBlockWeight` is used for regular transactions, but system-critical operations (operational transactions) may use all remaining block weight.
 
-By converting the transaction's weight to fees, Substrate charges the transaction's caller with fees in proportion to the cost of execution.
+By converting each transaction's weight to fees, Substrate charges every transaction's caller with fees in proportion to the cost of execution.
 
-Table of Contents:
-** Limit and bound non-linear complexity
-** Weights should be conservative
-** Underestimating weight exposes DDOS
-** Steps To Generate Runtime-Specific Weights
-** References
-
-== Limit and bound non-linear complexity
-
-TODO
-
-== Weights should be conservative
-
-To limit the execution time for each block, runtime constraints on Weight implicitly enforce upper bounds on computation and storage changes per block. 
-
-TODO: which runtime constraints and how are they enforced?
-
-TODO
-
-== Underestimating weight exposes DDOS
-
+TODO: organize
+* weights should be conservative
+* Limit and bound non-linear complexity
+* Underestimating weight exposes DDOS
 * Important that benchmarking hardware is not significantly more high performance than the hardware used by nodes participating in network consensus (i.e. validators, collators)
-
 * Using worse hardware (i.e. developer hardware) does take longer and, therefore, indirectly underestimates weights.
-
 
 == Steps to Generate Runtime-Specific Weights
 
