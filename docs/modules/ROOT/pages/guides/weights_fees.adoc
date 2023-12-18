@@ -4,35 +4,27 @@
 
 = Weights & Fees
 
-Weight provides a metric to estimate the time it takes to execute code.
+Weight is a metric to estimate the time it takes to execute code.
 
-In Substrate, every transaction has a weight. By default, the block production algorithm selects the set of transactions from the transaction pool that achieve block saturation without exceeding `MaximumBlockWeight`. The `AvailableBlockRatio` ensures only a fraction of `MaximumBlockWeight` is used for regular transactions, but system-critical operations (operational transactions) may use all remaining block weight.
+In Substrate, every transaction has a weight. The block production algorithm selects the set of transactions from the transaction pool that achieve block saturation without exceeding `MaximumBlockWeight`. The `AvailableBlockRatio` ensures only a fraction of `MaximumBlockWeight` is used for regular transactions while system-critical operations (operational transactions) may use all remaining block weight.
 
-By converting each transaction's weight to fees, Substrate charges every transaction's caller with fees in proportion to the cost of execution.
+Substrate charges every transaction's caller with fees in proportion to the cost of execution. It does so by converting each transaction's weight to fees via `WeightToFee`. 
 
-TODO: organize
-* weights should be conservative
-* Limit and bound non-linear complexity
-* Underestimating weight exposes DDOS
-* Important that benchmarking hardware is not significantly more high performance than the hardware used by nodes participating in network consensus (i.e. validators, collators)
-* Using worse hardware (i.e. developer hardware) does take longer and, therefore, indirectly underestimates weights.
+Weights which underestimate cost of execution expose a DDOS vulnerability. If a transaction takes up less space than it should, too many transactions may be included in the block and the block's execution time may exceed expected block time. For parachains, this DDOS vulnerability can be critical; it may prevent future block production by bricking the chain until the parachain state is reset on the relay chain.
 
-== Steps to Generate Runtime-Specific Weights
+It is imperative for runtime developers to be conservative when approximating weight. Moreover, runtime complexity that is non-linear must be limited and bounded.
 
-TODO: why are runtime-specific weights important
+== Runtime-Specific Weights
 
-1. Ensure Compilation With Runtime Benchmarks
-2. Generate Weights Using Production Hardware
-3. Write Weights to Runtime
-4. Automate via Bench Bot
+Production runtimes should never set `WeightInfo = ()` in production because this configuration underestimates weight. Instead, every production runtime should generate and set its own weights specific to its runtime.
 
-=== Ensure Compilation With Runtime Benchmarks
+Steps to generate Runtime-Specific Weights:
+1. Ensure compilation for runtime benchmarks by enforcing a passing CI status for the production benchmarking command `cargo build --release --features runtime-benchmarks`.
+2. Generate weights on https://wiki.polkadot.network/docs/maintain-guides-how-to-validate-polkadot#:~:text=Reference%20Hardware%E2%80%8B,instance%20on%20GCP%20and%20c6i.[Production Hardware].
+3. Write weights to the Runtime.
+4. Automate via a Benchmarking Bot. For an example, see https://github.com/paritytech/command-bot[Command Bot] and https://github.com/paritytech/pipeline-scripts/issues/54[an overview of its design].
 
-* compile `cargo build --features runtime-benchmarks`
-* compile `cargo build --release --features runtime-benchmarks`
-* Enforce with CI
-
-=== Generate Weights Using Production Hardware
+== More Reading
 
 Technically, *Weight* represents the time it takes to execute code on *production hardware* used by nodes actively participating in the network's consensus.
 
@@ -44,15 +36,5 @@ https://wiki.polkadot.network/docs/maintain-guides-how-to-validate-polkadot#:~:t
 
 It is important to ONLY generate weights by running `cargo build --features runtime-benchmarks --release` on *production hardware*.
 
-=== Write Weights to Runtime.
-
-TODO: where/why
-
-=== Automate via Bench Bot
-
-* examples and references
-
-== References
-
+References:
 ** *https://www.shawntabrizi.com/blog/substrate/substrate-weight-and-fees/[Substrate Weight & Fees] by https://github.com/shawntabrizi/[Shawn Tabrizi]*
-
