@@ -18,14 +18,12 @@ It is imperative for runtime developers to be conservative when approximating we
 
 Production runtimes should never set `WeightInfo = ()` in production because this configuration underestimates weight. Instead, every production runtime should generate and set its own weights specific to its runtime.
 
-Steps to generate Runtime-Specific Weights:
-1. Ensure passing status for benchmarking compilation
+The first step is to ensure passing status for benchmarking compilation
 ```
 cargo build --features runtime-benchmarks
 ```
 
-
-2. Run the benchmarking command and write the output to the runtime. Here is the command via bash script:
+The second step is to run the benchmarking command and write its output to the runtime. Here is the command via bash script:
 ```
 #!/bin/sh
 
@@ -47,7 +45,7 @@ for pallet_name in $pallets; do
 done
 ```
 
-3. Enforce (1) in the CI, and automate (2) via a Benchmarking Bot. For example, see https://github.com/paritytech/command-bot[Parity's Command Bot].
+The final step is to automate the steps above. the first step may be automated by enforcing the command in the CI. The second step is automated by integrating a Benchmarking Bot. For an example, see https://github.com/paritytech/command-bot[Parity's Command Bot].
 
 == More Reading
 
