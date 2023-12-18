@@ -1,0 +1,61 @@
+:source-highlighter: highlight.js
+:highlightjs-languages: rust
+:github-icon: pass:[<svg class="icon"><use href="#github-icon"/></svg>]
+
+= pallet_transaction_payment
+
+Branch/Release: `release-polkadot-v{1.3.0}`
+
+== Purpose
+
+`pallet-transaction-payment` implements transaction fee logic.
+
+In substrate, every transaction has an associated `call`, and each `call` has its own weight function. The weight function estimates the time it takes to execute the `call`.
+
+`Config::WeightToFee` is a mapping between the smallest unit of compute (*Weight*) and smallest unit of fee.
+
+This pallet also exposes 
+- how to update fees for the next block based on past fees (`Config::FeeMultiplierUpdate`)
+- how fees are paid (`Config::OnChargeTransaction`)
+
+The base fee and adjusted weight and length fees constitute the _inclusion fee_, which is the minimum fee for a transaction to be included in a block. The formula of final fee:
+```rust, ignore
+inclusion_fee = base_fee + length_fee + [fee_multiplier_update * weight_fee];
+final_fee = inclusion_fee + tip;
+```
+The inputs are defined below in the glossary and config sections.
+
+== Glossary
+
+** `Weight` -- The time it takes to execute runtime logic. By controlling the execution time that a block can consume, weight bounds the storage changes and computation per block.
+** `WeightFee` -- A fee proportional to amount of weight a transaction consumes.
+** `LengthFee` -- A fee proportional to the encoded length of the transaction.
+** `Tip` -- An optional tip. Tip increases the priority of the transaction, giving it a higher chance to be included by the transaction queue.
+
+== Config link:https://github.com/paritytech/polkadot-sdk/blob/release-polkadot-v1.3.0/substrate/frame/pallet-transaction-payment/src/lib.rs#L445[{github-icon},role=heading-link]
+
+* Pallet-specific handlers:
+** `OnChargeTransaction` -- Handler for withdrawing, refunding and depositing the transaction fee. Type must implement the trait  `OnChargeTransaction<Self>`.
+** `FeeMultiplierUpdate` -- Handler to define how base fees change over time (over blocks). Type must implement the trait `MultiplierUpdate`. Possible assignments include `ConstantFee`, `SlowAdjustingFee`, and  `FastAdjustingFee`.
+* Pallet-specific converters:
+** `WeightToFee` -- Mapping between the smallest unit of weight and smallest unit of fee. Type must implement the trait `WeightToFee<Balance = BalanceOf<Self>>`.
+** `LengthToFee` -- Convert a length value into a deductible fee based on the currency type. Type must implement the trait `WeightToFee<Balance = BalanceOf<Self>>`.
+* Pallet-specific constants:
+** `OperationalFeeMultiplier` -- A fee mulitiplier for `Operational` extrinsics to compute "virtual tip" to boost their `priority`. Type must implement the trait `Get<u32>`.
+* Common configs:
+** `RuntimeEvent`
+
+== Dispatchables
+
+There are no dispatchables (and no errors) in this pallet. This pallet is only intended to configure the transaction fee logic for a chain.
+
+**Events:**
+
+* `TransactionFeePaid(who, actual_fee, tip)` -- a transaction fee was paid by account `who` with total amount of `actual_fee + tip`.
+
+== More Reading
+
+** https://www.shawntabrizi.com/blog/substrate/substrate-weight-and-fees/[Substrate Weight & Fees] by Shawn Tabrizi
+* https://docs.substrate.io/build/tx-weights-fees/[Substrate Docs: Transaction Weight & Fees]
+** https://docs.substrate.io/reference/how-to-guides/weights/calculate-fees/#:~:text=Weight%20fee%20%2D%20A%20fee%20calculated,change%20as%20the%20chain%20progresses[Substrate Docs: How to Calculate Fees]
+
