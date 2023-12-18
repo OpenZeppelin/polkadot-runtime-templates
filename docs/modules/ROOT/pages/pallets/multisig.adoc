@@ -4,7 +4,7 @@
 
 = Pallet Name
 
-Branch/Release: `release-polkadot-v{1.3.0}`
+Branch/Release: `release-polkadot-v1.3.0`
 
 == Purpose
 
@@ -13,8 +13,8 @@ This module enables multi-signature operations in your runtime. It allows multip
 == Config link:https://github.com/paritytech/polkadot-sdk/blob/release-polkadot-v1.3.0/substrate/frame/multisig/src/lib.rs#L135[{github-icon},role=heading-link]
 
 * Pallet-specific configs
-** `DepositBase` -- The base amount of currency needed to reserve for creating a multisig execution or to store a dispatch call for later. Recall: The deposit to be made by the account that creates the multisig is: threshold * DepositFactor + DepositBase
-** `DepositFactor` -- The amount of currency needed per unit threshold when creating a multisig execution. Recall: The deposit to be made by the account that creates the multisig is: threshold * DepositFactor + DepositBase
+** `DepositBase` -- The base amount of currency needed to reserve for creating a multisig execution or to store a dispatch call for later. Recall: The deposit to be made by the account that creates the multisig is: `threshold * DepositFactor + DepositBase`
+** `DepositFactor` -- The amount of currency needed per unit threshold when creating a multisig execution. Recall: The deposit to be made by the account that creates the multisig is: `threshold * DepositFactor + DepositBase`
 ** `MaxSignatories` -- The maximum amount of signatories allowed in the multisig.
 * Common configs
 ** `RuntimeEvent` -- The overarching event type.
