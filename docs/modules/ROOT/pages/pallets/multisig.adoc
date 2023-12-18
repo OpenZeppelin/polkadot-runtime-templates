@@ -229,12 +229,8 @@ A real use case scenario could be for example a business that has a bank account
     ** If the approver wants to dispatch the call as well, they should use `as_multi` instead.
 
     ** *Niche Details:*
-        *** if a signatory tries to call `approve_as_multi` after the threshold is surpassed, they will get an error:
-        *** because, it is meaningless, and even harmful to allow this behavior
-        *** `approve_as_multi` does not dispatch the call
-        *** and, if someone approves the call (`as_multi` also counts as an approval), they cannot approve again
-        *** so, if the last signatory calls `approve_as_multi`, and if succeeds, the multisig operation is stuck (has to be cancelled and re-created).
-        *** Hence, it is creating an error to call `approve_as_mutli` after the threshold is surpassed.
+        *** If a signatory tries to call `approve_as_multi` after the threshold is surpassed, they will get an error: `AlreadyApproved`, because this action is meaningless.
+        *** A signatory can call `as_multi` to dispatch the call, even if they approved the same multisig before.
 
 * `1-out-of-n multisig account` example:
     ** Alice, Bob, and Charlie want to create a shared account, and the threshold for this shared account should be 1 (any person can spend from this account, without any approval).
