@@ -18,12 +18,12 @@ It is imperative for runtime developers to be conservative when approximating we
 
 Production runtimes should never set `WeightInfo = ()` in production because this configuration underestimates weight. Instead, every production runtime should generate and set its own weights specific to its runtime.
 
-The first step is to ensure passing status for benchmarking compilation
+. Ensure passing status for benchmarking compilation by running this command:
 ```
 cargo build --features runtime-benchmarks
 ```
 
-The second step is to run the benchmarking command and write its output to the runtime. Here is the command via bash script:
+. Run the benchmarking command and write its output to the runtime. Here is the command via bash script:
 ```
 #!/bin/sh
 
@@ -45,7 +45,7 @@ for pallet_name in $pallets; do
 done
 ```
 
-The final step is to automate the steps above. The first step may be automated by enforcing the command in the CI. The second step is automated by integrating a Benchmarking Bot. For an example, see https://github.com/paritytech/command-bot[Parity's Command Bot].
+. Automate the benchmarking pipeline. The first step may be automated by enforcing the command in the CI. The second step may be automated by integrating a benchmarking github bot. For an example, see https://github.com/paritytech/command-bot[Parity's Command Bot].
 
 == More Reading
 
@@ -55,7 +55,7 @@ Technically, *Weight* represents the time it takes to execute code on *productio
 1 unit of weight = 1 picosecond of execution time on target reference hardware
 ```
 
-It is important to ONLY generate weights on *production hardware*. https://wiki.polkadot.network/docs/maintain-guides-how-to-validate-polkadot#:~:text=Reference%20Hardware%E2%80%8B,instance%20on%20GCP%20and%20c6i.[Polkadot Reference Hardware Docs] provides more information on Polkadot validator hardware requirements.
+It is important to ONLY generate weights on *production hardware*. https://wiki.polkadot.network/docs/maintain-guides-how-to-validate-polkadot#:~:text=Reference%20Hardware%E2%80%8B,instance%20on%20GCP%20and%20c6i[Polkadot Reference Hardware Docs] provides more information on Polkadot validator hardware requirements.
 
 References:
 ** https://www.shawntabrizi.com/blog/substrate/substrate-weight-and-fees/[Substrate Weight & Fees] by https://github.com/shawntabrizi/[Shawn Tabrizi]
