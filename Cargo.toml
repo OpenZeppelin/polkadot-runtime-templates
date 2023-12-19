@@ -1,14 +1,15 @@
 [workspace]
-members = [ "node", "pallets/template", "runtime"]
-package.edition = "2021"
-package.repository = "https://github.com/paritytech/polkadot-sdk"
+members = [ "node", "pallets/template", "runtime" ]
 resolver = "2"
-
-[profile.release]
-panic = "unwind"
+[workspace.package]
+edition = "2021"
+repository = "https://github.com/paritytech/polkadot-sdk"
 
 
 [workspace.lints.clippy]
-type_complexity = "allow"
-too_many_arguments = "allow"
 large_enum_variant = "allow"
+too_many_arguments = "allow"
+type_complexity = "allow"
+
+[profile.release]
+panic = "unwind"

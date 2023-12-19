@@ -1,21 +1,20 @@
 [package]
 name = "pallet-parachain-template"
-authors = ["Anonymous"]
+authors = [ "Anonymous" ]
 description = "FRAME pallet template for defining custom runtime logic."
-version = "0.1.0"
-license = "Unlicense"
 homepage = "https://substrate.io"
-repository.workspace = true
-edition.workspace = true
+license = "Unlicense"
+version = "0.1.0"
+[package.edition]
+workspace = true
 
 [package.metadata.docs.rs]
-targets = ["x86_64-unknown-linux-gnu"]
+targets = [ "x86_64-unknown-linux-gnu" ]
+[package.repository]
+workspace = true
 
 [dependencies]
-codec = { package = "parity-scale-codec", version = "3.0.0", features = [
-	"derive",
-], default-features = false }
-scale-info = { version = "2.10.0", default-features = false, features = [
+codec = { package = "parity-scale-codec", version = "3.0.0", default-features = false, features = [
 	"derive",
 ] }
 # parity-scale-codec = { version = "3.1.5", default-features = false }
@@ -25,6 +24,9 @@ scale-info = { version = "2.10.0", default-features = false, features = [
 frame-benchmarking = { git = "https://github.com/paritytech/polkadot-sdk", branch = "release-polkadot-v1.3.0", default-features = false, optional = true }
 frame-support = { git = "https://github.com/paritytech/polkadot-sdk", branch = "release-polkadot-v1.3.0", default-features = false }
 frame-system = { git = "https://github.com/paritytech/polkadot-sdk", branch = "release-polkadot-v1.3.0", default-features = false }
+scale-info = { version = "2.10.0", default-features = false, features = [
+	"derive",
+] }
 
 [dev-dependencies]
 serde = { version = "1.0.188" }
@@ -35,13 +37,7 @@ sp-io = { git = "https://github.com/paritytech/polkadot-sdk", branch = "release-
 sp-runtime = { git = "https://github.com/paritytech/polkadot-sdk", branch = "release-polkadot-v1.3.0", default-features = false }
 
 [features]
-default = ["std"]
-runtime-benchmarks = [
-	"frame-benchmarking/runtime-benchmarks",
-	"frame-support/runtime-benchmarks",
-	"frame-system/runtime-benchmarks",
-	"sp-runtime/runtime-benchmarks",
-]
+default = [ "std" ]
 std = [
 	"codec/std",
 	"frame-benchmarking/std",
@@ -51,6 +47,12 @@ std = [
 	"sp-core/std",
 	"sp-io/std",
 	"sp-runtime/std",
+]
+runtime-benchmarks = [
+	"frame-benchmarking/runtime-benchmarks",
+	"frame-support/runtime-benchmarks",
+	"frame-system/runtime-benchmarks",
+	"sp-runtime/runtime-benchmarks",
 ]
 try-runtime = [
 	"frame-support/try-runtime",
