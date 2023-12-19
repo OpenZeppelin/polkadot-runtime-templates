@@ -1,0 +1,62 @@
+:source-highlighter: highlight.js
+:highlightjs-languages: rust
+:github-icon: pass:[<svg class="icon"><use href="#github-icon"/></svg>]
+
+= Weights & Fees
+
+Weight is a metric to estimate the time it takes to execute code.
+
+In Substrate, every transaction has a weight. The block production algorithm selects the set of transactions from the transaction pool that achieve block saturation without exceeding `MaximumBlockWeight`. The `AvailableBlockRatio` ensures only a fraction of `MaximumBlockWeight` is used for regular transactions while system-critical operations (operational transactions) may use all remaining block weight.
+
+Substrate charges every transaction's caller with fees in proportion to the cost of execution. It does so by converting each transaction's weight to fees via `WeightToFee`. 
+
+Weights which underestimate cost of execution expose a DDOS vulnerability. If a transaction takes up less space than it should, too many transactions may be included in the block and the block's execution time may exceed expected block time. For parachains, this DDOS vulnerability can be critical; it may prevent future block production by bricking the chain until the parachain state is reset on the relay chain.
+
+It is imperative for runtime developers to be conservative when approximating weight. Moreover, runtime complexity that is non-linear must be limited and bounded.
+
+== Runtime-Specific Weights
+
+Production runtimes should never set `WeightInfo = ()` in production because this configuration underestimates weight. Instead, every production runtime should generate and set its own weights specific to its runtime.
+
+. Ensure passing status for benchmarking compilation by running this command:
+```
+cargo build --features runtime-benchmarks
+```
+[start=2]
+. Run the benchmarking command and write its output to the runtime. Here is the command via bash script:
+```
+#!/bin/sh
+
+# Build release runtime benchmarks
+cargo build --release --features=runtime-benchmarks
+
+# Collect all pallets needed for benchmarking
+# Makes the assumption all pallets are present at: /pallets/$PALLET_NAME
+pallets=$(ls pallets/)
+
+# Generate weights
+for pallet_name in $pallets; do
+    ./target/release/node benchmark pallet \
+        --pallet pallet_$pallet_name \
+        --extrinsic "*" \
+        --steps 50 \
+        --repeat 20 \
+        --output ./runtime/src/weights/$pallet_name.rs
+done
+```
+[start=3]
+. Automate the benchmarking pipeline. The first step may be automated by enforcing the command in the CI. The second step may be automated by integrating a benchmarking github bot. For an example, see https://github.com/paritytech/command-bot[Parity's Command Bot].
+
+== More Reading
+
+Technically, *Weight* represents the time it takes to execute code on *production hardware* used by nodes actively participating in the network's consensus.
+
+```
+1 unit of weight = 1 picosecond of execution time on target reference hardware
+```
+
+It is important to ONLY generate weights on *production hardware*. https://wiki.polkadot.network/docs/maintain-guides-how-to-validate-polkadot#:~:text=Reference%20Hardware%E2%80%8B,instance%20on%20GCP%20and%20c6i[Polkadot Reference Hardware Docs] provides more information on Polkadot validator hardware requirements.
+
+=== References
+
+https://www.shawntabrizi.com/blog/substrate/substrate-weight-and-fees/[Substrate Weight & Fees] by https://github.com/shawntabrizi/[Shawn Tabrizi]
