@@ -1,0 +1,90 @@
+:source-highlighter: highlight.js
+:highlightjs-languages: rust
+:github-icon: pass:[<svg class="icon"><use href="#github-icon"/></svg>]
+
+= pallet_balances
+
+Branch/Release: `release-polkadot-v1.3.0`
+
+== Purpose
+
+The Balances pallet provides functions for:
+
+* Getting and setting free balances.
+* Retrieving total, reserved and unreserved balances.
+* Repatriating a reserved balance to a beneficiary account that exists.
+* Transferring a balance between accounts (when not reserved).
+* Slashing an account balance.
+* Account creation and removal.
+* Managing total issuance.
+* Setting and managing locks.
+
+== Glossary
+
+* Freeze --
+* Hold -- reserving/holding an amount of balance from an account. The `Hold` amount cannot be spent, but still belongs to the account.
+* Reserve -- Deprecated, use Hold
+* Lock -- Same as `Hold`, with 2 differences:
+** Locks can store the reason for the locking operation
+** Locks are overlapping, whereas Reserve/Hold's are additive. Example:
+*** Apply `Hold` to account A for 20 unit, then apply another `Hold` to account A for 10 unit -> a total of 30 unit will be reserved/hold
+*** Apply `Lock` to account A for 20 unit, then apply another `Lock` to account A for 10 unit -> a total of 20 unit will be locked, since 10 is smaller than 20.
+
+== Config link:https://github.com/paritytech/polkadot-sdk/blob/release-polkadot-v1.3.0/substrate/frame/balances/src/lib.rs#L253[{github-icon},role=heading-link]
+
+* Pallet-specific configs
+** `RuntimeHoldReason` -- The overarching hold reason.
+** `RuntimeFreezeReason` -- The overarching freeze reason.
+** `Balance` -- The balance of an account
+** `DustRemoval` -- Handler for the unbalanced reduction when removing a dust account.
+** `ExistentialDeposit` -- The minimum amount required to keep an account open. MUST BE GREATER THAN ZERO!
+** `AccountStore` -- The means of storing the balances of an account.
+** `ReserveIdentifier` --  The ID type for reserves. Use of reserves is deprecated in favour of holds. See `https://github.com/paritytech/substrate/pull/12951/`
+** `FreezeIdentifier` -- The ID type for freezes.
+** `MaxLocks` -- The maximum number of locks that should exist on an account.
+** `MaxReserves` -- The maximum number of named reserves that can exist on an account. Use of reserves is deprecated in favour of holds. See `https://github.com/paritytech/substrate/pull/12951/`
+** `MaxHolds` -- The maximum number of holds that can exist on an account at any time.
+** `MaxFreezes` -- The maximum number of individual freeze locks that can exist on an account at any time.
+* Common configs
+** `RuntimeEvent` -- The overarching event type.
+** `WeightInfo` -- Weight information for extrinsics in this pallet.
+
+== Dispatchables link:https://github.com/paritytech/polkadot-sdk/blob/release-polkadot-v1.3.0/substrate/frame/balances/src/lib.rs#L570[{github-icon},role=heading-link]
+
+[.contract-item]
+[[dispatchable_name]]
+==== `[.contract-item-name]#++dispatchable_name++#`
+[source,rust]
+----
+pub fn dispatchable_name(
+    param1: Type1,
+    param2: Type2
+) -> DispatchResult
+----
+Freeform description of the dispatchable. It is good to include the important things that should be included there.
+
+// four following blocks show how to make a highlight of some information. It will become a styled block
+
+NOTE: This is how you state important information that should be acknowledged
+
+IMPORTANT: This is how you put some information that should not be missed
+
+WARNING: This thing is for important information missing which may lead to dangerous consequences
+
+TIP: This is how you should give some useful advice
+
+**Params:**
+
+* `param1: Type1` -- description of the parameter
+
+**Errors:**
+
+* `ErrorName` -- description of conditions, when this error happens
+
+**Events:**
+
+* `EventName(param1, param2)` -- description of event, if needed (they are often self-explanatory)
+
+== Important Mentions and FAQ's
+
+Here you may put a freeform information about any aspect of the pallet.
