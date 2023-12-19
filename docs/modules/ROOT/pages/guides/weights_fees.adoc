@@ -57,6 +57,6 @@ Technically, *Weight* represents the time it takes to execute code on *productio
 
 It is important to ONLY generate weights on *production hardware*. https://wiki.polkadot.network/docs/maintain-guides-how-to-validate-polkadot#:~:text=Reference%20Hardware%E2%80%8B,instance%20on%20GCP%20and%20c6i[Polkadot Reference Hardware Docs] provides more information on Polkadot validator hardware requirements.
 
-References:
-** https://www.shawntabrizi.com/blog/substrate/substrate-weight-and-fees/[Substrate Weight & Fees] by https://github.com/shawntabrizi/[Shawn Tabrizi]
+=== References
 
+https://www.shawntabrizi.com/blog/substrate/substrate-weight-and-fees/[Substrate Weight & Fees] by https://github.com/shawntabrizi/[Shawn Tabrizi]
