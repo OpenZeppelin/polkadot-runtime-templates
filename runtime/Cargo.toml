@@ -5,7 +5,6 @@ description = "A generic parachain runtime template"
 license = { workspace = true }
 authors = { workspace = true }
 repository = { workspace = true }
-edition = "2021"
 
 [package.metadata.docs.rs]
 targets = ["x86_64-unknown-linux-gnu"]
@@ -21,7 +20,7 @@ scale-info = { workspace = true }
 smallvec = { workspace = true }
 
 # Local
-pallet-parachain-template = { workspace = true }
+pallet-template = { workspace = true }
 
 # Substrate
 frame-benchmarking = { workspace = true, optional = true }
@@ -102,7 +101,7 @@ std = [
 	"pallet-authorship/std",
 	"pallet-balances/std",
 	"pallet-collator-selection/std",
-	"pallet-parachain-template/std",
+	"pallet-template/std",
 	"pallet-proxy/std",
 	"pallet-multisig/std",
 	"pallet-session/std",
@@ -147,7 +146,7 @@ runtime-benchmarks = [
 	"pallet-balances/runtime-benchmarks",
 	"pallet-collator-selection/runtime-benchmarks",
 	"pallet-multisig/runtime-benchmarks",
-	"pallet-parachain-template/runtime-benchmarks",
+	"pallet-template/runtime-benchmarks",
 	"pallet-sudo/runtime-benchmarks",
 	"pallet-timestamp/runtime-benchmarks",
 	"pallet-xcm/runtime-benchmarks",
@@ -175,7 +174,7 @@ try-runtime = [
 	"pallet-balances/try-runtime",
 	"pallet-collator-selection/try-runtime",
 	"pallet-multisig/try-runtime",
-	"pallet-parachain-template/try-runtime",
+	"pallet-template/try-runtime",
 	"pallet-session/try-runtime",
 	"pallet-proxy/try-runtime",
 	"pallet-sudo/try-runtime",
