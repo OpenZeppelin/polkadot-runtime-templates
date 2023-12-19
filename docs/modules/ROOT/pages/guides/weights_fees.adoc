@@ -22,7 +22,7 @@ Production runtimes should never set `WeightInfo = ()` in production because thi
 ```
 cargo build --features runtime-benchmarks
 ```
-
+[start=2]
 . Run the benchmarking command and write its output to the runtime. Here is the command via bash script:
 ```
 #!/bin/sh
@@ -44,7 +44,7 @@ for pallet_name in $pallets; do
         --output ./runtime/src/weights/$pallet_name.rs
 done
 ```
-
+[start=3]
 . Automate the benchmarking pipeline. The first step may be automated by enforcing the command in the CI. The second step may be automated by integrating a benchmarking github bot. For an example, see https://github.com/paritytech/command-bot[Parity's Command Bot].
 
 == More Reading
