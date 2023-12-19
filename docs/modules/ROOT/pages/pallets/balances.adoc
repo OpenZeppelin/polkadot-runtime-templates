@@ -21,7 +21,7 @@ The Balances pallet provides functions for:
 
 == Glossary
 
-* Freeze --
+* Freeze -- What is the difference between Freeze and Hold?
 * Hold -- reserving/holding an amount of balance from an account. The `Hold` amount cannot be spent, but still belongs to the account.
 * Reserve -- Deprecated, use Hold
 * Lock -- Same as `Hold`, with 2 differences:
@@ -52,30 +52,26 @@ The Balances pallet provides functions for:
 == Dispatchables link:https://github.com/paritytech/polkadot-sdk/blob/release-polkadot-v1.3.0/substrate/frame/balances/src/lib.rs#L570[{github-icon},role=heading-link]
 
 [.contract-item]
-[[dispatchable_name]]
-==== `[.contract-item-name]#++dispatchable_name++#`
+[[transfer_allow_death]]
+==== `[.contract-item-name]#++transfer_allow_death++#`
 [source,rust]
 ----
-pub fn dispatchable_name(
-    param1: Type1,
-    param2: Type2
-) -> DispatchResult
+pub fn transfer_allow_death(
+			origin: OriginFor<T>,
+			dest: AccountIdLookupOf<T>,
+			#[pallet::compact] value: T::Balance,
+		) -> DispatchResult
 ----
-Freeform description of the dispatchable. It is good to include the important things that should be included there.
+Transfers the `value` from `origin` to `dest`.
 
-// four following blocks show how to make a highlight of some information. It will become a styled block
+NOTE: `allow_death` means, if the account balance drops below ExistentialDeposit, it might be reaped/deleted.
 
-NOTE: This is how you state important information that should be acknowledged
-
-IMPORTANT: This is how you put some information that should not be missed
-
-WARNING: This thing is for important information missing which may lead to dangerous consequences
-
-TIP: This is how you should give some useful advice
 
 **Params:**
 
-* `param1: Type1` -- description of the parameter
+* `origin: OriginFor<T>` -- caller (and in this case, sender) account
+* `dest: AccountIdLookupOf<T>` -- recipient
+* `value: T::Balance` -- amount to transfer
 
 **Errors:**
 
