@@ -28,6 +28,7 @@ scale-info = { version = "2.10.0", default-features = false, features = [
 	"derive",
 ] }
 smallvec = "1.11.0"
+serde = { version = "1.0.188" }
 
 # Local
 pallet-template = { path = "./pallets/template", default-features = false }
