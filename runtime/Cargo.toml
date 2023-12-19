@@ -5,22 +5,23 @@ description = "A generic parachain runtime template"
 license = { workspace = true }
 authors = { workspace = true }
 repository = { workspace = true }
+edition = "2021"
 
 [package.metadata.docs.rs]
 targets = ["x86_64-unknown-linux-gnu"]
 
 [build-dependencies]
-substrate-wasm-builder = { workspace = true, optional = true }
+substrate-wasm-builder = { workspace = true }
 
 [dependencies]
-codec = { workspace = true }
+parity-scale-codec = { workspace = true, features = [ "derive" ] }
 hex-literal = { workspace = true, optional = true }
 log = { workspace = true }
-scale-info = { workspace = true }
+scale-info = { workspace = true, features = [ "derive" ] }
 smallvec = { workspace = true }
 
 # Local
-pallet-template = { workspace = true }
+pallet-template = { path = "../pallets/template", default-features = false }
 
 # Substrate
 frame-benchmarking = { workspace = true, optional = true }
@@ -65,7 +66,7 @@ xcm-executor = { workspace = true }
 # Cumulus
 cumulus-pallet-aura-ext = { workspace = true }
 cumulus-pallet-dmp-queue = { workspace = true }
-cumulus-pallet-parachain-system = { workspace = true }
+cumulus-pallet-parachain-system = { workspace = true, features = [ "parameterized-consensus-hook" ] }
 cumulus-pallet-session-benchmarking = { workspace = true }
 cumulus-pallet-xcm = { workspace = true }
 cumulus-pallet-xcmp-queue = { workspace = true }
@@ -80,7 +81,7 @@ sp-io = { workspace = true }
 [features]
 default = ["std"]
 std = [
-	"codec/std",
+	"parity-scale-codec/std",
 	"cumulus-pallet-aura-ext/std",
 	"cumulus-pallet-dmp-queue/std",
 	"cumulus-pallet-parachain-system/std",
@@ -127,7 +128,6 @@ std = [
 	"sp-std/std",
 	"sp-transaction-pool/std",
 	"sp-version/std",
-	"substrate-wasm-builder",
 	"xcm-builder/std",
 	"xcm-executor/std",
 	"xcm/std",
