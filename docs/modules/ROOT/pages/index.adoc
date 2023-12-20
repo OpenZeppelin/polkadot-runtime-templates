@@ -14,7 +14,7 @@ IMPORTANT: This repo contains code in its early stages. Please be aware that it 
 git clone git@github.com:OpenZeppelin/polkadot-runtime-template.git
 ```
 
-- TCustomize a chainspec as desired in node/src/chain_spec.rs. For instance, if you want to launch your chain as a parachain against Rococo, refer to link:https://substrate.io/developers/rococo-network/[this guide from Parity] to set it up. Replace 1000 with the received parachain id in the chainspec.
+- Customize a chainspec as desired in node/src/chain_spec.rs. For instance, if you want to launch your chain as a parachain against Rococo, refer to link:https://substrate.io/developers/rococo-network/[this guide from Parity] to set it up. Replace 1000 with the received parachain id in the chainspec.
 
 NOTE: To submit calls for extrinsics reservation you can use the link:https://polkadot.js.org/apps[default explorer] along with the link:https://polkadot.js.org/extension/[polkadot browser extension]. However, the explorer won't provide a parachain id, and it can be challenging to locate it in the block. For such purposes, you can use link:https://www.subscan.io/[Subscan] to identify what was returned from the reserve call.
 
