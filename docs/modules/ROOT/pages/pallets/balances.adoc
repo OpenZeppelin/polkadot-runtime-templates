@@ -11,7 +11,7 @@ Branch/Release: `release-polkadot-v1.3.0`
 The Balances pallet provides functions for:
 
 * Getting and setting free balances.
-* Retrieving total, reserved and unreserved balances.
+* Retrieving total, reserved, and unreserved balances.
 * Repatriating a reserved balance to a beneficiary account that exists.
 * Transferring a balance between accounts (when not reserved).
 * Slashing an account balance.
@@ -21,14 +21,14 @@ The Balances pallet provides functions for:
 
 == Glossary
 
-* Freeze -- What is the difference between Freeze and Hold?
-* Hold -- reserving/holding an amount of balance from an account. The `Hold` amount cannot be spent, but still belongs to the account.
+* Freeze -- Freeze is reserving some amount from the account. For example, to make a transaction, the amount to be sent might be first frozen, then the checks for the transaction will be made. If the checks pass, the amount will be deducted from the sender's account and added to the recipient's. `Freeze` should be preferred if the reserved money can be lost/sent due to external reasons.
+* Hold -- reserving/holding an amount of balance from an account. The `Hold` amount cannot be spent, but still belongs to the account. For example, depositing modifying the state, and occupying space. This deposit will be repaid once the occupied space is freed.
 * Reserve -- Deprecated, use Hold.
-* Lock -- Same as `Hold`, with 2 differences:
+* Lock -- Nearly the same as `Hold`, with 2 major differences:
 ** Locks can store the reason for the locking operation.
 ** Locks are overlapping, whereas Reserve/Hold's are additive. Example:
-*** Apply `Hold` to account A for 20 unit, then apply another `Hold` to account A for 10 unit -> a total of 30 unit will be reserved/hold
-*** Apply `Lock` to account A for 20 unit, then apply another `Lock` to account A for 10 unit -> a total of 20 unit will be locked, since 10 is smaller than 20.
+*** Apply `Hold` to account A for 20 units, then apply another `Hold` to account A for 10 units -> a total of 30 units will be reserved/hold
+*** Apply `Lock` to account A for 20 units, then apply another `Lock` to account A for 10 units -> a total of 20 units will be locked, since 10 is smaller than 20.
 
 == Config link:https://github.com/paritytech/polkadot-sdk/blob/release-polkadot-v1.3.0/substrate/frame/balances/src/lib.rs#L253[{github-icon},role=heading-link]
 
@@ -39,10 +39,10 @@ The Balances pallet provides functions for:
 ** `DustRemoval` -- Handler for the unbalanced reduction when removing a dust account.
 ** `ExistentialDeposit` -- The minimum amount required to keep an account open. MUST BE GREATER THAN ZERO!
 ** `AccountStore` -- The means of storing the balances of an account.
-** `ReserveIdentifier` --  The ID type for reserves. Use of reserves is deprecated in favour of holds. See `https://github.com/paritytech/substrate/pull/12951/`
+** `ReserveIdentifier` --  The ID type for reserves. The use of reserves is deprecated in favor of holds. See `https://github.com/paritytech/substrate/pull/12951/`
 ** `FreezeIdentifier` -- The ID type for freezes.
 ** `MaxLocks` -- The maximum number of locks that should exist on an account.
-** `MaxReserves` -- The maximum number of named reserves that can exist on an account. Use of reserves is deprecated in favour of holds. See `https://github.com/paritytech/substrate/pull/12951/`
+** `MaxReserves` -- The maximum number of named reserves that can exist on an account. The use of reserves is deprecated in favor of holds. See `https://github.com/paritytech/substrate/pull/12951/`
 ** `MaxHolds` -- The maximum number of holds that can exist on an account at any time.
 ** `MaxFreezes` -- The maximum number of individual freeze locks that can exist on an account at any time.
 * Common configs
@@ -57,7 +57,7 @@ The Balances pallet provides functions for:
 * `BalanceSet(who, free)` -- A balance was set by root.
 * `Reserved(who, amount)` -- Some balance was reserved (moved from free to reserved).
 * `Unreserved(who, amount)` -- Some balance was unreserved (moved from reserved to free).
-* `ReserveRepatriated(from, to, amount, destination_status)` -- Some balance was moved from the reserve of the first account to the second account. Final argument indicates the destination balance type.
+* `ReserveRepatriated(from, to, amount, destination_status)` -- Some balance was moved from the reserve of the first account to the second account. The final argument indicates the destination balance type.
 * `Deposit(who, amount)` -- Some amount was deposited (e.g. for transaction fees).
 * `Withdraw(who, amount)` -- Some amount was withdrawn from the account (e.g. for transaction fees).
 * `Slashed(who, amount)` -- Some amount was removed from the account (e.g. for misbehavior).
@@ -78,13 +78,13 @@ The Balances pallet provides functions for:
 * `VestingBalance` -- Vesting balance too high to send value.
 * `LiquidityRestrictions` -- Account liquidity restrictions prevent withdrawal.
 * `InsufficientBalance` -- Balance too low to send value.
-* `ExistentialDeposit` -- Value too low to create account due to existential deposit.
-* `Expendability` -- Transfer/payment would kill account.
+* `ExistentialDeposit` -- Value too low to create an account due to existential deposit.
+* `Expendability` -- Transfer/payment would kill the account.
 * `ExistingVestingSchedule` -- A vesting schedule already exists for this account.
 * `DeadAccount` -- Beneficiary account must pre-exist.
 * `TooManyReserves` -- Number of named reserves exceed `MaxReserves`.
-* `TooManyHolds` -- Number of holds exceed `MaxHolds`.
-* `TooManyFreezes` -- Number of freezes exceed `MaxFreezes`.
+* `TooManyHolds` -- Number of holds exceeds `MaxHolds`.
+* `TooManyFreezes` -- Number of freezes exceeds `MaxFreezes`.
 
 == Dispatchables link:https://github.com/paritytech/polkadot-sdk/blob/release-polkadot-v1.3.0/substrate/frame/balances/src/lib.rs#L570[{github-icon},role=heading-link]
 
@@ -101,7 +101,7 @@ pub fn transfer_allow_death(
 ----
 Transfers the `value` from `origin` to `dest`.
 
-NOTE: `allow_death` means, if the account balance drops below ExistentialDeposit limit, it might be reaped/deleted.
+NOTE: `allow_death` means, that if the account balance drops below the ExistentialDeposit limit, it might be reaped/deleted.
 
 
 **Params:**
@@ -186,13 +186,13 @@ pub fn force_unreserve(
     amount: T::Balance,
 ) -> DispatchResult
 ----
-Unreserve some balance from a user by force. Caller (origin) must be root.
+Unreserve some balance from a user by force. The caller (origin) must be root.
 
 **Params:**
 
 * `origin: OriginFor<T>` -- caller (and in this case, sender) account.
 * `who: AccountIdLookupOf<T>` -- the account for which the balance is to be unreserved.
-* `amount: T::Balance` -- amount of balance to be unreserved.
+* `amount: T::Balance` -- the amount of balance to be unreserved.
 
 [.contract-item]
 [[upgrade_accounts]]
@@ -211,7 +211,7 @@ Upgrade the specified account/s.
 * `origin: OriginFor<T>` -- caller, must be `Signed`.
 * `who: Vec<T::AccountId>` -- the account/s to be upgraded.
 
-NOTE: This will waive the transaction fee if at least all but 10% of the accounts needed to be upgraded.
+NOTE: This will waive the transaction fee if at least all but 10% of the accounts need to be upgraded.
 
 [.contract-item]
 [[force_set_balance]]
@@ -224,11 +224,10 @@ pub fn force_set_balance(
     #[pallet::compact] new_free: T::Balance,
 ) -> DispatchResult
 ----
-Set the regular balance of a given account. Caller (origin) must be root.
+Set the regular balance of a given account. The caller (origin) must be root.
 
 **Params:**
 
 * `origin: OriginFor<T>` -- caller, must be root.
 * `who: AccountIdLookupOf<T>` -- the account for which the balance will be set.
-* `new_free: T::Balance` -- amount of free balance that will be set to the given account.
-
+* `new_free: T::Balance` -- the amount of free balance that will be set to the given account.
