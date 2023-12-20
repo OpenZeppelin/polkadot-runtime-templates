@@ -33,12 +33,12 @@ cargo build --release
     --[your chainspec] \
     --base-path <path to data> \
     --port 40333 \
-    --ws-port 8844 \
+    --rpc-port 8844 \
     -- \
     --execution wasm \
     --chain <relay chain raw chain spec> \
     --port 30343 \
-    --ws-port 9977
+    --rpc-port 9977
 ```
 
 == What's next?
