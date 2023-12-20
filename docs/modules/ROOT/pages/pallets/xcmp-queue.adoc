@@ -28,29 +28,104 @@ Responsible from the Queues (both incoming and outgoing) for XCMP messages. This
 == Dispatchables link:https://github.com/paritytech/polkadot-sdk/blob/release-polkadot-v1.5.0/cumulus/pallets/xcmp-queue/src/lib.rs#L150[{github-icon},role=heading-link]
 
 [.contract-item]
-[[dispatchable_name]]
-==== `[.contract-item-name]#++dispatchable_name++#`
+[[suspend_xcm_execution]]
+==== `[.contract-item-name]#++suspend_xcm_execution++#`
 [source,rust]
 ----
-pub fn dispatchable_name(
-    param1: Type1,
-    param2: Type2
-) -> DispatchResult
+pub fn suspend_xcm_execution(origin: OriginFor<T>) -> DispatchResult
 ----
-Freeform description of the dispatchable. It is good to include the important things that should be included there.
+Suspends all XCM executions for the XCMP queue.
+
+IMPORTANT: `origin` must pass the `ControllerOrigin` check.
+NOTE: this does not change the status of the in/out bound channels.
 
 **Params:**
 
-* `param1: Type1` -- description of the parameter
+* `origin: OriginFor<T>` -- caller of the dispatchable
 
 **Errors:**
 
-* `ErrorName` -- description of conditions, when this error happens
+* `AlreadySuspended` -- description of conditions, when this error happens
 
-**Events:**
+[.contract-item]
+[[resume_xcm_execution]]
+==== `[.contract-item-name]#++resume_xcm_execution++#`
+[source,rust]
+----
+pub fn resume_xcm_execution(origin: OriginFor<T>) -> DispatchResult
+----
+Resumes all XCM executions for the XCMP queue.
 
-* `EventName(param1, param2)` -- description of event, if needed (they are often self-explanatory)
+IMPORTANT: `origin` must pass the `ControllerOrigin` check.
+NOTE: this does not change the status of the in/out bound channels.
+
+**Params:**
+
+* `origin: OriginFor<T>` -- caller of the dispatchable
+
+**Errors:**
+
+* `AlreadyResumed` -- description of conditions, when this error happens
+
+[.contract-item]
+[[update_suspend_threshold]]
+==== `[.contract-item-name]#++update_suspend_threshold++#`
+[source,rust]
+----
+pub fn update_suspend_threshold(origin: OriginFor<T>, new: u32) -> DispatchResult
+----
+Overwrites the number of pages which must be in the queue for the other side to be told to suspend their sending.
+
+IMPORTANT: `origin` must be root.
+
+**Params:**
+
+* `origin: OriginFor<T>` -- caller of the dispatchable
+* `new: u32` -- new page threshold for suspend
+
+[.contract-item]
+[[update_drop_threshold]]
+==== `[.contract-item-name]#++update_drop_threshold++#`
+[source,rust]
+----
+pub fn update_drop_threshold(origin: OriginFor<T>, new: u32) -> DispatchResult
+----
+Overwrites the number of pages which must be in the queue after which we drop any further messages from the channel.
+
+IMPORTANT: `origin` must be root.
+
+**Params:**
+
+* `origin: OriginFor<T>` -- caller of the dispatchable
+* `new: u32` -- new page threshold for drop
+
+[.contract-item]
+[[update_resume_threshold]]
+==== `[.contract-item-name]#++update_resume_threshold++#`
+[source,rust]
+----
+pub fn update_resume_threshold(origin: OriginFor<T>, new: u32) -> DispatchResult
+----
+Overwrites the number of pages which the queue must be reduced to before it signals that message sending may recommence after it has been suspended.
+
+IMPORTANT: `origin` must be root.
+
+**Params:**
+
+* `origin: OriginFor<T>` -- caller of the dispatchable
+* `new: u32` -- new page threshold for resume
 
 == Important Mentions and FAQ's
 
-Here you may put a freeform information about any aspect of the pallet.
+IMPORTANT: messages are not ordered when they are received, but they are ordered when they are sent.
+
+Messages and signals are stored in different queues. When the messages to be sent are taken with `take_outbound_messages`, they will be ordered:
+
+* if there are signals present for outbound messages that targeting a parachain, we will only send signals, not messages
+* messages (that are not signals) won’t be ordered
+
+NOTE: polkadot/xcm/src/v3 has SendXcm trait, which has 2 blank methods validate and deliver. For each router struct, one can implement SendXcm for it.
+
+. `deliver` method take `destination` as a parameter, and calls `send_fragment` function with the target parachain id.
+. `send_fragment` puts the message to the queue of the given parachain id.
+** unlike it's name, `deliver` method does not actually delivers the message. It is calling `send_fragment`, which places a message fragment on the outgoing XCMP queue for recipient. So, `deliver` is only putting the message to the respective outgoing xcmp queue
