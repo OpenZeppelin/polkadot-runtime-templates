@@ -1,4 +1,4 @@
-//! Benchmarking setup for pallet-parachain-template
+//! Benchmarking setup for pallet-template
 
 use frame_benchmarking::{benchmarks, impl_benchmark_test_suite, whitelisted_caller};
 use frame_system::RawOrigin;

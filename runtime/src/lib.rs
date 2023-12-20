@@ -10,7 +10,6 @@ pub mod constants;
 mod weights;
 pub mod xcm_config;
 
-use codec::{Decode, Encode, MaxEncodedLen};
 use cumulus_pallet_parachain_system::RelayNumberStrictlyIncreases;
 use cumulus_primitives_core::ParaId;
 use frame_support::{
@@ -29,10 +28,8 @@ use frame_system::{
     limits::{BlockLength, BlockWeights},
     EnsureRoot,
 };
-pub use pallet_multisig;
-/// Import the template pallet.
-pub use pallet_parachain_template;
 use pallet_xcm::{EnsureXcm, IsVoiceOfBody};
+use parity_scale_codec::{Decode, Encode, MaxEncodedLen};
 use polkadot_runtime_common::xcm_sender::NoPriceForMessageDelivery;
 // Polkadot imports
 use polkadot_runtime_common::{BlockHashCount, SlowAdjustingFeeUpdate};
@@ -572,7 +569,7 @@ impl pallet_collator_selection::Config for Runtime {
 }
 
 /// Configure the pallet template in pallets/template.
-impl pallet_parachain_template::Config for Runtime {
+impl pallet_template::Config for Runtime {
     type RuntimeEvent = RuntimeEvent;
 }
 
@@ -618,7 +615,7 @@ construct_runtime!(
         DmpQueue: cumulus_pallet_dmp_queue = 33,
 
         // Template
-        TemplatePallet: pallet_parachain_template = 50,
+        TemplatePallet: pallet_template = 50,
     }
 );
 
