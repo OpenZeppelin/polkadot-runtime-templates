@@ -9,3 +9,4 @@
 ** xref:pallets/aura_ext.adoc[cumulus_aura_ext]
 ** xref:pallets/collator-selection.adoc[collator_selection]
 ** xref:pallets/parachain-system.adoc[parachain_system]
+** xref:pallets/xcmp-queue.adoc[cumulus_pallet_xcmp_queue]
