@@ -61,7 +61,7 @@ jobs:
         run: rustup show
 
       - name: Install toml-sort
-        run: cargo install --git https://github.com/moonsong-labs/toml_sort
+        run: cargo install --git https://github.com/Off-Narrative-Labs/toml_sort
 
       - name: Check Cargo.toml files are formatted using toml_sort
         run: ./scripts/check-toml-sorted.sh
