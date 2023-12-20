@@ -1,1 +1,49 @@
-= INDEX
+:source-highlighter: highlight.js
+:highlightjs-languages: bash
+
+= Substrate Parachain Runtimes
+
+A collection of runtimes that describe parachains with different purposes.
+
+IMPORTANT: This repo contains code in its early stages. Please be aware that it may change rapidly and was not yet audited.
+
+== Quick start
+
+- Begin by visiting our link:https://github.com/OpenZeppelin/polkadot-runtime-template[repository]. You can fork it, use it as a template, or simply clone it to your local directory.
+```bash
+git clone git@github.com:OpenZeppelin/polkadot-runtime-template.git
+```
+
+- TCustomize a chainspec as desired in node/src/chain_spec.rs. For instance, if you want to launch your chain as a parachain against Rococo, refer to link:https://substrate.io/developers/rococo-network/[this guide from Parity] to set it up. Replace 1000 with the received parachain id in the chainspec.
+
+NOTE: To submit calls for extrinsics reservation you can use the link:https://polkadot.js.org/apps[default explorer] along with the link:https://polkadot.js.org/extension/[polkadot browser extension]. However, the explorer won't provide a parachain id, and it can be challenging to locate it in the block. For such purposes, you can use link:https://www.subscan.io/[Subscan] to identify what was returned from the reserve call.
+
+- Build a release version of the runtime and node:
+```bash
+cargo build --release
+```
+
+- Run a node! For example, you can use a command from the aforementioned guide:
+
+```bash
+./target/release/parachain-template-node \
+    --[your authority] \
+    --collator \
+    --force-authoring \
+    --[your chainspec] \
+    --base-path <path to data> \
+    --port 40333 \
+    --ws-port 8844 \
+    -- \
+    --execution wasm \
+    --chain <relay chain raw chain spec> \
+    --port 30343 \
+    --ws-port 9977
+```
+
+== What's next?
+
+- Read our general guides to understand more about the concepts of runtime development.
+// TODO: change if we have more runtimes, add a link to the runtime doc
+- Learn more about the runtime configuration. Currently, we have a single runtime template (generic one), and you can find documentation for it here.
+- Explore the documentation for pallets. It may be useful if you are considering building a frontend for your parachain.
