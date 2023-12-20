@@ -1,0 +1,56 @@
+:source-highlighter: highlight.js
+:highlightjs-languages: rust
+:github-icon: pass:[<svg class="icon"><use href="#github-icon"/></svg>]
+
+= cumulus_pallet_xcmp_queue
+
+Branch/Release: `release-polkadot-v1.5.0`
+
+== Purpose
+
+Responsible from the Queues (both incoming and outgoing) for XCMP messages. This pallet does not actually receive or send messages. It's responsibility is to place the incoming and outgoing XCMP messages to their respective queues and manage these queues.
+
+
+== Config link:https://github.com/paritytech/polkadot-sdk/blob/release-polkadot-v1.5.0/cumulus/pallets/xcmp-queue/src/lib.rs#L112[{github-icon},role=heading-link]
+
+* Pallet-specific configs
+** `ChannelInfo` -- Configures two functions `get_channel_status` and `get_channel_info` to provide information about channels (`ChannelStatus` and `ChannelInfo`).
+** `VersionWrapper` -- Means of converting an `Xcm` into a `VersionedXcm`. Xcm's should be versioned in order to pass the validation.
+** `XcmpQueue` -- Defines max length of an XCMP message, and how `enqueue_message` should behave.
+** `MaxInboundSuspended` -- The maximum number of inbound XCMP channels that can be suspended simultaneously. Any further channel suspensions will fail and messages may get dropped without further notice. Choosing a high value (1000) is okay.
+** `ControllerOrigin` -- The origin that is allowed to resume or suspend the XCMP queue.
+** `ControllerOriginConverter>` -- The conversion function used to attempt to convert an XCM `MultiLocation` origin to a superuser origin. This is used for allowing the superuser's queue to send messages even to paused queues.
+** `PriceForSiblingDelivery` -- The price for delivering an XCM to a sibling parachain destination.
+* Common configs
+** `RuntimeEvent` -- The overarching event type.
+** `WeightInfo` -- The weight information of this pallet.
+
+== Dispatchables link:https://github.com/paritytech/polkadot-sdk/blob/release-polkadot-v1.5.0/cumulus/pallets/xcmp-queue/src/lib.rs#L150[{github-icon},role=heading-link]
+
+[.contract-item]
+[[dispatchable_name]]
+==== `[.contract-item-name]#++dispatchable_name++#`
+[source,rust]
+----
+pub fn dispatchable_name(
+    param1: Type1,
+    param2: Type2
+) -> DispatchResult
+----
+Freeform description of the dispatchable. It is good to include the important things that should be included there.
+
+**Params:**
+
+* `param1: Type1` -- description of the parameter
+
+**Errors:**
+
+* `ErrorName` -- description of conditions, when this error happens
+
+**Events:**
+
+* `EventName(param1, param2)` -- description of event, if needed (they are often self-explanatory)
+
+== Important Mentions and FAQ's
+
+Here you may put a freeform information about any aspect of the pallet.
