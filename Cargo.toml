@@ -13,6 +13,11 @@ edition = "2021"
 license = "GPL-3.0-only"
 repository = "https://github.com/OpenZeppelin/polkadot-runtime-template"
 
+[workspace.lints.clippy]
+type_complexity = "allow"
+too_many_arguments = "allow"
+large_enum_variant = "allow"
+
 [workspace.dependencies]
 clap = { version = "4.4.6", features = [ "derive" ] }
 color-print = "0.3.4"
@@ -119,9 +124,6 @@ cumulus-primitives-utility = { git = "https://github.com/paritytech/polkadot-sdk
 cumulus-relay-chain-interface = { git = "https://github.com/paritytech/polkadot-sdk", branch = "release-polkadot-v1.3.0", default-features = false }
 pallet-collator-selection = { git = "https://github.com/paritytech/polkadot-sdk", branch = "release-polkadot-v1.3.0", default-features = false }
 parachain-info = { git = "https://github.com/paritytech/polkadot-sdk", branch = "release-polkadot-v1.3.0", default-features = false }
-
-[workspace.lints.clippy]
-large_enum_variant = "allow"
 
 [profile.production]
 codegen-units = 1
