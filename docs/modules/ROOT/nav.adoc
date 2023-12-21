@@ -3,6 +3,7 @@
 * Runtime Descriptions
 * Pallet Specifications
 ** xref:pallets/pallet_transaction_payment.adoc[pallet_transaction_payment]
+** xref:pallets/pallet_xcm.adoc[pallet_xcm]
 ** xref:pallets/proxy.adoc[pallet_proxy]
 ** xref:pallets/multisig.adoc[pallet_multisig]
 ** xref:pallets/message-queue.adoc[pallet_message_queue]
