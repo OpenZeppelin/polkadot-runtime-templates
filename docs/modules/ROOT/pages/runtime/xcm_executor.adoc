@@ -1,0 +1,72 @@
+:source-highlighter: highlight.js
+:highlightjs-languages: rust
+:github-icon: pass:[<svg class="icon"><use href="#github-icon"/></svg>]
+
+= XCM Executor
+
+Branch/Release: `release-polkadot-v1.3.0`
+
+== Purpose
+
+`XcmExecutor` is responsible for executing XCM messages locally. 
+
+`XcmExecutor` is usually the assignment for `pallet_xcm::Config::XcmExecutor` and is thereby used to execute XCM in that pallet.
+
+NOTE: `XcmExecutor` is not a pallet, but rather it is a `struct` type parameterized by a `Config` trait. The inner config is the `trait Config` which parameterizes the outer config `struct XcmExecutor<Config>`. Both the inner and outer configs are configured in the runtime.
+
+== Inner Config
+
+The inner `trait Config` used to parameterize `XcmExecutor` has the following associated types.
+
+* Handlers:
+- `XcmSender` -- How to send an onward XCM message. Type must implement the trait `SendXcm`.
+- `AssetTransactor` -- How to withdraw and deposit an asset. Type must implement the trait `TransactAsset`.
+- `Trader` --  The means of purchasing weight credit for XCM execution. Type must implement the trait `WeightTrader`.
+- `ResponseHandler` -- What to do when a response of a query is found. Type must implement the trait `OnResponse`.
+- `AssetTrap` -- The general asset trap handler for when assets are left in the Holding Register at the end of execution. Type must implement the trait `DropAssets`.
+- `AssetLocker` --  Handler for asset locking. Type must implement the trait `AssetLock`.
+- `AssetExchanger` --  Handler for exchanging assets. Type must implement the trait `AssetExchange`.
+- `AssetClaims` -- The handler for when there is an instruction to claim assets. Type must implement the trait `ClaimAssets`.
+- `SubscriptionService` -- The handler for version subscription requests. Type must implement the trait `VersionChangeNotifier`.
+- `FeeManager` --  Configure the fees. Type must implement the trait `FeeManager`.
+- `MessageExporter` -- The method of exporting a message. Type must implement the trait `ExportXcm`.
+- `CallDispatcher` -- The call dispatcher used by XCM. Type must implement the trait `CallDispatcher<Self::RuntimeCall>`.
+
+* Filters:
+- `IsReserve` -- Combinations of (Asset, Location) pairs which we trust as reserves. Type must implement the trait `ContainsPair<MultiAsset, MultiLocation>`.
+- `IsTeleporter` --  Combinations of (Asset, Location) pairs which we trust as teleporters. Type must implement the trait `ContainsPair<MultiAsset, MultiLocation>`.
+- `Aliasers` --   A list of (Origin, Target) pairs allowing a given Origin to be substituted with its corresponding Target pair. Type must implement the trait `ContainsPair<MultiLocation, MultiLocation>`.
+- `Barrier` -- Whether or not to execute the XCM at all. Type must implement `ShouldExecute`.
+- `UniversalAliases` -- The origin locations and specific universal junctions to which they are allowed to elevate themselves. Type must implement the trait `Contains<(MultiLocation, Junction)>`.
+- `SafeCallFilter` -- The safe call filter for `Transact`. Use this type to explicitly whitelist calls that cannot undergo recursion. Type must implement the trait `Contains<Self::RuntimeCall>`.
+
+* Converters:
+- `OriginConverter` -- How to get a call origin from a `OriginKind` value. Type must implement the trait `ConvertOrigin<<Self::RuntimeCall as Dispatchable>::RuntimeOrigin>`.
+
+* Accessors:
+- `Weigher` -- The means of determining an XCM message's weight. Type must implement the trait `WeightBounds<Self::RuntimeCall>`.
+- `PalletInstancesInfo` -- Information on all pallets. Type must implement the trait `PalletsInfoAccess`.
+
+* Constants:
+- `UniversalLocation` --  This chain's Universal Location. Type must implement the trait `Get<InteriorMultiLocation>`.
+- `MaxAssetsIntoHolding` -- The maximum number of assets we target to have in the Holding Register at any one time. Type must implement the trait `Get<u32>`.
+
+* Common configs:
+- `RuntimeCall`
+
+== Outer Config
+
+The outer `struct XcmExecutor<Config>` configures the following fields:
+- `holding` -- Assets allowed in the holding register. Type must be `Assets`.
+- `holding_limit` -- The maximum number of assets in the holding register. Type must be `usize`.
+- `context` -- Type must be `XcmContext`.
+- `trader` -- Type must be `Config::Trader` which must implement the trait `WeightTrader`.
+- `error` -- The most recent error result and instruction index into the fragment in which it occurred, if any. Type must be `Option<(u32, XcmError)>`.
+- `total_surplus` -- Type must be `Weight`.
+- `total_refunded` -- Type must be `Weight`.
+- error_handler: Xcm<Config::RuntimeCall>,
+- `error_handler_weight` -- Type must be `Weight`.
+- `appendix` -- Type must be `Xcm<Config::RuntimeCall>`.
+- `appendix_weight` -- Type must be `Weight`.
+- `transact_status` -- Type must be `MaybeErrorCode`.
+- `fees_mode` -- Type must be `FeesMode`.
