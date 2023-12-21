@@ -204,12 +204,12 @@ pub fn upgrade_accounts(
     who: Vec<T::AccountId>,
 ) -> DispatchResultWithPostInfo
 ----
-Upgrade the specified account/s.
+Upgrade the specified account(s).
 
 **Params:**
 
 * `origin: OriginFor<T>` -- caller, must be `Signed`.
-* `who: Vec<T::AccountId>` -- the account/s to be upgraded.
+* `who: Vec<T::AccountId>` -- the account(s) to be upgraded.
 
 NOTE: This will waive the transaction fee if at least all but 10% of the accounts need to be upgraded.
 
