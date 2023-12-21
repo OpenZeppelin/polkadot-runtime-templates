@@ -124,7 +124,7 @@ Messages and signals are stored in different queues. When the messages to be sen
 * if there are signals present for outbound messages that targeting a parachain, we will only send signals, not messages
 * messages (that are not signals) won’t be ordered
 
-NOTE: polkadot/xcm/src/v3 has SendXcm trait, which has 2 blank methods validate and deliver. For each router struct, one can implement SendXcm for it.
+NOTE: polkadot/xcm/src/v3 has `SendXcm` trait, which has 2 blank methods validate and deliver. For each router struct, one can implement `SendXcm` for it.
 
 . `deliver` method take `destination` as a parameter, and calls `send_fragment` function with the target parachain id.
 . `send_fragment` puts the message to the queue of the given parachain id.
