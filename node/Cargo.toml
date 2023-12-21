@@ -1,21 +1,21 @@
 [package]
 name = "parachain-template-node"
-version = "0.1.0"
 authors = { workspace = true }
-description = "Node compatible with parachain runtime template."
-license = { workspace = true }
-repository = { workspace = true }
-edition = "2021"
 build = "build.rs"
+description = "Node compatible with parachain runtime template."
+edition = { workspace = true }
+license = { workspace = true }
 publish = false
+repository = { workspace = true }
+version = "0.1.0"
 
 [dependencies]
 clap = { workspace = true }
+futures = { workspace = true }
+jsonrpsee = { workspace = true, features = [ "server" ] }
 log = { workspace = true }
 parity-scale-codec = { workspace = true }
-serde = { workspace = true, features = ["derive"] }
-jsonrpsee = { workspace = true, features = [ "server" ] }
-futures = { workspace = true }
+serde = { workspace = true, features = [ "derive" ] }
 
 # Local
 parachain-template-runtime = { path = "../runtime" }
@@ -28,11 +28,11 @@ sc-basic-authorship = { workspace = true }
 sc-chain-spec = { workspace = true }
 sc-cli = { workspace = true }
 sc-client-api = { workspace = true }
-sc-offchain = { workspace = true }
 sc-consensus = { workspace = true }
 sc-executor = { workspace = true }
 sc-network = { workspace = true }
 sc-network-sync = { workspace = true }
+sc-offchain = { workspace = true }
 sc-rpc = { workspace = true }
 sc-service = { workspace = true }
 sc-sysinfo = { workspace = true }
@@ -45,8 +45,8 @@ sp-block-builder = { workspace = true }
 sp-blockchain = { workspace = true }
 sp-consensus-aura = { workspace = true }
 sp-core = { workspace = true }
-sp-keystore = { workspace = true }
 sp-io = { workspace = true }
+sp-keystore = { workspace = true }
 sp-runtime = { workspace = true }
 sp-timestamp = { workspace = true }
 substrate-frame-rpc-system = { workspace = true }
@@ -60,6 +60,7 @@ polkadot-primitives = { workspace = true }
 xcm = { workspace = true }
 
 # Cumulus
+color-print = { workspace = true }
 cumulus-client-cli = { workspace = true }
 cumulus-client-collator = { workspace = true }
 cumulus-client-consensus-aura = { workspace = true }
@@ -69,7 +70,6 @@ cumulus-client-service = { workspace = true }
 cumulus-primitives-core = { workspace = true }
 cumulus-primitives-parachain-inherent = { workspace = true }
 cumulus-relay-chain-interface = { workspace = true }
-color-print = { workspace = true }
 
 [build-dependencies]
 substrate-build-script-utils = { workspace = true }
@@ -90,7 +90,6 @@ try-runtime = [
 	"polkadot-cli/try-runtime",
 	"sp-runtime/try-runtime",
 ]
-
 
 [lints]
 workspace = true

@@ -1,22 +1,19 @@
 [package]
 name = "parachain-template-runtime"
-version = "0.1.0"
-description = "A generic parachain runtime template"
-license = { workspace = true }
 authors = { workspace = true }
+description = "A generic parachain runtime template"
+edition = { workspace = true }
+license = { workspace = true }
 repository = { workspace = true }
-edition = "2021"
+version = "0.1.0"
 
 [package.metadata.docs.rs]
-targets = ["x86_64-unknown-linux-gnu"]
-
-[build-dependencies]
-substrate-wasm-builder = { workspace = true }
+targets = [ "x86_64-unknown-linux-gnu" ]
 
 [dependencies]
-parity-scale-codec = { workspace = true, features = [ "derive" ] }
 hex-literal = { workspace = true, optional = true }
 log = { workspace = true }
+parity-scale-codec = { workspace = true, features = [ "derive" ] }
 scale-info = { workspace = true, features = [ "derive" ] }
 smallvec = { workspace = true }
 
@@ -35,13 +32,13 @@ pallet-aura = { workspace = true }
 pallet-authorship = { workspace = true }
 pallet-balances = { workspace = true }
 pallet-multisig = { workspace = true }
-pallet-session = { workspace = true }
 pallet-proxy = { workspace = true }
+pallet-session = { workspace = true }
 pallet-sudo = { workspace = true }
 pallet-timestamp = { workspace = true }
-pallet-utility = { workspace = true }
 pallet-transaction-payment = { workspace = true }
 pallet-transaction-payment-rpc-runtime-api = { workspace = true }
+pallet-utility = { workspace = true }
 sp-api = { workspace = true }
 sp-block-builder = { workspace = true }
 sp-consensus-aura = { workspace = true }
@@ -78,10 +75,12 @@ parachain-info = { workspace = true }
 [dev-dependencies]
 sp-io = { workspace = true }
 
+[build-dependencies]
+substrate-wasm-builder = { workspace = true }
+
 [features]
-default = ["std"]
+default = [ "std" ]
 std = [
-	"parity-scale-codec/std",
 	"cumulus-pallet-aura-ext/std",
 	"cumulus-pallet-dmp-queue/std",
 	"cumulus-pallet-parachain-system/std",
@@ -102,17 +101,17 @@ std = [
 	"pallet-authorship/std",
 	"pallet-balances/std",
 	"pallet-collator-selection/std",
-	"pallet-template/std",
 	"pallet-proxy/std",
-	"pallet-multisig/std",
 	"pallet-session/std",
 	"pallet-sudo/std",
+	"pallet-template/std",
 	"pallet-timestamp/std",
 	"pallet-transaction-payment-rpc-runtime-api/std",
 	"pallet-transaction-payment/std",
 	"pallet-utility/std",
 	"pallet-xcm/std",
 	"parachain-info/std",
+	"parity-scale-codec/std",
 	"polkadot-parachain-primitives/std",
 	"polkadot-runtime-common/std",
 	"scale-info/std",
@@ -146,17 +145,16 @@ runtime-benchmarks = [
 	"pallet-balances/runtime-benchmarks",
 	"pallet-collator-selection/runtime-benchmarks",
 	"pallet-multisig/runtime-benchmarks",
-	"pallet-template/runtime-benchmarks",
 	"pallet-sudo/runtime-benchmarks",
+	"pallet-template/runtime-benchmarks",
 	"pallet-timestamp/runtime-benchmarks",
+	"pallet-utility/runtime-benchmarks",
 	"pallet-xcm/runtime-benchmarks",
 	"polkadot-parachain-primitives/runtime-benchmarks",
 	"polkadot-runtime-common/runtime-benchmarks",
 	"sp-runtime/runtime-benchmarks",
 	"xcm-builder/runtime-benchmarks",
 	"xcm-executor/runtime-benchmarks",
-	"pallet-utility/runtime-benchmarks",
-	"pallet-proxy/runtime-benchmarks",
 ]
 
 try-runtime = [
@@ -174,17 +172,18 @@ try-runtime = [
 	"pallet-balances/try-runtime",
 	"pallet-collator-selection/try-runtime",
 	"pallet-multisig/try-runtime",
-	"pallet-template/try-runtime",
-	"pallet-session/try-runtime",
 	"pallet-proxy/try-runtime",
+	"pallet-session/try-runtime",
+	"pallet-session/try-runtime",
 	"pallet-sudo/try-runtime",
+	"pallet-template/try-runtime",
 	"pallet-timestamp/try-runtime",
 	"pallet-transaction-payment/try-runtime",
+	"pallet-utility/try-runtime",
 	"pallet-xcm/try-runtime",
 	"parachain-info/try-runtime",
 	"polkadot-runtime-common/try-runtime",
 	"sp-runtime/try-runtime",
-	"pallet-utility/try-runtime",
 ]
 
-experimental = ["pallet-aura/experimental"]
+experimental = [ "pallet-aura/experimental" ]
