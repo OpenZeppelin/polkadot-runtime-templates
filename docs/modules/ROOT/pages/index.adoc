@@ -5,7 +5,7 @@
 
 A collection of runtimes that describe parachains with different purposes.
 
-IMPORTANT: This repo contains code in its early stages. Please be aware that it may change rapidly and was not yet audited.
+IMPORTANT: This repo contains code in its early stages. Please be aware that it may change rapidly and is not yet audited.
 
 == Quick start
 
