@@ -8,7 +8,7 @@ Branch/Release: `release-polkadot-v1.5.0`
 
 == Purpose
 
-Responsible from the Queues (both incoming and outgoing) for XCMP messages. This pallet does not actually receive or send messages. It's responsibility is to place the incoming and outgoing XCMP messages to their respective queues and manage these queues.
+Responsible for the Queues (both incoming and outgoing) for XCMP messages. This pallet does not actually receive or send messages. Its responsibility is to place the incoming and outgoing XCMP messages in their respective queues and manage these queues.
 
 
 == Config link:https://github.com/paritytech/polkadot-sdk/blob/release-polkadot-v1.5.0/cumulus/pallets/xcmp-queue/src/lib.rs#L112[{github-icon},role=heading-link]
@@ -117,7 +117,7 @@ IMPORTANT: `origin` must be root.
 
 == Important Mentions and FAQ's
 
-IMPORTANT: messages are not ordered when they are received, but they are ordered when they are sent.
+IMPORTANT: messages are not ordered when they are received, but they are ordered when they are sent. `Signal` messages are prioritized over `non-signal` messages.
 
 Messages and signals are stored in different queues. When the messages to be sent are taken with `take_outbound_messages`, they will be ordered:
 
