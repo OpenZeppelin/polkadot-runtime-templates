@@ -14,7 +14,7 @@ Branch/Release: `release-polkadot-v1.3.0`
 
 NOTE: `XcmExecutor` is not a pallet, but rather it is a `struct` type parameterized by a `Config` trait. The inner config is the `trait Config` which parameterizes the outer config `struct XcmExecutor<Config>`. Both the inner and outer configs are configured in the runtime.
 
-== Inner Config
+== Inner Config link:https://github.com/paritytech/polkadot-sdk/blob/master/polkadot/xcm/xcm-executor/src/config.rs#L30[{github-icon},role=heading-link]
 
 The inner `trait Config` used to parameterize `XcmExecutor` has the following associated types.
 
@@ -54,9 +54,9 @@ The inner `trait Config` used to parameterize `XcmExecutor` has the following as
 * Common configs:
 - `RuntimeCall`
 
-== Outer Config
+== Outer Config link:https://github.com/paritytech/polkadot-sdk/blob/master/polkadot/xcm/xcm-executor/src/lib.rs#L30[{github-icon},role=heading-link]
 
-The outer `struct XcmExecutor<Config>` configures the following fields:
+* The outer `struct XcmExecutor<Config>` configures the following fields:
 - `holding` -- Assets allowed in the holding register. Type must be `Assets`.
 - `holding_limit` -- The maximum number of assets in the holding register. Type must be `usize`.
 - `context` -- Type must be `XcmContext`.
