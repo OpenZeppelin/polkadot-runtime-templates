@@ -1,4 +1,5 @@
 * General Guides
+** xref:guides/weights_fees.adoc[Weights & Fees]
 * Runtime Descriptions
 * Pallet Specifications
 ** xref:pallets/pallet_transaction_payment.adoc[pallet_transaction_payment]
@@ -9,3 +10,4 @@
 ** xref:pallets/collator-selection.adoc[collator_selection]
 ** xref:pallets/parachain-system.adoc[parachain_system]
 ** xref:pallets/balances.adoc[pallet_balances]
+** xref:pallets/xcmp-queue.adoc[cumulus_pallet_xcmp_queue]

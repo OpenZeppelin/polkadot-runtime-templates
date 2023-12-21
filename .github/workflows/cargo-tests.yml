@@ -57,6 +57,15 @@ jobs:
       - name: install rust toolchain
         uses: actions-rust-lang/setup-rust-toolchain@v1
 
+      - name: Install toml-sort
+        run: cargo install --git https://github.com/4meta5/toml_sort
+      - name: Add file permissions for toml-sort
+        run: chmod +x ./scripts/toml-sort.sh
+      - name: Add file permissions for check-toml-sorted
+        run: chmod +x ./scripts/check-toml-sorted.sh
+      - name: Check Cargo.toml files are formatted using toml_sort
+        run: ./scripts/check-toml-sorted.sh
+
       - name: Check format
         run: cargo fmt --all -- --check
 
