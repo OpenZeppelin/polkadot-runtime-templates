@@ -4,9 +4,9 @@
 
 = pallet_proxy
 
-Branch/Release: `release-polkadot-v1.3.0` 
+Branch/Release: `release-polkadot-v1.3.0`
 
-== Purpose 
+== Purpose
 
 This pallet enables delegation of rights to execute certain call types from one origin to another.
 
@@ -83,7 +83,7 @@ There may not be more proxies than `MaxProxies`
 ==== `[.contract-item-name]#++announce++#`
 [source,rust]
 ----
-pub fn announce
+pub fn announce(
     real: AccountIdLookupOf<T>,
     call_hash: CallHashOf<T>,
 )

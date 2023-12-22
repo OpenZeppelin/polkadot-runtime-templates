@@ -1,6 +1,7 @@
 * General Guides
 ** xref:guides/weights_fees.adoc[Weights & Fees]
 * Runtime Descriptions
+** xref:runtime/xcm_executor.adoc[XCM Executor]
 * Pallet Specifications
 ** xref:pallets/pallet_transaction_payment.adoc[pallet_transaction_payment]
 ** xref:pallets/pallet_xcm.adoc[pallet_xcm]
@@ -10,3 +11,5 @@
 ** xref:pallets/aura_ext.adoc[cumulus_aura_ext]
 ** xref:pallets/collator-selection.adoc[collator_selection]
 ** xref:pallets/parachain-system.adoc[parachain_system]
+** xref:pallets/balances.adoc[pallet_balances]
+** xref:pallets/xcmp-queue.adoc[cumulus_pallet_xcmp_queue]
