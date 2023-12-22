@@ -19,7 +19,7 @@ Branch/Release: `release-polkadot-v1.3.0`
 ** `NonFungible Asset` -- each unit is worth a different amount and/or is unique in some way
 ** `Junction` -- single item in a path to describe a relative location (think of `dir` or `dir/$file_path` as a junction)
 ** `Junctions` -- multiple `Junction`s, formed only through MultiLocation construction
-** `MultiAsset` -- Either an amount of a single fungible asset, or a single well-identified non-fungible asset.
+** `MultiAsset` -- Either an amount of a single fungible asset, or one non-fungible asset.
 ** `MultiLocation` -- path described by junctions leading to the location
 ** `MAX_ASSETS_FOR_TRANSFER` -- The maximum number of distinct assets allowed to be transferred in a single helper extrinsic. Set to 2 in this code.
 
