@@ -1,0 +1,346 @@
+:source-highlighter: highlight.js
+:highlightjs-languages: rust
+:github-icon: pass:[<svg class="icon"><use href="#github-icon"/></svg>]
+
+= pallet_xcm
+
+Branch/Release: `release-polkadot-v1.3.0`
+
+== Purpose
+
+`pallet-xcm` is responsible for filtering, routing, and executing incoming XCM.
+
+== Glossary
+
+** `Asset Teleportation` -- movement of an asset by destroying it on one side and creating a clone on the other side
+** `Reserve Asset Transfer` -- When consensus systems do not have a established layer of trust over which they can transfer assets, they can opt for a trusted 3rd entity to store the assets.
+** `Barrier` -- A generic filter which returns whether or not XCM may pass and be executed. If they do not pass the barrier, they are not executed. The barrier is the final filter before XCM execution. It implements the `ShouldExecute` trait and therefore takes as input an XCM and returns a bool indicating whether it should be executed.
+** `Fungible Asset` -- any unit is worth the same
+** `NonFungible Asset` -- each unit is worth a different amount and/or is unique in some way
+** `Junction` -- single item in a path to describe a relative location (think of `dir` or `dir/$file_path` as a junction)
+** `Junctions` -- multiple `Junction`s, formed only through MultiLocation construction
+** `MultiAsset` -- Either an amount of a single fungible asset, or one non-fungible asset.
+** `MultiLocation` -- path described by junctions leading to the location
+** `MAX_ASSETS_FOR_TRANSFER` -- The maximum number of distinct assets allowed to be transferred in a single helper extrinsic. Set to 2 in this code.
+
+== Config link:https://github.com/paritytech/polkadot-sdk/blob/release-polkadot-v1.3.0/polkadot/xcm/pallet-xcm/src/lib.rs#L192[{github-icon},role=heading-link]
+
+* Pallet-specific origins:
+** `AdminOrigin` -- The origin that is allowed to call privileged operations on the XCM pallet. Type must implement trait `EnsureOrigin`.
+** `ExecuteXcmOrigin` -- Required origin for executing XCM messages, including the teleport functionality. If successful, it returns a `MultiLocation` which exists as an interior location within this chain's XCM context. Type must implement trait `EnsureOrigin`.
+** `SendXcmOrigin` -- Required origin for sending XCM messages. If successful, it resolves to `MultiLocation`. Type must implement trait `EnsureOrigin`.
+
+* Pallet-specific ID types:
+** `RemoteLockConsumerIdentifier` -- The ID type for local consumers of remote locks. The type must implement `Copy`.
+
+* Pallet-specific handlers:
+** `OnChargeTransaction` -- Handler for withdrawing, refunding and depositing the transaction fee. Type must implement the trait  `OnChargeTransaction<Self>`.
+** `Currency` -- Lockable currency used in the pallet. Type must implement the trait `LockableCurrency`.
+** `Weigher` -- Measures weight consumed by XCM local execution. Type must implement the trait `WeightBounds`.
+** `XcmExecutor` -- Means of executing XCM. Type must implement the trait `ExecuteXcm`.
+** `XcmRouter` --  The type used to dispatch an XCM to its destination. Type must implement the trait `SendXcm`.
+
+* Pallet-specific filters:
+** `XcmExecuteFilter` -- XCM filter for which messages to be executed using `XcmExecutor` must pass. Type must implement trait `Contains<(MultiLocation, Xcm<<Self as Config>::RuntimeCall>)>`.
+** `XcmReserveTransferFilter` -- XCM filter for which messages to be reserve-transferred using the dedicated extrinsic must pass.Type must implement the trait `Contains<(MultiLocation, Vec<MultiAsset>)>`.
+** `XcmTeleportFilter` -- XCM filter for which messages to be teleported using the dedicated extrinsic must pass. Type must implement the trait `Contains<(MultiLocation, Vec<MultiAsset>)>`.
+** `TrustedLockers` -- Returns whether or not the origin can be trusted for a specific asset. Type must implement `ContainsPair` where each pair is an `asset` and an `origin` thereby entrusting `origin` for operations relating to `asset`.
+
+* Pallet-specific converters:
+** `CurrencyMatcher` -- The `MultiAsset` matcher for `Currency`. Type must implement the trait `MatchesFungible`.
+** `SovereignAccountOf` -- How to get an `AccountId` value from a `MultiLocation`, useful for handling asset locks. Type must implement `ConvertLocation`.
+
+* Pallet-specific constants:
+** `VERSION_DISCOVERY_QUEUE_SIZE` -- `u32` measures the size of the version discovery queue. Typically set to `100`.
+** `AdvertisedXcmVersion` -- The latest supported XCM version that this chain accepts. Type must implement the trait `Get<XcmVersion>`. Commonly set to `pallet_xcm::CurrentXcmVersion`.
+** `MaxLockers` --  The maximum number of local XCM locks that a single account may have. Type must implement the trait `Get<u32>`.
+** `MaxRemoteLockConsumers` -- The maximum number of consumers a single remote lock may have. Type must implement the trait `Get<u32>`.
+** `UniversalLocation` -- This chain's Universal Location. Type must implement the trait `Get<InteriorMultiLocation>`.
+
+* Benchmark-only configs:
+** `ReachableDest` -- A `MultiLocation` that can be reached via `XcmRouter`. Used only in benchmarks. Type must implement trait `ReachableDest`.
+
+* Common configs:
+** `RuntimeEvent`
+** `RuntimeCall`
+** `RuntimeOrigin`
+** `WeightInfo`
+
+== Dispatchables
+
+[.contract-item]
+[[send]]
+==== `[.contract-item-name]#++send++#`
+[source,rust]
+----
+pub fn send(
+    origin: OriginFor<T>,
+    dest: Box<VersionedMultiLocation>,
+    message: Box<VersionedXcm<()>>,
+)
+----
+Send a versioned XCM `message` to the destination `dest`.
+
+The origin must be `SendXcmOrigin` for this call.
+
+**Params:**
+
+- `dest: Box<VersionedMultiLocation>` — destination for the XCM
+- `message: Box<VersionedXcm<()>>` — versioned XCM to be sent to the multilocation `dest`
+
+**Errors:**
+
+- `InvalidOrigin` — origin did not match `SendXcmOrigin`
+- `BadVersion` — version for XCM not valid
+
+**Events:**
+
+- `Sent(origin, destination, message, message_id)` -- The versioned XCM `message` was sent from the `origin` to the `destination`.
+
+
+[.contract-item]
+[[execute]]
+==== `[.contract-item-name]#++execute++#`
+[source,rust]
+----
+pub fn execute(
+    origin: OriginFor<T>,
+    message: Box<VersionedXcm<<T as Config>::RuntimeCall>>,
+    max_weight: Weight,
+)
+----
+Execute an XCM message from a local, signed, origin.
+
+The origin must be `ExecuteXcmOrigin` for this call.
+
+NOTE: A successful return to this does NOT imply that the `msg` was executed successfully to completion; only that SOME of it was executed.
+
+**Params:**
+
+- `message: Box<VersionedXcm<T as Config::RuntimeCall>>` — versioned XCM to be executed
+- `max_weight: Weight` -- No more than this amount of `Weight` will be consumed during this execution attempt.
+
+**Errors:**
+
+- `BadOrigin` —- origin did not match `ExecuteXcmOrigin`
+- `BadVersion` —- version for XCM not valid
+
+**Events:**
+
+- `Attempted(outcome)` -- Indicates whether the `msg` was executed completely or only partially.
+
+[.contract-item]
+[[force_xcm_version]]
+==== `[.contract-item-name]#++force_xcm_version++#`
+[source,rust]
+----
+pub fn force_xcm_version(
+    origin: OriginFor<T>,
+    location: Box<MultiLocation>,
+    version: XcmVersion,
+)
+----
+Set that a particular destination can be communicated with through a particular version of XCM.
+
+The origin must be `AdminOrigin` for this call.
+
+**Params:**
+
+- `location: Box<MultiLocation>` —- The destination that is being described.
+- `version: XcmVersion` -- The latest version of XCM that `location` supports.
+
+**Errors:**
+
+- `BadOrigin` — origin did not match `AdminOrigin`
+
+**Events:**
+
+- `Event::SupportedVersionChanged { location, version }` -- `location` was updated to support the latest version of XCM `version`
+
+[.contract-item]
+[[force_default_xcm_version]]
+==== `[.contract-item-name]#++force_default_xcm_version++#`
+[source,rust]
+----
+pub fn force_default_xcm_version(
+    origin: OriginFor<T>,
+	maybe_xcm_version: Option<XcmVersion>,
+)
+----
+Set a safe XCM version (the version that XCM should be encoded with if the most recent version a destination can accept is unknown).
+
+The origin must be `AdminOrigin` for this call.
+
+**Params:**
+
+- `maybe_xcm_version: Option<XcmVersion>` —- The default XCM encoding version, or `None` to disable.
+
+**Errors:**
+
+- `BadOrigin` — origin did not match `AdminOrigin`
+
+**Events:**
+
+None
+
+[.contract-item]
+[[force_subscribe_version_notify]]
+==== `[.contract-item-name]#++force_subscribe_version_notify++#`
+[source,rust]
+----
+pub fn force_subscribe_version_notify(
+    origin: OriginFor<T>,
+	location: Box<VersionedMultiLocation>,
+)
+----
+Ask a location to notify us regarding their XCM version and any changes to it.
+
+The origin must be `AdminOrigin` for this call.
+
+**Params:**
+
+- `location: Box<VersionedMultiLocation>`: The location to which we should subscribe for XCM version notifications.
+
+**Errors:**
+
+- `BadOrigin` — origin did not match `AdminOrigin`
+
+**Events:**
+
+None
+
+[.contract-item]
+[[force_unsubscribe_version_notify]]
+==== `[.contract-item-name]#++force_unsubscribe_version_notify++#`
+[source,rust]
+----
+pub fn force_unsubscribe_version_notify(
+    origin: OriginFor<T>,
+	location: Box<VersionedMultiLocation>,
+)
+----
+Require that a particular destination should no longer notify us regarding any XCM version changes.
+
+The origin must be `AdminOrigin` for this call.
+
+**Params:**
+
+- `location: Box<VersionedMultiLocation>`: The location from which we are but no longer wish to subscribe to XCM version notifications.
+
+**Errors:**
+
+- `BadOrigin` —- origin did not match `AdminOrigin`
+- `NoSubscription` -- subscription not found to `location`
+- `BadLocation` -- location not found
+
+**Events:**
+
+None
+
+[.contract-item]
+[[limited_reserve_transfer_assets]]
+==== `[.contract-item-name]#++limited_reserve_transfer_assets++#`
+[source,rust]
+----
+pub fn limited_reserve_transfer_assets(
+    origin: OriginFor<T>,
+    dest: Box<VersionedMultiLocation>,
+    beneficiary: Box<VersionedMultiLocation>,
+    assets: Box<VersionedMultiAssets>,
+    fee_asset_item: u32,
+    weight_limit: WeightLimit,
+)
+----
+Transfer some assets from the local chain to the sovereign account of a destination chain and forward a notification XCM.
+
+The origin must be `ExecuteXcmOrigin` for this call.
+
+**Params:**
+
+- `dest: Box<VersionedMultiLocation>` -- Destination context for the assets. Will typically be `X2(Parent, Parachain(..))` to send from parachain to parachain, or `X1(Parachain(..))` to send from relay to parachain.
+- `beneficiary: Box<VersionedMultiLocation>` -- A beneficiary location for the assets in the context of `dest`. Willgenerally be an `AccountId32` value.
+- `assets: Box<VersionedMultiAssets>` -- The assets to be withdrawn. This should include the assets used to pay the fee on the `dest` side.
+- `fee_asset_item: u32` -- The index into `assets` of the item which should be used to pay fees.
+- `weight_limit: WeightLimit` -- The remote-side weight limit, if any, for the XCM fee purchase.
+
+**Errors:**
+
+- `BadOrigin` —- origin did not match `ExecuteXcm`
+- `BadVersion` -- `beneficiary` or `assets` have incorrect versioning
+- `TooManyAssets` -- assets length exceeds MAX_ASSETS_FOR_TRANSFER
+
+**Events:**
+
+- `Event::Attempted { outcome }` -- Attempted the reserve transfer with returned status `outcome`
+
+[.contract-item]
+[[limited_teleport_assets]]
+==== `[.contract-item-name]#++limited_teleport_assets++#`
+[source,rust]
+----
+pub fn limited_teleport_assets(
+    origin: OriginFor<T>,
+    dest: Box<VersionedMultiLocation>,
+    beneficiary: Box<VersionedMultiLocation>,
+    assets: Box<VersionedMultiAssets>,
+    fee_asset_item: u32,
+    weight_limit: WeightLimit,
+)
+----
+Teleport some assets from the local chain to some destination chain.
+
+Fee payment on the destination side is made from the asset in the `assets` vector of index `fee_asset_item`, up to enough to pay for `weight_limit` of weight. If more weight is needed than `weight_limit`, then the operation will fail and the assets send may be at risk.
+
+The origin must be `ExecuteXcmOrigin` for this call.
+
+**Params:**
+
+- `dest: Box<VersionedMultiLocation>` -- Destination context for the assets. Will typically be `X2(Parent, Parachain(..))` to teleport from parachain to parachain, or `X1(Parachain(..))` to teleport from relay to parachain.
+- `beneficiary: Box<VersionedMultiLocation>` -- A beneficiary location for the assets in the context of `dest`. Will generally be an `AccountId32` value.
+- `assets: Box<VersionedMultiAssets>` -- The assets to be withdrawn. This should include the assets used to pay the fee on the `dest` side.
+- `fee_asset_item: u32` -- The index into `assets` of the item which should be used to pay fees.
+- `weight_limit: WeightLimit` -- The remote-side weight limit, if any, for the XCM fee purchase.
+
+**Errors:**
+
+- `BadOrigin` —- origin did not match `ExecuteXcm`
+- `BadVersion` -- `beneficiary` or `assets` have incorrect versioning
+- `TooManyAssets` -- assets length exceeds MAX_ASSETS_FOR_TRANSFER
+
+**Events:**
+
+- `Event::Attempted { outcome }` -- Attempted the teleport status with returned status `outcome`
+
+[.contract-item]
+[[force_suspension]]
+==== `[.contract-item-name]#++force_suspension++#`
+[source,rust]
+----
+pub fn force_suspension(
+    origin: OriginFor<T>,
+    suspended: bool,
+)
+----
+Set or unset the global suspension state of the XCM executor.
+
+The origin must be `AdminOrigin` for this call.
+
+**Params:**
+
+- `suspended: bool` -- `true` to suspend, `false` to resume.
+
+**Errors:**
+
+None
+
+**Events:**
+
+None
+
+**Deprecated Extrinsics**:
+- `teleport_assets` -- Use `limited_teleport_assets` instead.
+- `reserve_transfer_assets` -- Use `limited_reserve_transfer_assets` instead.
+
+== More Reading
+
+https://wiki.polkadot.network/docs/learn-xcm-usecases[Polkadot Wiki XCM Use Cases]

@@ -1,0 +1,131 @@
+:source-highlighter: highlight.js
+:highlightjs-languages: rust
+:github-icon: pass:[<svg class="icon"><use href="#github-icon"/></svg>]
+
+= cumulus_pallet_xcmp_queue
+
+Branch/Release: `release-polkadot-v1.5.0`
+
+== Purpose
+
+Responsible for the Queues (both incoming and outgoing) for XCMP messages. This pallet does not actually receive or send messages. Its responsibility is to place the incoming and outgoing XCMP messages in their respective queues and manage these queues.
+
+
+== Config link:https://github.com/paritytech/polkadot-sdk/blob/release-polkadot-v1.5.0/cumulus/pallets/xcmp-queue/src/lib.rs#L112[{github-icon},role=heading-link]
+
+* Pallet-specific configs
+** `ChannelInfo` -- Configures two functions `get_channel_status` and `get_channel_info` to provide information about channels (`ChannelStatus` and `ChannelInfo`).
+** `VersionWrapper` -- Means of converting an `Xcm` into a `VersionedXcm`. Xcm's should be versioned in order to pass the validation.
+** `XcmpQueue` -- Defines max length of an XCMP message, and how `enqueue_message` should behave.
+** `MaxInboundSuspended` -- The maximum number of inbound XCMP channels that can be suspended simultaneously. Any further channel suspensions will fail and messages may get dropped without further notice. Choosing a high value (1000) is okay.
+** `ControllerOrigin` -- The origin that is allowed to resume or suspend the XCMP queue.
+** `ControllerOriginConverter>` -- The conversion function used to attempt to convert an XCM `MultiLocation` origin to a superuser origin. This is used for allowing the superuser's queue to send messages even to paused queues.
+** `PriceForSiblingDelivery` -- The price for delivering an XCM to a sibling parachain destination.
+* Common configs
+** `RuntimeEvent` -- The overarching event type.
+** `WeightInfo` -- The weight information of this pallet.
+
+== Dispatchables link:https://github.com/paritytech/polkadot-sdk/blob/release-polkadot-v1.5.0/cumulus/pallets/xcmp-queue/src/lib.rs#L150[{github-icon},role=heading-link]
+
+[.contract-item]
+[[suspend_xcm_execution]]
+==== `[.contract-item-name]#++suspend_xcm_execution++#`
+[source,rust]
+----
+pub fn suspend_xcm_execution(origin: OriginFor<T>) -> DispatchResult
+----
+Suspends all XCM executions for the XCMP queue.
+
+IMPORTANT: `origin` must pass the `ControllerOrigin` check.
+NOTE: this does not change the status of the in/out bound channels.
+
+**Params:**
+
+* `origin: OriginFor<T>` -- caller of the dispatchable
+
+**Errors:**
+
+* `AlreadySuspended` -- description of conditions, when this error happens
+
+[.contract-item]
+[[resume_xcm_execution]]
+==== `[.contract-item-name]#++resume_xcm_execution++#`
+[source,rust]
+----
+pub fn resume_xcm_execution(origin: OriginFor<T>) -> DispatchResult
+----
+Resumes all XCM executions for the XCMP queue.
+
+IMPORTANT: `origin` must pass the `ControllerOrigin` check.
+NOTE: this does not change the status of the in/out bound channels.
+
+**Params:**
+
+* `origin: OriginFor<T>` -- caller of the dispatchable
+
+**Errors:**
+
+* `AlreadyResumed` -- description of conditions, when this error happens
+
+[.contract-item]
+[[update_suspend_threshold]]
+==== `[.contract-item-name]#++update_suspend_threshold++#`
+[source,rust]
+----
+pub fn update_suspend_threshold(origin: OriginFor<T>, new: u32) -> DispatchResult
+----
+Overwrites the number of pages which must be in the queue for the other side to be told to suspend their sending.
+
+IMPORTANT: `origin` must be root.
+
+**Params:**
+
+* `origin: OriginFor<T>` -- caller of the dispatchable
+* `new: u32` -- new page threshold for suspend
+
+[.contract-item]
+[[update_drop_threshold]]
+==== `[.contract-item-name]#++update_drop_threshold++#`
+[source,rust]
+----
+pub fn update_drop_threshold(origin: OriginFor<T>, new: u32) -> DispatchResult
+----
+Overwrites the number of pages which must be in the queue after which we drop any further messages from the channel.
+
+IMPORTANT: `origin` must be root.
+
+**Params:**
+
+* `origin: OriginFor<T>` -- caller of the dispatchable
+* `new: u32` -- new page threshold for drop
+
+[.contract-item]
+[[update_resume_threshold]]
+==== `[.contract-item-name]#++update_resume_threshold++#`
+[source,rust]
+----
+pub fn update_resume_threshold(origin: OriginFor<T>, new: u32) -> DispatchResult
+----
+Overwrites the number of pages which the queue must be reduced to before it signals that message sending may recommence after it has been suspended.
+
+IMPORTANT: `origin` must be root.
+
+**Params:**
+
+* `origin: OriginFor<T>` -- caller of the dispatchable
+* `new: u32` -- new page threshold for resume
+
+== Important Mentions and FAQ's
+
+IMPORTANT: messages are not ordered when they are received, but they are ordered when they are sent. `Signal` messages are prioritized over `non-signal` messages.
+
+Messages and signals are stored in different queues. When the messages to be sent are taken with `take_outbound_messages`, they will be ordered:
+
+* if there are signals present for outbound messages that targeting a parachain, we will only send signals, not messages
+* messages (that are not signals) won’t be ordered
+
+NOTE: polkadot/xcm/src/v3 has `SendXcm` trait, which has 2 blank methods validate and deliver. For each router struct, one can implement `SendXcm` for it.
+
+. `deliver` method take `destination` as a parameter, and calls `send_fragment` function with the target parachain id.
+. `send_fragment` puts the message to the queue of the given parachain id.
+** unlike it's name, `deliver` method does not actually delivers the message. It is calling `send_fragment`, which places a message fragment on the outgoing XCMP queue for recipient. So, `deliver` is only putting the message to the respective outgoing xcmp queue
