@@ -1,0 +1,31 @@
+:source-highlighter: highlight.js
+:highlightjs-languages: rust
+:github-icon: pass:[<svg class="icon"><use href="#github-icon"/></svg>]
+
+= pallet_assets
+
+Branch/Release: `release-polkadot-v1.1.0`
+
+== Purpose
+
+The `pallet_assets` module is designed to manage and manipulate custom fungible asset types. It provides functionality for asset creation, management, and various operations, allowing for a flexible and scalable approach to asset handling.
+
+== Glossary
+
+** `[Non]Fungible assets` - Assets that are `[non-]fungible`, meaning that they are `[not]` interchangeable with other assets of the same type. For example, a non-fungible asset could be an NFT, while a fungible asset could be a currency token.
+** `Minting` - The process of creating new assets.
+** `Burning` - The process of destroying existing assets.
+** `Freezing` - The process of preventing an asset from being transferred.
+** `Thawing` - The process of allowing a frozen asset to be transferred.
+** `Asset ID` - A unique identifier for an asset type.
+** `Asset Owner` - The account that owns an asset.
+** `Admin` - The account that has administrative privileges over an asset, such as: `minting`, `burning`, `freezing`, and `thawing`.
+** `Sufficiency` - The amount of an asset that is required to be held in an account in order to perform certain operations, such as: `transfers`, `freezing`, and `thawing`.
+
+== Config
+
+== Dispatchables
+
+== Important Mentions and FAQ’s
+
+== More Reading
