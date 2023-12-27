@@ -8,21 +8,13 @@ Branch/Release: `release-polkadot-v1.3.0`
 
 == Purpose
 
-This pallet is needed to manage the set of collators for each session and to provision the next session with the actual list of collators.
-
-== Glossary
-
-- _Collator_ — a node that gathers collation information and communicates it to relay chain to make a block.
-- _Pot_ — stake that will reward block authors. Block author will get half of the current stake.
-- _Candidate_ — a self-promoted collator, who deposited a candidacy bond to participate in collation process
-- _Candidacy Bond_ — fixed amount to deposit to become a collator
-- _Invulnerable_ — permissioned collator, that will always be part of the collation process.
+This pallet is needed to manage the set of xref:glossary.adoc#collator[collators] for each session and to provision the next session with the actual list of collators.
 
 == Config link:https://github.com/paritytech/polkadot-sdk/blob/release-polkadot-v1.3.0/cumulus/pallets/collator-selection/src/lib.rs#L118[{github-icon},role=heading-link]
 
 * Pallet-specific configs
-** `UpdateOrigin` — defines the list of origins that are able to modify the settings of collators (e.g. set and remove list of invulnerables, desired candidates, candidacy bond). This type should implement the trait `EnsureOrigin`.
-** `PotId` — id of account that will hold a Pot.
+** `UpdateOrigin` — defines the list of origins that are able to modify the settings of collators (e.g. set and remove list of xref:glossary.adoc#invulnerable[invulnerables], desired xref:glossary.adoc#candidates[candidates], xref:glossary.adoc#candidacy_bond[candidacy bond]). This type should implement the trait `EnsureOrigin`.
+** `PotId` — id of account that will hold a xref:glossary.adoc#pot[Pot].
 ** `MaxCandidates` — maximum number of candidates
 ** `MinEligibleCollators` — minimum number of collators to collect for the session
 ** `MaxInvulnerables` — maximum number of invulnerables

@@ -10,24 +10,11 @@ Branch/Release: `release-polkadot-v1.3.0`
 
 `pallet-xcm` is responsible for filtering, routing, and executing incoming XCM.
 
-== Glossary
-
-** `Asset Teleportation` -- movement of an asset by destroying it on one side and creating a clone on the other side
-** `Reserve Asset Transfer` -- When consensus systems do not have a established layer of trust over which they can transfer assets, they can opt for a trusted 3rd entity to store the assets.
-** `Barrier` -- A generic filter which returns whether or not XCM may pass and be executed. If they do not pass the barrier, they are not executed. The barrier is the final filter before XCM execution. It implements the `ShouldExecute` trait and therefore takes as input an XCM and returns a bool indicating whether it should be executed.
-** `Fungible Asset` -- any unit is worth the same
-** `NonFungible Asset` -- each unit is worth a different amount and/or is unique in some way
-** `Junction` -- single item in a path to describe a relative location (think of `dir` or `dir/$file_path` as a junction)
-** `Junctions` -- multiple `Junction`s, formed only through MultiLocation construction
-** `MultiAsset` -- Either an amount of a single fungible asset, or one non-fungible asset.
-** `MultiLocation` -- path described by junctions leading to the location
-** `MAX_ASSETS_FOR_TRANSFER` -- The maximum number of distinct assets allowed to be transferred in a single helper extrinsic. Set to 2 in this code.
-
 == Config link:https://github.com/paritytech/polkadot-sdk/blob/release-polkadot-v1.3.0/polkadot/xcm/pallet-xcm/src/lib.rs#L192[{github-icon},role=heading-link]
 
 * Pallet-specific origins:
 ** `AdminOrigin` -- The origin that is allowed to call privileged operations on the XCM pallet. Type must implement trait `EnsureOrigin`.
-** `ExecuteXcmOrigin` -- Required origin for executing XCM messages, including the teleport functionality. If successful, it returns a `MultiLocation` which exists as an interior location within this chain's XCM context. Type must implement trait `EnsureOrigin`.
+** `ExecuteXcmOrigin` -- Required origin for executing XCM messages, including the teleport functionality. If successful, it returns a `xref:glossary.adoc#multilocation[MultiLocation]` which exists as an interior location within this chain's XCM context. Type must implement trait `EnsureOrigin`.
 ** `SendXcmOrigin` -- Required origin for sending XCM messages. If successful, it resolves to `MultiLocation`. Type must implement trait `EnsureOrigin`.
 
 * Pallet-specific ID types:
@@ -36,7 +23,7 @@ Branch/Release: `release-polkadot-v1.3.0`
 * Pallet-specific handlers:
 ** `OnChargeTransaction` -- Handler for withdrawing, refunding and depositing the transaction fee. Type must implement the trait  `OnChargeTransaction<Self>`.
 ** `Currency` -- Lockable currency used in the pallet. Type must implement the trait `LockableCurrency`.
-** `Weigher` -- Measures weight consumed by XCM local execution. Type must implement the trait `WeightBounds`.
+** `Weigher` -- Measures xref:glossary.adoc#weight[weight] consumed by XCM local execution. Type must implement the trait `WeightBounds`.
 ** `XcmExecutor` -- Means of executing XCM. Type must implement the trait `ExecuteXcm`.
 ** `XcmRouter` --  The type used to dispatch an XCM to its destination. Type must implement the trait `SendXcm`.
 
@@ -47,7 +34,7 @@ Branch/Release: `release-polkadot-v1.3.0`
 ** `TrustedLockers` -- Returns whether or not the origin can be trusted for a specific asset. Type must implement `ContainsPair` where each pair is an `asset` and an `origin` thereby entrusting `origin` for operations relating to `asset`.
 
 * Pallet-specific converters:
-** `CurrencyMatcher` -- The `MultiAsset` matcher for `Currency`. Type must implement the trait `MatchesFungible`.
+** `CurrencyMatcher` -- The `xref:glossary.adoc#multiasset[MultiAsset]` matcher for `Currency`. Type must implement the trait `MatchesFungible`.
 ** `SovereignAccountOf` -- How to get an `AccountId` value from a `MultiLocation`, useful for handling asset locks. Type must implement `ConvertLocation`.
 
 * Pallet-specific constants:
@@ -267,7 +254,7 @@ The origin must be `ExecuteXcmOrigin` for this call.
 
 - `BadOrigin` —- origin did not match `ExecuteXcm`
 - `BadVersion` -- `beneficiary` or `assets` have incorrect versioning
-- `TooManyAssets` -- assets length exceeds MAX_ASSETS_FOR_TRANSFER
+- `TooManyAssets` -- assets length exceeds MAX_ASSETS_FOR_TRANSFER which equals 2 in this code
 
 **Events:**
 
@@ -305,7 +292,7 @@ The origin must be `ExecuteXcmOrigin` for this call.
 
 - `BadOrigin` —- origin did not match `ExecuteXcm`
 - `BadVersion` -- `beneficiary` or `assets` have incorrect versioning
-- `TooManyAssets` -- assets length exceeds MAX_ASSETS_FOR_TRANSFER
+- `TooManyAssets` -- assets length exceeds MAX_ASSETS_FOR_TRANSFER which equals 2 in this code
 
 **Events:**
 

@@ -14,27 +14,21 @@ This pallet is a core element of each parachain. It will:
 - Process binary code upgrades
 - Process incoming messages from both relay chain and other parachains (if a channel is established between them)
 - Send outgoing messages to relay chain and other parachains
-- Build collation info when requested by collator
-
-== Glossary
-
-- _Validation Code_ — the runtime binary that runs in the parachain
-- _Validation Data_ — information passed from the relay chain to validate the next block
-- _(Aggregated) Unincluded Segment_ — sequence of blocks that were not yet included into the relay chain state transition
+- Build collation info when requested by xref:glossary.adoc#collator[collator]
 
 == Config link:https://github.com/paritytech/polkadot-sdk/blob/release-polkadot-v1.3.0/cumulus/pallets/parachain-system/src/lib.rs#L207[{github-icon},role=heading-link]
 
 * Pallet-specific configs:
-** `OnSystemEvent` — a handler that will be called when new validation data will be set (once each block). New validation data will also be passed to it. Look to `trait OnSystemEvent` for more details.
+** `OnSystemEvent` — a handler that will be called when new xref:glossary.adoc#validation_data[validation data] will be set (once each block). New validation data will also be passed to it. Look to `trait OnSystemEvent` for more details.
 ** `SelfParaId` — getter for a parachain id of this chain
 ** `OutboundXcmpMessageSource` — source of  outgoing XCMP messages. It is queried in `finalize_block` and later included into collation information
 // it was added after 1.3.0. I am leaving it commented for the future updates 
 // ** `DmpQueue` — a handler for the incoming *downward* messages from relay chain
-** `ReservedDmpWeight` — weight reserved for DMP message processing. This config seems to be is not used as the function that processes these messages (`enqueue_inbound_downward_messages`) returns used weight.
+** `ReservedDmpWeight` — xref:glossary.adoc#weight[weight] reserved for DMP message processing. This config seems to be is not used as the function that processes these messages (`enqueue_inbound_downward_messages`) returns used weight.
 ** `XcmpMessageHandler` — a handler for the incoming _horizontal_ messages from other parachains
 ** `ReservedXcmpWeight` — default weight limit for the for the XCMP message processing. May be overriden by storage `ReservedXcmpWeightOverride` . If incoming messages in block will exceed the weight limit, they won’t be processed.
 ** `CheckAssociatedRelayNumber` — type that implements `trait CheckAssociatedRelayNumber` . Currently there are three implementations: no check (`AnyRelayNumber`), strict increase (`RelayNumberStrictlyIncreases`), monotonic increase (`RelayNumberMonotonicallyIncreases`). It is needed to maintain some order between blocks in relay chain and parachain.
-** `ConsensusHook` — this is a feature-enabled config ( for the management of the unincluded segment. Requires the implementation of `trait ConsensusHook`. There are several implementations of it, in `parachain-system` crate (`FixedCapacityUnincludedSegment`) and in `aura-ext` crate (`FixedVelocityConsensusHook`). It is needed to maintain the logic of segment length handling.
+** `ConsensusHook` — this is a feature-enabled config ( for the management of the xref:glossary.adoc#unincluded_segment[unincluded segment]. Requires the implementation of `trait ConsensusHook`. There are several implementations of it, in `parachain-system` crate (`FixedCapacityUnincludedSegment`) and in `aura-ext` crate (`FixedVelocityConsensusHook`). It is needed to maintain the logic of segment length handling.
 * Common parameters for all pallets:
 ** `RuntimeEvent`
 ** `WeightInfo`
@@ -123,7 +117,7 @@ Validate and perform the authorized upgrade.
 === Pallet's workflow
 
 * Block Initialization
-** Remove already processed validation code
+** Remove already processed xref:glossary.adoc#validation_code[validation code]
 ** Update `UnincludedSegment` with latest parent hash
 ** Cleans up `ValidationData` and other functions.
 ** Calculate weights for everything that was done in `on_finalize` hook

@@ -1,0 +1,168 @@
+= Glossary
+
+== A
+
+=== Announcement
+
+Announcement is a statement of call hash for the <<proxy>> to execute in some future block. Required for some proxies where delay is specified.
+
+=== Asset Teleportation
+
+Asset Teleportation is a movement of an asset by destroying it on one side and creating a clone on the other side
+
+== B
+
+=== Barrier
+
+A generic filter which returns whether or not XCM may pass and be executed. If they do not pass the barrier, they are not executed. The barrier is the final filter before XCM execution. It implements the `ShouldExecute` trait and therefore takes as input an XCM and returns a bool indicating whether it should be executed.
+
+== C
+
+=== Candidacy Bond
+
+Candidacy bond is fixed amount to deposit to become a <<candidate>>.
+
+
+=== Candidate
+
+Candidate is a self-promoted <<collator>>, who deposited a candidacy bond to participate in collation process
+
+=== Collator
+
+Collator is a node that gathers collation information and communicates it to relay chain to make a block.
+
+== D
+
+=== Delay
+
+Delay is number of block that should pass from <<announcement>> before call execution.
+
+=== Delegatee
+
+Delegatee is an account that was granted call execution rights with <<proxy>> creation.
+
+=== Delegator
+
+Delegator is an account that granted call execution rights with <<proxy>> creation.
+
+== F
+
+=== Freeze
+
+`Freeze` is reserving some amount from the account. For example, to make a transaction, the amount to be sent might be first frozen, then the checks for the transaction will be made. If the checks pass, the amount will be deducted from the sender's account and added to the recipient's. `Freeze` should be preferred if the reserved money can be lost/sent due to external reasons.
+
+=== Fungible Asset
+
+An asset where any unit of it worth the same. Opposite of <<nonfungible_asset>>
+
+== H
+
+=== Hold 
+`Hold` means reserving/holding an amount of balance from an account. The `Hold` amount cannot be spent, but still belongs to the account. For example, depositing modifying the state, and occupying space. This deposit will be repaid once the occupied space is freed.
+
+== I
+
+=== Invulnerable
+
+Invulnerable is a permissioned <<collator>>, that will always be part of the collation process
+
+== J
+
+=== Junction
+
+Junction is a single item in a path to describe a relative location (think of `dir` or `dir/$file_path` as a junction).
+
+=== Junctions
+
+Junctions is multiple `Junction`s, formed only through <<multilocation>> construction.
+
+== L
+
+=== Length Fee
+
+A fee proportional to the encoded length of the transaction.
+
+=== Lock 
+
+Nearly the same as `<<Hold>>`, with 2 major differences:
+
+* Locks can store the reason for the locking operation.
+* Locks are overlapping, whereas Reserve/Hold's are additive. Example:
+** Apply `Hold` to account A for 20 units, then apply another `Hold` to account A for 10 units -> a total of 30 units will be reserved/hold
+** Apply `Lock` to account A for 20 units, then apply another `Lock` to account A for 10 units -> a total of 20 units will be locked, since 10 is smaller than 20.
+
+== M
+
+=== MultiAsset
+
+Either an amount of a single fungible asset, or one non-fungible asset.
+
+=== MultiLocation
+
+A path described by junctions leading to the location.
+
+== N
+
+=== NonFungible Asset
+
+An asset where each unit is worth a different amount and/or is unique in some way. Opposite of <<fungible_asset>>.
+
+== P
+
+=== Pot
+
+Pot is a stake that will reward block authors. Block author will get half of the current stake.
+
+=== Proxy
+
+Proxy is a statement of call execution rights transfer from <<delegator>> to <<delegatee>>. Specified by <<proxy_type>> and <<delay>>.
+
+=== Proxy type
+
+Proxy type is a type of calls that can be executed using this <<proxy>>.
+
+=== Pure account
+
+Pure account is an account that was spawned only to be a <<delegatee>> for some <<proxy>>.
+
+== R
+
+=== Reserve 
+
+Deprecated, use `<<Hold>>`.
+
+=== Reserve Asset Transfer
+
+When consensus systems do not have a established layer of trust over which they can transfer assets, they can opt for a trusted 3rd entity to store the assets
+
+== T
+
+=== Tip
+
+An optional tip. Tip increases the priority of the transaction, giving it a higher chance to be included by the transaction queue.
+
+== U
+
+=== Unincluded Segment
+
+A sequence of blocks that were not yet included into the relay chain state transition
+
+== V
+
+=== Validation Code
+
+Validation Code is the runtime binary that runs in the parachain
+
+=== Validation Data
+
+Validation Data is the information passed from the relay chain to validate the next block
+
+== W
+
+=== Weight
+
+The time it takes to execute runtime logic. By controlling the execution time that a block can consume, weight bounds the storage changes and computation per block.
+
+=== Weight Fee
+
+A fee proportional to amount of <<weight>> a transaction consumes.
