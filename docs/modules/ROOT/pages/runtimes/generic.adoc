@@ -1,0 +1,53 @@
+:source-highlighter: highlight.js
+:highlightjs-languages: rust
+:github-icon: pass:[<svg class="icon"><use href="#github-icon"/></svg>]
+
+== Purpose
+
+Polkadot Runtime Template is constructed with the purpose of providing the most generic template that is working out of the box.
+
+The pallet list is constructed by the contributions of Parity, the community, and OpenZeppelin.
+
+Our motivation for crafting the pallet list was to be as minimalistic as possible,
+whilst preserving the most important pallets that are used in the Polkadot ecosystem.
+
+We designed this template to be generic, so that it can be used as a starting point for any other template,
+and we aim to base our future templates off of this one.
+
+To demystify the hard concepts, we provided a documentation, in which you can find:
+* explanation of the pallets that are used in this template (purpose, terminology, configuration, dispatchables, etc.),
+* general guides regarding this template,
+* runtime related guides,
+* and miscellaneous topics.
+
+=== Comparison with other templates
+
+// TODO:
+
+== Configuration
+
+// TODO:
+
+// List of pallets with their config description
+
+=== `++pallet_name++` link:https://google.com[{github-icon},role=heading-link]
+[%collapsible]
+====
+Freeform description of the reason why this pallet was added.
+
+```rust
+impl pallet_name::Config for Runtime {
+    type Config1 = Type1;
+    type Config2 = Type2;
+}
+```
+
+* Description of `Type1` if needed
+* Description of `Type2` if needed
+
+**Relations**
+
+Description of which pallets will get affected if this pallet is going to be removed or changed
+====
+
+
