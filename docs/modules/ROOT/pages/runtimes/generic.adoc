@@ -11,7 +11,7 @@ The pallet list is constructed by the contributions of Parity, the community, an
 Our motivation for crafting the pallet list was to be as minimalistic as possible,
 whilst preserving the most important pallets that are used in the Polkadot ecosystem.
 
-We designed this template to be generic, so that it can be used as a starting point for any other template,
+We designed this template to be generic, so that it can be used as a starting point for any other project/template,
 and we aim to base our future templates off of this one.
 
 To demystify the hard concepts, we provided a documentation, in which you can find:
@@ -26,28 +26,72 @@ To demystify the hard concepts, we provided a documentation, in which you can fi
 
 == Configuration
 
-// TODO:
-
-// List of pallets with their config description
-
-=== `++pallet_name++` link:https://google.com[{github-icon},role=heading-link]
+=== System Support
 [%collapsible]
 ====
-Freeform description of the reason why this pallet was added.
+===== `++frame_system++` link:https://paritytech.github.io/polkadot-sdk/master/frame_system/index.html#
+`frame_system` is responsible from creating the runtime, initializing the storage, and providing the base functionality for the runtime.
 
-```rust
-impl pallet_name::Config for Runtime {
-    type Config1 = Type1;
-    type Config2 = Type2;
-}
-```
+===== `++cumulus_pallet_parachain_system++` link:https://paritytech.github.io/polkadot-sdk/master/cumulus_pallet_parachain_system/index.html#
+`cumulus_pallet_parachain_system` handles low-level details of being a parachain.
 
-* Description of `Type1` if needed
-* Description of `Type2` if needed
+===== `++pallet_timestamp++` link:https://paritytech.github.io/polkadot-sdk/master/pallet_timestamp/index.html#
+`pallet_timestamp` provides a way for consensus systems to set and check the onchain time.
 
-**Relations**
+===== `++parachain_info++` link:https://docs.rs/staging-parachain-info/latest/staging_parachain_info/index.html#
+`parachain_info` provides a way for parachains to report their parachain id and the relay chain block number.
 
-Description of which pallets will get affected if this pallet is going to be removed or changed
+===== `++pallet_utility++` link:https://paritytech.github.io/polkadot-sdk/master/pallet_utility/index.html#
+`pallet_utility` contains two basic pieces of functionality:
+
+* Batch dispatch: A stateless operation, allowing any origin to execute multiple calls in a single dispatch. This can be useful to amalgamate proposals, combining `set_code` with corresponding `set_storage`s, for efficient multiple payouts with just a single signature verify, or in combination with one of the other two dispatch functionality.
+**https://paritytech.github.io/polkadot-sdk/master/pallet_utility/pallet/struct.Pallet.html#method.force_batch[force_batch]: Sends a batch of dispatch calls. Errors are allowed and won’t interrupt
+**https://paritytech.github.io/polkadot-sdk/master/pallet_utility/pallet/struct.Pallet.html#method.batch[batch]: Sends a batch of dispatch calls. This will return `Ok` in all circumstances. To determine the success of the batch, an event is deposited. If a call failed and the batch was interrupted, then the `BatchInterrupted` event is deposited, along with the number of successful calls made and the error of the failed call. If all were successful, then the `BatchCompleted` event is deposited.
+**https://paritytech.github.io/polkadot-sdk/master/pallet_utility/pallet/struct.Pallet.html#method.batch_all[batch_all]: Send a batch of dispatch calls and atomically execute them. The whole transaction will rollback and fail if any of the calls failed.
+* Pseudonymal dispatch: A stateless operation, allowing a signed origin to execute a call from an alternative signed origin. Each account has 2 * 2**16 possible “pseudonyms” (alternative account IDs) and these can be stacked. This can be useful as a key management tool, where you need multiple distinct accounts (e.g. as controllers for many staking accounts), but where it’s perfectly fine to have each of them controlled by the same underlying keypair. Derivative accounts are, for the purposes of proxy filtering considered exactly the same as the origin and are thus hampered with the origin’s filters.
+
 ====
+
+=== Monetary
+[%collapsible]
+====
+===== `++pallet_balances++` link:https://docs.rs/pallet-balances/latest/pallet_balances/#
+`pallet_balances`  provides functions for:
+* Getting and setting free balances.
+* Retrieving total, reserved and unreserved balances.
+* Repatriating a reserved balance to a beneficiary account that exists.
+* Transferring a balance between accounts (when not reserved).
+* Slashing an account balance.
+* Account creation and removal.
+* Managing total issuance.
+* Setting and managing locks.
+
+===== `++pallet_transaction_payment++` link:https://docs.rs/pallet-transaction-payment/latest/pallet_transaction_payment/#
+`pallet_transaction_payment` provides the basic logic needed to pay the absolute minimum amount needed for a transaction to be included. This includes:
+* *base fee*: This is the minimum amount a user pays for a transaction. It is declared as a base *weight* in the runtime and converted to a fee using `WeightToFee`.
+* *weight fee*: A fee proportional to amount of weight a transaction consumes.
+* *length fee*: A fee proportional to the encoded length of the transaction.
+* *tip*: An optional tip. Tip increases the priority of the transaction, giving it a higher chance to be included by the transaction queue.
+
+====
+
+
+// Governance
+Sudo: pallet_sudo = 15,
+Multisig: pallet_multisig = 16,
+Proxy: pallet_proxy = 17,
+
+// Collator support. The order of these 4 are important and shall not change.
+Authorship: pallet_authorship = 20,
+CollatorSelection: pallet_collator_selection = 21,
+Session: pallet_session = 22,
+Aura: pallet_aura = 23,
+AuraExt: cumulus_pallet_aura_ext = 24,
+
+// XCM helpers.
+XcmpQueue: cumulus_pallet_xcmp_queue = 30,
+PolkadotXcm: pallet_xcm = 31,
+CumulusXcm: cumulus_pallet_xcm = 32,
+DmpQueue: cumulus_pallet_dmp_queue = 33,
 
 
