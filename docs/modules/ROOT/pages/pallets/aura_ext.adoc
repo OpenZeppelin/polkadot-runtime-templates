@@ -2,7 +2,7 @@
 :highlightjs-languages: rust
 :github-icon: pass:[<svg class="icon"><use href="#github-icon"/></svg>]
 
-= cumulus_aura_ext
+= cumulus_pallet_aura_ext
 
 Branch/Release: `release-polkadot-v1.3.0`
 
@@ -18,9 +18,9 @@ This pallet integrates parachain’s own block production mechanism (for example
 There is no special config for this integration and it has no dispatchables, but you need to integrate it with other `parachain-system` crate:
 
 === Integrate `BlockExecutor`
-    
+
 When you invoke the `register_validate_block` macro, you should provide `cumulus_pallet_aura_ext::BlockExecutor` to it to allow `aura-ext` to validate the blocks produced by `aura`
-    
+
 [source, rust]
 ----
 cumulus_pallet_parachain_system::register_validate_block! {
@@ -28,9 +28,9 @@ cumulus_pallet_parachain_system::register_validate_block! {
     BlockExecutor = cumulus_pallet_aura_ext::BlockExecutor::<Runtime, Executive>,
 }
 ----
-    
+
 === Integrate `ConsensusHook`
-    
+
 Also you might want to manage the consensus externally and control the segment that is not yet included (its capacity, speed and etc.) `aura-ext` provides the `FixedVelocityConsensusHook` that allows to check if we are still in the limits for the slot.
 
 [source, rust]
