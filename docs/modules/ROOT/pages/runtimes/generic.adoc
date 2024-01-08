@@ -20,10 +20,6 @@ To demystify the hard concepts, we provided a documentation, in which you can fi
 * runtime related guides,
 * and miscellaneous topics.
 
-=== Comparison with other templates
-
-// TODO:
-
 == Configuration
 
 === System Support
@@ -56,7 +52,7 @@ To demystify the hard concepts, we provided a documentation, in which you can fi
 [%collapsible]
 ====
 ===== `++pallet_balances++` link:https://docs.rs/pallet-balances/latest/pallet_balances/#
-`pallet_balances`  provides functions for:
+`pallet_balances` provides functions for:
 * Getting and setting free balances.
 * Retrieving total, reserved and unreserved balances.
 * Repatriating a reserved balance to a beneficiary account that exists.
@@ -75,23 +71,62 @@ To demystify the hard concepts, we provided a documentation, in which you can fi
 
 ====
 
+=== Governance
+[%collapsible]
+====
+===== `++pallet_sudo++` link:https://docs.rs/pallet-sudo/latest/pallet_sudo/#
+`pallet_sudo` provides a way to execute privileged runtime calls using a specified sudo (“superuser do”) account.
 
-// Governance
-Sudo: pallet_sudo = 15,
-Multisig: pallet_multisig = 16,
-Proxy: pallet_proxy = 17,
+===== `++pallet_multisig++` link:https://docs.rs/pallet-multisig/latest/pallet_multisig/#
+`pallet_multisig` enables multi-signature operations in your runtime. This module allows multiple signed origins (accounts) to coordinate and dispatch a call. For the call to execute, the threshold number of accounts from the set (signatories) must approve it.
 
-// Collator support. The order of these 4 are important and shall not change.
-Authorship: pallet_authorship = 20,
-CollatorSelection: pallet_collator_selection = 21,
-Session: pallet_session = 22,
-Aura: pallet_aura = 23,
-AuraExt: cumulus_pallet_aura_ext = 24,
+===== `++pallet_proxy++` link:https://docs.rs/pallet-proxy/latest/pallet_proxy/#
+`pallet_proxy` enables delegation of rights to execute certain call types from one origin to another.
 
-// XCM helpers.
-XcmpQueue: cumulus_pallet_xcmp_queue = 30,
-PolkadotXcm: pallet_xcm = 31,
-CumulusXcm: cumulus_pallet_xcm = 32,
-DmpQueue: cumulus_pallet_dmp_queue = 33,
+====
 
+=== Collator support
+[%collapsible]
+====
+===== `++pallet_authorship++` link:https://docs.rs/pallet-authorship/latest/pallet_authorship/#
+`pallet_authorship` provides authorship tracking for FRAME runtimes. This tracks the current author of the block and recent uncles.
 
+===== `++pallet_collator_selection++` link:https://paritytech.github.io/polkadot-sdk/master/pallet_collator_selection/index.html#
+`pallet_collator_selection` - manages the collators of a parachain. **Collation is *not* a secure activity** and this pallet does not implement any game-theoretic mechanisms to meet BFT safety assumptions of the chosen set. This pallet can:
+* set invulnerable candidates (fixed candidates)
+* set desired candidates (ideal number of non-fixed)
+* set candidacy bond
+* remove invulnerability (turn candidate into not fixed)
+* and many more (all related to collators)
+
+===== `++pallet_session++` link:https://paritytech.github.io/polkadot-sdk/master/pallet_session/index.html#
+`pallet_session` allows validators to manage their session keys, provides a function for changing the session length, and handles session rotation.
+
+===== `++pallet_aura++` link:https://docs.rs/pallet-aura/latest/pallet_aura/#
+`pallet_aura` extends Aura consensus by managing offline reporting. It can:
+* get the current slot
+* get the slot duration
+* change and initialize authorities
+* ensure the correctness of the state of this pallet
+
+===== `++cumulus_pallet_aura_ext++` link:https://paritytech.github.io/polkadot-sdk/master/cumulus_pallet_aura_ext/index.html#
+`cumulus_pallet_aura_ext` extends the Substrate AuRa pallet to make it compatible with parachains. It provides the Pallet, the Config and the GenesisConfig.
+
+====
+
+=== XCM Helpers
+[%collapsible]
+====
+===== `++cumulus_pallet_xcmp_queue++` link:https://paritytech.github.io/polkadot-sdk/master/cumulus_pallet_xcmp_queue/index.html#
+`cumulus_pallet_xcmp_queue` Responsible for the Queues (both incoming and outgoing) for XCMP messages. This pallet does not actually receive or send messages. Its responsibility is to place the incoming and outgoing XCMP messages in their respective queues and manage these queues.
+
+===== `++pallet_xcm++` link:https://docs.rs/pallet-xcm/6.0.0/pallet_xcm/#
+`pallet_xcm` is responsible for filtering, routing, and executing incoming XCM.
+
+===== `++cumulus_pallet_xcm++` link:https://paritytech.github.io/polkadot-sdk/master/cumulus_pallet_xcm/index.html#
+`cumulus_pallet_xcm` is responsible from detecting and ensuring whether XCM's are coming from *Relay* or *Sibling* chain.
+
+===== `++cumulus_pallet_dmp_queue++` link:https://paritytech.github.io/polkadot-sdk/master/cumulus_pallet_dmp_queue/index.html#
+`cumulus_pallet_dmp_queue` is **DEPRECATED**. This pallet used to implement a message queue for downward messages from the relay-chain.
+
+====
