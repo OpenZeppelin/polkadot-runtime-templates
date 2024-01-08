@@ -10,24 +10,14 @@ Branch/Release: `release-polkadot-v1.3.0`
 
 This pallet enables delegation of rights to execute certain call types from one origin to another.
 
-== Glossary
-
-* _Announcement_ — a statement of call hash for the proxy to execute in some future block. Required for some proxies where delay is specified
-* _Delay_ — number of block that should pass from announcement before call execution
-* _Delegatee_ — account that was granted call execution rights with proxy creation
-* _Delegator_ — account that granted call execution rights with proxy creation
-* _Proxy_ — statement of call execution rights transfer from delegator to delegatee. Specified by proxy type and delay.
-* _Proxy type_ — type of calls that can be executed using this proxy.
-* _Pure account_ — account that was spawned only to be a delegatee for some proxy.
-
 == Config link:https://github.com/paritytech/polkadot-sdk/blob/release-polkadot-v1.3.0/substrate/frame/proxy/src/lib.rs#L107[{github-icon},role=heading-link]
 
 * Pallet-specific configs:
-** `ProxyType` -- a type that describes different variants of proxy. It must implement `Default` trait and `InstanceFilter<RuntimeCall>` trait.
+** `ProxyType` -- a type that describes different variants of xref:glossary.adoc#proxy[proxy]. It must implement `Default` trait and `InstanceFilter<RuntimeCall>` trait.
 ** `ProxyDepositBase` -- a base amount of currency that defines a deposit for proxy creation.
 ** `ProxyDepositFactor` -- an amount of currency that will be frozen along with the `ProxyDepositBase` for each additional proxy.
 ** `MaxProxies` -- maximum number of proxies that single account can create.
-** `MaxPending` -- maximum number of announcements that can be made per account.
+** `MaxPending` -- maximum number of xref:glossary.adoc#announcement[announcements] that can be made per account.
 ** `CallHasher` -- a type implementing a `Hash` trait. Will be used to hash the executed call.
 ** `AnnouncementDepositBase` -- a base amount of currency that defines a deposit for announcement creation.
 ** `AnnouncementDepositFactor` -- an amount of currency that will be frozen along with the `AnnouncementDepositBase` for each additional announcement.
@@ -53,7 +43,7 @@ Create a new `Proxy`  that allows `delegate` to execute calls that fulfill `prox
 
 The origin must be signed for this call.
 
-This call will take (or modify) a deposit based on number of proxies created by delegator and calculated by this formula: `ProxyDepositBase + ProxyDepositFactor * <number of proxies>`
+This call will take (or modify) a deposit based on number of proxies created by xref:glossary.adoc#delegator[delegator] and calculated by this formula: `ProxyDepositBase + ProxyDepositFactor * <number of proxies>`
 
 There may not be more proxies than `MaxProxies`
 
@@ -69,7 +59,7 @@ There may not be more proxies than `MaxProxies`
 - `LookupError` — delegate not found
 - `NoSelfProxy` — delegate and call origin is the same account
 - `Duplicate` — proxy already exists
-- `TooMany` — too many proxies created for this delegate with this type and the same delay
+- `TooMany` — too many proxies created for this delegate with this type and the same xref:glossary.adoc#delay[delay]
 - `InsufficientBalance` — delegator does not have enough funds for deposit for proxy creation
 - `LiquidityRestrictions` —  account restrictions (like frozen funds or vesting) prevent from creating a deposit
 - `Overflow` — reserved funds overflow the currency type. Should not happen in usual scenarios.
@@ -136,7 +126,7 @@ If the proxy requires an announcement before the call, this dispatchable will fa
 **Params:**
 
 - `real: AccountIdLookupOf<T>` — the account on which behalf this call will be made
-- `force_proxy_type: Option<T::ProxyType>` — specific proxy type to get proxy for. If not specified, first one found in the storage will be used.
+- `force_proxy_type: Option<T::ProxyType>` — specific xref:glossary.adoc#proxy_type[proxy type] to get proxy for. If not specified, first one found in the storage will be used.
 - `call: Box<<T as Config>::RuntimeCall>` — a call to execute
 
 **Errors:**
@@ -200,7 +190,7 @@ pub fn reject_announcement<T: Config>(
 
 Remove the given announcement. Deposit is returned in case of success.
 
-May be called from delegator of the proxy to remove announcement made by delegatee.
+May be called from delegator of the proxy to remove announcement made by xref:glossary.adoc#delegatee[delegatee].
 
 The origin must be signed for this call.
 
@@ -301,7 +291,7 @@ pub fn create_pure<T: Config>(
 )
 ----
 
-This call creates a new account with a proxy issued to it from the call’s origin.
+This call creates a xref:glossary.adoc#pur_account[pure account] with a proxy issued to it from the call’s origin.
 
 The origin must be signed for this call.
 

@@ -10,10 +10,6 @@ Branch/Release: `release-polkadot-v{x.x.x}`
 
 This is a freeform description of the tasks that this pallet fulfills
 
-== Glossary
-
-* _Term_ -- definition of the term
-
 == Config link:https://google.com[{github-icon},role=heading-link]
 
 * Pallet-specific configs

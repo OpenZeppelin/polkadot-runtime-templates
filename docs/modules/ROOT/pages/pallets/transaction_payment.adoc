@@ -10,7 +10,7 @@ Branch/Release: `release-polkadot-v1.3.0`
 
 `pallet-transaction-payment` implements transaction fee logic.
 
-In substrate, every transaction has an associated `call`, and each `call` has its own weight function. The weight function estimates the time it takes to execute the `call`.
+In substrate, every transaction has an associated `call`, and each `call` has its own xref:glossary.adoc#weight[weight] function. The weight function estimates the time it takes to execute the `call`.
 
 `Config::WeightToFee` is a mapping between the smallest unit of compute (*Weight*) and smallest unit of fee.
 
@@ -18,19 +18,12 @@ This pallet also exposes
 - how to update fees for the next block based on past fees (`Config::FeeMultiplierUpdate`)
 - how fees are paid (`Config::OnChargeTransaction`)
 
-The base fee and adjusted weight and length fees constitute the _inclusion fee_, which is the minimum fee for a transaction to be included in a block. The formula of final fee:
+The base fee and adjusted xref:glossary.adoc#weight_fee[weight] and xref:glossary.adoc#length_fee[length] fees constitute the _inclusion fee_, which is the minimum fee for a transaction to be included in a block. The formula of final fee:
 ```rust, ignore
 inclusion_fee = base_fee + length_fee + [fee_multiplier_update * weight_fee];
 final_fee = inclusion_fee + tip;
 ```
 The inputs are defined below in the glossary and config sections.
-
-== Glossary
-
-** `Weight` -- The time it takes to execute runtime logic. By controlling the execution time that a block can consume, weight bounds the storage changes and computation per block.
-** `WeightFee` -- A fee proportional to amount of weight a transaction consumes.
-** `LengthFee` -- A fee proportional to the encoded length of the transaction.
-** `Tip` -- An optional tip. Tip increases the priority of the transaction, giving it a higher chance to be included by the transaction queue.
 
 == Config link:https://github.com/paritytech/polkadot-sdk/blob/release-polkadot-v1.3.0/substrate/frame/pallet-transaction-payment/src/lib.rs#L445[{github-icon},role=heading-link]
 

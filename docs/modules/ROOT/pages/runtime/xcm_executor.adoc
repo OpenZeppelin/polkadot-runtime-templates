@@ -21,7 +21,7 @@ The inner `trait Config` used to parameterize `XcmExecutor` has the following as
 * Handlers:
 - `XcmSender` -- How to send an onward XCM message. Type must implement the trait `SendXcm`.
 - `AssetTransactor` -- How to withdraw and deposit an asset. Type must implement the trait `TransactAsset`.
-- `Trader` --  The means of purchasing weight credit for XCM execution. Type must implement the trait `WeightTrader`.
+- `Trader` --  The means of purchasing xref:glossary.adoc#weight[weight] credit for XCM execution. Type must implement the trait `WeightTrader`.
 - `ResponseHandler` -- What to do when a response of a query is found. Type must implement the trait `OnResponse`.
 - `AssetTrap` -- The general asset trap handler for when assets are left in the Holding Register at the end of execution. Type must implement the trait `DropAssets`.
 - `AssetLocker` --  Handler for asset locking. Type must implement the trait `AssetLock`.
@@ -37,7 +37,7 @@ The inner `trait Config` used to parameterize `XcmExecutor` has the following as
 - `IsTeleporter` --  Combinations of (Asset, Location) pairs which we trust as teleporters. Type must implement the trait `ContainsPair<MultiAsset, MultiLocation>`.
 - `Aliasers` --   A list of (Origin, Target) pairs allowing a given Origin to be substituted with its corresponding Target pair. Type must implement the trait `ContainsPair<MultiLocation, MultiLocation>`.
 - `Barrier` -- Whether or not to execute the XCM at all. Type must implement `ShouldExecute`.
-- `UniversalAliases` -- The origin locations and specific universal junctions to which they are allowed to elevate themselves. Type must implement the trait `Contains<(MultiLocation, Junction)>`.
+- `UniversalAliases` -- The origin locations and specific universal xref:glossary.adoc#junctions[junctions] to which they are allowed to elevate themselves. Type must implement the trait `Contains<(MultiLocation, Junction)>`.
 - `SafeCallFilter` -- The safe call filter for `Transact`. Use this type to explicitly whitelist calls that cannot undergo recursion. Type must implement the trait `Contains<Self::RuntimeCall>`.
 
 * Converters:

@@ -17,29 +17,18 @@ The Balances pallet provides functions for:
 * Slashing an account balance.
 * Account creation and removal.
 * Managing total issuance.
-* Setting and managing locks.
-
-== Glossary
-
-* Freeze -- Freeze is reserving some amount from the account. For example, to make a transaction, the amount to be sent might be first frozen, then the checks for the transaction will be made. If the checks pass, the amount will be deducted from the sender's account and added to the recipient's. `Freeze` should be preferred if the reserved money can be lost/sent due to external reasons.
-* Hold -- reserving/holding an amount of balance from an account. The `Hold` amount cannot be spent, but still belongs to the account. For example, depositing modifying the state, and occupying space. This deposit will be repaid once the occupied space is freed.
-* Reserve -- Deprecated, use Hold.
-* Lock -- Nearly the same as `Hold`, with 2 major differences:
-** Locks can store the reason for the locking operation.
-** Locks are overlapping, whereas Reserve/Hold's are additive. Example:
-*** Apply `Hold` to account A for 20 units, then apply another `Hold` to account A for 10 units -> a total of 30 units will be reserved/hold
-*** Apply `Lock` to account A for 20 units, then apply another `Lock` to account A for 10 units -> a total of 20 units will be locked, since 10 is smaller than 20.
+* Setting and managing xref:glossary.adoc#lock[locks].
 
 == Config link:https://github.com/paritytech/polkadot-sdk/blob/release-polkadot-v1.3.0/substrate/frame/balances/src/lib.rs#L253[{github-icon},role=heading-link]
 
 * Pallet-specific configs
-** `RuntimeHoldReason` -- The overarching hold reason.
-** `RuntimeFreezeReason` -- The overarching freeze reason.
+** `RuntimeHoldReason` -- The overarching xref:glossary.adoc#hold[hold] reason.
+** `RuntimeFreezeReason` -- The overarching xref:glossary.adoc#freeze[freeze] reason.
 ** `Balance` -- The balance of an account
 ** `DustRemoval` -- Handler for the unbalanced reduction when removing a dust account.
 ** `ExistentialDeposit` -- The minimum amount required to keep an account open. MUST BE GREATER THAN ZERO!
 ** `AccountStore` -- The means of storing the balances of an account.
-** `ReserveIdentifier` --  The ID type for reserves. The use of reserves is deprecated in favor of holds. See `https://github.com/paritytech/substrate/pull/12951/`
+** `ReserveIdentifier` --  The ID type for xref:glossary.adoc#reserve[reserves]. The use of reserves is deprecated in favor of holds. See `https://github.com/paritytech/substrate/pull/12951/`
 ** `FreezeIdentifier` -- The ID type for freezes.
 ** `MaxLocks` -- The maximum number of locks that should exist on an account.
 ** `MaxReserves` -- The maximum number of named reserves that can exist on an account. The use of reserves is deprecated in favor of holds. See `https://github.com/paritytech/substrate/pull/12951/`
@@ -47,7 +36,7 @@ The Balances pallet provides functions for:
 ** `MaxFreezes` -- The maximum number of individual freeze locks that can exist on an account at any time.
 * Common configs
 ** `RuntimeEvent` -- The overarching event type.
-** `WeightInfo` -- Weight information for extrinsics in this pallet.
+** `WeightInfo` -- xref:glossary.adoc#weight[Weight] information for extrinsics in this pallet.
 
 == Events link:https://github.com/paritytech/polkadot-sdk/blob/release-polkadot-v1.3.0/substrate/frame/balances/src/lib.rs#L339[{github-icon},role=heading-link]
 
