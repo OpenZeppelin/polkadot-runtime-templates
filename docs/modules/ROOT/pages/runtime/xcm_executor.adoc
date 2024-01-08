@@ -8,7 +8,7 @@ Branch/Release: `release-polkadot-v1.3.0`
 
 == Purpose
 
-`XcmExecutor` is responsible for executing XCM messages locally. 
+`XcmExecutor` is responsible for executing XCM messages locally.
 
 `XcmExecutor` is usually the assignment for `pallet_xcm::Config::XcmExecutor` and is thereby used to execute XCM in that pallet.
 
@@ -54,7 +54,7 @@ The inner `trait Config` used to parameterize `XcmExecutor` has the following as
 * Common configs:
 - `RuntimeCall`
 
-== Outer Config link:https://github.com/paritytech/polkadot-sdk/blob/master/polkadot/xcm/xcm-executor/src/lib.rs#L30[{github-icon},role=heading-link]
+== Outer Config link:https://github.com/paritytech/polkadot-sdk/blob/master/polkadot/xcm/xcm-executor/src/lib.rs#L58[{github-icon},role=heading-link]
 
 * The outer `struct XcmExecutor<Config>` configures the following fields:
 - `holding` -- Assets allowed in the holding register. Type must be `Assets`.
