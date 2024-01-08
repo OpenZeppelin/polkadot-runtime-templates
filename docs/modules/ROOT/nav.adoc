@@ -14,5 +14,7 @@
 ** xref:pallets/proxy.adoc[pallet_proxy]
 ** xref:pallets/transaction_payment.adoc[pallet_transaction_payment]
 ** xref:pallets/xcm.adoc[pallet_xcm]
+* Misc
+** xref:misc/multisig-accounts.adoc[Multisig Accounts]
 * Appendix
 ** xref:glossary.adoc[Glossary]
