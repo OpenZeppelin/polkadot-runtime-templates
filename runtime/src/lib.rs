@@ -11,13 +11,16 @@ mod weights;
 pub mod xcm_config;
 
 use cumulus_pallet_parachain_system::RelayNumberStrictlyIncreases;
-use cumulus_primitives_core::ParaId;
+use cumulus_primitives_core::{AggregateMessageOrigin, ParaId};
 use frame_support::{
     construct_runtime,
     dispatch::DispatchClass,
     genesis_builder_helper::{build_config, create_default_config},
     parameter_types,
-    traits::{ConstBool, ConstU32, ConstU64, ConstU8, EitherOfDiverse, Everything, InstanceFilter},
+    traits::{
+        ConstBool, ConstU32, ConstU64, ConstU8, EitherOfDiverse, Everything, InstanceFilter,
+        TransformOrigin,
+    },
     weights::{
         constants::WEIGHT_REF_TIME_PER_SECOND, ConstantMultiplier, Weight, WeightToFeeCoefficient,
         WeightToFeeCoefficients, WeightToFeePolynomial,
@@ -53,12 +56,11 @@ use sp_version::NativeVersion;
 use sp_version::RuntimeVersion;
 // XCM Imports
 use xcm::latest::prelude::BodyId;
-use xcm_executor::XcmExecutor;
 
 use crate::{
     constants::currency::{deposit, EXISTENTIAL_DEPOSIT, MICROCENTS, MILLICENTS},
     weights::{BlockExecutionWeight, ExtrinsicBaseWeight, RocksDbWeight},
-    xcm_config::{RelayLocation, XcmConfig, XcmOriginToTransactDispatchOrigin},
+    xcm_config::{RelayLocation, XcmOriginToTransactDispatchOrigin},
 };
 
 /// Alias to 512-bit hash when used in the context of a transaction signature on
@@ -460,13 +462,14 @@ impl cumulus_pallet_parachain_system::Config for Runtime {
         BLOCK_PROCESSING_VELOCITY,
         UNINCLUDED_SEGMENT_CAPACITY,
     >;
-    type DmpMessageHandler = DmpQueue;
+    type DmpQueue = DmpQueue;
     type OnSystemEvent = ();
     type OutboundXcmpMessageSource = XcmpQueue;
     type ReservedDmpWeight = ReservedDmpWeight;
     type ReservedXcmpWeight = ReservedXcmpWeight;
     type RuntimeEvent = RuntimeEvent;
     type SelfParaId = parachain_info::Pallet<Runtime>;
+    type WeightInfo = cumulus_pallet_parachain_system::weights::SubstrateWeight<Runtime>;
     type XcmpMessageHandler = XcmpQueue;
 }
 
@@ -478,18 +481,19 @@ impl cumulus_pallet_xcmp_queue::Config for Runtime {
     type ChannelInfo = ParachainSystem;
     type ControllerOrigin = EnsureRoot<AccountId>;
     type ControllerOriginConverter = XcmOriginToTransactDispatchOrigin;
-    type ExecuteOverweightOrigin = EnsureRoot<AccountId>;
+    type MaxInboundSuspended = ConstU32<1_000>;
     type PriceForSiblingDelivery = NoPriceForMessageDelivery<ParaId>;
     type RuntimeEvent = RuntimeEvent;
     type VersionWrapper = ();
     type WeightInfo = ();
-    type XcmExecutor = XcmExecutor<XcmConfig>;
+    // Enqueue XCMP messages from siblings for later processing.
+    type XcmpQueue = TransformOrigin<MessageQueue, AggregateMessageOrigin, ParaId, ParaIdToSibling>;
 }
 
 impl cumulus_pallet_dmp_queue::Config for Runtime {
-    type ExecuteOverweightOrigin = EnsureRoot<AccountId>;
+    type DmpSink = ();
     type RuntimeEvent = RuntimeEvent;
-    type XcmExecutor = XcmExecutor<XcmConfig>;
+    type WeightInfo = cumulus_pallet_dmp_queue::weights::SubstrateWeight<Runtime>;
 }
 
 parameter_types! {
