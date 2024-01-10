@@ -585,30 +585,30 @@ impl pallet_utility::Config for Runtime {
 construct_runtime!(
     pub enum Runtime
     {
-        // System support stuff.
+        // System Support
         System: frame_system = 0,
         ParachainSystem: cumulus_pallet_parachain_system = 1,
         Timestamp: pallet_timestamp = 2,
         ParachainInfo: parachain_info = 3,
-        Proxy: pallet_proxy = 4,
-        Utility: pallet_utility = 5,
+        Utility: pallet_utility = 4,
 
-        // Monetary stuff.
+        // Monetary
         Balances: pallet_balances = 10,
         TransactionPayment: pallet_transaction_payment = 11,
 
         // Governance
         Sudo: pallet_sudo = 15,
         Multisig: pallet_multisig = 16,
+        Proxy: pallet_proxy = 17,
 
-        // Collator support. The order of these 4 are important and shall not change.
+        // Collator Support. The order of these 4 are important and shall not change.
         Authorship: pallet_authorship = 20,
         CollatorSelection: pallet_collator_selection = 21,
         Session: pallet_session = 22,
         Aura: pallet_aura = 23,
         AuraExt: cumulus_pallet_aura_ext = 24,
 
-        // XCM helpers.
+        // XCM Helpers
         XcmpQueue: cumulus_pallet_xcmp_queue = 30,
         PolkadotXcm: pallet_xcm = 31,
         CumulusXcm: cumulus_pallet_xcm = 32,
