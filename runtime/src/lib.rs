@@ -11,6 +11,9 @@ pub mod governance;
 mod weights;
 pub mod xcm_config;
 
+#[cfg(feature = "async-backing")]
+use cumulus_pallet_parachain_system::RelayNumberMonotonicallyIncreases;
+#[cfg(not(feature = "async-backing"))]
 use cumulus_pallet_parachain_system::RelayNumberStrictlyIncreases;
 use cumulus_primitives_core::{AggregateMessageOrigin, ParaId};
 use frame_support::{
@@ -221,6 +224,9 @@ pub const VERSION: RuntimeVersion = RuntimeVersion {
 /// up by `pallet_aura` to implement `fn slot_duration()`.
 ///
 /// Change this to adjust the block time.
+#[cfg(feature = "async-backing")]
+pub const MILLISECS_PER_BLOCK: u64 = 6000;
+#[cfg(not(feature = "async-backing"))]
 pub const MILLISECS_PER_BLOCK: u64 = 12000;
 
 // NOTE: Currently it is not possible to change the slot duration after the
@@ -242,12 +248,18 @@ pub const NORMAL_DISPATCH_RATIO: Perbill = Perbill::from_percent(75);
 
 /// We allow for 0.5 of a second of compute with a 12 second average block time.
 pub const MAXIMUM_BLOCK_WEIGHT: Weight = Weight::from_parts(
+    #[cfg(feature = "async-backing")]
+    WEIGHT_REF_TIME_PER_SECOND.saturating_mul(2),
+    #[cfg(not(feature = "async-backing"))]
     WEIGHT_REF_TIME_PER_SECOND.saturating_div(2),
     cumulus_primitives_core::relay_chain::MAX_POV_SIZE as u64,
 );
 
 /// Maximum number of blocks simultaneously accepted by the Runtime, not yet
 /// included into the relay chain.
+#[cfg(feature = "async-backing")]
+pub const UNINCLUDED_SEGMENT_CAPACITY: u32 = 3;
+#[cfg(not(feature = "async-backing"))]
 pub const UNINCLUDED_SEGMENT_CAPACITY: u32 = 1;
 /// How many parachain blocks are processed by the relay chain per parent.
 /// Limits the number of blocks authored per slot.
@@ -399,6 +411,9 @@ impl pallet_preimage::Config for Runtime {
 }
 
 impl pallet_timestamp::Config for Runtime {
+    #[cfg(feature = "experimental")]
+    type MinimumPeriod = ConstU64<0>;
+    #[cfg(not(feature = "experimental"))]
     type MinimumPeriod = ConstU64<{ SLOT_DURATION / 2 }>;
     /// A timestamp: milliseconds since the unix epoch.
     type Moment = u64;
@@ -565,14 +580,19 @@ parameter_types! {
     pub const RelayOrigin: AggregateMessageOrigin = AggregateMessageOrigin::Parent;
 }
 
+type ConsensusHook = cumulus_pallet_aura_ext::FixedVelocityConsensusHook<
+    Runtime,
+    RELAY_CHAIN_SLOT_DURATION_MILLIS,
+    BLOCK_PROCESSING_VELOCITY,
+    UNINCLUDED_SEGMENT_CAPACITY,
+>;
+
 impl cumulus_pallet_parachain_system::Config for Runtime {
+    #[cfg(not(feature = "async-backing"))]
     type CheckAssociatedRelayNumber = RelayNumberStrictlyIncreases;
-    type ConsensusHook = cumulus_pallet_aura_ext::FixedVelocityConsensusHook<
-        Runtime,
-        RELAY_CHAIN_SLOT_DURATION_MILLIS,
-        BLOCK_PROCESSING_VELOCITY,
-        UNINCLUDED_SEGMENT_CAPACITY,
-    >;
+    #[cfg(feature = "async-backing")]
+    type CheckAssociatedRelayNumber = RelayNumberMonotonicallyIncreases;
+    type ConsensusHook = ConsensusHook;
     type DmpQueue = frame_support::traits::EnqueueWithOrigin<MessageQueue, RelayOrigin>;
     type OnSystemEvent = ();
     type OutboundXcmpMessageSource = XcmpQueue;
@@ -671,7 +691,10 @@ impl pallet_session::Config for Runtime {
 }
 
 parameter_types! {
+    #[cfg(not(feature = "async-backing"))]
     pub const AllowMultipleBlocksPerSlot: bool = false;
+    #[cfg(feature = "async-backing")]
+    pub const AllowMultipleBlocksPerSlot: bool = true;
     pub const MaxAuthorities: u32 = 100_000;
 }
 
@@ -680,7 +703,9 @@ impl pallet_aura::Config for Runtime {
     type AuthorityId = AuraId;
     type DisabledValidators = ();
     type MaxAuthorities = MaxAuthorities;
-    #[cfg(feature = "experimental")]
+    #[cfg(all(feature = "experimental", feature = "async-backing"))]
+    type SlotDuration = ConstU64<SLOT_DURATION>;
+    #[cfg(all(feature = "experimental", not(feature = "async-backing")))]
     type SlotDuration = pallet_aura::MinimumPeriodTimesTwo<Self>;
 }
 
@@ -843,6 +868,9 @@ mod benches {
 impl_runtime_apis! {
     impl sp_consensus_aura::AuraApi<Block, AuraId> for Runtime {
         fn slot_duration() -> sp_consensus_aura::SlotDuration {
+            #[cfg(feature = "async-backing")]
+            return sp_consensus_aura::SlotDuration::from_millis(SLOT_DURATION);
+            #[cfg(not(feature = "async-backing"))]
             sp_consensus_aura::SlotDuration::from_millis(Aura::slot_duration())
         }
 
@@ -981,6 +1009,16 @@ impl_runtime_apis! {
     impl cumulus_primitives_core::CollectCollationInfo<Block> for Runtime {
         fn collect_collation_info(header: &<Block as BlockT>::Header) -> cumulus_primitives_core::CollationInfo {
             ParachainSystem::collect_collation_info(header)
+        }
+    }
+
+    #[cfg(feature = "async-backing")]
+    impl cumulus_primitives_aura::AuraUnincludedSegmentApi<Block> for Runtime {
+        fn can_build_upon(
+            included_hash: <Block as BlockT>::Hash,
+            slot: cumulus_primitives_aura::Slot
+        ) -> bool {
+            ConsensusHook::can_build_upon(included_hash, slot)
         }
     }
 
