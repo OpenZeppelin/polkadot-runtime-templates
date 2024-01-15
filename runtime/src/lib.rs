@@ -590,7 +590,10 @@ construct_runtime!(
         ParachainSystem: cumulus_pallet_parachain_system = 1,
         Timestamp: pallet_timestamp = 2,
         ParachainInfo: parachain_info = 3,
-        Utility: pallet_utility = 4,
+        Proxy: pallet_proxy = 4,
+        Utility: pallet_utility = 5,
+        Multisig: pallet_multisig = 6,
+
 
         // Monetary
         Balances: pallet_balances = 10,
@@ -598,8 +601,6 @@ construct_runtime!(
 
         // Governance
         Sudo: pallet_sudo = 15,
-        Multisig: pallet_multisig = 16,
-        Proxy: pallet_proxy = 17,
 
         // Collator Support. The order of these 4 are important and shall not change.
         Authorship: pallet_authorship = 20,
