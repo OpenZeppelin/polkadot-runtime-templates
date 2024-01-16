@@ -36,6 +36,10 @@ To demystify the hard concepts, we provided a documentation, in which you can fi
 
 * https://docs.rs/staging-parachain-info/latest/staging_parachain_info/index.html#[parachain_info] provides a way for parachains to report their parachain id and the relay chain block number.
 
+* https://docs.rs/pallet-multisig/latest/pallet_multisig/#[pallet_multisig] enables multi-signature operations in your runtime. This module allows multiple signed origins (accounts) to coordinate and dispatch a call. For the call to execute, the threshold number of accounts from the set (signatories) must approve it.
+
+* https://docs.rs/pallet-proxy/latest/pallet_proxy/#[pallet_proxy] enables delegation of rights to execute certain call types from one origin to another.
+
 * https://paritytech.github.io/polkadot-sdk/master/pallet_utility/index.html#[pallet_utility] contains two basic pieces of functionality:
 
 ** Batch dispatch: A stateless operation, allowing any origin to execute multiple calls in a single dispatch. This can be useful to amalgamate proposals, combining `set_code` with corresponding `set_storage`s, for efficient multiple payouts with just a single signature verify, or in combination with one of the other two dispatch functionality.
@@ -73,11 +77,8 @@ To demystify the hard concepts, we provided a documentation, in which you can fi
 .click to expand
 [%collapsible]
 ====
+
 * https://docs.rs/pallet-sudo/latest/pallet_sudo/#[pallet_sudo] provides a way to execute privileged runtime calls using a specified sudo (“superuser do”) account.
-
-* https://docs.rs/pallet-multisig/latest/pallet_multisig/#[pallet_multisig] enables multi-signature operations in your runtime. This module allows multiple signed origins (accounts) to coordinate and dispatch a call. For the call to execute, the threshold number of accounts from the set (signatories) must approve it.
-
-* https://docs.rs/pallet-proxy/latest/pallet_proxy/#[pallet_proxy] enables delegation of rights to execute certain call types from one origin to another.
 
 ====
 
@@ -85,6 +86,7 @@ To demystify the hard concepts, we provided a documentation, in which you can fi
 .click to expand
 [%collapsible]
 ====
+
 * https://docs.rs/pallet-authorship/latest/pallet_authorship/#[pallet_authorship] provides authorship tracking for FRAME runtimes. This tracks the current author of the block and recent uncles.
 
 * https://paritytech.github.io/polkadot-sdk/master/pallet_collator_selection/index.html#[pallet_collator_selection] - manages the collators of a parachain. **Collation is *not* a secure activity** and this pallet does not implement any game-theoretic mechanisms to meet BFT safety assumptions of the chosen set. This pallet can:
@@ -110,6 +112,7 @@ To demystify the hard concepts, we provided a documentation, in which you can fi
 .click to expand
 [%collapsible]
 ====
+
 * https://paritytech.github.io/polkadot-sdk/master/cumulus_pallet_xcmp_queue/index.html#[cumulus_pallet_xcmp_queue] Responsible for the Queues (both incoming and outgoing) for XCMP messages. This pallet does not actually receive or send messages. Its responsibility is to place the incoming and outgoing XCMP messages in their respective queues and manage these queues.
 
 * https://docs.rs/pallet-xcm/6.0.0/pallet_xcm/#[pallet_xcm] is responsible for filtering, routing, and executing incoming XCM.
