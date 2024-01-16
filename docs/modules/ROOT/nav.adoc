@@ -1,5 +1,7 @@
 * General Guides
 ** xref:guides/weights_fees.adoc[Weights & Fees]
+* Runtimes
+** xref:runtimes/generic.adoc[Generic Runtime]
 * Runtime Descriptions
 ** xref:runtime/xcm_executor.adoc[XCM Executor]
 * Pallet Specifications

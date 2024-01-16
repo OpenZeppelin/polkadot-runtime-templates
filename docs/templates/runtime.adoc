@@ -1,7 +1,7 @@
 :source-highlighter: highlight.js
 :highlightjs-languages: rust
 :github-icon: pass:[<svg class="icon"><use href="#github-icon"/></svg>]
-= Pallet Name
+= Runtime Name
 
 == Purpose
 
@@ -11,11 +11,13 @@ Freeform description of runtime purpose
 
 // List of pallets with their config description
 
-=== `++pallet_name++` link:https://google.com[{github-icon},role=heading-link]
-
+=== Pallet Category
+[%collapsible]
+====
+===== `++pallet_name++` link:https://google.com[{github-icon},role=heading-link]
 Freeform description of the reason why this pallet was added.
 
-```rust
+Freeform description may include important configuration parameters as:
 impl pallet_name::Config for Runtime {
     type Config1 = Type1;
     type Config2 = Type2;
@@ -24,7 +26,8 @@ impl pallet_name::Config for Runtime {
 
 * Description of `Type1` if needed
 * Description of `Type2` if needed
+====
 
-**Relations**
 
-Description of which pallets will get affected if this pallet is going to be removed or changed
+=== Important Config Changes Specific to This Template
+
