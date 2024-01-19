@@ -1,5 +1,3 @@
-// In your tests directory, create a new file, e.g., runtime/tests/constants_test.rs
-
 use parachain_template_runtime::constants::currency::*;
 
 #[test]

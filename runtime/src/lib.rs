@@ -137,16 +137,21 @@ pub type Executive = frame_executive::Executive<
 ///   - Setting it to `1` will cause the literal `#[weight = x]` values to be
 ///     charged.
 pub struct WeightToFee;
+
+const P_FACTOR: u128 = 10;
+const Q_FACTOR: u128 = 100;
+const POLY_DEGREE: u8 = 1;
+
 impl WeightToFeePolynomial for WeightToFee {
     type Balance = Balance;
 
     fn polynomial() -> WeightToFeeCoefficients<Self::Balance> {
         // in Rococo, extrinsic base weight (smallest non-zero weight) is mapped to 1
         // MILLIUNIT: in our template, we map to 1/10 of that, or 1/10 MILLIUNIT
-        let p = MILLICENTS / 10;
-        let q = 100 * Balance::from(ExtrinsicBaseWeight::get().ref_time());
+        let p = MILLICENTS / P_FACTOR;
+        let q = Q_FACTOR * Balance::from(ExtrinsicBaseWeight::get().ref_time());
         smallvec![WeightToFeeCoefficient {
-            degree: 1,
+            degree: POLY_DEGREE,
             negative: false,
             coeff_frac: Perbill::from_rational(p % q, q),
             coeff_integer: p / q,
@@ -234,6 +239,8 @@ const UNINCLUDED_SEGMENT_CAPACITY: u32 = 1;
 const BLOCK_PROCESSING_VELOCITY: u32 = 1;
 /// Relay chain slot duration, in milliseconds.
 const RELAY_CHAIN_SLOT_DURATION_MILLIS: u32 = 6000;
+/// Maximum length for a block.
+const MAX_BLOCK_LENGTH: u32 = 5 * 1024 * 1024;
 
 /// The version information used to identify this runtime when compiled
 /// natively.
@@ -250,7 +257,7 @@ parameter_types! {
     // `DeletionWeightLimit` and `DeletionQueueDepth` depend on those to parameterize
     // the lazy contract deletion.
     pub RuntimeBlockLength: BlockLength =
-        BlockLength::max_with_normal_ratio(5 * 1024 * 1024, NORMAL_DISPATCH_RATIO);
+        BlockLength::max_with_normal_ratio(MAX_BLOCK_LENGTH, NORMAL_DISPATCH_RATIO);
     pub RuntimeBlockWeights: BlockWeights = BlockWeights::builder()
         .base_block(BlockExecutionWeight::get())
         .for_class(DispatchClass::all(), |weights| {
@@ -273,6 +280,8 @@ parameter_types! {
 }
 
 // Configure FRAME pallets to include in runtime.
+
+const MAX_CONSUMERS: u32 = 16;
 
 impl frame_system::Config for Runtime {
     /// The data to be stored in an account.
@@ -299,7 +308,7 @@ impl frame_system::Config for Runtime {
     /// The lookup mechanism to get account ID from whatever is passed in
     /// dispatchers.
     type Lookup = AccountIdLookup<AccountId, ()>;
-    type MaxConsumers = frame_support::traits::ConstU32<16>;
+    type MaxConsumers = frame_support::traits::ConstU32<MAX_CONSUMERS>;
     /// The index type for storing how many extrinsics an account has signed.
     type Nonce = Nonce;
     /// What to do if an account is fully reaped from the system.
@@ -411,6 +420,12 @@ parameter_types! {
     pub const ExistentialDeposit: Balance = EXISTENTIAL_DEPOSIT;
 }
 
+const MAX_FREEZES: u32 = 0;
+const MAX_HOLDS: u32 = 0;
+const MAX_LOCKS: u32 = 50;
+const MAX_RESERVES: u32 = 50;
+const RESERVE_IDENTIFIER_SIZE: usize = 8;
+
 impl pallet_balances::Config for Runtime {
     type AccountStore = System;
     /// The type for recording an account's balance.
@@ -418,11 +433,11 @@ impl pallet_balances::Config for Runtime {
     type DustRemoval = ();
     type ExistentialDeposit = ExistentialDeposit;
     type FreezeIdentifier = ();
-    type MaxFreezes = ConstU32<0>;
-    type MaxHolds = ConstU32<0>;
-    type MaxLocks = ConstU32<50>;
-    type MaxReserves = ConstU32<50>;
-    type ReserveIdentifier = [u8; 8];
+    type MaxFreezes = ConstU32<MAX_FREEZES>;
+    type MaxHolds = ConstU32<MAX_HOLDS>;
+    type MaxLocks = ConstU32<MAX_LOCKS>;
+    type MaxReserves = ConstU32<MAX_RESERVES>;
+    type ReserveIdentifier = [u8; RESERVE_IDENTIFIER_SIZE];
     /// The ubiquitous event type.
     type RuntimeEvent = RuntimeEvent;
     type RuntimeFreezeReason = RuntimeFreezeReason;
@@ -438,6 +453,8 @@ parameter_types! {
     pub const MetadataDepositBase: Balance = deposit(1, 68);
     pub const MetadataDepositPerByte: Balance = deposit(0, 1);
 }
+
+const REMOVE_ITEMS_LIMIT: u32 = 1000;
 
 impl pallet_assets::Config for Runtime {
     type ApprovalDeposit = ApprovalDeposit;
@@ -456,7 +473,7 @@ impl pallet_assets::Config for Runtime {
     type Freezer = ();
     type MetadataDepositBase = MetadataDepositBase;
     type MetadataDepositPerByte = MetadataDepositPerByte;
-    type RemoveItemsLimit = ConstU32<1000>;
+    type RemoveItemsLimit = ConstU32<REMOVE_ITEMS_LIMIT>;
     type RuntimeEvent = RuntimeEvent;
     type StringLimit = StringLimit;
     type WeightInfo = pallet_assets::weights::SubstrateWeight<Runtime>;
@@ -467,11 +484,13 @@ parameter_types! {
     pub const TransactionByteFee: Balance = 10 * MICROCENTS;
 }
 
+const OPERATIONAL_FEE_MULTIPLIER: u8 = 5;
+
 impl pallet_transaction_payment::Config for Runtime {
     type FeeMultiplierUpdate = SlowAdjustingFeeUpdate<Self>;
     type LengthToFee = ConstantMultiplier<Balance, TransactionByteFee>;
     type OnChargeTransaction = pallet_transaction_payment::CurrencyAdapter<Balances, ()>;
-    type OperationalFeeMultiplier = ConstU8<5>;
+    type OperationalFeeMultiplier = ConstU8<OPERATIONAL_FEE_MULTIPLIER>;
     type RuntimeEvent = RuntimeEvent;
     type WeightToFee = WeightToFee;
 }
@@ -587,11 +606,14 @@ impl pallet_session::Config for Runtime {
     type WeightInfo = pallet_session::weights::SubstrateWeight<Runtime>;
 }
 
+const ALLOW_MULTIPLE_BLOCKS_PER_SLOT: bool = false;
+const MAX_AUTHORITIES: u32 = 100_000;
+
 impl pallet_aura::Config for Runtime {
-    type AllowMultipleBlocksPerSlot = ConstBool<false>;
+    type AllowMultipleBlocksPerSlot = ConstBool<ALLOW_MULTIPLE_BLOCKS_PER_SLOT>;
     type AuthorityId = AuraId;
     type DisabledValidators = ();
-    type MaxAuthorities = ConstU32<100_000>;
+    type MaxAuthorities = ConstU32<MAX_AUTHORITIES>;
     #[cfg(feature = "experimental")]
     type SlotDuration = pallet_aura::MinimumPeriodTimesTwo<Self>;
 }
@@ -610,13 +632,17 @@ pub type CollatorSelectionUpdateOrigin = EitherOfDiverse<
     EnsureXcm<IsVoiceOfBody<RelayLocation, StakingAdminBodyId>>,
 >;
 
+const MAX_CANDIDATES: u32 = 100;
+const MAX_INVULNERABLES: u32 = 20;
+const MIN_ELIGIBLE_COLLATORS: u32 = 4;
+
 impl pallet_collator_selection::Config for Runtime {
     type Currency = Balances;
     // should be a multiple of session or things will get inconsistent
     type KickThreshold = Period;
-    type MaxCandidates = ConstU32<100>;
-    type MaxInvulnerables = ConstU32<20>;
-    type MinEligibleCollators = ConstU32<4>;
+    type MaxCandidates = ConstU32<MAX_CANDIDATES>;
+    type MaxInvulnerables = ConstU32<MAX_INVULNERABLES>;
+    type MinEligibleCollators = ConstU32<MIN_ELIGIBLE_COLLATORS>;
     type PotId = PotId;
     type RuntimeEvent = RuntimeEvent;
     type UpdateOrigin = CollatorSelectionUpdateOrigin;
@@ -921,4 +947,137 @@ impl_runtime_apis! {
 cumulus_pallet_parachain_system::register_validate_block! {
     Runtime = Runtime,
     BlockExecutor = cumulus_pallet_aura_ext::BlockExecutor::<Runtime, Executive>,
+}
+
+#[cfg(test)]
+mod tests {
+
+    use super::*;
+
+    #[test]
+    fn test_constants() {
+        assert_eq!(P_FACTOR, 10);
+
+        assert_eq!(Q_FACTOR, 100);
+
+        assert_eq!(POLY_DEGREE, 1);
+
+        assert_eq!(
+            MAXIMUM_BLOCK_WEIGHT,
+            Weight::from_parts(
+                WEIGHT_REF_TIME_PER_SECOND.saturating_div(2),
+                cumulus_primitives_core::relay_chain::MAX_POV_SIZE as u64
+            )
+        );
+
+        assert_eq!(UNINCLUDED_SEGMENT_CAPACITY, 1);
+
+        assert_eq!(BLOCK_PROCESSING_VELOCITY, 1);
+
+        assert_eq!(RELAY_CHAIN_SLOT_DURATION_MILLIS, 6000);
+
+        assert_eq!(
+            VERSION,
+            RuntimeVersion {
+                spec_name: create_runtime_str!("template-parachain"),
+                impl_name: create_runtime_str!("template-parachain"),
+                authoring_version: 1,
+                spec_version: 1,
+                impl_version: 0,
+                apis: RUNTIME_API_VERSIONS,
+                transaction_version: 1,
+                state_version: 1,
+            }
+        );
+
+        assert_eq!(MILLISECS_PER_BLOCK, 12000);
+
+        assert_eq!(SLOT_DURATION, MILLISECS_PER_BLOCK);
+
+        assert_eq!(MINUTES, 60_000 / (MILLISECS_PER_BLOCK as BlockNumber));
+
+        assert_eq!(HOURS, MINUTES * 60);
+
+        assert_eq!(DAYS, HOURS * 24);
+
+        assert_eq!(MAX_BLOCK_LENGTH, 5 * 1024 * 1024);
+
+        assert_eq!(SS58Prefix::get(), 42);
+
+        assert_eq!(MAX_CONSUMERS, 16);
+
+        assert_eq!(MaxProxies::get(), 32);
+
+        assert_eq!(MaxPending::get(), 32);
+
+        assert_eq!(ProxyDepositBase::get(), deposit(1, 40));
+
+        assert_eq!(AnnouncementDepositBase::get(), deposit(1, 48));
+
+        assert_eq!(ProxyDepositFactor::get(), deposit(0, 33));
+
+        assert_eq!(AnnouncementDepositFactor::get(), deposit(0, 66));
+
+        assert_eq!(MAX_FREEZES, 0);
+
+        assert_eq!(MAX_HOLDS, 0);
+
+        assert_eq!(MAX_LOCKS, 50);
+
+        assert_eq!(MAX_RESERVES, 50);
+
+        assert_eq!(RESERVE_IDENTIFIER_SIZE, 8);
+
+        assert_eq!(AssetDeposit::get(), 10 * CENTS);
+
+        assert_eq!(AssetAccountDeposit::get(), deposit(1, 16));
+
+        assert_eq!(ApprovalDeposit::get(), EXISTENTIAL_DEPOSIT);
+
+        assert_eq!(StringLimit::get(), 50);
+
+        assert_eq!(MetadataDepositBase::get(), deposit(1, 68));
+
+        assert_eq!(MetadataDepositPerByte::get(), deposit(0, 1));
+
+        assert_eq!(REMOVE_ITEMS_LIMIT, 1000);
+
+        assert_eq!(TransactionByteFee::get(), 10 * MICROCENTS);
+
+        assert_eq!(OPERATIONAL_FEE_MULTIPLIER, 5);
+
+        assert_eq!(ReservedXcmpWeight::get(), MAXIMUM_BLOCK_WEIGHT.saturating_div(4));
+
+        assert_eq!(ReservedDmpWeight::get(), MAXIMUM_BLOCK_WEIGHT.saturating_div(4));
+
+        assert_eq!(DepositBase::get(), deposit(1, 88));
+
+        assert_eq!(DepositFactor::get(), deposit(0, 32));
+
+        assert_eq!(MaxSignatories::get(), 100);
+
+        assert_eq!(Period::get(), 6 * HOURS);
+
+        assert_eq!(Offset::get(), 0);
+
+        assert_eq!(ALLOW_MULTIPLE_BLOCKS_PER_SLOT, false);
+
+        assert_eq!(MAX_AUTHORITIES, 100_000);
+
+        let pallet_id_to_string = |id: PalletId| -> String {
+            core::str::from_utf8(&id.0).unwrap_or_default().to_string()
+        };
+
+        assert_eq!(pallet_id_to_string(PotId::get()), pallet_id_to_string(PalletId(*b"PotStake")));
+
+        assert_eq!(SessionLength::get(), 6 * HOURS);
+
+        assert_eq!(StakingAdminBodyId::get(), BodyId::Defense);
+
+        assert_eq!(MAX_CANDIDATES, 100);
+
+        assert_eq!(MAX_INVULNERABLES, 20);
+
+        assert_eq!(MIN_ELIGIBLE_COLLATORS, 4);
+    }
 }
