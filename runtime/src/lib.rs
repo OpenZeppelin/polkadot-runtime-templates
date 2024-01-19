@@ -955,13 +955,16 @@ mod tests {
     use super::*;
 
     #[test]
-    fn test_constants() {
+    fn weight_to_fee_constants() {
         assert_eq!(P_FACTOR, 10);
 
         assert_eq!(Q_FACTOR, 100);
 
         assert_eq!(POLY_DEGREE, 1);
+    }
 
+    #[test]
+    fn frame_system_constants() {
         assert_eq!(
             MAXIMUM_BLOCK_WEIGHT,
             Weight::from_parts(
@@ -1005,7 +1008,10 @@ mod tests {
         assert_eq!(SS58Prefix::get(), 42);
 
         assert_eq!(MAX_CONSUMERS, 16);
+    }
 
+    #[test]
+    fn proxy_constants() {
         assert_eq!(MaxProxies::get(), 32);
 
         assert_eq!(MaxPending::get(), 32);
@@ -1017,7 +1023,10 @@ mod tests {
         assert_eq!(ProxyDepositFactor::get(), deposit(0, 33));
 
         assert_eq!(AnnouncementDepositFactor::get(), deposit(0, 66));
+    }
 
+    #[test]
+    fn balances_constants() {
         assert_eq!(MAX_FREEZES, 0);
 
         assert_eq!(MAX_HOLDS, 0);
@@ -1027,7 +1036,10 @@ mod tests {
         assert_eq!(MAX_RESERVES, 50);
 
         assert_eq!(RESERVE_IDENTIFIER_SIZE, 8);
+    }
 
+    #[test]
+    fn assets_constants() {
         assert_eq!(AssetDeposit::get(), 10 * CENTS);
 
         assert_eq!(AssetAccountDeposit::get(), deposit(1, 16));
@@ -1041,29 +1053,47 @@ mod tests {
         assert_eq!(MetadataDepositPerByte::get(), deposit(0, 1));
 
         assert_eq!(REMOVE_ITEMS_LIMIT, 1000);
+    }
 
+    #[test]
+    fn transaction_payment_constants() {
         assert_eq!(TransactionByteFee::get(), 10 * MICROCENTS);
 
         assert_eq!(OPERATIONAL_FEE_MULTIPLIER, 5);
+    }
 
+    #[test]
+    fn cumulus_pallet_parachain_system_constants() {
         assert_eq!(ReservedXcmpWeight::get(), MAXIMUM_BLOCK_WEIGHT.saturating_div(4));
 
         assert_eq!(ReservedDmpWeight::get(), MAXIMUM_BLOCK_WEIGHT.saturating_div(4));
+    }
 
+    #[test]
+    fn multisig_constants() {
         assert_eq!(DepositBase::get(), deposit(1, 88));
 
         assert_eq!(DepositFactor::get(), deposit(0, 32));
 
         assert_eq!(MaxSignatories::get(), 100);
+    }
 
+    #[test]
+    fn session_constants() {
         assert_eq!(Period::get(), 6 * HOURS);
 
         assert_eq!(Offset::get(), 0);
+    }
 
+    #[test]
+    fn aura_constants() {
         assert_eq!(ALLOW_MULTIPLE_BLOCKS_PER_SLOT, false);
 
         assert_eq!(MAX_AUTHORITIES, 100_000);
+    }
 
+    #[test]
+    fn collator_selection_constants() {
         let pallet_id_to_string = |id: PalletId| -> String {
             core::str::from_utf8(&id.0).unwrap_or_default().to_string()
         };
