@@ -1086,8 +1086,9 @@ mod tests {
     }
 
     #[test]
+    #[allow(clippy::assertions_on_constants)]
     fn aura_constants() {
-        assert_eq!(ALLOW_MULTIPLE_BLOCKS_PER_SLOT, false);
+        assert!(!ALLOW_MULTIPLE_BLOCKS_PER_SLOT);
 
         assert_eq!(MAX_AUTHORITIES, 100_000);
     }
