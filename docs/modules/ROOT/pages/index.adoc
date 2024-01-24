@@ -9,37 +9,107 @@ IMPORTANT: This repo contains code in its early stages. Please be aware that it 
 
 == Quick start
 
-- Begin by visiting our link:https://github.com/OpenZeppelin/polkadot-runtime-template[repository]. You can fork it, use it as a template, or simply clone it to your local directory.
+* Begin by visiting our link:https://github.com/OpenZeppelin/polkadot-runtime-template[repository]. You can fork it, use it as a template, or simply clone it to your local directory.
 ```bash
 git clone git@github.com:OpenZeppelin/polkadot-runtime-template.git
 ```
 
-- Customize a chainspec as desired in node/src/chain_spec.rs. For instance, if you want to launch your chain as a parachain against Rococo, refer to link:https://substrate.io/developers/rococo-network/[this guide from Parity] to set it up. Replace 1000 with the received parachain id in the chainspec.
-
-NOTE: To submit calls for extrinsics reservation you can use the link:https://polkadot.js.org/apps[default explorer] along with the link:https://polkadot.js.org/extension/[polkadot browser extension]. However, the explorer won't provide a parachain id, and it can be challenging to locate it in the block. For such purposes, you can use link:https://www.subscan.io/[Subscan] to identify what was returned from the reserve call.
-
-- Build a release version of the runtime and node:
+* Build a release version of the runtime and node:
 ```bash
 cargo build --release
 ```
 
-- Run a node! For example, you can use a command from the aforementioned guide:
+* Receive some `ROC` from the link:https://paritytech.github.io/polkadot-testnet-faucet/[Rococo faucet]
 
+* Reserve a ParaId on Rococo:
+
+** Go to link:https://polkadot.js.org/apps[PolkadotJS]. Check that it points to Rococo testnet.
+** Go to `Network` > `Parachains`
+** Go to `Parathreads` tab
+** Click the `+ ParaId` button
+** Save a `parachain id` for the further usage.
+** Click `Submit` and `Sign and Submit`.
+
+* Generate and customize a chainspec:
+
+** Generate a plain chainspec with this command:
++
+```bash
+./target/release/parachain-template-node build-spec --disable-default-nodes > plain-parachain-chainspec.json
+```
+
+** Edit the chainspec:
+
+*** Update `name`, `id` and `protocolId` to unique values.
+*** Change `relay_chain` from `rococo-local` to `rococo`.
+*** Change `para_id` and `parachainInfo.parachainId` from `1000` to the previously saved parachain id.
+
+** Generate a raw chainspec with this command:
++
+```bash
+./target/release/parachain-template-node build-spec --chain plain-parachain-chainspec.json --disable-default-bootnode --raw > raw-parachain-chainspec.json
+```
+
+* Run two nodes and wait till it syncs with the Rococo relay chain (it may take up to two days to sync it):
++
 ```bash
 ./target/release/parachain-template-node \
-    --[your authority] \
+    --alice \
     --collator \
     --force-authoring \
-    --[your chainspec] \
-    --base-path <path to data> \
+    --chain raw-parachain-chainspec.json \
+    --base-path <path to datadir> \
     --port 40333 \
     --rpc-port 8844 \
     -- \
     --execution wasm \
-    --chain <relay chain raw chain spec> \
+    --chain <path to the Rococo chainspec> \
+    --port 30343 \
+    --rpc-port 9977
+
+./target/release/parachain-template-node \
+    --bob \
+    --collator \
+    --force-authoring \
+    --chain raw-parachain-chainspec.json \
+    --base-path <path to datadir> \
+    --port 40333 \
+    --rpc-port 8845 \
+    -- \
+    --execution wasm \
+    --chain <path to the Rococo chainspec> \
     --port 30343 \
     --rpc-port 9977
 ```
+
+* Register a parathread:
+
+** Generate a genesis state:
++
+```bash
+./target/release/parachain-template-node export-genesis-state --chain raw-parachain-chainspec.json para-<paraId>-genesis-state
+```
+** Generate a genesis wasm:
++
+```bash
+./target/release/parachain-template-node export-genesis-wasm --chain raw-parachain-chainspec.json para-<paraId>-wasm
+```
+** Go to link:https://polkadot.js.org/apps[PolkadotJS]. Check that it points to Rococo testnet.
+** Go to `Network` > `Parachains`.
+** Go to `Parathreads` tab.
+** Click the `+ ParaThread` button.
+** Insert `para-<paraId>-wasm` to `code` field.
+** Insert `para-<paraId>-genesis-state` to `initial state` field.
+** Click `Submit` and `Sign and Submit`.
+
+* When a parachain gets synced with a relaychain, you may start producing blocks as a parathread:
+** Create some transaction with a PolkadotJS pointing to your parachain setup.
+** With a PolkadotJS pointing to Rococo go to `Developer` > `Extrinsics`.
+** Submit an extrinsic `onDemandAssignmentProvider.placeOrderAllowDeath` or `onDemandAssignmentProvider.placeOrderKeepAlive`:
+*** `maxAmount` should be not less than 10_000_000 and it is amount of 0.00001 ROC. It is an amount of ROC paid for the block.
+*** `paraId` should be set to your parachain id.
+*** Click `Submit` and `Sign and Submit`.
+** In some time your parathread will produce a block and in one of the next blocks of Rococo there will be an inclusion of this block
 
 == What's next?
 
