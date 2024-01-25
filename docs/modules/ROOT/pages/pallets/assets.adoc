@@ -727,7 +727,3 @@ NOTE: The `block` function is used to restrict a particular account from perform
 * `origin: OriginFor<T>` -- caller, must be root.
 * `id: T::AssetIdParameter` -- the identifier of the asset for which transactions are being blocked.
 * `who: AccountIdLookupOf<T>` -- the account that is being blocked from transacting the asset.
-
-== Important Mentions and FAQ’s
-
-== More Reading
