@@ -66,7 +66,9 @@ cargo build --release
     --chain <path to the Rococo chainspec> \
     --port 30343 \
     --rpc-port 9977
-
+```
++
+```bash
 ./target/release/parachain-template-node \
     --bob \
     --collator \
