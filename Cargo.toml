@@ -18,7 +18,7 @@ clap = { version = "4.4.6", features = [ "derive" ] }
 color-print = "0.3.4"
 futures = "0.3.28"
 hex-literal = "0.4.1"
-jsonrpsee = { version = "0.21.0", features = [ "server" ] }
+jsonrpsee = { version = "0.16.3", features = [ "server" ] }
 log = { version = "0.4.20", default-features = false }
 parity-scale-codec = { version = "3.0.0", default-features = false, features = [
 	"derive",
@@ -26,6 +26,7 @@ parity-scale-codec = { version = "3.0.0", default-features = false, features = [
 scale-info = { version = "2.10.0", default-features = false }
 serde = { version = "1.0.188", default-features = false }
 smallvec = "1.11.0"
+serde_json = "1.0.108"
 
 # Local
 pallet-template = { path = "pallets/template", default-features = false }
