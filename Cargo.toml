@@ -25,8 +25,8 @@ parity-scale-codec = { version = "3.0.0", default-features = false, features = [
 ] }
 scale-info = { version = "2.10.0", default-features = false }
 serde = { version = "1.0.188", default-features = false }
-smallvec = "1.11.0"
 serde_json = "1.0.108"
+smallvec = "1.11.0"
 
 # Local
 pallet-template = { path = "pallets/template", default-features = false }
