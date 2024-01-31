@@ -17,7 +17,79 @@ The `pallet_assets` module is designed to manage and manipulate custom fungible 
 ** `Admin` - The account that has administrative privileges over an asset, such as: `minting`, `burning`, `freezing`, and `thawing`.
 ** `Sufficiency` - The amount of an asset that is required to be held in an account in order to perform certain operations, such as: `transfers`, `freezing`, and `thawing`.
 
-== Config
+== Config link:https://github.com/paritytech/polkadot-sdk/blob/master/substrate/frame/assets/src/lib.rs#L231[{github-icon},role=heading-link]
+
+* Pallet-specific configs
+** `Balance` -- The balance unit type.
+** `RemoveItemsLimit` -- The maximum number of items that can be removed in a single `destroy_accounts` and `destroy_approvals` call.
+** `AssetId` -- The unique asset identifiers.
+** `AssetIdParameter` -- The parameter type for asset identifiers.
+** `Currency` -- The currency type.
+** `CreateOrigin` -- The origin type that can create an asset.
+** `ForceOrigin` -- The origin type that can force an asset action.
+** `AssetDeposit` -- The deposit required for reservation to create an asset.
+** `AssetAccountDeposit` -- The deposit required for a non-provider asset account for reservation to create an asset account.
+** `MetadataDepositBase` -- The base deposit required to reserve metadata.
+** `MetadataDepositPerByte` -- The deposit required to reserve metadata per byte.
+** `ApprovalDeposit` -- The deposit required to reserve an approval.
+** `StringLimit` -- The maximum length of a name or symbol.
+** `Freezer` -- A hook to allow a per-asset, per-account minimum balance to be enforced.
+** `Extra` -- The extra data to be stored with an account's asset balance.
+** `CallbackHandle` -- An asset created or destroyed callback functions.
+** `BenchmarkHelper` -- A helper type to benchmark the pallet's weight.
+* Common configs
+** `RuntimeEvent` -- The overarching event type.
+** `WeightInfo` -- xref:glossary.adoc#weight[Weight] information for extrinsics in this pallet.
+
+== Events link:https://github.com/paritytech/polkadot-sdk/blob/master/substrate/frame/assets/src/lib.rs#L442[{github-icon},role=heading-link]
+
+* `Created(asset_id, creator, owner)` -- An asset was created.
+* `Issued(asset_id, owner, amount)` -- An asset was issued.
+* `Transferred(asset_id, from, to, amount)` -- An asset was transferred.
+* `Burned(asset_id, owner, balance)` -- An asset was burned.
+* `TeamChanged(asset_id, issuer, admin, freezer)` -- The management team of an asset was changed.
+* `OwnerChanged(asset_id, owner)` -- The owner of an asset was changed.
+* `Frozen(asset_id, who)` -- An account `who` was frozen.
+* `Thawed(asset_id, who)` -- An account `who` was thawed.
+* `AssetFrozen(asset_id)` -- An asset was frozen.
+* `AssetThawed(asset_id)` -- An asset was thawed.
+* `AccountsDestroyed(asset_id, accounts_destroyed, accounts_remaining)` -- A number `accounts_destroyed` accounts were destroyed for an asset.
+* `ApprovalsDestroyed(asset_id, approvals_destroyed, approvals_remaining)` -- A number `approvals_destroyed` approvals were destroyed for an asset.
+* `DestructionStarted(asset_id)` -- The destruction of an asset class was started.
+* `Destroyed(asset_id)` -- An asset class was destroyed.
+* `ForceCreated(asset_id, owner)` -- An asset was force created.
+* `MetadataSet(asset_id, name, symbol, decimals, is_frozen)` -- The metadata of an asset was set.
+* `MetadataCleared(asset_id)` -- The metadata of an asset was cleared.
+* `ApprovedTransfer(asset_id, source, delegate, amount)` -- An approval was made for a delegate to transfer a specific amount of an asset on behalf of the owner.
+* `ApprovalCancelled(asset_id, owner, delegate)` -- An approval was cancelled for a delegate to transfer a specific amount of an asset on behalf of the owner.
+* `TransferredApproved(asset_id, owner, delegate, destination, amount)` -- A delegate transferred a specific amount of an asset on behalf of the owner.
+* `AssetStatusChanged(asset_id)` -- The attributes of an asset was forcely changed.
+* `AssetMinBalanceChanged(asset_id, new_min_balance)` -- The minimum balance of an asset was changed by an owner.
+* `Touched(asset_id, who, depositor)` -- An account `who` was created with a deposit from `depositor`.
+* `Blocked(asset_id, who)` -- An account `who` was blocked.
+
+== Errors link:https://github.com/paritytech/polkadot-sdk/blob/master/substrate/frame/assets/src/lib.rs#L526[{github-icon},role=heading-link]
+
+* `BalanceLow` -- Account balance must be greater than or equal to the transfer amount.
+* `NoAccount` -- The account to alter does not exist.
+* `NoPermission` -- The signing account has no permission to do the operation.
+* `Unknown` -- The given asset ID is unknown.
+* `Frozen` -- The origin account is frozen.
+* `InUse` -- The asset ID is already taken.
+* `BadWitness` -- Invalid witness data given.
+* `MinBalanceZero` -- Minimum balance should be non-zero.
+* `UnavailableConsumer` -- Unable to increment the consumer reference counters on the account. Either no provider reference exists to allow a non-zero balance of a non-self-sufficient asset, or one fewer then the maximum number of consumers has been reached.
+* `BadMetadata` -- Invalid metadata given.
+* `Unapproved` -- No approval exists that would allow the transfer.
+* `WouldDie` -- The source account would not survive the transfer and it needs to stay alive.
+* `AlreadyExists` -- The asset-account already exists.
+* `NoDeposit` -- The asset-account doesn't have an associated deposit.
+* `WouldBurn` -- The operation would result in funds being burned.
+* `LiveAsset` -- The asset is a live asset and is actively being used. Usually emit for operations such as `start_destroy` which require the asset to be in a destroying state.
+* `AssetNotLive` -- The asset is not live, and likely being destroyed.
+* `IncorrectStatus` -- The asset status is not the expected status.
+* `NotFrozen` -- The asset should be frozen before the given operation.
+* `CallbackFailed` -- Callback action resulted in error.
 
 == Dispatchables link:https://github.com/paritytech/polkadot-sdk/blob/release-polkadot-v1.3.0/substrate/frame/assets/src/lib.rs#L576[{github-icon},role=heading-link]
 
