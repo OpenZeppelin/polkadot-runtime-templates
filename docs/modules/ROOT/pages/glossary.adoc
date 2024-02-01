@@ -16,6 +16,10 @@ Asset Teleportation is a movement of an asset by destroying it on one side and c
 
 A generic filter which returns whether or not XCM may pass and be executed. If they do not pass the barrier, they are not executed. The barrier is the final filter before XCM execution. It implements the `ShouldExecute` trait and therefore takes as input an XCM and returns a bool indicating whether it should be executed.
 
+=== Burning
+
+The process of destroying existing assets.
+
 == C
 
 === Candidacy Bond
@@ -55,6 +59,10 @@ Delegator is an account that granted call execution rights with <<proxy>> creati
 
 An asset where any unit of it worth the same. Opposite of <<nonfungible_asset>>
 
+=== NonFungible Asset
+
+An asset meaning that it is not interchangeable with other assets of the same type. For example, a non-fungible asset could be an NFT, while a fungible asset could be a currency token.
+
 == H
 
 === Hold 
@@ -92,6 +100,10 @@ Nearly the same as `<<Hold>>`, with 2 major differences:
 ** Apply `Lock` to account A for 20 units, then apply another `Lock` to account A for 10 units -> a total of 20 units will be locked, since 10 is smaller than 20.
 
 == M
+
+=== Minting
+
+The process of creating new assets.
 
 === MultiAsset
 
@@ -136,6 +148,10 @@ Deprecated, use `<<Hold>>`.
 When consensus systems do not have a established layer of trust over which they can transfer assets, they can opt for a trusted 3rd entity to store the assets
 
 == T
+
+=== Thawing
+
+The process of unfreezing an asset after being frozen.
 
 === Tip
 

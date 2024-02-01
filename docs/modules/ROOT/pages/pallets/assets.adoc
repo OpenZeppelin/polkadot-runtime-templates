@@ -1,0 +1,801 @@
+:source-highlighter: highlight.js
+:highlightjs-languages: rust
+:github-icon: pass:[<svg class="icon"><use href="#github-icon"/></svg>]
+
+= pallet_assets
+
+Branch/Release: `release-polkadot-v1.3.0`
+
+== Purpose
+
+The `pallet_assets` module is designed to manage and manipulate custom fungible asset types. It provides functionality for asset creation, management, and various operations, allowing for a flexible and scalable approach to asset handling.
+
+== Pallet specific terms
+
+** `Asset ID` - A unique identifier for an asset type.
+** `Asset Owner` - The account that owns an asset.
+** `Admin` - The account that has administrative privileges over an asset, such as: `minting`, `burning`, `freezing`, and `thawing`.
+** `Sufficiency` - The amount of an asset that is required to be held in an account in order to perform certain operations, such as: `transfers`, `freezing`, and `thawing`.
+
+== Config link:https://github.com/paritytech/polkadot-sdk/blob/master/substrate/frame/assets/src/lib.rs#L231[{github-icon},role=heading-link]
+
+* Pallet-specific configs
+** `Balance` -- The balance unit type.
+** `RemoveItemsLimit` -- The maximum number of items that can be removed in a single `destroy_accounts` and `destroy_approvals` call.
+** `AssetId` -- The unique asset identifiers.
+** `AssetIdParameter` -- The parameter type for asset identifiers.
+** `Currency` -- The currency type.
+** `CreateOrigin` -- The origin type that can create an asset.
+** `ForceOrigin` -- The origin type that can force an asset action.
+** `AssetDeposit` -- The deposit required for reservation to create an asset.
+** `AssetAccountDeposit` -- The deposit required for a non-provider asset account for reservation to create an asset account.
+** `MetadataDepositBase` -- The base deposit required to reserve metadata.
+** `MetadataDepositPerByte` -- The deposit required to reserve metadata per byte.
+** `ApprovalDeposit` -- The deposit required to reserve an approval.
+** `StringLimit` -- The maximum length of a name or symbol.
+** `Freezer` -- A hook to allow a per-asset, per-account minimum balance to be enforced.
+** `Extra` -- The extra data to be stored with an account's asset balance.
+** `CallbackHandle` -- An asset created or destroyed callback functions.
+** `BenchmarkHelper` -- A helper type to benchmark the pallet's weight.
+* Common configs
+** `RuntimeEvent` -- The overarching event type.
+** `WeightInfo` -- xref:glossary.adoc#weight[Weight] information for extrinsics in this pallet.
+
+== Events link:https://github.com/paritytech/polkadot-sdk/blob/master/substrate/frame/assets/src/lib.rs#L442[{github-icon},role=heading-link]
+
+* `Created(asset_id, creator, owner)` -- An asset was created.
+* `Issued(asset_id, owner, amount)` -- An asset was issued.
+* `Transferred(asset_id, from, to, amount)` -- An asset was transferred.
+* `Burned(asset_id, owner, balance)` -- An asset was burned.
+* `TeamChanged(asset_id, issuer, admin, freezer)` -- The management team of an asset was changed.
+* `OwnerChanged(asset_id, owner)` -- The owner of an asset was changed.
+* `Frozen(asset_id, who)` -- An account `who` was frozen.
+* `Thawed(asset_id, who)` -- An account `who` was thawed.
+* `AssetFrozen(asset_id)` -- An asset was frozen.
+* `AssetThawed(asset_id)` -- An asset was thawed.
+* `AccountsDestroyed(asset_id, accounts_destroyed, accounts_remaining)` -- A number `accounts_destroyed` accounts were destroyed for an asset.
+* `ApprovalsDestroyed(asset_id, approvals_destroyed, approvals_remaining)` -- A number `approvals_destroyed` approvals were destroyed for an asset.
+* `DestructionStarted(asset_id)` -- The destruction of an asset class was started.
+* `Destroyed(asset_id)` -- An asset class was destroyed.
+* `ForceCreated(asset_id, owner)` -- An asset was force created.
+* `MetadataSet(asset_id, name, symbol, decimals, is_frozen)` -- The metadata of an asset was set.
+* `MetadataCleared(asset_id)` -- The metadata of an asset was cleared.
+* `ApprovedTransfer(asset_id, source, delegate, amount)` -- An approval was made for a delegate to transfer a specific amount of an asset on behalf of the owner.
+* `ApprovalCancelled(asset_id, owner, delegate)` -- An approval was cancelled for a delegate to transfer a specific amount of an asset on behalf of the owner.
+* `TransferredApproved(asset_id, owner, delegate, destination, amount)` -- A delegate transferred a specific amount of an asset on behalf of the owner.
+* `AssetStatusChanged(asset_id)` -- The attributes of an asset was forcely changed.
+* `AssetMinBalanceChanged(asset_id, new_min_balance)` -- The minimum balance of an asset was changed by an owner.
+* `Touched(asset_id, who, depositor)` -- An account `who` was created with a deposit from `depositor`.
+* `Blocked(asset_id, who)` -- An account `who` was blocked.
+
+== Errors link:https://github.com/paritytech/polkadot-sdk/blob/master/substrate/frame/assets/src/lib.rs#L526[{github-icon},role=heading-link]
+
+* `BalanceLow` -- Account balance must be greater than or equal to the transfer amount.
+* `NoAccount` -- The account to alter does not exist.
+* `NoPermission` -- The signing account has no permission to do the operation.
+* `Unknown` -- The given asset ID is unknown.
+* `Frozen` -- The origin account is frozen.
+* `InUse` -- The asset ID is already taken.
+* `BadWitness` -- Invalid witness data given.
+* `MinBalanceZero` -- Minimum balance should be non-zero.
+* `UnavailableConsumer` -- Unable to increment the consumer reference counters on the account. Either no provider reference exists to allow a non-zero balance of a non-self-sufficient asset, or one fewer then the maximum number of consumers has been reached.
+* `BadMetadata` -- Invalid metadata given.
+* `Unapproved` -- No approval exists that would allow the transfer.
+* `WouldDie` -- The source account would not survive the transfer and it needs to stay alive.
+* `AlreadyExists` -- The asset-account already exists.
+* `NoDeposit` -- The asset-account doesn't have an associated deposit.
+* `WouldBurn` -- The operation would result in funds being burned.
+* `LiveAsset` -- The asset is a live asset and is actively being used. Usually emit for operations such as `start_destroy` which require the asset to be in a destroying state.
+* `AssetNotLive` -- The asset is not live, and likely being destroyed.
+* `IncorrectStatus` -- The asset status is not the expected status.
+* `NotFrozen` -- The asset should be frozen before the given operation.
+* `CallbackFailed` -- Callback action resulted in error.
+
+== Dispatchables link:https://github.com/paritytech/polkadot-sdk/blob/release-polkadot-v1.3.0/substrate/frame/assets/src/lib.rs#L576[{github-icon},role=heading-link]
+
+[.contract-item]
+[[create]]
+==== `[.contract-item-name]#++create++#`
+[source,rust]
+----
+pub fn create(
+    origin: OriginFor<T>,
+    id: T::AssetIdParameter,
+    admin: AccountIdLookupOf<T>,
+    min_balance: T::Balance,
+) -> DispatchResult
+----
+Issues a new class of fungible assets from a public origin. If an asset was not created, raises `CallbackFailed`.
+
+NOTE: The origin must conform to the configured `CreateOrigin` and have sufficient funds free.
+
+**Params:**
+
+* `origin: OriginFor<T>` -- caller (and in this case, sender) account.
+* `id: T::AssetIdParameter` -- the identifier of the asset to be created.
+* `admin: AccountIdLookupOf<T>` -- the admin of this asset, who can execute all privileged functions.
+* `min_balance: T::Balance` -- the minimum balance of this new asset that any single account must have.
+
+[.contract-item]
+[[force_create]]
+==== `[.contract-item-name]#++force_create++#`
+[source,rust]
+----
+pub fn force_create(
+    origin: OriginFor<T>,
+    id: T::AssetIdParameter,
+    owner: AccountIdLookupOf<T>,
+    is_sufficient: bool,
+    #[pallet::compact] min_balance: T::Balance,
+) -> DispatchResult
+----
+Issues a new class of fungible assets from a privileged origin.
+
+NOTE: The origin must conform to `ForceOrigin`. Unlike `create`, no funds are reserved.
+
+**Params:**
+
+* `origin: OriginFor<T>` -- caller (and in this case, sender) account.
+* `id: T::AssetIdParameter` -- the unique identifier of the asset to be created.
+* `owner: AccountIdLookupOf<T>` -- the owner of this asset, who can mint/burn tokens.
+* `is_sufficient: bool` -- whether the owner account should be checked for minimum balance.
+
+[.contract-item]
+[[start_destroy]]
+==== `[.contract-item-name]#++start_destroy++#`
+[source,rust]
+----
+pub fn start_destroy(
+    origin: OriginFor<T>,
+    id: T::AssetIdParameter
+) -> DispatchResult
+----
+Start the process of destroying a fungible asset class.
+
+NOTE: `start_destroy` is the first in a series of extrinsics that should be called, to allow destruction of an asset class. The origin must conform to `ForceOrigin` or must be `Signed` by the asset's `owner`. The asset class must be frozen before calling `start_destroy`.
+
+**Params:**
+
+* `origin: OriginFor<T>` -- caller (and in this case, sender) account.
+* `id: T::AssetIdParameter` -- the identifier of the existing asset to be destroyed.
+
+[.contract-item]
+[[destroy_accounts]]
+==== `[.contract-item-name]#++destroy_accounts++#`
+[source,rust]
+----
+pub fn destroy_accounts(
+    origin: OriginFor<T>,
+    id: T::AssetIdParameter,
+) -> DispatchResultWithPostInfo
+----
+
+Destroys accounts associated with a given asset.
+
+NOTE: `destroy_accounts` is the second in a series of extrinsics that should only be called after `start_destroy`, to allow destruction of an asset class. The origin must conform to `ForceOrigin` or must be `Signed` by the asset's `owner`. It will call `T::RemoveItemsLimit::get()` so if the number of accounts exceeds this limit, this function need to be called several times.
+
+**Params:**
+
+* `origin: OriginFor<T>` -- caller (and in this case, sender) account.
+* `id: T::AssetIdParameter` -- the identifier of the existing asset to be destroyed.
+
+[.contract-item]
+[[destroy_approvals]]
+==== `[.contract-item-name]#++destroy_approvals++#`
+[source,rust]
+----
+pub fn destroy_approvals(
+    origin: OriginFor<T>,
+    id: T::AssetIdParameter,
+) -> DispatchResult
+----
+Clears approvals associated with a given asset.
+
+NOTE: It should be called after `start_destroy`. It will call `T::RemoveItemsLimit::get()` so if the number of approvals exceeds this limit, this function need to be called several times.
+
+**Params:**
+
+* `origin: OriginFor<T>` -- caller (and in this case, root) account.
+* `id: T::AssetIdParameter` -- the identifier of the asset for which all approvals will be destroyed.
+
+[.contract-item]
+[[finish_destroy]]
+==== `[.contract-item-name]#++finish_destroy++#`
+[source,rust]
+----
+pub fn finish_destroy(
+    origin: OriginFor<T>,
+    id: T::AssetIdParameter
+) -> DispatchResult
+----
+Completes the process of asset destruction initiated by `start_destroy`.
+
+NOTE: This function is the final step in the asset destruction process. It should only be called after all checks and balances have been done, typically after `start_destroy` and `destroy_accounts` are successfully called. The origin must conform to `ForceOrigin` or be `Signed` by the asset's owner, ensuring that this sensitive action is adequately authorized.
+
+**Params:**
+
+* `origin: OriginFor<T>` -- caller (and in this case, root) account.
+* `id: T::AssetIdParameter` -- the identifier of the asset to be destroyed.
+
+[.contract-item]
+[[mint]]
+==== `[.contract-item-name]#++mint++#`
+[source,rust]
+----
+pub fn mint(
+    origin: OriginFor<T>,
+    id: T::AssetIdParameter,
+    beneficiary: AccountIdLookupOf<T>,
+    #[pallet::compact] amount: T::Balance,
+) -> DispatchResult
+----
+Mints new units of a specific asset and assigns them to a beneficiary account.
+
+NOTE: The `mint` function allows authorized accounts to increase the supply of an asset. The origin must be authorized to mint assets, typically configured via `MintOrigin`. The `#[pallet::compact]` attribute is used to optimize the storage of the `amount` parameter. This function ensures that the total supply doesn't overflow and that the beneficiary is capable of holding the asset.
+
+**Params:**
+
+* `origin: OriginFor<T>` -- caller, must be root.
+* `id: T::AssetIdParameter` -- the identifier of the asset for which units are to be minted.
+* `beneficiary: AccountIdLookupOf<T>` -- the account that will receive the newly minted units.
+* `amount: T::Balance` -- the amount of new units to be minted and credited to the beneficiary.
+
+[.contract-item]
+[[burn]]
+==== `[.contract-item-name]#++burn++#`
+[source,rust]
+----
+pub fn burn(
+    origin: OriginFor<T>,
+    id: T::AssetIdParameter,
+    who: AccountIdLookupOf<T>,
+    #[pallet::compact] amount: T::Balance,
+) -> DispatchResult
+----
+Destroys units of a specific asset from the specified account.
+
+NOTE: The `burn` function decreases the supply of an asset by removing a specified amount from a particular account. The origin must be authorized to burn assets, typically configured via `BurnOrigin`. The `#[pallet::compact]` attribute optimizes the storage of the `amount` parameter. This function is used for asset management, such as reducing supply or removing assets from circulation for regulatory compliance.
+
+**Params:**
+
+* `origin: OriginFor<T>` -- caller, must be root.
+* `id: T::AssetIdParameter` -- the identifier of the asset from which units are to be burned.
+* `who: AccountIdLookupOf<T>` -- the account from which the units will be destroyed.
+* `amount: T::Balance` -- the amount of units to be burned from the specified account.
+
+[.contract-item]
+[[transfer]]
+==== `[.contract-item-name]#++transfer++#`
+[source,rust]
+----
+pub fn transfer(
+    origin: OriginFor<T>,
+    id: T::AssetIdParameter,
+    target: AccountIdLookupOf<T>,
+    #[pallet::compact] amount: T::Balance,
+) -> DispatchResult
+----
+Transfers a specified amount of a specific asset to a target account.
+
+NOTE: The `transfer` function allows assets to be moved between accounts. The origin must be signed by the account wishing to transfer assets and must have sufficient balance. The `#[pallet::compact]` attribute is used for efficient storage of the `amount` parameter. This function checks for liquidity, asset validity, and the receiving account's ability to accept the asset, ensuring secure and accurate transactions.
+
+**Params:**
+
+* `origin: OriginFor<T>` -- the caller account initiating the transfer.
+* `id: T::AssetIdParameter` -- the identifier of the asset to be transferred.
+* `target: AccountIdLookupOf<T>` -- the recipient account of the asset units.
+* `amount: T::Balance` -- the amount of units to transfer from the caller to the target account. The amount actually transferred may be slightly greater in the case that the transfer would otherwise take the sender balance above zero but below the minimum balance. Must be greater than zero.
+
+[.contract-item]
+[[transfer_keep_alive]]
+==== `[.contract-item-name]#++transfer_keep_alive++#`
+[source,rust]
+----
+pub fn transfer_keep_alive(
+    origin: OriginFor<T>,
+    id: T::AssetIdParameter,
+    target: AccountIdLookupOf<T>,
+    #[pallet::compact] amount: T::Balance,
+) -> DispatchResult
+----
+Transfers a specified amount of a specific asset to a target account, ensuring that the transfer does not result in the sender's total demise.
+
+NOTE: The `transfer_keep_alive` function is similar to `transfer` but includes an additional check that prevents the transfer if it would cause the origin account to be reaped. This is critical for ensuring the account's continued existence, particularly for accounts with minimum balance requirements. The `#[pallet::compact]` attribute is used for efficient storage of the `amount` parameter. Like `transfer`, it ensures secure and precise asset movement between accounts.
+
+**Params:**
+
+* `origin: OriginFor<T>` -- the caller account initiating the transfer.
+* `id: T::AssetIdParameter` -- the identifier of the asset to be transferred.
+* `target: AccountIdLookupOf<T>` -- the recipient account of the asset units.
+* `amount: T::Balance` -- the amount of units to transfer from the caller to the target account, while ensuring the sender's account remains active.  The amount actually transferred may be slightly greater in the case that the transfer would otherwise take the sender balance above zero but below the minimum balance. Must be greater than zero.
+
+[.contract-item]
+[[force_transfer]]
+==== `[.contract-item-name]#++force_transfer++#`
+[source,rust]
+----
+pub fn force_transfer(
+    origin: OriginFor<T>,
+    id: T::AssetIdParameter,
+    source: AccountIdLookupOf<T>,
+    dest: AccountIdLookupOf<T>,
+    #[pallet::compact] amount: T::Balance,
+) -> DispatchResult
+----
+Forces the transfer of a specified amount of a specific asset from a source account to a destination account.
+
+NOTE: The `force_transfer` function is an administrative tool that allows a privileged origin, typically configured via `ForceOrigin`, to move assets between accounts without consent from the source. This might be used in exceptional scenarios, such as legal or administrative resolutions. The `#[pallet::compact]` attribute optimizes storage of the `amount` parameter. This function must be used with caution due to its power and potential impact on account balances.
+
+**Params:**
+
+* `origin: OriginFor<T>` -- caller, must be root.
+* `id: T::AssetIdParameter` -- the identifier of the asset to be forcibly transferred.
+* `source: AccountIdLookupOf<T>` -- the account from which the asset units will be debited.
+* `dest: AccountIdLookupOf<T>` -- the account to which the asset units will be credited.
+* `amount: T::Balance` -- the amount of units to forcibly transfer from the source to the destination account.  The amount actually transferred may be slightly greater in the case that the transfer would otherwise take the sender balance above zero but below the minimum balance. Must be greater than zero.
+
+[.contract-item]
+[[freeze]]
+==== `[.contract-item-name]#++freeze++#`
+[source,rust]
+----
+pub fn freeze(
+    origin: OriginFor<T>,
+    id: T::AssetIdParameter,
+    who: AccountIdLookupOf<T>,
+) -> DispatchResult
+----
+Freezes the specified asset in a particular account, preventing further unprivileged transfers of the asset from the frozen account.
+
+NOTE: The `freeze` function is used to halt all operations for a specified asset in a given account, typically for regulatory or compliance reasons. This action can only be performed by an authorized origin, usually the asset's admin or another account with special privileges. Once an account is frozen, it cannot transact the specified asset until an `thaw` operation is performed.
+
+**Params:**
+
+* `origin: OriginFor<T>` -- caller, must be root.
+* `id: T::AssetIdParameter` -- the identifier of the asset to be frozen.
+* `who: AccountIdLookupOf<T>` -- the account in which the asset will be frozen. Must already exist as an entry in `Account`s of the asset.
+
+[.contract-item]
+[[thaw]]
+==== `[.contract-item-name]#++thaw++#`
+[source,rust]
+----
+pub fn thaw(
+    origin: OriginFor<T>,
+    id: T::AssetIdParameter,
+    who: AccountIdLookupOf<T>,
+) -> DispatchResult
+----
+Unfreezes the specified asset in a particular account, allowing the resumption of unprivileged transfers of the asset.
+
+NOTE: The `thaw` function reverses the effect of `freeze`, re-enabling the account to transact with the specified asset. This action is typically restricted to authorized origins, such as the asset's admin or other accounts with special privileges. It is used in scenarios where the conditions that led to the initial freezing have been resolved or are no longer applicable.
+
+**Params:**
+
+* `origin: OriginFor<T>` -- caller, must be root.
+* `id: T::AssetIdParameter` -- the identifier of the asset to be thawed.
+* `who: AccountIdLookupOf<T>` -- the account in which the asset will be thawed.
+
+[.contract-item]
+[[freeze_asset]]
+==== `[.contract-item-name]#++freeze_asset++#`
+[source,rust]
+----
+pub fn freeze_asset(
+    origin: OriginFor<T>,
+    id: T::AssetIdParameter
+) -> DispatchResult
+----
+Freezes all operations for a specified asset across all accounts, halting any transfer, minting, or other asset-related activities.
+
+NOTE: The `freeze_asset` function is a comprehensive freeze operation affecting all accounts holding the specified asset. It is intended for emergency or regulatory situations requiring immediate suspension of all activities related to the asset. This action typically requires authorization from a privileged origin, which might be the asset's admin or a specific governance mechanism in place. The freeze remains in effect until an `thaw_asset` operation is performed.
+
+**Params:**
+
+* `origin: OriginFor<T>` -- caller, must be root.
+* `id: T::AssetIdParameter` -- the identifier of the asset to be frozen.
+
+[.contract-item]
+[[thaw_asset]]
+==== `[.contract-item-name]#++thaw_asset++#`
+[source,rust]
+----
+pub fn thaw_asset(
+    origin: OriginFor<T>,
+    id: T::AssetIdParameter
+) -> DispatchResult
+----
+Unfreezes all operations for a specified asset across all accounts, allowing resumption of transfers, minting, and other asset-related activities.
+
+NOTE: The `thaw_asset` function reverses the comprehensive freeze applied by `freeze_asset`, re-enabling the normal operation of all activities related to the asset across all accounts. It is typically used once the conditions necessitating the freeze are no longer applicable or have been resolved. This action usually requires authorization from a privileged origin, such as the asset's admin or a specific governance mechanism.
+
+**Params:**
+
+* `origin: OriginFor<T>` -- caller, must be root.
+* `id: T::AssetIdParameter` -- the identifier of the asset to be thawed.
+
+[.contract-item]
+[[transfer_ownership]]
+==== `[.contract-item-name]#++transfer_ownership++#`
+[source,rust]
+----
+pub fn transfer_ownership(
+    origin: OriginFor<T>,
+    id: T::AssetIdParameter,
+    owner: AccountIdLookupOf<T>,
+) -> DispatchResult
+----
+Transfers the ownership of a specific asset to another account.
+
+NOTE: The `transfer_ownership` function is used to change the admin or owner of an asset to a new account. This operation might be necessary for administrative restructuring, transferring responsibilities, or ownership succession scenarios. The origin must be the current owner or authorized to transfer ownership, ensuring proper authorization and security in the ownership transfer process.
+
+**Params:**
+
+* `origin: OriginFor<T>` -- caller, must be root.
+* `id: T::AssetIdParameter` -- the identifier of the asset for which ownership is being transferred.
+* `owner: AccountIdLookupOf<T>` -- the account that will become the new owner of the asset.
+
+[.contract-item]
+[[set_team]]
+==== `[.contract-item-name]#++set_team++#`
+[source,rust]
+----
+pub fn set_team(
+    origin: OriginFor<T>,
+    id: T::AssetIdParameter,
+    issuer: AccountIdLookupOf<T>,
+    admin: AccountIdLookupOf<T>,
+    freezer: AccountIdLookupOf<T>,
+) -> DispatchResult
+----
+Sets the team managing a specific asset, defining roles for issuance, administration, and freezing operations.
+
+NOTE: The `set_team` function is used to designate specific accounts for managing various aspects of an asset. This includes issuing new units of the asset, administering ownership or other significant changes, and freezing or thawing operations. The origin must be the current owner or another authorized account to ensure proper governance and control over the asset. This function allows for flexible and secure management of assets by clearly separating responsibilities among different roles.
+
+**Params:**
+
+* `origin: OriginFor<T>` -- caller, must be root.
+* `id: T::AssetIdParameter` -- the identifier of the asset for which the team is being set.
+* `issuer: AccountIdLookupOf<T>` -- the account designated for issuing new units of the asset.
+* `admin: AccountIdLookupOf<T>` -- the account designated for administrative tasks.
+* `freezer: AccountIdLookupOf<T>` -- the account designated for freezing and thawing the asset.
+
+[.contract-item]
+[[set_metadata]]
+==== `[.contract-item-name]#++set_metadata++#`
+[source,rust]
+----
+pub fn set_metadata(
+    origin: OriginFor<T>,
+    id: T::AssetIdParameter,
+    name: Vec<u8>,
+    symbol: Vec<u8>,
+    decimals: u8,
+) -> DispatchResult
+----
+Sets or updates the metadata for a specific asset, including its name, symbol, and decimals.
+
+NOTE: The `set_metadata` function is used to define or update the descriptive attributes of an asset. These attributes include the asset's name, a short symbol, and the number of decimals that represent the asset's smallest unit. This information is crucial for user interfaces and third-party integrations to properly display and understand the asset's properties. The origin must have the appropriate permissions to modify an asset's metadata, ensuring that only authorized users can make changes. Funds of sender are reserved according to the formula: `MetadataDepositBase + MetadataDepositPerByte * (name.len + symbol.len)` taking into account any already reserved funds.
+
+**Params:**
+
+* `origin: OriginFor<T>` -- caller, must be root.
+* `id: T::AssetIdParameter` -- the identifier of the asset for which metadata is being set.
+* `name: Vec<u8>` -- the new name of the asset as a byte array.
+* `symbol: Vec<u8>` -- the new symbol of the asset as a byte array.
+* `decimals: u8` -- the number of decimals places used to represent the asset.
+
+[.contract-item]
+[[clear_metadata]]
+==== `[.contract-item-name]#++clear_metadata++#`
+[source,rust]
+----
+pub fn clear_metadata(
+    origin: OriginFor<T>,
+    id: T::AssetIdParameter
+) -> DispatchResult
+----
+Clears the metadata of a specific asset, removing its name, symbol, and decimals information.
+
+NOTE: The `clear_metadata` function is used to remove all descriptive information associated with an asset. This may be necessary in situations where the asset's properties have changed significantly, or the asset is being deprecated. Clearing metadata is an important aspect of asset management and requires proper authorization to ensure that only valid users can perform this action. Once cleared, the asset will no longer have descriptive labels or detailed display information until new metadata is set.
+
+**Params:**
+
+* `origin: OriginFor<T>` -- caller, must be root.
+* `id: T::AssetIdParameter` -- the identifier of the asset for which metadata is being cleared.
+
+[.contract-item]
+[[force_set_metadata]]
+==== `[.contract-item-name]#++force_set_metadata++#`
+[source,rust]
+----
+pub fn force_set_metadata(
+    origin: OriginFor<T>,
+    id: T::AssetIdParameter,
+    name: Vec<u8>,
+    symbol: Vec<u8>,
+    decimals: u8,
+    is_frozen: bool,
+) -> DispatchResult
+----
+Forcibly sets or updates the metadata for a specific asset, including its name, symbol, decimals, and frozen status, regardless of the current owner's permissions.
+
+NOTE: The `force_set_metadata` function is an administrative tool that allows privileged accounts to set or update the metadata of an asset. This includes force-changing the name, symbol, decimals, and freeze status. It is used in scenarios requiring higher-level intervention, such as regulatory compliance or significant asset restructuring. The origin must be authorized to perform forceful administrative actions, ensuring that only valid scenarios permit such drastic changes.
+
+**Params:**
+
+* `origin: OriginFor<T>` -- caller, must be root.
+* `id: T::AssetIdParameter` -- the identifier of the asset for which metadata is being forcibly set.
+* `name: Vec<u8>` -- the new name of the asset as a byte array.
+* `symbol: Vec<u8>` -- the new symbol of the asset as a byte array.
+* `decimals: u8` -- the number of decimal places used to represent the asset.
+* `is_frozen: bool` -- the new frozen status of the asset, determining if it can be transacted.
+
+[.contract-item]
+[[force_clear_metadata]]
+==== `[.contract-item-name]#++force_clear_metadata++#`
+[source,rust]
+----
+pub fn force_clear_metadata(
+    origin: OriginFor<T>,
+    id: T::AssetIdParameter
+) -> DispatchResult
+----
+Forcibly clears all metadata of a specific asset, including its name, symbol, and decimals, by an administrative order.
+
+NOTE: The `force_clear_metadata` function is an administrative action used in circumstances that require overriding the usual asset management, such as regulatory compliance or significant changes to the asset's structure or purpose. This function removes all descriptive information, essentially resetting the asset's public-facing details. The origin must be a privileged account authorized to perform such forceful actions, ensuring that the clearance is done under proper oversight and for valid reasons.
+
+**Params:**
+
+* `origin: OriginFor<T>` -- caller, must be root.
+* `id: T::AssetIdParameter` -- the identifier of the asset for which metadata is being forcibly cleared.
+
+[.contract-item]
+[[force_asset_status]]
+==== `[.contract-item-name]#++force_asset_status++#`
+[source,rust]
+----
+pub fn force_asset_status(
+    origin: OriginFor<T>,
+    id: T::AssetIdParameter,
+    owner: AccountIdLookupOf<T>,
+    issuer: AccountIdLookupOf<T>,
+    admin: AccountIdLookupOf<T>,
+    freezer: AccountIdLookupOf<T>,
+    #[pallet::compact] min_balance: T::Balance,
+    is_sufficient: bool,
+    is_frozen: bool,
+) -> DispatchResult
+----
+Forcibly changes the status of a specific asset, including ownership, management team, minimum balance, sufficiency status, and frozen status.
+
+NOTE: The `force_asset_status` function is a powerful administrative tool used to configure or reconfigure critical aspects of an asset's behavior and control. It is typically used in scenarios requiring immediate intervention or significant restructuring. The function allows changing the owner, issuer, admin, and freezer accounts, setting the minimum balance required for the asset, and determining whether the asset should be considered sufficient for existential deposit purposes or frozen entirely. Due to its significant impact, this function is restricted to privileged origins authorized for such impactful changes.
+
+**Params:**
+
+* `origin: OriginFor<T>` -- caller, must be root.
+* `id: T::AssetIdParameter` -- the identifier of the asset being modified.
+* `owner: AccountIdLookupOf<T>` -- the account designated as the new owner of the asset.
+* `issuer: AccountIdLookupOf<T>` -- the account designated for issuing new units of the asset.
+* `admin: AccountIdLookupOf<T>` -- the account designated for administrative tasks.
+* `freezer: AccountIdLookupOf<T>` -- the account designated for freezing and thawing the asset.
+* `min_balance: T::Balance` -- the new minimum balance required for the asset.
+* `is_sufficient: bool` -- indicates if the asset should be considered sufficient for existential deposit purposes.
+* `is_frozen: bool` -- indicates if the asset is to be frozen across all accounts.
+
+[.contract-item]
+[[approve_transfer]]
+==== `[.contract-item-name]#++approve_transfer++#`
+[source,rust]
+----
+pub fn approve_transfer(
+    origin: OriginFor<T>,
+    id: T::AssetIdParameter,
+    delegate: AccountIdLookupOf<T>,
+    #[pallet::compact] amount: T::Balance,
+) -> DispatchResult
+----
+Approves a delegate to transfer a specified amount of a specific asset on behalf of the origin account.
+
+NOTE: The `approve_transfer` function allows the origin account to delegate transfer rights for a portion of their assets to another account, known as the delegate. This is useful in scenarios where temporary or limited rights to transfer assets are needed without transferring full ownership. The approval specifies an exact amount of the asset that the delegate is allowed to transfer. The `#[pallet::compact]` attribute is used for efficient storage of the `amount` parameter. This function is often used in decentralized applications to enable features like spending allowances and automated payments.
+
+**Params:**
+
+* `origin: OriginFor<T>` -- caller, must be root.
+* `id: T::AssetIdParameter` -- the identifier of the asset for which transfer rights are being granted.
+* `delegate: AccountIdLookupOf<T>` -- the account being granted the rights to transfer the specified amount of the asset.
+* `amount: T::Balance` -- the amount of the asset that the delegate is approved to transfer.
+
+[.contract-item]
+[[cancel_approval]]
+==== `[.contract-item-name]#++cancel_approval++#`
+[source,rust]
+----
+pub fn cancel_approval(
+    origin: OriginFor<T>,
+    id: T::AssetIdParameter,
+    delegate: AccountIdLookupOf<T>,
+) -> DispatchResult
+----
+Cancels a previously granted approval for a delegate to transfer a specified asset on behalf of the origin account.
+
+NOTE: The `cancel_approval` function revokes the rights previously granted to a delegate to transfer a portion of the origin's assets. This might be used when the need for the delegate's rights has expired or if the original approval was made in error. The action ensures that the delegate can no longer transfer any amount of the specified asset from the origin's account. This function is important for maintaining control and security over asset delegation and is a common feature in permission and rights management within asset systems.
+
+**Params:**
+
+* `origin: OriginFor<T>` -- caller, must be root.
+* `id: T::AssetIdParameter` -- the identifier of the asset for which transfer rights are being revoked.
+* `delegate: AccountIdLookupOf<T>` -- the account from which the rights to transfer the asset are being revoked.
+
+
+[.contract-item]
+[[force_cancel_approval]]
+==== `[.contract-item-name]#++force_cancel_approval++#`
+[source,rust]
+----
+pub fn force_cancel_approval(
+    origin: OriginFor<T>,
+    id: T::AssetIdParameter,
+    owner: AccountIdLookupOf<T>,
+    delegate: AccountIdLookupOf<T>,
+) -> DispatchResult
+----
+Forcibly cancels a previously granted approval for a delegate to transfer a specific asset on behalf of the owner account.
+
+NOTE: The `force_cancel_approval` function is an administrative action used to revoke transfer rights from a delegate, typically in situations of emergency or misuse. Unlike `cancel_approval`, this function can be initiated by an admin or authority other than the asset's owner, reflecting its more forceful nature. It's critical for situations where the asset owner cannot revoke the approval themselves or in governance scenarios where broader control is necessary. As with all forceful actions, the origin must have the necessary administrative privileges.
+
+**Params:**
+
+* `origin: OriginFor<T>` -- caller, must be root. Origin must be either ForceOrigin or Signed origin with the signer being the Admin account of the asset `id`.
+* `id: T::AssetIdParameter` -- the identifier of the asset for which the approval is being forcibly canceled.
+* `owner: AccountIdLookupOf<T>` -- the account that owns the asset and had previously granted transfer rights.
+* `delegate: AccountIdLookupOf<T>` -- the account from which the rights to transfer the asset are being forcibly revoked.
+
+[.contract-item]
+[[transfer_approved]]
+==== `[.contract-item-name]#++transfer_approved++#`
+[source,rust]
+----
+pub fn transfer_approved(
+    origin: OriginFor<T>,
+    id: T::AssetIdParameter,
+    owner: AccountIdLookupOf<T>,
+    destination: AccountIdLookupOf<T>,
+    #[pallet::compact] amount: T::Balance,
+) -> DispatchResult
+----
+Executes a transfer of a specified amount of an asset from an owner to a destination account, using a previously granted approval.
+
+NOTE: The `transfer_approved` function allows a delegate (the origin) to transfer assets within the limits of an approval granted by the asset's owner. This enables scenarios where third parties are given limited rights to manage assets. The function ensures that the delegate cannot exceed the approved amount or perform transfers without a valid approval. The `#[pallet::compact]` attribute is used for efficient storage of the `amount` parameter. It's a critical function for flexible asset management in decentralized systems and applications.
+
+**Params:**
+
+* `origin: OriginFor<T>` -- caller, must be root.
+* `id: T::AssetIdParameter` -- the identifier of the asset being transferred.
+* `owner: AccountIdLookupOf<T>` -- the account that owns the asset and had previously granted transfer rights.
+* `destination: AccountIdLookupOf<T>` -- the account receiving the asset.
+* `amount: T::Balance` -- the amount of the asset to be transferred, which must be within the approved amount.
+
+[.contract-item]
+[[touch]]
+==== `[.contract-item-name]#++touch++#`
+[source,rust]
+----
+pub fn touch(
+    origin: OriginFor<T>,
+    id: T::AssetIdParameter
+) -> DispatchResult
+----
+Creates an asset account for non-provider assets.
+
+NOTE: A deposit will be taken from the signer account.
+
+**Params:**
+
+* `origin: OriginFor<T>` -- caller, must be root.
+* `id: T::AssetIdParameter` -- the identifier of the asset being updated.
+
+[.contract-item]
+[[refund]]
+==== `[.contract-item-name]#++refund++#`
+[source,rust]
+----
+pub fn refund(
+    origin: OriginFor<T>,
+    id: T::AssetIdParameter,
+    allow_burn: bool,
+) -> DispatchResult
+----
+Refunds any reserved balance of a specific asset back to the asset's owner or burns it based on the provided parameter.
+
+NOTE: The `refund` function is designed to handle situations where an asset's reserved balance needs to be reconciled. This might occur in scenarios such as the completion of a contract, dissolution of a stake, or other instances where reserved funds are to be released. The `allow_burn` parameter determines if the refunded amount should be returned to the asset's owner or burned, removing it from circulation. This function requires careful use and is typically controlled by the asset's owner or an administrative authority.
+
+**Params:**
+
+* `origin: OriginFor<T>` -- caller, must be root.
+* `id: T::AssetIdParameter` -- the identifier of the asset for which the reserved balance is being refunded.
+* `allow_burn: bool` -- indicates whether the reserved balance should be returned to the owner (false) or burned (true).
+
+[.contract-item]
+[[set_min_balance]]
+==== `[.contract-item-name]#++set_min_balance++#`
+[source,rust]
+----
+pub fn set_min_balance(
+    origin: OriginFor<T>,
+    id: T::AssetIdParameter,
+    min_balance: T::Balance,
+) -> DispatchResult
+----
+Sets a new minimum balance for a specific asset.
+
+NOTE: The `set_min_balance` function is used to define or update the minimum balance required to hold a particular asset. This is crucial for preventing dust accounts and ensuring economic viability of the asset system. Changing the minimum balance affects all holders of the asset, as accounts below the new minimum might be cleaned up or require additional funding. This operation requires authorization from the asset's owner or another privileged account, ensuring that the change is made with proper oversight and consideration of its effects. Only works if there aren't any accounts that are holding the asset or if the new value of `min_balance` is less than the old one.
+
+**Params:**
+
+* `origin: OriginFor<T>` -- caller, must be root.
+* `id: T::AssetIdParameter` -- the identifier of the asset for which the minimum balance is being set.
+* `min_balance: T::Balance` -- the new minimum balance required to hold the asset.
+
+[.contract-item]
+[[touch_other]]
+==== `[.contract-item-name]#++touch_other++#`
+[source,rust]
+----
+pub fn touch_other(
+    origin: OriginFor<T>,
+    id: T::AssetIdParameter,
+    who: AccountIdLookupOf<T>,
+) -> DispatchResult
+----
+Create an asset account for `who`.
+
+NOTE: A deposit will be taken from the signer account.
+
+**Params:**
+
+* `origin: OriginFor<T>` -- caller, must be root.
+* `id: T::AssetIdParameter` -- the identifier of the asset being updated.
+* `who: AccountIdLookupOf<T>` -- the account for which the asset's timestamp is being updated.
+
+[.contract-item]
+[[refund_other]]
+==== `[.contract-item-name]#++refund_other++#`
+[source,rust]
+----
+pub fn refund_other(
+    origin: OriginFor<T>,
+    id: T::AssetIdParameter,
+    who: AccountIdLookupOf<T>,
+) -> DispatchResult
+----
+Refunds the reserved balance of a specific asset back to another account's owner.
+
+NOTE: The `refund_other` function is similar to the `refund` function but targets another account rather than the caller's own. This allows administrators or authorized personnel to manage reserved balances across different accounts, potentially as part of a broader asset management or reconciliation process. This action might be necessary in scenarios such as contract completion, resolving disputes, or other instances where reserved funds need to be released or reallocated. The origin must have the necessary permissions to ensure that this function is used appropriately and by authorized entities. Useful if you are the depositor.
+
+**Params:**
+
+* `origin: OriginFor<T>` -- caller, must be root.
+* `id: T::AssetIdParameter` -- the identifier of the asset for which the reserved balance is being refunded.
+* `who: AccountIdLookupOf<T>` -- the account from which the reserved balance will be refunded.
+
+[.contract-item]
+[[block]]
+==== `[.contract-item-name]#++block++#`
+[source,rust]
+----
+pub fn block(
+    origin: OriginFor<T>,
+    id: T::AssetIdParameter,
+    who: AccountIdLookupOf<T>,
+) -> DispatchResult
+----
+Blocks a specific account from unprivileged transacting a specific asset.
+
+NOTE: The `block` function is used to restrict a particular account from performing unprivileged transactions involving a specified asset. This might be used in scenarios such as suspected fraud, regulatory compliance, or other security or administrative reasons. Once an account is blocked, it cannot transfer, mint, or burn the asset until it is unblocked. The origin must have the necessary administrative rights or privileges to enforce such restrictions, ensuring that the action is authorized and appropriate for the given context.
+
+**Params:**
+
+* `origin: OriginFor<T>` -- caller, must be root.
+* `id: T::AssetIdParameter` -- the identifier of the asset for which transactions are being blocked.
+* `who: AccountIdLookupOf<T>` -- the account that is being blocked from transacting the asset.
