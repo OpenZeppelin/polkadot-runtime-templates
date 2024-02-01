@@ -280,9 +280,6 @@ parameter_types! {
 }
 
 // Configure FRAME pallets to include in runtime.
-
-const MAX_CONSUMERS: u32 = 16;
-
 impl frame_system::Config for Runtime {
     /// The data to be stored in an account.
     type AccountData = pallet_balances::AccountData<Balance>;
@@ -308,7 +305,7 @@ impl frame_system::Config for Runtime {
     /// The lookup mechanism to get account ID from whatever is passed in
     /// dispatchers.
     type Lookup = AccountIdLookup<AccountId, ()>;
-    type MaxConsumers = frame_support::traits::ConstU32<MAX_CONSUMERS>;
+    type MaxConsumers = frame_support::traits::ConstU32<16>;
     /// The index type for storing how many extrinsics an account has signed.
     type Nonce = Nonce;
     /// What to do if an account is fully reaped from the system.
@@ -418,13 +415,11 @@ impl pallet_proxy::Config for Runtime {
 
 parameter_types! {
     pub const ExistentialDeposit: Balance = EXISTENTIAL_DEPOSIT;
+    pub const MaxFreezes: u32 = 0;
+    pub const MaxHolds: u32 = 0;
+    pub const MaxLocks: u32 = 50;
+    pub const MaxReserves: u32 = 50;
 }
-
-const MAX_FREEZES: u32 = 0;
-const MAX_HOLDS: u32 = 0;
-const MAX_LOCKS: u32 = 50;
-const MAX_RESERVES: u32 = 50;
-const RESERVE_IDENTIFIER_SIZE: usize = 8;
 
 impl pallet_balances::Config for Runtime {
     type AccountStore = System;
@@ -433,11 +428,11 @@ impl pallet_balances::Config for Runtime {
     type DustRemoval = ();
     type ExistentialDeposit = ExistentialDeposit;
     type FreezeIdentifier = ();
-    type MaxFreezes = ConstU32<MAX_FREEZES>;
-    type MaxHolds = ConstU32<MAX_HOLDS>;
-    type MaxLocks = ConstU32<MAX_LOCKS>;
-    type MaxReserves = ConstU32<MAX_RESERVES>;
-    type ReserveIdentifier = [u8; RESERVE_IDENTIFIER_SIZE];
+    type MaxFreezes = MaxFreezes;
+    type MaxHolds = MaxHolds;
+    type MaxLocks = MaxLocks;
+    type MaxReserves = MaxReserves;
+    type ReserveIdentifier = [u8; 8];
     /// The ubiquitous event type.
     type RuntimeEvent = RuntimeEvent;
     type RuntimeFreezeReason = RuntimeFreezeReason;
@@ -452,9 +447,8 @@ parameter_types! {
     pub const StringLimit: u32 = 50;
     pub const MetadataDepositBase: Balance = deposit(1, 68);
     pub const MetadataDepositPerByte: Balance = deposit(0, 1);
+    pub const RemoveItemsLimit: u32 = 1000;
 }
-
-const REMOVE_ITEMS_LIMIT: u32 = 1000;
 
 impl pallet_assets::Config for Runtime {
     type ApprovalDeposit = ApprovalDeposit;
@@ -473,7 +467,7 @@ impl pallet_assets::Config for Runtime {
     type Freezer = ();
     type MetadataDepositBase = MetadataDepositBase;
     type MetadataDepositPerByte = MetadataDepositPerByte;
-    type RemoveItemsLimit = ConstU32<REMOVE_ITEMS_LIMIT>;
+    type RemoveItemsLimit = RemoveItemsLimit;
     type RuntimeEvent = RuntimeEvent;
     type StringLimit = StringLimit;
     type WeightInfo = pallet_assets::weights::SubstrateWeight<Runtime>;
@@ -482,15 +476,14 @@ impl pallet_assets::Config for Runtime {
 parameter_types! {
     /// Relay Chain `TransactionByteFee` / 10
     pub const TransactionByteFee: Balance = 10 * MICROCENTS;
+    pub const OperationalFeeMultiplier: u8 = 5;
 }
-
-const OPERATIONAL_FEE_MULTIPLIER: u8 = 5;
 
 impl pallet_transaction_payment::Config for Runtime {
     type FeeMultiplierUpdate = SlowAdjustingFeeUpdate<Self>;
     type LengthToFee = ConstantMultiplier<Balance, TransactionByteFee>;
     type OnChargeTransaction = pallet_transaction_payment::CurrencyAdapter<Balances, ()>;
-    type OperationalFeeMultiplier = ConstU8<OPERATIONAL_FEE_MULTIPLIER>;
+    type OperationalFeeMultiplier = OperationalFeeMultiplier;
     type RuntimeEvent = RuntimeEvent;
     type WeightToFee = WeightToFee;
 }
@@ -606,14 +599,16 @@ impl pallet_session::Config for Runtime {
     type WeightInfo = pallet_session::weights::SubstrateWeight<Runtime>;
 }
 
-const ALLOW_MULTIPLE_BLOCKS_PER_SLOT: bool = false;
-const MAX_AUTHORITIES: u32 = 100_000;
+parameter_types! {
+    pub const AllowMultipleBlocksPerSlot: bool = false;
+    pub const MaxAuthorities: u32 = 100_000;
+}
 
 impl pallet_aura::Config for Runtime {
-    type AllowMultipleBlocksPerSlot = ConstBool<ALLOW_MULTIPLE_BLOCKS_PER_SLOT>;
+    type AllowMultipleBlocksPerSlot = AllowMultipleBlocksPerSlot;
     type AuthorityId = AuraId;
     type DisabledValidators = ();
-    type MaxAuthorities = ConstU32<MAX_AUTHORITIES>;
+    type MaxAuthorities = MaxAuthorities;
     #[cfg(feature = "experimental")]
     type SlotDuration = pallet_aura::MinimumPeriodTimesTwo<Self>;
 }
@@ -632,17 +627,19 @@ pub type CollatorSelectionUpdateOrigin = EitherOfDiverse<
     EnsureXcm<IsVoiceOfBody<RelayLocation, StakingAdminBodyId>>,
 >;
 
-const MAX_CANDIDATES: u32 = 100;
-const MAX_INVULNERABLES: u32 = 20;
-const MIN_ELIGIBLE_COLLATORS: u32 = 4;
+parameter_types! {
+    pub const MaxCandidates: u32 = 100;
+    pub const MaxInvulnerables: u32 = 20;
+    pub const MinEligibleCollators: u32 = 4;
+}
 
 impl pallet_collator_selection::Config for Runtime {
     type Currency = Balances;
     // should be a multiple of session or things will get inconsistent
     type KickThreshold = Period;
-    type MaxCandidates = ConstU32<MAX_CANDIDATES>;
-    type MaxInvulnerables = ConstU32<MAX_INVULNERABLES>;
-    type MinEligibleCollators = ConstU32<MIN_ELIGIBLE_COLLATORS>;
+    type MaxCandidates = MaxCandidates;
+    type MaxInvulnerables = MaxInvulnerables;
+    type MinEligibleCollators = MinEligibleCollators;
     type PotId = PotId;
     type RuntimeEvent = RuntimeEvent;
     type UpdateOrigin = CollatorSelectionUpdateOrigin;
@@ -952,6 +949,8 @@ cumulus_pallet_parachain_system::register_validate_block! {
 #[cfg(test)]
 mod tests {
 
+    use frame_support::traits::TypedGet;
+
     use super::*;
 
     #[test]
@@ -1007,7 +1006,7 @@ mod tests {
 
         assert_eq!(SS58Prefix::get(), 42);
 
-        assert_eq!(MAX_CONSUMERS, 16);
+        assert_eq!(<Runtime as frame_system::Config>::MaxConsumers::get(), 16);
     }
 
     #[test]
@@ -1027,15 +1026,13 @@ mod tests {
 
     #[test]
     fn balances_constants() {
-        assert_eq!(MAX_FREEZES, 0);
+        assert_eq!(MaxFreezes::get(), 0);
 
-        assert_eq!(MAX_HOLDS, 0);
+        assert_eq!(MaxHolds::get(), 0);
 
-        assert_eq!(MAX_LOCKS, 50);
+        assert_eq!(MaxLocks::get(), 50);
 
-        assert_eq!(MAX_RESERVES, 50);
-
-        assert_eq!(RESERVE_IDENTIFIER_SIZE, 8);
+        assert_eq!(MaxReserves::get(), 50);
     }
 
     #[test]
@@ -1052,14 +1049,14 @@ mod tests {
 
         assert_eq!(MetadataDepositPerByte::get(), deposit(0, 1));
 
-        assert_eq!(REMOVE_ITEMS_LIMIT, 1000);
+        assert_eq!(RemoveItemsLimit::get(), 1000);
     }
 
     #[test]
     fn transaction_payment_constants() {
         assert_eq!(TransactionByteFee::get(), 10 * MICROCENTS);
 
-        assert_eq!(OPERATIONAL_FEE_MULTIPLIER, 5);
+        assert_eq!(OperationalFeeMultiplier::get(), 5);
     }
 
     #[test]
@@ -1088,9 +1085,9 @@ mod tests {
     #[test]
     #[allow(clippy::assertions_on_constants)]
     fn aura_constants() {
-        assert!(!ALLOW_MULTIPLE_BLOCKS_PER_SLOT);
+        assert!(!AllowMultipleBlocksPerSlot::get());
 
-        assert_eq!(MAX_AUTHORITIES, 100_000);
+        assert_eq!(MaxAuthorities::get(), 100_000);
     }
 
     #[test]
@@ -1105,10 +1102,10 @@ mod tests {
 
         assert_eq!(StakingAdminBodyId::get(), BodyId::Defense);
 
-        assert_eq!(MAX_CANDIDATES, 100);
+        assert_eq!(MaxCandidates::get(), 100);
 
-        assert_eq!(MAX_INVULNERABLES, 20);
+        assert_eq!(MaxInvulnerables::get(), 20);
 
-        assert_eq!(MIN_ELIGIBLE_COLLATORS, 4);
+        assert_eq!(MinEligibleCollators::get(), 4);
     }
 }
