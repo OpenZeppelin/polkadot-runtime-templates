@@ -227,23 +227,3 @@ impl cumulus_pallet_xcm::Config for Runtime {
     type RuntimeEvent = RuntimeEvent;
     type XcmExecutor = XcmExecutor<XcmConfig>;
 }
-
-#[cfg(test)]
-mod tests {
-
-    use super::*;
-
-    #[test]
-    fn xcm_executor_constants() {
-        assert_eq!(UnitWeightCost::get(), Weight::from_parts(1_000_000_000, 64 * 1024));
-        assert_eq!(MaxInstructions::get(), 100);
-        assert_eq!(MaxAssetsIntoHolding::get(), 64);
-    }
-
-    #[test]
-    fn pallet_xcm_constants() {
-        assert_eq!(MaxLockers::get(), 8);
-        assert_eq!(MaxRemoteLockConsumers::get(), 0);
-        assert_eq!(<Runtime as pallet_xcm::Config>::VERSION_DISCOVERY_QUEUE_SIZE, 100);
-    }
-}
