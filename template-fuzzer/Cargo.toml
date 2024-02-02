@@ -1,17 +1,22 @@
 [package]
 name = "template-fuzzer"
 version = "0.1.0"
-authors.workspace = true
-description.workspace = true
-edition.workspace = true
-license.workspace = true
-repository.workspace = true
+[package.authors]
+workspace = true
+[package.description]
+workspace = true
+[package.edition]
+workspace = true
+[package.license]
+workspace = true
+[package.repository]
+workspace = true
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-ziggy = { workspace = true }
 substrate-runtime-fuzzer = { workspace = true }
+ziggy = { workspace = true }
 
 parachain-template-runtime = { path = "../runtime" }
 parachains-common = { workspace = true }
@@ -21,34 +26,34 @@ parity-scale-codec = { workspace = true }
 frame-support = { workspace = true }
 frame-system = { workspace = true }
 
+sp-consensus-aura = { workspace = true }
 sp-runtime = { workspace = true }
 sp-state-machine = { workspace = true }
-sp-consensus-aura = { workspace = true }
 
-pallet-timestamp = { workspace = true }
 pallet-balances = { workspace = true }
+pallet-timestamp = { workspace = true }
 
+cumulus-pallet-parachain-system = { workspace = true }
 cumulus-primitives-core = { workspace = true }
 cumulus-primitives-parachain-inherent = { workspace = true }
-cumulus-pallet-parachain-system = { workspace = true }
 cumulus-test-relay-sproof-builder = { workspace = true }
 
 [features]
-default = ["std", "try-runtime"]
+default = [ "std", "try-runtime" ]
 std = [
-    "parachain-template-runtime/std",
-    "parity-scale-codec/std",
-	"sp-runtime/std",
 	"frame-support/std",
 	"pallet-timestamp/std",
+	"parachain-template-runtime/std",
+	"parity-scale-codec/std",
 	"sp-consensus-aura/std",
+	"sp-runtime/std",
 ]
 try-runtime = [
-    "parachain-template-runtime/try-runtime",
 	"frame-support/try-runtime",
 	"frame-system/try-runtime",
-	"sp-runtime/try-runtime",
 	"pallet-timestamp/try-runtime",
+	"parachain-template-runtime/try-runtime",
+	"sp-runtime/try-runtime",
 ]
 
 [lints]
