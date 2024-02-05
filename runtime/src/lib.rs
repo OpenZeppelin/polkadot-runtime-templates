@@ -18,8 +18,8 @@ use frame_support::{
     genesis_builder_helper::{build_config, create_default_config},
     parameter_types,
     traits::{
-        AsEnsureOriginWithArg, ConstU32, ConstU64, EitherOfDiverse, Everything, InstanceFilter,
-        TransformOrigin,
+        AsEnsureOriginWithArg, ConstU32, ConstU64, Contains, EitherOfDiverse, Everything,
+        InstanceFilter, TransformOrigin,
     },
     weights::{
         constants::WEIGHT_REF_TIME_PER_SECOND, ConstantMultiplier, Weight, WeightToFeeCoefficient,
@@ -279,6 +279,22 @@ parameter_types! {
     pub const SS58Prefix: u16 = 42;
 }
 
+pub struct NormalFilter;
+impl Contains<RuntimeCall> for NormalFilter {
+    fn contains(c: &RuntimeCall) -> bool {
+        match c {
+            // We filter anonymous proxy as they make "reserve" inconsistent
+            // See: https://github.com/paritytech/substrate/blob/37cca710eed3dadd4ed5364c7686608f5175cce1/frame/proxy/src/lib.rs#L270
+            RuntimeCall::Proxy(method) => match method {
+                pallet_proxy::Call::create_pure { .. } => false,
+                pallet_proxy::Call::kill_pure { .. } => false,
+                _ => true,
+            },
+            _ => true,
+        }
+    }
+}
+
 // Configure FRAME pallets to include in runtime.
 impl frame_system::Config for Runtime {
     /// The data to be stored in an account.
@@ -286,7 +302,7 @@ impl frame_system::Config for Runtime {
     /// The identifier used to distinguish between accounts.
     type AccountId = AccountId;
     /// The basic call filter to use in dispatchable.
-    type BaseCallFilter = Everything;
+    type BaseCallFilter = NormalFilter;
     /// The block type.
     type Block = Block;
     /// Maximum number of block number to block hash mappings to keep (oldest
