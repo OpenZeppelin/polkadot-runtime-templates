@@ -16,6 +16,7 @@ jsonrpsee = { workspace = true, features = [ "server" ] }
 log = { workspace = true }
 parity-scale-codec = { workspace = true }
 serde = { workspace = true, features = [ "derive" ] }
+serde_json = { workspace = true }
 
 # Local
 parachain-template-runtime = { path = "../runtime" }

@@ -32,6 +32,7 @@ pallet-assets = { workspace = true }
 pallet-aura = { workspace = true }
 pallet-authorship = { workspace = true }
 pallet-balances = { workspace = true }
+pallet-message-queue = { workspace = true }
 pallet-multisig = { workspace = true }
 pallet-proxy = { workspace = true }
 pallet-session = { workspace = true }
@@ -64,7 +65,6 @@ xcm-executor = { workspace = true }
 # Cumulus
 assets-common = { workspace = true }
 cumulus-pallet-aura-ext = { workspace = true }
-cumulus-pallet-dmp-queue = { workspace = true }
 cumulus-pallet-parachain-system = { workspace = true, features = [ "parameterized-consensus-hook" ] }
 cumulus-pallet-session-benchmarking = { workspace = true }
 cumulus-pallet-xcm = { workspace = true }
@@ -73,6 +73,7 @@ cumulus-primitives-core = { workspace = true }
 cumulus-primitives-utility = { workspace = true }
 pallet-collator-selection = { workspace = true }
 parachain-info = { workspace = true }
+parachains-common = { workspace = true }
 
 [dev-dependencies]
 sp-io = { workspace = true }
@@ -85,7 +86,6 @@ default = [ "std" ]
 std = [
 	"assets-common/std",
 	"cumulus-pallet-aura-ext/std",
-	"cumulus-pallet-dmp-queue/std",
 	"cumulus-pallet-parachain-system/std",
 	"cumulus-pallet-session-benchmarking/std",
 	"cumulus-pallet-xcm/std",
@@ -105,6 +105,7 @@ std = [
 	"pallet-authorship/std",
 	"pallet-balances/std",
 	"pallet-collator-selection/std",
+	"pallet-message-queue/std",
 	"pallet-multisig/std",
 	"pallet-proxy/std",
 	"pallet-session/std",
@@ -116,6 +117,7 @@ std = [
 	"pallet-utility/std",
 	"pallet-xcm/std",
 	"parachain-info/std",
+	"parachains-common/std",
 	"parity-scale-codec/std",
 	"polkadot-parachain-primitives/std",
 	"polkadot-runtime-common/std",
@@ -151,12 +153,14 @@ runtime-benchmarks = [
 	"pallet-assets/runtime-benchmarks",
 	"pallet-balances/runtime-benchmarks",
 	"pallet-collator-selection/runtime-benchmarks",
+	"pallet-message-queue/runtime-benchmarks",
 	"pallet-multisig/runtime-benchmarks",
 	"pallet-sudo/runtime-benchmarks",
 	"pallet-template/runtime-benchmarks",
 	"pallet-timestamp/runtime-benchmarks",
 	"pallet-utility/runtime-benchmarks",
 	"pallet-xcm/runtime-benchmarks",
+	"parachains-common/runtime-benchmarks",
 	"polkadot-parachain-primitives/runtime-benchmarks",
 	"polkadot-runtime-common/runtime-benchmarks",
 	"sp-runtime/runtime-benchmarks",
@@ -166,7 +170,6 @@ runtime-benchmarks = [
 
 try-runtime = [
 	"cumulus-pallet-aura-ext/try-runtime",
-	"cumulus-pallet-dmp-queue/try-runtime",
 	"cumulus-pallet-parachain-system/try-runtime",
 	"cumulus-pallet-xcm/try-runtime",
 	"cumulus-pallet-xcmp-queue/try-runtime",
@@ -179,6 +182,7 @@ try-runtime = [
 	"pallet-authorship/try-runtime",
 	"pallet-balances/try-runtime",
 	"pallet-collator-selection/try-runtime",
+	"pallet-message-queue/try-runtime",
 	"pallet-multisig/try-runtime",
 	"pallet-proxy/try-runtime",
 	"pallet-session/try-runtime",
