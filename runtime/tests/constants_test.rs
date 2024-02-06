@@ -127,6 +127,17 @@ mod runtime_tests {
     }
 
     #[test]
+    fn message_queue_constants() {
+        assert_eq!(HeapSize::get(), 64 * 1024);
+        assert_eq!(MaxStale::get(), 8);
+    }
+
+    #[test]
+    fn cumulus_pallet_xcmp_queue_constants() {
+        assert_eq!(MaxInboundSuspended::get(), 1000);
+    }
+
+    #[test]
     fn multisig_constants() {
         assert_eq!(DepositBase::get(), deposit(1, 88));
 

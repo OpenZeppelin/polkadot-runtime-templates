@@ -18,7 +18,7 @@ use frame_support::{
     genesis_builder_helper::{build_config, create_default_config},
     parameter_types,
     traits::{
-        AsEnsureOriginWithArg, ConstBool, ConstU32, ConstU64, ConstU8, EitherOfDiverse, Everything,
+        AsEnsureOriginWithArg, ConstU32, ConstU64, ConstU8, EitherOfDiverse, Everything,
         InstanceFilter, TransformOrigin,
     },
     weights::{
@@ -305,7 +305,7 @@ impl frame_system::Config for Runtime {
     /// The lookup mechanism to get account ID from whatever is passed in
     /// dispatchers.
     type Lookup = AccountIdLookup<AccountId, ()>;
-    type MaxConsumers = frame_support::traits::ConstU32<16>;
+    type MaxConsumers = ConstU32<16>;
     /// The index type for storing how many extrinsics an account has signed.
     type Nonce = Nonce;
     /// What to do if an account is fully reaped from the system.
@@ -523,11 +523,13 @@ impl parachain_info::Config for Runtime {}
 
 parameter_types! {
     pub MessageQueueServiceWeight: Weight = Perbill::from_percent(35) * RuntimeBlockWeights::get().max_block;
+    pub const HeapSize: u32 = 64 * 1024;
+    pub const MaxStale: u32 = 8;
 }
 
 impl pallet_message_queue::Config for Runtime {
-    type HeapSize = sp_core::ConstU32<{ 64 * 1024 }>;
-    type MaxStale = sp_core::ConstU32<8>;
+    type HeapSize = HeapSize;
+    type MaxStale = MaxStale;
     #[cfg(feature = "runtime-benchmarks")]
     type MessageProcessor = pallet_message_queue::mock_helpers::NoopMessageProcessor<
         cumulus_primitives_core::AggregateMessageOrigin,
@@ -549,11 +551,15 @@ impl pallet_message_queue::Config for Runtime {
 
 impl cumulus_pallet_aura_ext::Config for Runtime {}
 
+parameter_types! {
+    pub const MaxInboundSuspended: u32 = 1000;
+}
+
 impl cumulus_pallet_xcmp_queue::Config for Runtime {
     type ChannelInfo = ParachainSystem;
     type ControllerOrigin = EnsureRoot<AccountId>;
     type ControllerOriginConverter = XcmOriginToTransactDispatchOrigin;
-    type MaxInboundSuspended = ConstU32<1_000>;
+    type MaxInboundSuspended = MaxInboundSuspended;
     type PriceForSiblingDelivery = NoPriceForMessageDelivery<ParaId>;
     type RuntimeEvent = RuntimeEvent;
     type VersionWrapper = ();
