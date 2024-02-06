@@ -1,7 +1,7 @@
 FROM rust:1-buster
 USER root
 
-RUN apt-get update && apt-get -y install protobuf-compiler libclang-dev clang
+RUN apt-get update && apt-get -y install protobuf-compiler libclang-dev clang binutils-dev libunwind-dev
 
 RUN mkdir -p /fuzztest
 
