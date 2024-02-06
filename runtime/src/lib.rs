@@ -18,8 +18,8 @@ use frame_support::{
     genesis_builder_helper::{build_config, create_default_config},
     parameter_types,
     traits::{
-        AsEnsureOriginWithArg, ConstU32, ConstU64, ConstU8, EitherOfDiverse, Everything,
-        InstanceFilter, TransformOrigin,
+        AsEnsureOriginWithArg, ConstU32, ConstU64, EitherOfDiverse, Everything, InstanceFilter,
+        TransformOrigin,
     },
     weights::{
         constants::WEIGHT_REF_TIME_PER_SECOND, ConstantMultiplier, Weight, WeightToFeeCoefficient,
