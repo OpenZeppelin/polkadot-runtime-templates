@@ -285,11 +285,10 @@ impl Contains<RuntimeCall> for NormalFilter {
         match c {
             // We filter anonymous proxy as they make "reserve" inconsistent
             // See: https://github.com/paritytech/substrate/blob/37cca710eed3dadd4ed5364c7686608f5175cce1/frame/proxy/src/lib.rs#L270
-            RuntimeCall::Proxy(method) => match method {
-                pallet_proxy::Call::create_pure { .. } => false,
-                pallet_proxy::Call::kill_pure { .. } => false,
-                _ => true,
-            },
+            RuntimeCall::Proxy(method) => !matches!(
+                method,
+                pallet_proxy::Call::create_pure { .. } | pallet_proxy::Call::kill_pure { .. }
+            ),
             _ => true,
         }
     }
