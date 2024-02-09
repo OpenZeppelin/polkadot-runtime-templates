@@ -108,7 +108,7 @@ pub type XcmOriginToTransactDispatchOrigin = (
 
 parameter_types! {
     // One XCM operation is 1_000_000_000 weight - almost certainly a conservative estimate.
-    pub UnitWeightCost: Weight = Weight::from_parts(1_000_000_000, 64 * 1024);
+    pub const UnitWeightCost: Weight = Weight::from_parts(1_000_000_000, 64 * 1024);
     pub const MaxInstructions: u32 = 100;
     pub const MaxAssetsIntoHolding: u32 = 64;
 }
@@ -186,6 +186,11 @@ parameter_types! {
     pub ReachableDest: Option<MultiLocation> = Some(Parent.into());
 }
 
+parameter_types! {
+    pub const MaxLockers: u32 = 8;
+    pub const MaxRemoteLockConsumers: u32 = 0;
+}
+
 impl pallet_xcm::Config for Runtime {
     type AdminOrigin = EnsureRoot<AccountId>;
     // ^ Override for AdvertisedXcmVersion default
@@ -193,8 +198,8 @@ impl pallet_xcm::Config for Runtime {
     type Currency = Balances;
     type CurrencyMatcher = ();
     type ExecuteXcmOrigin = EnsureXcmOrigin<RuntimeOrigin, LocalOriginToLocation>;
-    type MaxLockers = ConstU32<8>;
-    type MaxRemoteLockConsumers = ConstU32<0>;
+    type MaxLockers = MaxLockers;
+    type MaxRemoteLockConsumers = MaxLockers;
     #[cfg(feature = "runtime-benchmarks")]
     type ReachableDest = ReachableDest;
     type RemoteLockConsumerIdentifier = ();
