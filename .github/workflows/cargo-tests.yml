@@ -26,6 +26,8 @@ env:
   CARGO_TERM_COLOR: always
   # Remove unnecessary WASM build artifacts
   WASM_BUILD_CLEAN_TARGET: 1
+  # stripping symbols and optimizing for binary size
+  RUSTFLAGS: -C strip=symbols -C opt-level=s
 
 jobs:
   clippy-fmt-test:
@@ -69,16 +71,16 @@ jobs:
         run: cargo fmt --all -- --check
 
       - name: Run tests
-        run: cargo test
+        run: cargo test --release
 
       - name: Check build
         run: cargo check --release
 
       - name: Check clippy
-        run: cargo clippy --locked --all-targets -- -D warnings
+        run: cargo clippy --release --locked --all-targets -- -D warnings
 
       - name: Check Documentation
-        run: cargo doc --locked --all --no-deps
+        run: cargo doc --release --locked --all --no-deps
         env:
           RUSTDOCFLAGS: "-D rustdoc::broken-intra-doc-links -D rustdoc::private_intra_doc_links"
 
