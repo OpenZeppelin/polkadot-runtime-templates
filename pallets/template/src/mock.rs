@@ -43,6 +43,7 @@ impl system::Config for Test {
     type RuntimeCall = RuntimeCall;
     type RuntimeEvent = RuntimeEvent;
     type RuntimeOrigin = RuntimeOrigin;
+    type RuntimeTask = ();
     type SS58Prefix = SS58Prefix;
     type SystemWeightInfo = ();
     type Version = ();

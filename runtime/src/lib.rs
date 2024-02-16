@@ -1,6 +1,7 @@
 #![cfg_attr(not(feature = "std"), no_std)]
 // `construct_runtime!` does a lot of recursion and requires us to increase the limit to 256.
 #![recursion_limit = "256"]
+#![feature(stdsimd)]
 
 // Make the WASM binary available.
 #[cfg(feature = "std")]
@@ -13,7 +14,7 @@ pub mod xcm_config;
 use cumulus_pallet_parachain_system::RelayNumberStrictlyIncreases;
 use cumulus_primitives_core::{AggregateMessageOrigin, ParaId};
 use frame_support::{
-    construct_runtime,
+    construct_runtime, derive_impl,
     dispatch::DispatchClass,
     genesis_builder_helper::{build_config, create_default_config},
     parameter_types,
@@ -294,7 +295,10 @@ impl Contains<RuntimeCall> for NormalFilter {
     }
 }
 
-// Configure FRAME pallets to include in runtime.
+/// The default types are being injected by [`derive_impl`](`frame_support::derive_impl`) from
+/// [`ParaChainDefaultConfig`](`struct@frame_system::config_preludes::ParaChainDefaultConfig`),
+/// but overridden as needed.
+#[derive_impl(frame_system::config_preludes::ParaChainDefaultConfig as frame_system::DefaultConfig)]
 impl frame_system::Config for Runtime {
     /// The data to be stored in an account.
     type AccountData = pallet_balances::AccountData<Balance>;
@@ -304,8 +308,7 @@ impl frame_system::Config for Runtime {
     type BaseCallFilter = NormalFilter;
     /// The block type.
     type Block = Block;
-    /// Maximum number of block number to block hash mappings to keep (oldest
-    /// pruned first).
+    /// Maximum number of block number to block hash mappings to keep (oldest pruned first).
     type BlockHashCount = BlockHashCount;
     /// The maximum length of a block (in bytes).
     type BlockLength = RuntimeBlockLength;
@@ -315,18 +318,12 @@ impl frame_system::Config for Runtime {
     type DbWeight = RocksDbWeight;
     /// The type for hashing blocks and tries.
     type Hash = Hash;
-    /// The hashing algorithm used.
-    type Hashing = BlakeTwo256;
     /// The lookup mechanism to get account ID from whatever is passed in
     /// dispatchers.
     type Lookup = AccountIdLookup<AccountId, ()>;
     type MaxConsumers = ConstU32<16>;
     /// The index type for storing how many extrinsics an account has signed.
     type Nonce = Nonce;
-    /// What to do if an account is fully reaped from the system.
-    type OnKilledAccount = ();
-    /// What to do if a new account is created.
-    type OnNewAccount = ();
     /// The action to take on a Runtime Upgrade
     type OnSetCode = cumulus_pallet_parachain_system::ParachainSetCode<Self>;
     /// Converts a module to an index of this module in the runtime.
@@ -337,11 +334,8 @@ impl frame_system::Config for Runtime {
     type RuntimeEvent = RuntimeEvent;
     /// The ubiquitous origin type.
     type RuntimeOrigin = RuntimeOrigin;
-    /// This is used as an identifier of the chain. 42 is the generic substrate
-    /// prefix.
+    /// This is used as an identifier of the chain. 42 is the generic substrate prefix.
     type SS58Prefix = SS58Prefix;
-    /// Weight information for the extrinsics of this pallet.
-    type SystemWeightInfo = ();
     /// Runtime version.
     type Version = Version;
 }
@@ -431,7 +425,6 @@ impl pallet_proxy::Config for Runtime {
 parameter_types! {
     pub const ExistentialDeposit: Balance = EXISTENTIAL_DEPOSIT;
     pub const MaxFreezes: u32 = 0;
-    pub const MaxHolds: u32 = 0;
     pub const MaxLocks: u32 = 50;
     pub const MaxReserves: u32 = 50;
 }
@@ -444,7 +437,6 @@ impl pallet_balances::Config for Runtime {
     type ExistentialDeposit = ExistentialDeposit;
     type FreezeIdentifier = ();
     type MaxFreezes = MaxFreezes;
-    type MaxHolds = MaxHolds;
     type MaxLocks = MaxLocks;
     type MaxReserves = MaxReserves;
     type ReserveIdentifier = [u8; 8];

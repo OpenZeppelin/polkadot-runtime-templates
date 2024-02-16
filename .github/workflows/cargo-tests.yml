@@ -55,8 +55,6 @@ jobs:
 
       - name: install rust toolchain
         uses: actions-rust-lang/setup-rust-toolchain@v1
-        with:
-          components: rust-src
 
       - name: Install toml-sort
         run: cargo install --git https://github.com/4meta5/toml_sort

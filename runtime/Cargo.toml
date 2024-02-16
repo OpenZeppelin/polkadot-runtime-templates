@@ -5,7 +5,7 @@ description = "A generic parachain runtime template"
 edition = { workspace = true }
 license = { workspace = true }
 repository = { workspace = true }
-version = "0.1.0"
+version = "0.7.0"
 
 [package.metadata.docs.rs]
 targets = [ "x86_64-unknown-linux-gnu" ]
@@ -65,7 +65,9 @@ xcm-executor = { workspace = true }
 # Cumulus
 assets-common = { workspace = true }
 cumulus-pallet-aura-ext = { workspace = true }
-cumulus-pallet-parachain-system = { workspace = true, features = [ "parameterized-consensus-hook" ] }
+cumulus-pallet-parachain-system = { workspace = true, features = [
+	"parameterized-consensus-hook",
+] }
 cumulus-pallet-session-benchmarking = { workspace = true }
 cumulus-pallet-xcm = { workspace = true }
 cumulus-pallet-xcmp-queue = { workspace = true }
