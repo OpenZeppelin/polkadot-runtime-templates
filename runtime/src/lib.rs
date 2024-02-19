@@ -320,6 +320,7 @@ impl frame_system::Config for Runtime {
     /// The lookup mechanism to get account ID from whatever is passed in
     /// dispatchers.
     type Lookup = AccountIdLookup<AccountId, ()>;
+    /// The maximum number of consumers allowed on a single account.
     type MaxConsumers = ConstU32<16>;
     /// The index type for storing how many extrinsics an account has signed.
     type Nonce = Nonce;
