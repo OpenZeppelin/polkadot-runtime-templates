@@ -2,8 +2,8 @@
 use frame_support::traits::PalletInfo;
 use parachain_template_runtime::{
     Aura, AuraExt, Authorship, Balances, CollatorSelection, CumulusXcm, MessageQueue, Multisig,
-    ParachainInfo, ParachainSystem, PolkadotXcm, Proxy, Runtime, Session, Sudo, System,
-    TemplatePallet, Timestamp, TransactionPayment, XcmpQueue,
+    ParachainInfo, ParachainSystem, PolkadotXcm, Proxy, Runtime, Session, Sudo, System, Timestamp,
+    TransactionPayment, XcmpQueue,
 };
 
 fn assert_pallet_prefix<P: 'static>(name: &str) {
@@ -30,5 +30,4 @@ fn verify_pallet_prefixes() {
     assert_pallet_prefix::<PolkadotXcm>("PolkadotXcm");
     assert_pallet_prefix::<CumulusXcm>("CumulusXcm");
     assert_pallet_prefix::<MessageQueue>("MessageQueue");
-    assert_pallet_prefix::<TemplatePallet>("TemplatePallet");
 }
