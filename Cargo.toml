@@ -1,5 +1,5 @@
 [workspace]
-members = ["node", "runtime"]
+members = ["node", "runtime", "template-fuzzer"]
 resolver = "2"
 
 [workspace.package]
@@ -18,6 +18,7 @@ jsonrpsee = { version = "0.20.3", features = ["server"] }
 log = { version = "0.4.20", default-features = false }
 parity-scale-codec = { version = "3.0.0", default-features = false, features = [
 	"derive",
+	"max-encoded-len",
 ] }
 scale-info = { version = "2.10.0", default-features = false }
 serde = { version = "1.0.188", default-features = false }
@@ -75,6 +76,7 @@ sp-keystore = { git = "https://github.com/paritytech/polkadot-sdk", default-feat
 sp-offchain = { git = "https://github.com/paritytech/polkadot-sdk", default-features = false, tag = "polkadot-v1.7.0" }
 sp-runtime = { git = "https://github.com/paritytech/polkadot-sdk", default-features = false, tag = "polkadot-v1.7.0" }
 sp-session = { git = "https://github.com/paritytech/polkadot-sdk", default-features = false, tag = "polkadot-v1.7.0" }
+sp-state-machine = { git = "https://github.com/paritytech/polkadot-sdk", default-features = false, tag = "polkadot-v1.7.0" }
 sp-std = { git = "https://github.com/paritytech/polkadot-sdk", default-features = false, tag = "polkadot-v1.7.0" }
 sp-timestamp = { git = "https://github.com/paritytech/polkadot-sdk", default-features = false, tag = "polkadot-v1.7.0" }
 sp-transaction-pool = { git = "https://github.com/paritytech/polkadot-sdk", default-features = false, tag = "polkadot-v1.7.0" }
@@ -113,9 +115,15 @@ cumulus-primitives-core = { git = "https://github.com/paritytech/polkadot-sdk", 
 cumulus-primitives-parachain-inherent = { git = "https://github.com/paritytech/polkadot-sdk", default-features = false, tag = "polkadot-v1.7.0" }
 cumulus-primitives-utility = { git = "https://github.com/paritytech/polkadot-sdk", default-features = false, tag = "polkadot-v1.7.0" }
 cumulus-relay-chain-interface = { git = "https://github.com/paritytech/polkadot-sdk", default-features = false, tag = "polkadot-v1.7.0" }
+cumulus-test-relay-sproof-builder = { git = "https://github.com/paritytech/polkadot-sdk", default-features = false, tag = "polkadot-v1.7.0" }
 pallet-collator-selection = { git = "https://github.com/paritytech/polkadot-sdk", default-features = false, tag = "polkadot-v1.7.0" }
 parachain-info = { package = "staging-parachain-info", git = "https://github.com/paritytech/polkadot-sdk", default-features = false, tag = "polkadot-v1.7.0" }
 parachains-common = { git = "https://github.com/paritytech/polkadot-sdk", default-features = false, tag = "polkadot-v1.7.0" }
+
+# Fuzzer
+substrate-runtime-fuzzer = { git = "https://github.com/srlabs/substrate-runtime-fuzzer.git", default-features = false }
+ziggy = { version = "0.8", default-features = false }
+
 
 [workspace.lints.clippy]
 large_enum_variant = "allow"
