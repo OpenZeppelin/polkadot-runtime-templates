@@ -6960,21 +6960,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "pallet-template"
-version = "0.7.0"
-dependencies = [
- "frame-benchmarking",
- "frame-support",
- "frame-system",
- "parity-scale-codec",
- "scale-info",
- "serde",
- "sp-core",
- "sp-io",
- "sp-runtime",
-]
-
-[[package]]
 name = "pallet-timestamp"
 version = "27.0.0"
 source = "git+https://github.com/paritytech/polkadot-sdk?tag=polkadot-v1.7.0#2fe3145ab9bd26ceb5a26baf2a64105b0035a5a6"
@@ -7224,7 +7209,7 @@ dependencies = [
 
 [[package]]
 name = "parachain-template-runtime"
-version = "0.7.0"
+version = "0.1.0"
 dependencies = [
  "assets-common",
  "cumulus-pallet-aura-ext",
@@ -7253,7 +7238,6 @@ dependencies = [
  "pallet-proxy",
  "pallet-session",
  "pallet-sudo",
- "pallet-template",
  "pallet-timestamp",
  "pallet-transaction-payment",
  "pallet-transaction-payment-rpc-runtime-api",
