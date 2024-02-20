@@ -88,8 +88,6 @@ mod runtime_tests {
     fn balances_constants() {
         assert_eq!(MaxFreezes::get(), 0);
 
-        assert_eq!(MaxHolds::get(), 0);
-
         assert_eq!(MaxLocks::get(), 50);
 
         assert_eq!(MaxReserves::get(), 50);
