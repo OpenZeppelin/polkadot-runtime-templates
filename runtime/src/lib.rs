@@ -7,6 +7,7 @@
 include!(concat!(env!("OUT_DIR"), "/wasm_binary.rs"));
 
 pub mod constants;
+pub mod governance;
 mod weights;
 pub mod xcm_config;
 
@@ -31,6 +32,7 @@ use frame_system::{
     limits::{BlockLength, BlockWeights},
     EnsureRoot, EnsureSigned,
 };
+use governance::origins::pallet_custom_origins; //, Treasurer, TreasurySpender,
 use pallet_xcm::{EnsureXcm, IsVoiceOfBody};
 use parachains_common::message_queue::{NarrowOriginToSibling, ParaIdToSibling};
 use parity_scale_codec::{Decode, Encode, MaxEncodedLen};
@@ -350,7 +352,6 @@ parameter_types! {
 impl pallet_scheduler::Config for Runtime {
     type MaxScheduledPerBlock = MaxScheduledPerBlock;
     type MaximumWeight = MaximumSchedulerWeight;
-    // TODO
     type OriginPrivilegeCmp = frame_support::traits::EqualPrivilegeOnly;
     type PalletsOrigin = OriginCaller;
     type Preimages = Preimage;
@@ -380,7 +381,6 @@ impl pallet_preimage::Config for Runtime {
     >;
     type Currency = Balances;
     type ManagerOrigin = EnsureRoot<AccountId>;
-    //TODO
     type RuntimeEvent = RuntimeEvent;
     type WeightInfo = ();
 }
@@ -737,6 +737,9 @@ construct_runtime!(
 
         // Governance
         Sudo: pallet_sudo = 15,
+        ConvictionVoting: pallet_conviction_voting::{Pallet, Call, Storage, Event<T>} = 16,
+        Referenda: pallet_referenda::{Pallet, Call, Storage, Event<T>} = 17,
+        Origins: pallet_custom_origins::{Origin} = 18,
 
         // Collator Support. The order of these 4 are important and shall not change.
         Authorship: pallet_authorship = 20,
