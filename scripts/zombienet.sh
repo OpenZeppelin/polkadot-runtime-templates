@@ -72,7 +72,8 @@ zombienet_devnet() {
   zombienet_init
   cargo build --release
   echo "spawning rococo-local relay chain plus devnet as a parachain..."
-  ./$ZOMBIENET_BIN spawn zombienet-config/devnet.toml -p native
+  local dir=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
+  ./$ZOMBIENET_BIN spawn "$dir/../zombienet-config/devnet.toml" -p native
 }
 
 
