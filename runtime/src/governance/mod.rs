@@ -11,13 +11,10 @@ use frame_support::traits::EitherOf;
 use frame_system::EnsureRootWithSuccess;
 
 use super::*;
-
-// temporary
-pub type Balance = u128;
-pub const UNITS: Balance = 1_000_000_000_000;
-pub const CENTS: Balance = UNITS / 100;
-pub const MILLICENTS: Balance = CENTS / 1_000;
-pub const GRAND: Balance = CENTS * 100_000;
+use crate::{
+    constants::currency::{CENTS, GRAND},
+    Balance,
+};
 
 parameter_types! {
     pub const VoteLockingPeriod: BlockNumber = 7 * DAYS;
