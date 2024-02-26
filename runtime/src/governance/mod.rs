@@ -8,6 +8,7 @@ pub use origins::{
 mod tracks;
 
 use frame_support::traits::EitherOf;
+use frame_system::EnsureRootWithSuccess;
 
 use super::*;
 
@@ -33,10 +34,10 @@ impl pallet_conviction_voting::Config for Runtime {
     type WeightInfo = ();
 }
 
-// parameter_types! {
-// 	pub const MaxBalance: Balance = Balance::max_value();
-// }
-// pub type TreasurySpender = EitherOf<EnsureRootWithSuccess<AccountId, MaxBalance>, Spender>;
+parameter_types! {
+    pub const MaxBalance: Balance = Balance::max_value();
+}
+pub type TreasurySpender = EitherOf<EnsureRootWithSuccess<AccountId, MaxBalance>, Spender>;
 
 impl origins::pallet_custom_origins::Config for Runtime {}
 
@@ -65,7 +66,7 @@ impl pallet_referenda::Config for Runtime {
     type RuntimeCall = RuntimeCall;
     type RuntimeEvent = RuntimeEvent;
     type Scheduler = Scheduler;
-    type Slash = ();
+    type Slash = Treasury;
     type SubmissionDeposit = SubmissionDeposit;
     type SubmitOrigin = EnsureSigned<AccountId>;
     type Tally = pallet_conviction_voting::TallyOf<Runtime>;
