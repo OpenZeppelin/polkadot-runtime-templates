@@ -340,6 +340,51 @@ impl frame_system::Config for Runtime {
     type Version = Version;
 }
 
+parameter_types! {
+    pub MaximumSchedulerWeight: frame_support::weights::Weight = Perbill::from_percent(80) *
+        RuntimeBlockWeights::get().max_block;
+    pub const MaxScheduledPerBlock: u32 = 50;
+    pub const NoPreimagePostponement: Option<u32> = Some(10);
+}
+
+impl pallet_scheduler::Config for Runtime {
+    type MaxScheduledPerBlock = MaxScheduledPerBlock;
+    type MaximumWeight = MaximumSchedulerWeight;
+    // TODO
+    type OriginPrivilegeCmp = frame_support::traits::EqualPrivilegeOnly;
+    type PalletsOrigin = OriginCaller;
+    type Preimages = Preimage;
+    type RuntimeCall = RuntimeCall;
+    type RuntimeEvent = RuntimeEvent;
+    type RuntimeOrigin = RuntimeOrigin;
+    type ScheduleOrigin = EnsureRoot<AccountId>;
+    type WeightInfo = ();
+}
+
+parameter_types! {
+    pub const PreimageBaseDeposit: Balance = deposit(2, 64);
+    pub const PreimageByteDeposit: Balance = deposit(0, 1);
+    pub const PreimageHoldReason: RuntimeHoldReason = RuntimeHoldReason::Preimage(pallet_preimage::HoldReason::Preimage);
+}
+
+impl pallet_preimage::Config for Runtime {
+    type Consideration = frame_support::traits::fungible::HoldConsideration<
+        AccountId,
+        Balances,
+        PreimageHoldReason,
+        frame_support::traits::LinearStoragePrice<
+            PreimageBaseDeposit,
+            PreimageByteDeposit,
+            Balance,
+        >,
+    >;
+    type Currency = Balances;
+    type ManagerOrigin = EnsureRoot<AccountId>;
+    //TODO
+    type RuntimeEvent = RuntimeEvent;
+    type WeightInfo = ();
+}
+
 impl pallet_timestamp::Config for Runtime {
     type MinimumPeriod = ConstU64<{ SLOT_DURATION / 2 }>;
     /// A timestamp: milliseconds since the unix epoch.
@@ -682,7 +727,8 @@ construct_runtime!(
         Proxy: pallet_proxy = 4,
         Utility: pallet_utility = 5,
         Multisig: pallet_multisig = 6,
-
+        Scheduler: pallet_scheduler::{Pallet, Call, Storage, Event<T>} = 7,
+        Preimage: pallet_preimage::{Pallet, Call, Storage, Event<T>, HoldReason} = 8,
 
         // Monetary
         Balances: pallet_balances = 10,
