@@ -1,8 +1,15 @@
 //! OpenGov governance config
 
-use super::*;
 pub mod origins;
+pub use origins::{
+    pallet_custom_origins, ReferendumCanceller, ReferendumKiller, Spender, Treasurer,
+    WhitelistedCaller,
+};
 mod tracks;
+
+use frame_support::traits::EitherOf;
+
+use super::*;
 
 // temporary
 pub type Balance = u128;
@@ -32,6 +39,15 @@ impl pallet_conviction_voting::Config for Runtime {
 // pub type TreasurySpender = EitherOf<EnsureRootWithSuccess<AccountId, MaxBalance>, Spender>;
 
 impl origins::pallet_custom_origins::Config for Runtime {}
+
+impl pallet_whitelist::Config for Runtime {
+    type DispatchWhitelistedOrigin = EitherOf<EnsureRoot<Self::AccountId>, WhitelistedCaller>;
+    type Preimages = Preimage;
+    type RuntimeCall = RuntimeCall;
+    type RuntimeEvent = RuntimeEvent;
+    type WeightInfo = ();
+    type WhitelistOrigin = EnsureRoot<Self::AccountId>;
+}
 
 parameter_types! {
     pub const AlarmInterval: BlockNumber = 1;

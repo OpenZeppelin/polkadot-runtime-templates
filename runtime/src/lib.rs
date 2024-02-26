@@ -740,6 +740,7 @@ construct_runtime!(
         ConvictionVoting: pallet_conviction_voting::{Pallet, Call, Storage, Event<T>} = 16,
         Referenda: pallet_referenda::{Pallet, Call, Storage, Event<T>} = 17,
         Origins: pallet_custom_origins::{Origin} = 18,
+        Whitelist: pallet_whitelist::{Pallet, Call, Storage, Event<T>} = 19,
 
         // Collator Support. The order of these 4 are important and shall not change.
         Authorship: pallet_authorship = 20,
