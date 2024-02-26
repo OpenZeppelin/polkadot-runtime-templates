@@ -38,12 +38,12 @@ pallet-referenda = { workspace = true }
 pallet-scheduler = { workspace = true }
 pallet-session = { workspace = true }
 pallet-sudo = { workspace = true }
-pallet-treasury = { workspace = true }
 pallet-timestamp = { workspace = true }
 pallet-transaction-payment = { workspace = true }
 pallet-transaction-payment-rpc-runtime-api = { workspace = true }
-pallet-whitelist = { workspace = true }
+pallet-treasury = { workspace = true }
 pallet-utility = { workspace = true }
+pallet-whitelist = { workspace = true }
 sp-api = { workspace = true }
 sp-arithmetic = { workspace = true }
 sp-block-builder = { workspace = true }
