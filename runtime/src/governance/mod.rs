@@ -28,7 +28,7 @@ impl pallet_conviction_voting::Config for Runtime {
     type Polls = Referenda;
     type RuntimeEvent = RuntimeEvent;
     type VoteLockingPeriod = VoteLockingPeriod;
-    type WeightInfo = ();
+    type WeightInfo = pallet_conviction_voting::weights::SubstrateWeight<Runtime>;
 }
 
 parameter_types! {
@@ -43,7 +43,7 @@ impl pallet_whitelist::Config for Runtime {
     type Preimages = Preimage;
     type RuntimeCall = RuntimeCall;
     type RuntimeEvent = RuntimeEvent;
-    type WeightInfo = ();
+    type WeightInfo = pallet_whitelist::weights::SubstrateWeight<Runtime>;
     type WhitelistOrigin = EnsureRoot<Self::AccountId>;
 }
 
@@ -70,5 +70,5 @@ impl pallet_referenda::Config for Runtime {
     type Tracks = tracks::TracksInfo;
     type UndecidingTimeout = UndecidingTimeout;
     type Votes = pallet_conviction_voting::VotesOf<Runtime>;
-    type WeightInfo = ();
+    type WeightInfo = pallet_referenda::weights::SubstrateWeight<Runtime>;
 }
