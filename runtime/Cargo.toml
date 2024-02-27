@@ -90,7 +90,6 @@ substrate-wasm-builder = { workspace = true }
 
 [features]
 default = [ "std" ]
-async-backing = []
 std = [
 	"assets-common/std",
 	"cumulus-pallet-aura-ext/std",
@@ -152,6 +151,7 @@ std = [
 	"xcm-executor/std",
 	"xcm/std",
 ]
+async-backing = []
 
 runtime-benchmarks = [
 	"assets-common/runtime-benchmarks",
