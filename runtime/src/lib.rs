@@ -690,10 +690,14 @@ impl pallet_session::Config for Runtime {
     type WeightInfo = pallet_session::weights::SubstrateWeight<Runtime>;
 }
 
+#[cfg(not(feature = "async-backing"))]
 parameter_types! {
-    #[cfg(not(feature = "async-backing"))]
     pub const AllowMultipleBlocksPerSlot: bool = false;
-    #[cfg(feature = "async-backing")]
+    pub const MaxAuthorities: u32 = 100_000;
+}
+
+#[cfg(feature = "async-backing")]
+parameter_types! {
     pub const AllowMultipleBlocksPerSlot: bool = true;
     pub const MaxAuthorities: u32 = 100_000;
 }
