@@ -67,7 +67,7 @@ const TRACKS_DATA: [(u16, pallet_referenda::TrackInfo<Balance, BlockNumber>); 10
         pallet_referenda::TrackInfo {
             name: "treasurer",
             max_deciding: 10,
-            decision_deposit: 1 * GRAND,
+            decision_deposit: GRAND,
             prepare_period: 8 * MINUTES,
             decision_period: 20 * MINUTES,
             confirm_period: 8 * MINUTES,
@@ -109,11 +109,11 @@ const TRACKS_DATA: [(u16, pallet_referenda::TrackInfo<Balance, BlockNumber>); 10
         pallet_referenda::TrackInfo {
             name: "small_tipper",
             max_deciding: 200,
-            decision_deposit: 1 * 3 * CENTS,
-            prepare_period: 1 * MINUTES,
+            decision_deposit: 3 * CENTS,
+            prepare_period: MINUTES,
             decision_period: 14 * MINUTES,
             confirm_period: 4 * MINUTES,
-            min_enactment_period: 1 * MINUTES,
+            min_enactment_period: MINUTES,
             min_approval: APP_SMALL_TIPPER,
             min_support: SUP_SMALL_TIPPER,
         },
