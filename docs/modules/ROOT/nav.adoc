@@ -1,5 +1,6 @@
 * General Guides
 ** xref:guides/weights_fees.adoc[Weights & Fees]
+** xref:guides/async_backing.adoc[Async Backing]
 * Runtimes
 ** xref:runtimes/generic.adoc[Generic Runtime]
 * Runtime Descriptions
