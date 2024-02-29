@@ -7,6 +7,7 @@
 include!(concat!(env!("OUT_DIR"), "/wasm_binary.rs"));
 
 pub mod constants;
+pub mod governance;
 mod weights;
 pub mod xcm_config;
 
@@ -30,6 +31,10 @@ use frame_support::{
 use frame_system::{
     limits::{BlockLength, BlockWeights},
     EnsureRoot, EnsureSigned,
+};
+use governance::{
+    origins::{pallet_custom_origins, Treasurer},
+    TreasurySpender,
 };
 use pallet_xcm::{EnsureXcm, IsVoiceOfBody};
 use parachains_common::message_queue::{NarrowOriginToSibling, ParaIdToSibling};
@@ -56,7 +61,7 @@ use sp_std::prelude::*;
 use sp_version::NativeVersion;
 use sp_version::RuntimeVersion;
 // XCM Imports
-use xcm::latest::prelude::BodyId;
+use xcm::latest::{prelude::BodyId, InteriorLocation, Junction::PalletInstance};
 
 use crate::{
     constants::currency::{deposit, CENTS, EXISTENTIAL_DEPOSIT, MICROCENTS, MILLICENTS},
@@ -340,6 +345,49 @@ impl frame_system::Config for Runtime {
     type Version = Version;
 }
 
+parameter_types! {
+    pub MaximumSchedulerWeight: frame_support::weights::Weight = Perbill::from_percent(80) *
+        RuntimeBlockWeights::get().max_block;
+    pub const MaxScheduledPerBlock: u32 = 50;
+    pub const NoPreimagePostponement: Option<u32> = Some(10);
+}
+
+impl pallet_scheduler::Config for Runtime {
+    type MaxScheduledPerBlock = MaxScheduledPerBlock;
+    type MaximumWeight = MaximumSchedulerWeight;
+    type OriginPrivilegeCmp = frame_support::traits::EqualPrivilegeOnly;
+    type PalletsOrigin = OriginCaller;
+    type Preimages = Preimage;
+    type RuntimeCall = RuntimeCall;
+    type RuntimeEvent = RuntimeEvent;
+    type RuntimeOrigin = RuntimeOrigin;
+    type ScheduleOrigin = EnsureRoot<AccountId>;
+    type WeightInfo = pallet_scheduler::weights::SubstrateWeight<Runtime>;
+}
+
+parameter_types! {
+    pub const PreimageBaseDeposit: Balance = deposit(2, 64);
+    pub const PreimageByteDeposit: Balance = deposit(0, 1);
+    pub const PreimageHoldReason: RuntimeHoldReason = RuntimeHoldReason::Preimage(pallet_preimage::HoldReason::Preimage);
+}
+
+impl pallet_preimage::Config for Runtime {
+    type Consideration = frame_support::traits::fungible::HoldConsideration<
+        AccountId,
+        Balances,
+        PreimageHoldReason,
+        frame_support::traits::LinearStoragePrice<
+            PreimageBaseDeposit,
+            PreimageByteDeposit,
+            Balance,
+        >,
+    >;
+    type Currency = Balances;
+    type ManagerOrigin = EnsureRoot<AccountId>;
+    type RuntimeEvent = RuntimeEvent;
+    type WeightInfo = pallet_preimage::weights::SubstrateWeight<Runtime>;
+}
+
 impl pallet_timestamp::Config for Runtime {
     type MinimumPeriod = ConstU64<{ SLOT_DURATION / 2 }>;
     /// A timestamp: milliseconds since the unix epoch.
@@ -553,7 +601,7 @@ impl pallet_message_queue::Config for Runtime {
     type RuntimeEvent = RuntimeEvent;
     type ServiceWeight = MessageQueueServiceWeight;
     type Size = u32;
-    type WeightInfo = ();
+    type WeightInfo = pallet_message_queue::weights::SubstrateWeight<Runtime>;
 }
 
 impl cumulus_pallet_aura_ext::Config for Runtime {}
@@ -669,6 +717,51 @@ impl pallet_utility::Config for Runtime {
     type WeightInfo = pallet_utility::weights::SubstrateWeight<Runtime>;
 }
 
+parameter_types! {
+    pub const ProposalBond: Permill = Permill::from_percent(5);
+    pub const ProposalBondMinimum: Balance = 2000; // * CENTS
+    pub const ProposalBondMaximum: Balance = 1;// * GRAND;
+    pub const SpendPeriod: BlockNumber = 6 * DAYS;
+    pub const Burn: Permill = Permill::from_perthousand(2);
+    pub const TreasuryPalletId: PalletId = PalletId(*b"py/trsry");
+    pub const PayoutSpendPeriod: BlockNumber = 30 * DAYS;
+    // The asset's interior location for the paying account. This is the Treasury
+    // pallet instance (which sits at index 13).
+    pub TreasuryInteriorLocation: InteriorLocation = PalletInstance(13).into();
+    pub const MaxApprovals: u32 = 100;
+}
+
+parameter_types! {
+    pub TreasuryAccount: AccountId = Treasury::account_id();
+}
+
+impl pallet_treasury::Config for Runtime {
+    type ApproveOrigin = EitherOfDiverse<EnsureRoot<AccountId>, Treasurer>;
+    type AssetKind = ();
+    type BalanceConverter = frame_support::traits::tokens::UnityAssetBalanceConversion;
+    #[cfg(feature = "runtime-benchmarks")]
+    type BenchmarkHelper = runtime_common::impls::benchmarks::TreasuryArguments;
+    type Beneficiary = Self::AccountId;
+    type BeneficiaryLookup = sp_runtime::traits::IdentityLookup<Self::Beneficiary>;
+    type Burn = ();
+    type BurnDestination = ();
+    type Currency = Balances;
+    type MaxApprovals = MaxApprovals;
+    type OnSlash = Treasury;
+    type PalletId = TreasuryPalletId;
+    type Paymaster = frame_support::traits::tokens::PayFromAccount<Balances, TreasuryAccount>;
+    type PayoutPeriod = PayoutSpendPeriod;
+    type ProposalBond = ProposalBond;
+    type ProposalBondMaximum = ProposalBondMaximum;
+    type ProposalBondMinimum = ProposalBondMinimum;
+    type RejectOrigin = EitherOfDiverse<EnsureRoot<AccountId>, Treasurer>;
+    type RuntimeEvent = RuntimeEvent;
+    type SpendFunds = ();
+    type SpendOrigin = TreasurySpender;
+    type SpendPeriod = SpendPeriod;
+    type WeightInfo = pallet_treasury::weights::SubstrateWeight<Runtime>;
+}
+
 // Create the runtime by composing the FRAME pallets that were previously
 // configured.
 construct_runtime!(
@@ -682,15 +775,21 @@ construct_runtime!(
         Proxy: pallet_proxy = 4,
         Utility: pallet_utility = 5,
         Multisig: pallet_multisig = 6,
-
+        Scheduler: pallet_scheduler::{Pallet, Call, Storage, Event<T>} = 7,
+        Preimage: pallet_preimage::{Pallet, Call, Storage, Event<T>, HoldReason} = 8,
 
         // Monetary
         Balances: pallet_balances = 10,
         TransactionPayment: pallet_transaction_payment = 11,
         Assets: pallet_assets = 12,
+        Treasury: pallet_treasury::{Pallet, Call, Storage, Config<T>, Event<T>} = 13,
 
         // Governance
         Sudo: pallet_sudo = 15,
+        ConvictionVoting: pallet_conviction_voting::{Pallet, Call, Storage, Event<T>} = 16,
+        Referenda: pallet_referenda::{Pallet, Call, Storage, Event<T>} = 17,
+        Origins: pallet_custom_origins::{Origin} = 18,
+        Whitelist: pallet_whitelist::{Pallet, Call, Storage, Event<T>} = 19,
 
         // Collator Support. The order of these 4 are important and shall not change.
         Authorship: pallet_authorship = 20,

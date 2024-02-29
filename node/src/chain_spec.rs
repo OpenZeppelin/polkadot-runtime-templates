@@ -199,6 +199,7 @@ fn testnet_genesis(
                 })
             .collect::<Vec<_>>(),
         },
+        "treasury": {},
         "polkadotXcm": {
             "safeXcmVersion": Some(SAFE_XCM_VERSION),
         },
