@@ -72,7 +72,7 @@ jobs:
         run: cargo test --release
       
       - name: Check benchmarking compilation
-        run: cargo check --features runtime-benchmarks
+        run: cargo check --release --features runtime-benchmarks
 
       - name: Check clippy
         run: cargo clippy --release --locked --all-targets -- -D warnings
