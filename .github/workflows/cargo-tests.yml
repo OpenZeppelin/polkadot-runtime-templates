@@ -74,6 +74,9 @@ jobs:
       - name: Check benchmarking compilation
         run: cargo check --release --features runtime-benchmarks
 
+      - name: Run tests with async backing
+        run: cargo test --release --features="async-backing"
+
       - name: Check clippy
         run: cargo clippy --release --locked --all-targets -- -D warnings
 
