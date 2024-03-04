@@ -740,7 +740,7 @@ impl pallet_treasury::Config for Runtime {
     type AssetKind = ();
     type BalanceConverter = frame_support::traits::tokens::UnityAssetBalanceConversion;
     #[cfg(feature = "runtime-benchmarks")]
-    type BenchmarkHelper = runtime_common::impls::benchmarks::TreasuryArguments;
+    type BenchmarkHelper = polkadot_runtime_common::impls::benchmarks::TreasuryArguments;
     type Beneficiary = Self::AccountId;
     type BeneficiaryLookup = sp_runtime::traits::IdentityLookup<Self::Beneficiary>;
     type Burn = ();
