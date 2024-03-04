@@ -39,9 +39,11 @@ use governance::{
 use pallet_xcm::{EnsureXcm, IsVoiceOfBody};
 use parachains_common::message_queue::{NarrowOriginToSibling, ParaIdToSibling};
 use parity_scale_codec::{Decode, Encode, MaxEncodedLen};
-use polkadot_runtime_common::xcm_sender::NoPriceForMessageDelivery;
-// Polkadot imports
-use polkadot_runtime_common::{BlockHashCount, SlowAdjustingFeeUpdate};
+use polkadot_runtime_common::{
+    impls::{LocatableAssetConverter, VersionedLocatableAsset, VersionedLocationConverter},
+    xcm_sender::NoPriceForMessageDelivery,
+    BlockHashCount, SlowAdjustingFeeUpdate,
+};
 use scale_info::TypeInfo;
 use smallvec::smallvec;
 use sp_api::impl_runtime_apis;
@@ -51,7 +53,9 @@ use sp_core::{crypto::KeyTypeId, OpaqueMetadata};
 pub use sp_runtime::BuildStorage;
 use sp_runtime::{
     create_runtime_str, generic, impl_opaque_keys,
-    traits::{AccountIdLookup, BlakeTwo256, Block as BlockT, IdentifyAccount, Verify},
+    traits::{
+        AccountIdLookup, BlakeTwo256, Block as BlockT, IdentifyAccount, IdentityLookup, Verify,
+    },
     transaction_validity::{TransactionSource, TransactionValidity},
     ApplyExtrinsicResult, MultiSignature, RuntimeDebug,
 };
@@ -61,7 +65,13 @@ use sp_std::prelude::*;
 use sp_version::NativeVersion;
 use sp_version::RuntimeVersion;
 // XCM Imports
-use xcm::latest::{prelude::BodyId, InteriorLocation, Junction::PalletInstance};
+use xcm::{
+    latest::{prelude::BodyId, InteriorLocation, Junction::PalletInstance},
+    VersionedLocation,
+};
+use xcm_builder::PayOverXcm;
+#[cfg(not(feature = "runtime-benchmarks"))]
+use xcm_builder::ProcessXcmMessage;
 
 use crate::{
     constants::currency::{deposit, CENTS, EXISTENTIAL_DEPOSIT, MICROCENTS, MILLICENTS},
@@ -590,7 +600,7 @@ impl pallet_message_queue::Config for Runtime {
         cumulus_primitives_core::AggregateMessageOrigin,
     >;
     #[cfg(not(feature = "runtime-benchmarks"))]
-    type MessageProcessor = xcm_builder::ProcessXcmMessage<
+    type MessageProcessor = ProcessXcmMessage<
         AggregateMessageOrigin,
         xcm_executor::XcmExecutor<xcm_config::XcmConfig>,
         RuntimeCall,
@@ -737,19 +747,28 @@ parameter_types! {
 
 impl pallet_treasury::Config for Runtime {
     type ApproveOrigin = EitherOfDiverse<EnsureRoot<AccountId>, Treasurer>;
-    type AssetKind = ();
+    type AssetKind = VersionedLocatableAsset;
     type BalanceConverter = frame_support::traits::tokens::UnityAssetBalanceConversion;
     #[cfg(feature = "runtime-benchmarks")]
-    type BenchmarkHelper = runtime_common::impls::benchmarks::TreasuryArguments;
-    type Beneficiary = Self::AccountId;
-    type BeneficiaryLookup = sp_runtime::traits::IdentityLookup<Self::Beneficiary>;
+    type BenchmarkHelper = polkadot_runtime_common::impls::benchmarks::TreasuryArguments;
+    type Beneficiary = VersionedLocation;
+    type BeneficiaryLookup = IdentityLookup<Self::Beneficiary>;
     type Burn = ();
     type BurnDestination = ();
     type Currency = Balances;
     type MaxApprovals = MaxApprovals;
     type OnSlash = Treasury;
     type PalletId = TreasuryPalletId;
-    type Paymaster = frame_support::traits::tokens::PayFromAccount<Balances, TreasuryAccount>;
+    type Paymaster = PayOverXcm<
+        TreasuryInteriorLocation,
+        crate::xcm_config::XcmRouter,
+        crate::PolkadotXcm,
+        ConstU32<{ 6 * HOURS }>,
+        Self::Beneficiary,
+        Self::AssetKind,
+        LocatableAssetConverter,
+        VersionedLocationConverter,
+    >;
     type PayoutPeriod = PayoutSpendPeriod;
     type ProposalBond = ProposalBond;
     type ProposalBondMaximum = ProposalBondMaximum;
