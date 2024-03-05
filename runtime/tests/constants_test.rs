@@ -34,6 +34,7 @@ mod runtime_tests {
 
     #[test]
     fn frame_system_constants() {
+        #[cfg(not(feature = "async-backing"))]
         assert_eq!(
             MAXIMUM_BLOCK_WEIGHT,
             Weight::from_parts(
@@ -42,17 +43,31 @@ mod runtime_tests {
             )
         );
 
+        #[cfg(feature = "async-backing")]
+        assert_eq!(
+            MAXIMUM_BLOCK_WEIGHT,
+            Weight::from_parts(
+                frame_support::weights::constants::WEIGHT_REF_TIME_PER_SECOND.saturating_mul(2),
+                cumulus_primitives_core::relay_chain::MAX_POV_SIZE as u64
+            )
+        );
+
         assert_eq!(AVERAGE_ON_INITIALIZE_RATIO, Perbill::from_percent(5));
 
         assert_eq!(NORMAL_DISPATCH_RATIO, Perbill::from_percent(75));
-
+        #[cfg(not(feature = "async-backing"))]
         assert_eq!(UNINCLUDED_SEGMENT_CAPACITY, 1);
+        #[cfg(feature = "async-backing")]
+        assert_eq!(UNINCLUDED_SEGMENT_CAPACITY, 3);
 
         assert_eq!(BLOCK_PROCESSING_VELOCITY, 1);
 
         assert_eq!(RELAY_CHAIN_SLOT_DURATION_MILLIS, 6000);
 
+        #[cfg(not(feature = "async-backing"))]
         assert_eq!(MILLISECS_PER_BLOCK, 12000);
+        #[cfg(feature = "async-backing")]
+        assert_eq!(MILLISECS_PER_BLOCK, 6000);
 
         assert_eq!(SLOT_DURATION, MILLISECS_PER_BLOCK);
 
@@ -154,7 +169,10 @@ mod runtime_tests {
     #[test]
     #[allow(clippy::assertions_on_constants)]
     fn aura_constants() {
+        #[cfg(not(feature = "async-backing"))]
         assert!(!AllowMultipleBlocksPerSlot::get());
+        #[cfg(feature = "async-backing")]
+        assert!(AllowMultipleBlocksPerSlot::get());
 
         assert_eq!(MaxAuthorities::get(), 100_000);
     }

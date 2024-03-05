@@ -1,0 +1,36 @@
+:source-highlighter: highlight.js
+:highlightjs-languages: rust
+:github-icon: pass:[<svg class="icon"><use href="#github-icon"/></svg>]
+
+= Async Backing
+
+Async backing is a feature of parachains that allow to shorten the block time, get more execution time and speed up transaction inclusion in general. You can read in details what async backing is in the link:https://wiki.polkadot.network/docs/learn-async-backing#candidate-receipt[general guide] and in the link:https://wiki.polkadot.network/docs/maintain-guides-async-backing[update guide]. In our generic template we have included async backing under a feature. This page describes how can you build and test the template with async backing enabled.
+
+== How to build
+
+Async backing is enabled by the feature `async-backing`. You can build the template with it like this:
+
+```bash
+cargo build --release --features="async-backing"
+```
+
+== How to test
+
+You can always test it against Rococo (it should already have enabled async backing), but the fastest way is to test against a local relay chain. In our repository you can find a script, a config and a link:https://github.com/OpenZeppelin/polkadot-runtime-template/tree/main/zombienet-config[manual] that will run both relay chain and a parachain. To launch a parachain with a relay chain, you will need to run these commands:
+
+* Get the Polkadot binaries:
+** If you are using some Linux distro, you can download the binaries:
++
+```
+./scripts/zombienet.sh init
+```
+** Otherwise, you have to build it from scratch. It takes 
++
+```
+./scripts/zombienet.sh build
+```
+* After that, launch the network:
++
+```
+./scripts/zombienet.sh devnet
+```

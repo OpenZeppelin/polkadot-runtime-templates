@@ -75,6 +75,7 @@ cumulus-pallet-parachain-system = { workspace = true, features = [
 cumulus-pallet-session-benchmarking = { workspace = true }
 cumulus-pallet-xcm = { workspace = true }
 cumulus-pallet-xcmp-queue = { workspace = true }
+cumulus-primitives-aura = { workspace = true }
 cumulus-primitives-core = { workspace = true }
 cumulus-primitives-utility = { workspace = true }
 pallet-collator-selection = { workspace = true }
@@ -150,6 +151,7 @@ std = [
 	"xcm-executor/std",
 	"xcm/std",
 ]
+async-backing = []
 
 runtime-benchmarks = [
 	"assets-common/runtime-benchmarks",
