@@ -440,6 +440,8 @@ fn start_consensus(
         authoring_duration: Duration::from_millis(1500),
         #[cfg(not(feature = "async-backing"))]
         collation_request_receiver: None,
+        #[cfg(feature = "async-backing")]
+        reinitialize: false,
     };
 
     #[cfg(not(feature = "async-backing"))]
