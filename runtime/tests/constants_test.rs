@@ -34,10 +34,20 @@ mod runtime_tests {
 
     #[test]
     fn frame_system_constants() {
+        #[cfg(not(feature = "async-backing"))]
         assert_eq!(
             MAXIMUM_BLOCK_WEIGHT,
             Weight::from_parts(
                 frame_support::weights::constants::WEIGHT_REF_TIME_PER_SECOND.saturating_div(2),
+                cumulus_primitives_core::relay_chain::MAX_POV_SIZE as u64
+            )
+        );
+
+        #[cfg(feature = "async-backing")]
+        assert_eq!(
+            MAXIMUM_BLOCK_WEIGHT,
+            Weight::from_parts(
+                frame_support::weights::constants::WEIGHT_REF_TIME_PER_SECOND.saturating_mul(2),
                 cumulus_primitives_core::relay_chain::MAX_POV_SIZE as u64
             )
         );
