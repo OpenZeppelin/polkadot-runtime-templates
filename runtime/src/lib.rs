@@ -311,10 +311,12 @@ impl Contains<RuntimeCall> for NormalFilter {
     fn contains(c: &RuntimeCall) -> bool {
         match c {
             // We filter anonymous proxy as they make "reserve" inconsistent
-            // See: https://github.com/paritytech/substrate/blob/37cca710eed3dadd4ed5364c7686608f5175cce1/frame/proxy/src/lib.rs#L270
+            // See: https://github.com/paritytech/polkadot-sdk/blob/v1.9.0-rc2/substrate/frame/proxy/src/lib.rs#L260
             RuntimeCall::Proxy(method) => !matches!(
                 method,
-                pallet_proxy::Call::create_pure { .. } | pallet_proxy::Call::kill_pure { .. }
+                pallet_proxy::Call::create_pure { .. }
+                    | pallet_proxy::Call::kill_pure { .. }
+                    | pallet_proxy::Call::remove_proxies { .. }
             ),
             _ => true,
         }
