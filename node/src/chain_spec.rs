@@ -66,9 +66,9 @@ pub fn template_session_keys(keys: AuraId) -> parachain_template_runtime::Sessio
 }
 
 pub fn development_config() -> ChainSpec {
-    // Give your base currency a unit name and decimal places
+    // Give your base currency a XCAV name and decimal places
     let mut properties = sc_chain_spec::Properties::new();
-    properties.insert("tokenSymbol".into(), "UNIT".into());
+    properties.insert("tokenSymbol".into(), "XCAV".into());
     properties.insert("tokenDecimals".into(), 12.into());
     properties.insert("ss58Format".into(), 42.into());
 
@@ -117,9 +117,9 @@ pub fn development_config() -> ChainSpec {
 }
 
 pub fn local_testnet_config() -> ChainSpec {
-    // Give your base currency a unit name and decimal places
+    // Give your base currency a XCAV name and decimal places
     let mut properties = sc_chain_spec::Properties::new();
-    properties.insert("tokenSymbol".into(), "UNIT".into());
+    properties.insert("tokenSymbol".into(), "XCAV".into());
     properties.insert("tokenDecimals".into(), 12.into());
     properties.insert("ss58Format".into(), 42.into());
 
