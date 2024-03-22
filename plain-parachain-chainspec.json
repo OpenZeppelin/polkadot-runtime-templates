@@ -10,8 +10,8 @@
     "tokenDecimals": 12,
     "tokenSymbol": "XCAV"
   },
-  "relay_chain": "rococo",
-  "para_id": 4285,
+  "relay_chain": "paseo",
+  "para_id": 4003,
   "codeSubstitutes": {},
   "genesis": {
     "runtimeGenesis": {
@@ -77,7 +77,7 @@
           ]
         },
         "parachainInfo": {
-          "parachainId": 1000
+          "parachainId": 4003
         },
         "polkadotXcm": {
           "safeXcmVersion": 4

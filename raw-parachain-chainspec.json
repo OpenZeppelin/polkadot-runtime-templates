@@ -10,14 +10,14 @@
     "tokenDecimals": 12,
     "tokenSymbol": "XCAV"
   },
-  "relay_chain": "rococo",
-  "para_id": 4285,
+  "relay_chain": "paseo",
+  "para_id": 4003,
   "codeSubstitutes": {},
   "genesis": {
     "raw": {
       "top": {
         "0x074b65e262fcd5bd9c785caf7f42e00a4e7b9012096b41c4eb3aaf947f6ea429": "0x0000",
-        "0x0d715f2646c8f85767b5d2764bb2782604a74d81251e398fd8a0a4d55023bb3f": "0xe8030000",
+        "0x0d715f2646c8f85767b5d2764bb2782604a74d81251e398fd8a0a4d55023bb3f": "0xa30f0000",
         "0x0d715f2646c8f85767b5d2764bb278264e7b9012096b41c4eb3aaf947f6ea429": "0x0000",
         "0x0f6738a0ee80c8e74cd2c7417c1e25564e7b9012096b41c4eb3aaf947f6ea429": "0x0100",
         "0x15464cac3378d46f113cd5b7a4d71c84476f594316a7dfe49c1f352d95abdaf1": "0x00000000",
