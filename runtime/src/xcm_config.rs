@@ -183,11 +183,6 @@ pub type XcmRouter = WithUniqueTopic<(
     XcmpQueue,
 )>;
 
-#[cfg(feature = "runtime-benchmarks")]
-parameter_types! {
-    pub ReachableDest: Option<MultiLocation> = Some(Parent.into());
-}
-
 parameter_types! {
     pub const MaxLockers: u32 = 8;
     pub const MaxRemoteLockConsumers: u32 = 0;
@@ -202,8 +197,6 @@ impl pallet_xcm::Config for Runtime {
     type ExecuteXcmOrigin = EnsureXcmOrigin<RuntimeOrigin, LocalOriginToLocation>;
     type MaxLockers = MaxLockers;
     type MaxRemoteLockConsumers = MaxLockers;
-    #[cfg(feature = "runtime-benchmarks")]
-    type ReachableDest = ReachableDest;
     type RemoteLockConsumerIdentifier = ();
     type RuntimeCall = RuntimeCall;
     type RuntimeEvent = RuntimeEvent;
