@@ -725,6 +725,8 @@ mod benches {
         [pallet_proxy, Proxy]
         [pallet_utility, Utility]
         [pallet_multisig, Multisig]
+
+		[pallet_xcm, PalletXcmExtrinsicsBenchmark::<Runtime>]
     );
 }
 
@@ -902,6 +904,8 @@ impl_runtime_apis! {
             use frame_system_benchmarking::Pallet as SystemBench;
             use cumulus_pallet_session_benchmarking::Pallet as SessionBench;
 
+			use pallet_xcm::benchmarking::Pallet as PalletXcmExtrinsicsBenchmark;
+
             let mut list = Vec::<BenchmarkList>::new();
             list_benchmarks!(list, extra);
 
@@ -924,6 +928,27 @@ impl_runtime_apis! {
                 fn verify_set_code() {
                     System::assert_last_event(cumulus_pallet_parachain_system::Event::<Runtime>::ValidationFunctionStored.into());
                 }
+            }
+
+            use pallet_xcm::benchmarking::Pallet as PalletXcmExtrinsicsBenchmark;
+            use xcm::latest::prelude::*;
+            impl pallet_xcm::benchmarking::Config for Runtime {
+				fn reachable_dest() -> Option<Location> {
+					Some(Parent.into())
+				}
+
+				fn teleportable_asset_and_dest() -> Option<(Asset, Location)> {
+                    None
+				}
+
+				fn reserve_transferable_asset_and_dest() -> Option<(Asset, Location)> {
+					None
+				}
+
+				fn set_up_complex_asset_transfer(
+				) -> Option<(Assets, u32, Location, Box<dyn FnOnce()>)> {
+                    None
+				}
             }
 
             use cumulus_pallet_session_benchmarking::Pallet as SessionBench;
