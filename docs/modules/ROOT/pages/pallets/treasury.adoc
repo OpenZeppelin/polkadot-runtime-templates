@@ -1,0 +1,82 @@
+:source-highlighter: highlight.js
+:highlightjs-languages: rust
+:github-icon: pass:[<svg class="icon"><use href="#github-icon"/></svg>]
+
+= pallet_treasury
+
+Branch/Release: `release-polkadot-v1.7.0`
+
+== Purpose
+
+The Treasury pallet provides a “pot” of funds that can be managed by stakeholders in the system and a structure for making spending proposals from this pot.
+
+== Config link:https://github.com/paritytech/polkadot-sdk/blob/release-polkadot-v1.7.0/substrate/frame/treasury/src/lib.rs#L202
+
+* Pallet-specific configs
+** `OnSlash` -- Handler for the unbalanced decrease when slashing for a rejected proposal or bounty.
+** `ProposalBond` --  Fraction of a proposal's value that should be bonded in order to place the proposal. An accepted proposal gets these back. A rejected proposal does not.
+** `ProposalBondMinimum` -- Minimum amount of funds that should be placed in a deposit for making a proposal.
+** `ProposalBondMaximum` -- Maximum amount of funds that should be placed in a deposit for making a proposal.
+** `SpendPeriod` -- Period between successive spends. "Spend" means, treasury spending money to a proposal. `SpendPeriod` determines how often the treasury pallet distributes the assets to the proposals.
+** `Burn` -- Percentage of spare funds (if any) that are burnt per spend period.
+** `BurnDestination` -- Handler for the unbalanced decrease when treasury funds are burned.
+** `SpendFunds` -- Runtime hooks to external pallet using treasury to compute spend funds.
+** `MaxApprovals` -- The maximum number of approvals that can wait in the spending queue. NOTE: This parameter is also used within the Bounties Pallet extension if enabled.
+** `AssetKind` -- Type parameter representing the asset kinds to be spent from the treasury.
+** `Beneficiary` -- Type parameter used to identify the beneficiaries eligible to receive treasury spends.
+** `BeneficiaryLookup` -- Converting trait to take a source type and convert to [`Self::Beneficiary`].
+** `Paymaster` -- Type for processing spends of [Self::AssetKind] in favor of [`Self::Beneficiary`].
+** `BalanceConverter` -- Type for converting the balance of an [Self::AssetKind] to the balance of the native asset, solely for the purpose of asserting the result against the maximum allowed spend amount of the [`Self::SpendOrigin`].
+** `PayoutPeriod` -- The period during which an approved treasury spend has to be claimed by the beneficiary of the proposal.
+
+* Pallet-specific origins:
+** `ApproveOrigin` -- Origin from which approvals must come.
+** `RejectOrigin` -- Origin from which rejections must come.
+** `SpendOrigin` -- The origin required for approving spends from the treasury outside of the proposal process. The `Success` value is the maximum amount in a native asset that this origin is allowed to spend at a time.
+
+* Common configs
+** `Currency` -- The staking balance.
+** `RuntimeEvent` -- The overarching event type.
+** `PalletId` -- The treasury's pallet id, used for deriving its sovereign account ID.
+** `WeightInfo` -- Weight information for extrinsics in this pallet.
+** `BenchmarkHelper` --  Helper type for benchmarks.
+
+== Dispatchables link:https://google.com[{github-icon},role=heading-link]
+
+[.contract-item]
+[[dispatchable_name]]
+==== `[.contract-item-name]#++dispatchable_name++#`
+[source,rust]
+----
+pub fn dispatchable_name(
+    param1: Type1,
+    param2: Type2
+) -> DispatchResult
+----
+Freeform description of the dispatchable. It is good to include the important things that should be included there.
+
+// four following blocks show how to make a highlight of some information. It will become a styled block
+
+NOTE: This is how you state important information that should be acknowledged
+
+IMPORTANT: This is how you put some information that should not be missed
+
+WARNING: This thing is for important information missing which may lead to dangerous consequences
+
+TIP: This is how you should give some useful advice
+
+**Params:**
+
+* `param1: Type1` -- description of the parameter
+
+**Errors:**
+
+* `ErrorName` -- description of conditions, when this error happens
+
+**Events:**
+
+* `EventName(param1, param2)` -- description of event, if needed (they are often self-explanatory)
+
+== Important Mentions and FAQ's
+
+Here you may put a freeform information about any aspect of the pallet.

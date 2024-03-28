@@ -79,6 +79,7 @@ To demystify the hard concepts, we provided a documentation, in which you can fi
 ====
 
 * https://docs.rs/pallet-sudo/latest/pallet_sudo/#[pallet_sudo] provides a way to execute privileged runtime calls using a specified sudo (“superuser do”) account.
+* https://docs.rs/pallet-treasury/latest/pallet_treasury/#[pallet_treasury] provides a “pot” of funds that can be managed by stakeholders in the system and a structure for making spending proposals from this pot.
 
 ====
 

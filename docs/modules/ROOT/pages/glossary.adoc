@@ -65,7 +65,7 @@ An asset meaning that it is not interchangeable with other assets of the same ty
 
 == H
 
-=== Hold 
+=== Hold
 `Hold` means reserving/holding an amount of balance from an account. The `Hold` amount cannot be spent, but still belongs to the account. For example, depositing modifying the state, and occupying space. This deposit will be repaid once the occupied space is freed.
 
 == I
@@ -90,7 +90,7 @@ Junctions is multiple `Junction`s, formed only through <<multilocation>> constru
 
 A fee proportional to the encoded length of the transaction.
 
-=== Lock 
+=== Lock
 
 Nearly the same as `<<Hold>>`, with 2 major differences:
 
@@ -139,7 +139,7 @@ Pure account is an account that was spawned only to be a <<delegatee>> for some 
 
 == R
 
-=== Reserve 
+=== Reserve
 
 Deprecated, use `<<Hold>>`.
 
