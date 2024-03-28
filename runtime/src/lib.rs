@@ -230,7 +230,7 @@ pub const MILLISECS_PER_BLOCK: u64 = 6000;
 pub const MILLISECS_PER_BLOCK: u64 = 12000;
 
 // NOTE: Currently it is not possible to change the slot duration after the
-// chain has started.       Attempting to do so will brick block production.
+// chain has started. Attempting to do so will brick block production.
 pub const SLOT_DURATION: u64 = MILLISECS_PER_BLOCK;
 
 // Time is measured by number of blocks.
@@ -303,6 +303,7 @@ parameter_types! {
         })
         .avg_block_initialization(AVERAGE_ON_INITIALIZE_RATIO)
         .build_or_panic();
+    // generic substrate prefix. For more info, see: [Polkadot Accounts In-Depth](https://wiki.polkadot.network/docs/learn-account-advanced#:~:text=The%20address%20format%20used%20in,belonging%20to%20a%20specific%20network)
     pub const SS58Prefix: u16 = 42;
 }
 
@@ -370,12 +371,11 @@ impl frame_system::Config for Runtime {
 parameter_types! {
     pub MaximumSchedulerWeight: frame_support::weights::Weight = Perbill::from_percent(80) *
         RuntimeBlockWeights::get().max_block;
-    pub const MaxScheduledPerBlock: u32 = 50;
-    pub const NoPreimagePostponement: Option<u32> = Some(10);
+    pub const MaxScheduledRuntimeCallsPerBlock: u32 = 50;
 }
 
 impl pallet_scheduler::Config for Runtime {
-    type MaxScheduledPerBlock = MaxScheduledPerBlock;
+    type MaxScheduledPerBlock = MaxScheduledRuntimeCallsPerBlock;
     type MaximumWeight = MaximumSchedulerWeight;
     type OriginPrivilegeCmp = frame_support::traits::EqualPrivilegeOnly;
     type PalletsOrigin = OriginCaller;
@@ -672,6 +672,10 @@ impl pallet_multisig::Config for Runtime {
 }
 
 parameter_types! {
+    // pallet_session ends the session after a fixed period of blocks.
+    // The first session will have length of Offset,
+    // and the following sessions will have length of Period.
+    // This may prove nonsensical if Offset >= Period.
     pub const Period: u32 = 6 * HOURS;
     pub const Offset: u32 = 0;
 }
@@ -718,6 +722,9 @@ parameter_types! {
     pub const SessionLength: BlockNumber = 6 * HOURS;
     // StakingAdmin pluralistic body.
     pub const StakingAdminBodyId: BodyId = BodyId::Defense;
+    pub const MaxCandidates: u32 = 100;
+    pub const MaxInvulnerables: u32 = 20;
+    pub const MinEligibleCollators: u32 = 4;
 }
 
 /// We allow root and the StakingAdmin to execute privileged collator selection
@@ -726,12 +733,6 @@ pub type CollatorSelectionUpdateOrigin = EitherOfDiverse<
     EnsureRoot<AccountId>,
     EnsureXcm<IsVoiceOfBody<RelayLocation, StakingAdminBodyId>>,
 >;
-
-parameter_types! {
-    pub const MaxCandidates: u32 = 100;
-    pub const MaxInvulnerables: u32 = 20;
-    pub const MinEligibleCollators: u32 = 4;
-}
 
 impl pallet_collator_selection::Config for Runtime {
     type Currency = Balances;
@@ -768,9 +769,6 @@ parameter_types! {
     // pallet instance (which sits at index 13).
     pub TreasuryInteriorLocation: InteriorLocation = PalletInstance(13).into();
     pub const MaxApprovals: u32 = 100;
-}
-
-parameter_types! {
     pub TreasuryAccount: AccountId = Treasury::account_id();
 }
 
