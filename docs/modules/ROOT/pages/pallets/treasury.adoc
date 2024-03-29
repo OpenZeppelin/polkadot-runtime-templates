@@ -10,7 +10,7 @@ Branch/Release: `release-polkadot-v1.7.0`
 
 The Treasury pallet provides a “pot” of funds that can be managed by stakeholders in the system and a structure for making spending proposals from this pot.
 
-== Config link:https://github.com/paritytech/polkadot-sdk/blob/release-polkadot-v1.7.0/substrate/frame/treasury/src/lib.rs#L202
+== Config link:https://github.com/paritytech/polkadot-sdk/blob/release-polkadot-v1.7.0/substrate/frame/treasury/src/lib.rs#L202[{github-icon},role=heading-link]
 
 * Pallet-specific configs
 ** `OnSlash` -- Handler for the unbalanced decrease when slashing for a rejected proposal or bounty.
@@ -41,33 +41,30 @@ The Treasury pallet provides a “pot” of funds that can be managed by stakeho
 ** `WeightInfo` -- Weight information for extrinsics in this pallet.
 ** `BenchmarkHelper` --  Helper type for benchmarks.
 
-== Dispatchables link:https://google.com[{github-icon},role=heading-link]
+== Dispatchables link:https://github.com/paritytech/polkadot-sdk/blob/master/substrate/frame/treasury/src/lib.rs#L475[{github-icon},role=heading-link]
 
 [.contract-item]
-[[dispatchable_name]]
-==== `[.contract-item-name]#++dispatchable_name++#`
+[[propose_spend]]
+==== `[.contract-item-name]#++propose_spend++#`
 [source,rust]
 ----
-pub fn dispatchable_name(
-    param1: Type1,
-    param2: Type2
+pub fn propose_spend(
+    origin: OriginFor<T>,
+	#[pallet::compact] value: BalanceOf<T, I>,
+	beneficiary: AccountIdLookupOf<T>,
 ) -> DispatchResult
 ----
-Freeform description of the dispatchable. It is good to include the important things that should be included there.
+Put forward a suggestion for spending.
 
-// four following blocks show how to make a highlight of some information. It will become a styled block
+A deposit proportional to the value is reserved and slashed if the proposal is rejected. It is returned once the proposal is awarded.
 
-NOTE: This is how you state important information that should be acknowledged
-
-IMPORTANT: This is how you put some information that should not be missed
-
-WARNING: This thing is for important information missing which may lead to dangerous consequences
-
-TIP: This is how you should give some useful advice
+WARNING: Deprecated! `propose_spend` will be removed in February 2024. Use `spend` instead.
 
 **Params:**
 
-* `param1: Type1` -- description of the parameter
+* `origin: OriginFor<T>` -- caller (in this case, proposer) account. Must be signed.
+* `value: BalanceOf<T, I>` -- proposed amount.
+* `beneficiary: AccountIdLookupOf<T>` --  The destination account for the transfer.
 
 **Errors:**
 
@@ -77,6 +74,32 @@ TIP: This is how you should give some useful advice
 
 * `EventName(param1, param2)` -- description of event, if needed (they are often self-explanatory)
 
-== Important Mentions and FAQ's
+[.contract-item]
+[[spend_local]]
+==== `[.contract-item-name]#++spend_local++#`
+[source,rust]
+----
+pub fn spend_local(
+    origin: OriginFor<T>,
+    #[pallet::compact] amount: BalanceOf<T, I>,
+    beneficiary: AccountIdLookupOf<T>,
+) -> DispatchResult
+----
+Propose and approve a spend of treasury funds.
 
-Here you may put a freeform information about any aspect of the pallet.
+NOTE: For record-keeping purposes, the proposer is deemed to be equivalent to the beneficiary.
+
+**Params:**
+
+* `origin: OriginFor<T>` -- Must be [`Config::SpendOrigin`] with the `Success` value being at least `amount`.
+* `value: BalanceOf<T, I>` -- The amount to be transferred from the treasury to the `beneficiary`.
+* `beneficiary: AccountIdLookupOf<T>` --  The destination account for the transfer.
+
+**Errors:**
+
+* `InsufficientPermission` -- if the amount to be spent is greater than what the dispatcher of this call is allowed to spend.
+* `TooManyApprovals` -- when `MaxApprovals` limit is hit, and cannot add a new proposal to the storage.
+
+**Events:**
+
+* `SpendApproved(proposal_index, amount, beneficiary)`
