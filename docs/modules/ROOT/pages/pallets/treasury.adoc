@@ -13,10 +13,6 @@ The Treasury pallet provides a “pot” of funds that can be managed by stakeho
 == Config link:https://github.com/paritytech/polkadot-sdk/blob/release-polkadot-v1.7.0/substrate/frame/treasury/src/lib.rs#L202[{github-icon},role=heading-link]
 
 * Pallet-specific configs
-** `OnSlash` -- Handler for the unbalanced decrease when slashing for a rejected proposal or bounty.
-** `ProposalBond` --  Fraction of a proposal's value that should be bonded in order to place the proposal. An accepted proposal gets these back. A rejected proposal does not.
-** `ProposalBondMinimum` -- Minimum amount of funds that should be placed in a deposit for making a proposal.
-** `ProposalBondMaximum` -- Maximum amount of funds that should be placed in a deposit for making a proposal.
 ** `SpendPeriod` -- Period between successive spends. "Spend" means, treasury spending money to a proposal. `SpendPeriod` determines how often the treasury pallet distributes the assets to the proposals.
 ** `Burn` -- Percentage of spare funds (if any) that are burnt per spend period.
 ** `BurnDestination` -- Handler for the unbalanced decrease when treasury funds are burned.
@@ -30,7 +26,6 @@ The Treasury pallet provides a “pot” of funds that can be managed by stakeho
 ** `PayoutPeriod` -- The period during which an approved treasury spend has to be claimed by the beneficiary of the proposal.
 
 * Pallet-specific origins:
-** `ApproveOrigin` -- Origin from which approvals must come.
 ** `RejectOrigin` -- Origin from which rejections must come.
 ** `SpendOrigin` -- The origin required for approving spends from the treasury outside of the proposal process. The `Success` value is the maximum amount in a native asset that this origin is allowed to spend at a time.
 
@@ -44,37 +39,6 @@ The Treasury pallet provides a “pot” of funds that can be managed by stakeho
 == Dispatchables link:https://github.com/paritytech/polkadot-sdk/blob/master/substrate/frame/treasury/src/lib.rs#L475[{github-icon},role=heading-link]
 
 [.contract-item]
-[[propose_spend]]
-==== `[.contract-item-name]#++propose_spend++#`
-[source,rust]
-----
-pub fn propose_spend(
-    origin: OriginFor<T>,
-	#[pallet::compact] value: BalanceOf<T, I>,
-	beneficiary: AccountIdLookupOf<T>,
-) -> DispatchResult
-----
-Put forward a suggestion for spending.
-
-A deposit proportional to the value is reserved and slashed if the proposal is rejected. It is returned once the proposal is awarded.
-
-WARNING: Deprecated! `propose_spend` will be removed in February 2024. Use `spend` instead.
-
-**Params:**
-
-* `origin: OriginFor<T>` -- caller (in this case, proposer) account. Must be signed.
-* `value: BalanceOf<T, I>` -- proposed amount.
-* `beneficiary: AccountIdLookupOf<T>` --  The destination account for the transfer.
-
-**Errors:**
-
-* `ErrorName` -- description of conditions, when this error happens
-
-**Events:**
-
-* `EventName(param1, param2)` -- description of event, if needed (they are often self-explanatory)
-
-[.contract-item]
 [[spend_local]]
 ==== `[.contract-item-name]#++spend_local++#`
 [source,rust]
@@ -85,7 +49,7 @@ pub fn spend_local(
     beneficiary: AccountIdLookupOf<T>,
 ) -> DispatchResult
 ----
-Propose and approve a spend of treasury funds.
+Propose and approve a spend of treasury funds, enables the creation of spends using the native currency of the chain, utilizing the funds stored in the pot.
 
 NOTE: For record-keeping purposes, the proposer is deemed to be equivalent to the beneficiary.
 
@@ -94,6 +58,42 @@ NOTE: For record-keeping purposes, the proposer is deemed to be equivalent to th
 * `origin: OriginFor<T>` -- Must be [`Config::SpendOrigin`] with the `Success` value being at least `amount`.
 * `value: BalanceOf<T, I>` -- The amount to be transferred from the treasury to the `beneficiary`.
 * `beneficiary: AccountIdLookupOf<T>` --  The destination account for the transfer.
+
+**Errors:**
+
+* `InsufficientPermission` -- if the amount to be spent is greater than what the dispatcher of this call is allowed to spend.
+* `TooManyApprovals` -- when `MaxApprovals` limit is hit, and cannot add a new proposal to the storage.
+
+**Events:**
+
+* `SpendApproved(proposal_index, amount, beneficiary)`
+
+
+[.contract-item]
+[[spend_local]]
+==== `[.contract-item-name]#++spend_local++#`
+[source,rust]
+----
+pub fn spend(
+    origin: OriginFor<T>,
+    asset_kind: Box<T::AssetKind>,
+    amount: AssetBalanceOf<T, I>,
+    beneficiary: Box<<<T as Config<I>>::BeneficiaryLookup as StaticLookup>::Source>,
+    valid_from: Option<BlockNumberFor<T>>
+) -> DispatchResult
+----
+
+Propose and approve a spend of treasury funds, allows spending any asset kind managed by the treasury.
+
+NOTE: For record-keeping purposes, the proposer is deemed to be equivalent to the beneficiary.
+
+**Params:**
+
+* `origin: OriginFor<T>` -- Must be [`Config::SpendOrigin`] with the `Success` value being at least `amount`.
+* `asset_kind: Box<T::AssetKind>` -- An indicator of the specific asset class to be spent.
+* `value: BalanceOf<T, I>` -- The amount to be transferred from the treasury to the `beneficiary`.
+* `beneficiary: AccountIdLookupOf<T>` --  The destination account for the transfer.
+* `valid_from: Option<BlockNumberFor<T>>` -- The block number from which the spend can be claimed. It can refer to the past if the resulting spend has not yet expired according to the  [`Config::PayoutPeriod`]. If `None`, the spend can be claimed immediately after approval.
 
 **Errors:**
 
