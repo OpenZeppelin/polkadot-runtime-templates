@@ -689,7 +689,7 @@ construct_runtime!(
         // Monetary
         Balances: pallet_balances = 10,
         TransactionPayment: pallet_transaction_payment = 11,
-        Assets: pallet_assets = 12,
+        AssetsManagement: pallet_assets = 12,
 
         // Governance
         Sudo: pallet_sudo = 15,
@@ -713,7 +713,7 @@ construct_runtime!(
 mod benches {
     frame_benchmarking::define_benchmarks!(
         [frame_system, SystemBench::<Runtime>]
-        [pallet_assets, Assets]
+        [pallet_assets, AssetsManagement]
         [pallet_balances, Balances]
         [pallet_session, SessionBench::<Runtime>]
         [pallet_timestamp, Timestamp]
@@ -725,7 +725,6 @@ mod benches {
         [pallet_proxy, Proxy]
         [pallet_utility, Utility]
         [pallet_multisig, Multisig]
-
 		[pallet_xcm, PalletXcmExtrinsicsBenchmark::<Runtime>]
     );
 }
@@ -930,6 +929,10 @@ impl_runtime_apis! {
                 }
             }
 
+            parameter_types! {
+				pub const RandomParaId: ParaId = ParaId::new(43211234);
+			}
+
             use pallet_xcm::benchmarking::Pallet as PalletXcmExtrinsicsBenchmark;
             use xcm::latest::prelude::*;
             impl pallet_xcm::benchmarking::Config for Runtime {
@@ -942,7 +945,13 @@ impl_runtime_apis! {
 				}
 
 				fn reserve_transferable_asset_and_dest() -> Option<(Asset, Location)> {
-					None
+                    Some((
+						Asset {
+							fun: Fungible(ExistentialDeposit::get()),
+							id: AssetId(Parent.into())
+						}.into(),
+						ParentThen(Parachain(RandomParaId::get().into()).into()).into(),
+					))     
 				}
 
 				fn set_up_complex_asset_transfer(

@@ -20,7 +20,7 @@ use xcm_builder::{
 use xcm_executor::XcmExecutor;
 
 use super::{
-    AccountId, AllPalletsWithSystem, Assets, Balance, Balances, ParachainInfo, ParachainSystem,
+    AccountId, AllPalletsWithSystem, AssetsManagement as Assets, Balance, Balances, ParachainInfo, ParachainSystem,
     PolkadotXcm, Runtime, RuntimeCall, RuntimeEvent, RuntimeOrigin, WeightToFee, XcmpQueue,
 };
 
@@ -216,7 +216,7 @@ impl pallet_xcm::Config for Runtime {
     type XcmExecutor = XcmExecutor<XcmConfig>;
     type XcmReserveTransferFilter = Nothing;
     type XcmRouter = XcmRouter;
-    type XcmTeleportFilter = Everything;
+    type XcmTeleportFilter = Nothing;
 
     const VERSION_DISCOVERY_QUEUE_SIZE: u32 = 100;
 }
