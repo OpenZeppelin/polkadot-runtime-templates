@@ -21,7 +21,7 @@ use xcm_executor::XcmExecutor;
 
 use super::{
     AccountId, AllPalletsWithSystem, AssetsManagement as Assets, Balance, Balances, ParachainInfo, ParachainSystem,
-    PolkadotXcm, Runtime, RuntimeCall, RuntimeEvent, RuntimeOrigin, WeightToFee, XcmpQueue,
+    PolkadotXcm, Runtime, RuntimeCall, RuntimeEvent, RuntimeOrigin, WeightToFee, XcmpQueue, weights,
 };
 
 parameter_types! {
@@ -209,7 +209,7 @@ impl pallet_xcm::Config for Runtime {
     type TrustedLockers = ();
     type UniversalLocation = UniversalLocation;
     type Weigher = FixedWeightBounds<UnitWeightCost, RuntimeCall, MaxInstructions>;
-    type WeightInfo = pallet_xcm::TestWeightInfo;
+    type WeightInfo = weights::pallet_xcm::WeightInfo<Runtime>;
     type XcmExecuteFilter = Nothing;
     // ^ Disable dispatchable execute on the XCM pallet.
     // Needs to be `Everything` for local testing.

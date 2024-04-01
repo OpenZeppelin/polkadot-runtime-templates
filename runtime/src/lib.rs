@@ -556,7 +556,7 @@ impl pallet_message_queue::Config for Runtime {
     type RuntimeEvent = RuntimeEvent;
     type ServiceWeight = MessageQueueServiceWeight;
     type Size = u32;
-    type WeightInfo = ();
+    type WeightInfo = weights::pallet_message_queue::WeightInfo<Runtime>;
 }
 
 impl cumulus_pallet_aura_ext::Config for Runtime {}
