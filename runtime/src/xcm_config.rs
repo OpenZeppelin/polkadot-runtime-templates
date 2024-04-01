@@ -20,8 +20,9 @@ use xcm_builder::{
 use xcm_executor::XcmExecutor;
 
 use super::{
-    AccountId, AllPalletsWithSystem, AssetsManagement as Assets, Balance, Balances, ParachainInfo, ParachainSystem,
-    PolkadotXcm, Runtime, RuntimeCall, RuntimeEvent, RuntimeOrigin, WeightToFee, XcmpQueue, weights,
+    weights, AccountId, AllPalletsWithSystem, AssetsManagement as Assets, Balance, Balances,
+    ParachainInfo, ParachainSystem, PolkadotXcm, Runtime, RuntimeCall, RuntimeEvent, RuntimeOrigin,
+    WeightToFee, XcmpQueue,
 };
 
 parameter_types! {
