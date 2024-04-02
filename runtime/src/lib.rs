@@ -934,7 +934,7 @@ impl_runtime_apis! {
             }
 
             use pallet_xcm::benchmarking::Pallet as PalletXcmExtrinsicsBenchmark;
-            use xcm::latest::prelude::*;
+            use xcm::latest::prelude::{Asset, AssetId, Assets as AssetList, Fungible, Location, Parachain, Parent, ParentThen};
             impl pallet_xcm::benchmarking::Config for Runtime {
                 fn reachable_dest() -> Option<Location> {
                     Some(Parent.into())
@@ -955,7 +955,7 @@ impl_runtime_apis! {
                 }
 
                 fn set_up_complex_asset_transfer(
-                ) -> Option<(Assets, u32, Location, Box<dyn FnOnce()>)> {
+                ) -> Option<(AssetList, u32, Location, Box<dyn FnOnce()>)> {
                     None
                 }
             }
