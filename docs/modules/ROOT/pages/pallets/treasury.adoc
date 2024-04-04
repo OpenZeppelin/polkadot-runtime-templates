@@ -53,6 +53,10 @@ Propose and approve a spend of treasury funds, enables the creation of spends us
 
 NOTE: For record-keeping purposes, the proposer is deemed to be equivalent to the beneficiary.
 
+NOTE: The behavior and API of the old `spend` call capable of spending local DOT tokens remain unchanged, and is now under the name `spend_local`. The revised
+new `spend` call is able to spend any asset kind managed by the treasury.
+
+
 **Params:**
 
 * `origin: OriginFor<T>` -- Must be [`Config::SpendOrigin`] with the `Success` value being at least `amount`.
@@ -84,6 +88,8 @@ pub fn spend(
 ----
 
 Propose and approve a spend of treasury funds, allows spending any asset kind managed by the treasury.
+
+NOTE: The behavior and the API of the previous version of this function is kept the same and renamed to `spend_local`. The new feature `valid_from` is not added to `spend_local` for backward compatibility.
 
 **Params:**
 
@@ -219,4 +225,19 @@ IMPORTANT: even if the payout is failed, it still counts towards an attempt, and
 **Events:**
 
 * `AssetSpendVoided(index)`
+
+
+== Important Mentions and FAQ's
+
+You might have come across the below from official documentation or source-code:
+
+* `propose_spend` will be removed in February 2024. Use spend instead.
+* `reject_proposal` will be removed in February 2024. Use spend instead.
+* `approve_proposal` will be removed in February 2024. Use spend instead.
+
+The new `spend` dispatchable will not be able to solely `propose` or `approve` proposals separately, nor `reject` them.
+
+After the deprecation update, `treasury` pallet no longer tracks `unapproved` proposals, but only approved ones.
+
+The idea is to use the `treausry` pallet combined with some other pallet which will provide the functionality of tracking unapproved proposals (reject, approve, propose). For Polkadot it's OpenGov (referenda and conviction voting pallets).
 
