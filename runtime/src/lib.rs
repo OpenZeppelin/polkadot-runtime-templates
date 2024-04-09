@@ -561,7 +561,7 @@ parameter_types! {
     pub const MaxInboundSuspended: u32 = 1000;
     /// The asset ID for the asset that we use to pay for message delivery fees.
     pub FeeAssetId: AssetId = AssetId(RelayLocation::get());
-    /// The base fee for the message delivery fees.
+    /// The base fee for the message delivery fees. Kusama is based for the reference.
     pub const ToSiblingBaseDeliveryFee: u128 = CENTS.saturating_mul(3);
 }
 
