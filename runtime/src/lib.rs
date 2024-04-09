@@ -687,7 +687,7 @@ construct_runtime!(
         // Monetary
         Balances: pallet_balances = 10,
         TransactionPayment: pallet_transaction_payment = 11,
-        AssetsManagement: pallet_assets = 12,
+        Assets: pallet_assets = 12,
 
         // Governance
         Sudo: pallet_sudo = 15,
@@ -711,7 +711,7 @@ construct_runtime!(
 mod benches {
     frame_benchmarking::define_benchmarks!(
         [frame_system, SystemBench::<Runtime>]
-        [pallet_assets, AssetsManagement]
+        [pallet_assets, Assets]
         [pallet_balances, Balances]
         [pallet_session, SessionBench::<Runtime>]
         [pallet_timestamp, Timestamp]
