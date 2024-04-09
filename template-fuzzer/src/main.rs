@@ -58,7 +58,7 @@ fn main() {
             parachain_info: Default::default(),
             parachain_system: Default::default(),
             polkadot_xcm: Default::default(),
-            assets_management: Default::default(),
+            assets: Default::default(),
             transaction_payment: Default::default(),
             sudo: SudoConfig { key: Some(root) },
         }
