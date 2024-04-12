@@ -2,9 +2,9 @@
 :highlightjs-languages: rust
 :github-icon: pass:[<svg class="icon"><use href="#github-icon"/></svg>]
 
-= cumulus_pallet_parachain_system
+= pallet_transaction_payment
 
-Branch/Release: `release-polkadot-v1.3.0`
+Branch/Release: `release-polkadot-v1.7.0`
 
 == Purpose
 

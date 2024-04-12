@@ -4,7 +4,7 @@
 
 = cumulus_pallet_xcmp_queue
 
-Branch/Release: `release-polkadot-v1.5.0`
+Branch/Release: `release-polkadot-v1.7.0`
 
 == Purpose
 
@@ -18,7 +18,7 @@ Responsible for the Queues (both incoming and outgoing) for XCMP messages. This 
 ** `XcmpQueue` -- Defines max length of an XCMP message, and how `enqueue_message` should behave.
 ** `MaxInboundSuspended` -- The maximum number of inbound XCMP channels that can be suspended simultaneously. Any further channel suspensions will fail and messages may get dropped without further notice. Choosing a high value (1000) is okay.
 ** `ControllerOrigin` -- The origin that is allowed to resume or suspend the XCMP queue.
-** `ControllerOriginConverter>` -- The conversion function used to attempt to convert an XCM `xref:glossary.adoc#multilocation[MultiLocation]` origin to a superuser origin. This is used for allowing the superuser's queue to send messages even to paused queues.
+** `ControllerOriginConverter` -- The conversion function used to attempt to convert an XCM `xref:glossary.adoc#multilocation[MultiLocation]` origin to a superuser origin. This is used for allowing the superuser's queue to send messages even to paused queues.
 ** `PriceForSiblingDelivery` -- The price for delivering an XCM to a sibling parachain destination.
 * Common configs
 ** `RuntimeEvent` -- The overarching event type.

@@ -4,7 +4,7 @@
 
 = cumulus_pallet_aura_ext
 
-Branch/Release: `release-polkadot-v1.3.0`
+Branch/Release: `release-polkadot-v1.7.0`
 
 == Purpose
 

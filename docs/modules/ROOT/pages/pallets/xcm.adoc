@@ -4,7 +4,7 @@
 
 = pallet_xcm
 
-Branch/Release: `release-polkadot-v1.3.0`
+Branch/Release: `release-polkadot-v1.7.0`
 
 == Purpose
 
@@ -21,7 +21,6 @@ Branch/Release: `release-polkadot-v1.3.0`
 ** `RemoteLockConsumerIdentifier` -- The ID type for local consumers of remote locks. The type must implement `Copy`.
 
 * Pallet-specific handlers:
-** `OnChargeTransaction` -- Handler for withdrawing, refunding and depositing the transaction fee. Type must implement the trait  `OnChargeTransaction<Self>`.
 ** `Currency` -- Lockable currency used in the pallet. Type must implement the trait `LockableCurrency`.
 ** `Weigher` -- Measures xref:glossary.adoc#weight[weight] consumed by XCM local execution. Type must implement the trait `WeightBounds`.
 ** `XcmExecutor` -- Means of executing XCM. Type must implement the trait `ExecuteXcm`.
@@ -43,9 +42,6 @@ Branch/Release: `release-polkadot-v1.3.0`
 ** `MaxLockers` --  The maximum number of local XCM locks that a single account may have. Type must implement the trait `Get<u32>`.
 ** `MaxRemoteLockConsumers` -- The maximum number of consumers a single remote lock may have. Type must implement the trait `Get<u32>`.
 ** `UniversalLocation` -- This chain's Universal Location. Type must implement the trait `Get<InteriorMultiLocation>`.
-
-* Benchmark-only configs:
-** `ReachableDest` -- A `MultiLocation` that can be reached via `XcmRouter`. Used only in benchmarks. Type must implement trait `ReachableDest`.
 
 * Common configs:
 ** `RuntimeEvent`
@@ -323,6 +319,55 @@ None
 **Events:**
 
 None
+
+[.contract-item]
+[[transfer_assets]]
+==== `[.contract-item-name]#++transfer_assets++#`
+[source,rust]
+----
+pub fn transfer_assets(
+	origin: OriginFor<T>,
+	dest: Box<VersionedLocation>,
+	beneficiary: Box<VersionedLocation>,
+	assets: Box<VersionedAssets>,
+	fee_asset_item: u32,
+	weight_limit: WeightLimit,
+)
+----
+Transfer some assets from the local chain to the destination chain through their local, destination or remote reserve, or through teleports.
+
+**Params:**
+
+- `dest: Box<VersionedLocation>` -- Destination context for the assets. Will typically be `X2(Parent, Parachain(..))` to send from parachain to parachain, or `X1(Parachain(..))` to send from relay to parachain.
+- `beneficiary: Box<VersionedLocation>` -- A beneficiary location for the assets in the context of `dest`. Will generally be an `AccountId32` value.
+- `assets`: The assets to be withdrawn. This should include the assets used to pay the fee on the `dest` (and possibly reserve) chains.
+- `fee_asset_item: u32` -- The index into `assets` of the item which should be used to pay fees.
+- `weight_limit: WeightLimit` -- The remote-side weight limit, if any, for the XCM fee purchase.
+
+**Errors:**
+
+* `BadOrigin` —- origin did not match `ExecuteXcmOrigin`.
+* `BadVersion` -- v2/v3 conversion to v4 failed for `assets`, `dest`, or `beneficiary`.
+* `TooManyAssets` -- `assets` contain more than `MAX_ASSETS_FOR_TRANSFER = 2` to transfer.
+* `Empty` -- can be a number of different errors:
+** `fee_asset_item` is not present in `assets`.
+** some fungible asset in `assets` has a value of 0.
+** fees or asset transfer type was not determined.
+* `TooManyReserves` -- there are more than one transfer type for an asset.
+* `InvalidAssetUnknownReserve` -- transfer type can not be determined for a given asset.
+* `InvalidAssetUnsupportedReserve` -- asset or fees transfer type is remote reserve and asset and fees asset are different.
+* `Filtered` -- can be a number of different errors:
+** `XcmReserveTransferFilter` filtered the asset.
+** `XcmTeleportFilter` filtered the asset
+* `CannotReanchor` -- asset can't be reanchored.
+* `CannotCheckOutTeleport` -- asset can't be teleported
+* `UnweighableMessage` -- prepared XCM message had issues with weighing (i.e. more instructions than the limit).
+* `LocalExecutionIncomplete` -- local execution of XCM message have failed.
+* `FeesNotMet` -- unable to charge fees. See the error log of any node to see the details.
+
+**Events:**
+
+- `Sent(origin, destination, message, message_id)`
 
 **Deprecated Extrinsics**:
 - `teleport_assets` -- Use `limited_teleport_assets` instead.

@@ -4,7 +4,7 @@
 
 = pallet_message_queue
 
-Branch/Release: `release-polkadot-v{1.3.0}`
+Branch/Release: `release-polkadot-v1.7.0`
 
 == Purpose
 
