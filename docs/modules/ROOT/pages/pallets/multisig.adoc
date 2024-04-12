@@ -10,7 +10,7 @@ Branch/Release: `release-polkadot-v1.7.0`
 
 This module enables multi-signature operations in your runtime. It allows multiple signed origins (accounts) to coordinate and dispatch a call. For the call to execute, the threshold number of accounts from the set (signatories) must approve it.
 
-== Config link:https://github.com/paritytech/polkadot-sdk/blob/release-polkadot-v1.3.0/substrate/frame/multisig/src/lib.rs#L135[{github-icon},role=heading-link]
+== Config link:https://github.com/paritytech/polkadot-sdk/blob/release-polkadot-v1.7.0/substrate/frame/multisig/src/lib.rs#L135[{github-icon},role=heading-link]
 
 * Pallet-specific configs
 ** `DepositBase` -- The base amount of currency needed to xref:glossary.adoc#reserve[reserve] for creating a multisig execution or to store a dispatch call for later. Recall: The deposit to be made by the account that creates the multisig is: `threshold * DepositFactor + DepositBase`
@@ -23,7 +23,7 @@ This module enables multi-signature operations in your runtime. It allows multip
 ** `WeightInfo` -- xref:glossary.adoc#weight[Weight] information for extrinsics in this pallet.
 
 
-== Dispatchables link:https://github.com/paritytech/polkadot-sdk/blob/release-polkadot-v1.3.0/substrate/frame/multisig/src/lib.rs#L254[{github-icon},role=heading-link]
+== Dispatchables link:https://github.com/paritytech/polkadot-sdk/blob/release-polkadot-v1.7.0/substrate/frame/multisig/src/lib.rs#L254[{github-icon},role=heading-link]
 
 [.contract-item]
 [[approve_as_multi]]

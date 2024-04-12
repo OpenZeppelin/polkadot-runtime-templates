@@ -10,7 +10,7 @@ Branch/Release: `release-polkadot-v1.7.0`
 
 Flexible FRAME pallet for implementing message queues. This pallet can also initiate message processing using the `MessageProcessor` (see `Config`).
 
-== Config link:https://github.com/paritytech/polkadot-sdk/blob/release-polkadot-v1.3.0/substrate/frame/message-queue/src/lib.rs#L445[{github-icon},role=heading-link]
+== Config link:https://github.com/paritytech/polkadot-sdk/blob/release-polkadot-v1.7.0/substrate/frame/message-queue/src/lib.rs#L469[{github-icon},role=heading-link]
 * Pallet-specific configs:
 ** `MessageProcessor` -- Processor for messages
 ** `Size` -- Page/heap size type.
@@ -23,7 +23,7 @@ Flexible FRAME pallet for implementing message queues. This pallet can also init
 ** `RuntimeEvent` -- The overarching event type.
 ** `WeightInfo` -- Weight information for extrinsics in this pallet.
 
-== Dispatchables link:https://github.com/paritytech/polkadot-sdk/blob/release-polkadot-v1.3.0/substrate/frame/message-queue/src/lib.rs#L594[{github-icon},role=heading-link]
+== Dispatchables link:https://github.com/paritytech/polkadot-sdk/blob/release-polkadot-v1.7.0/substrate/frame/message-queue/src/lib.rs#L657[{github-icon},role=heading-link]
 
 [.contract-item]
 [[execute_overweight]]

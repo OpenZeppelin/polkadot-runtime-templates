@@ -10,7 +10,7 @@ Branch/Release: `release-polkadot-v1.7.0`
 
 `pallet-xcm` is responsible for filtering, routing, and executing incoming XCM.
 
-== Config link:https://github.com/paritytech/polkadot-sdk/blob/release-polkadot-v1.3.0/polkadot/xcm/pallet-xcm/src/lib.rs#L192[{github-icon},role=heading-link]
+== Config link:https://github.com/paritytech/polkadot-sdk/blob/release-polkadot-v1.7.0/polkadot/xcm/pallet-xcm/src/lib.rs#L200[{github-icon},role=heading-link]
 
 * Pallet-specific origins:
 ** `AdminOrigin` -- The origin that is allowed to call privileged operations on the XCM pallet. Type must implement trait `EnsureOrigin`.

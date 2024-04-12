@@ -16,7 +16,7 @@ This pallet is a core element of each parachain. It will:
 - Send outgoing messages to relay chain and other parachains
 - Build collation info when requested by xref:glossary.adoc#collator[collator]
 
-== Config link:https://github.com/paritytech/polkadot-sdk/blob/release-polkadot-v1.3.0/cumulus/pallets/parachain-system/src/lib.rs#L207[{github-icon},role=heading-link]
+== Config link:https://github.com/paritytech/polkadot-sdk/blob/release-polkadot-v1.7.0/cumulus/pallets/parachain-system/src/lib.rs#L200[{github-icon},role=heading-link]
 
 * Pallet-specific configs:
 ** `OnSystemEvent` — a handler that will be called when new xref:glossary.adoc#validation_data[validation data] will be set (once each block). New validation data will also be passed to it. Look to `trait OnSystemEvent` for more details.
@@ -32,7 +32,7 @@ This pallet is a core element of each parachain. It will:
 ** `RuntimeEvent`
 ** `WeightInfo`
 
-== Dispatchables link:https://github.com/paritytech/polkadot-sdk/blob/release-polkadot-v1.3.0/cumulus/pallets/parachain-system/src/lib.rs#L506[{github-icon},role=heading-link]
+== Dispatchables link:https://github.com/paritytech/polkadot-sdk/blob/release-polkadot-v1.7.0/cumulus/pallets/parachain-system/src/lib.rs#L503[{github-icon},role=heading-link]
 
 [.contract-item]
 [[set_validation_data]]

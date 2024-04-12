@@ -10,7 +10,7 @@ Branch/Release: `release-polkadot-v1.7.0`
 
 This pallet is needed to manage the set of xref:glossary.adoc#collator[collators] for each session and to provision the next session with the actual list of collators.
 
-== Config link:https://github.com/paritytech/polkadot-sdk/blob/release-polkadot-v1.3.0/cumulus/pallets/collator-selection/src/lib.rs#L118[{github-icon},role=heading-link]
+== Config link:https://github.com/paritytech/polkadot-sdk/blob/release-polkadot-v1.7.0/cumulus/pallets/collator-selection/src/lib.rs#L138[{github-icon},role=heading-link]
 
 * Pallet-specific configs
 ** `UpdateOrigin` — defines the list of origins that are able to modify the settings of collators (e.g. set and remove list of xref:glossary.adoc#invulnerable[invulnerables], desired xref:glossary.adoc#candidates[candidates], xref:glossary.adoc#candidacy_bond[candidacy bond]). This type should implement the trait `EnsureOrigin`.
@@ -27,7 +27,7 @@ This pallet is needed to manage the set of xref:glossary.adoc#collator[collators
 ** `Currency`
 ** `WeightInfo`
 
-== Dispatchables link:https://github.com/paritytech/polkadot-sdk/blob/release-polkadot-v1.3.0/cumulus/pallets/collator-selection/src/lib.rs#L301[{github-icon},role=heading-link]
+== Dispatchables link:https://github.com/paritytech/polkadot-sdk/blob/release-polkadot-v1.7.0/cumulus/pallets/collator-selection/src/lib.rs#L354[{github-icon},role=heading-link]
 
 [.contract-item]
 [[set_invulnerables]]
