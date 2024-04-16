@@ -4,13 +4,13 @@
 
 = collator_selection
 
-Branch/Release: `release-polkadot-v1.3.0`
+Branch/Release: `release-polkadot-v1.7.0`
 
 == Purpose
 
 This pallet is needed to manage the set of xref:glossary.adoc#collator[collators] for each session and to provision the next session with the actual list of collators.
 
-== Config link:https://github.com/paritytech/polkadot-sdk/blob/release-polkadot-v1.3.0/cumulus/pallets/collator-selection/src/lib.rs#L118[{github-icon},role=heading-link]
+== Config link:https://github.com/paritytech/polkadot-sdk/blob/release-polkadot-v1.7.0/cumulus/pallets/collator-selection/src/lib.rs#L138[{github-icon},role=heading-link]
 
 * Pallet-specific configs
 ** `UpdateOrigin` — defines the list of origins that are able to modify the settings of collators (e.g. set and remove list of xref:glossary.adoc#invulnerable[invulnerables], desired xref:glossary.adoc#candidates[candidates], xref:glossary.adoc#candidacy_bond[candidacy bond]). This type should implement the trait `EnsureOrigin`.
@@ -27,7 +27,7 @@ This pallet is needed to manage the set of xref:glossary.adoc#collator[collators
 ** `Currency`
 ** `WeightInfo`
 
-== Dispatchables link:https://github.com/paritytech/polkadot-sdk/blob/release-polkadot-v1.3.0/cumulus/pallets/collator-selection/src/lib.rs#L301[{github-icon},role=heading-link]
+== Dispatchables link:https://github.com/paritytech/polkadot-sdk/blob/release-polkadot-v1.7.0/cumulus/pallets/collator-selection/src/lib.rs#L354[{github-icon},role=heading-link]
 
 [.contract-item]
 [[set_invulnerables]]
@@ -187,3 +187,67 @@ Remove an invulnerable from the list. Call must be signed and caller pass `Confi
 **Events:**
 
 - `InvulnerableRemoved(account_id)`
+
+[.contract-item]
+[[update_bond]]
+==== `[.contract-item-name]#++update_bond++#`
+[source,rust]
+----
+pub fn update_bond(new_deposit: BalanceOf<T>)
+----
+Update the candidacy bond of origin to the new value.
+
+*Params:*
+
+- `new_deposit: BalanceOf<T>` — new value for the candidacy bond
+
+**Errors:**
+
+- `BadOrigin` — caller’s origin does not fulfill the `Config::EnsureOrigin` check.
+- `DepositTooLow` - new deposit is smaller than required candidacy bond.
+- `NotCandidate` - caller's origin is not a candidate
+- `IdenticalDeposit` - deposit have not changed
+- `InsufficientBalance` — candidate does not have enough funds for deposit for candidacy bond
+- `LiquidityRestrictions` —  account restrictions (like frozen funds or vesting) prevent from creating a deposit
+- `Overflow` — reserved funds overflow the currency type. Should not happen in usual scenarios.
+- `InvalidUnreserve` - after the unreserve the number of candidates becomes less than desired.
+- `InsertToCandidateListFailed` - candidate list is at maximum capacity. Should not happen in usual scenarios. Chain is misconfigured.
+
+**Events:**
+
+- `CandidateBondUpdated(account_id, deposit)`
+
+
+[.contract-item]
+[[take_candidate_slot]]
+==== `[.contract-item-name]#++take_candidate_slot++#`
+[source,rust]
+----
+pub fn take_candidate_slot(
+	deposit: BalanceOf<T>,
+	target: T::AccountId,
+)
+----
+Try to replace the target's candidacy by making a bigger candidacy bond. 
+
+*Params:*
+
+- `deposit: BalanceOf<T>` — value for the candidacy bond
+- `target: T::AccountId` - target candidate to replace
+
+**Errors:**
+
+- `BadOrigin` — caller’s origin does not fulfill the `Config::EnsureOrigin` check.
+- `AlreadyInvulnerable` — caller is already in invulnerable collators list.
+- `InsufficientBond` - the deposit is less the candidacy bond or target's deposit.
+- `NoAssociatedValidatorId` — caller does not have a session key.
+- `ValidatorNotRegistered` — caller session key is not registered.
+- `AlreadyCandidate` — caller is already in candidates list.
+- `TargetIsNotCandidate` - target is not in candidate list.
+- `InsufficientBalance` — candidate does not have enough funds for deposit for candidacy bond
+- `LiquidityRestrictions` —  account restrictions (like frozen funds or vesting) prevent from creating a deposit
+- `Overflow` — reserved funds overflow the currency type. Should not happen in usual scenarios.
+
+**Events:**
+
+- `CandidateReplaced(old, new, deposit)`

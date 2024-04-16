@@ -4,7 +4,7 @@
 
 = cumulus_pallet_aura_ext
 
-Branch/Release: `release-polkadot-v1.3.0`
+Branch/Release: `release-polkadot-v1.7.0`
 
 == Purpose
 
@@ -13,7 +13,7 @@ This pallet integrates parachain’s own block production mechanism (for example
 - to manage the unincluded blocks from the current slot
 - to validate produced block against the relay chain
 
-== Configuration and Integration link:https://github.com/paritytech/polkadot-sdk/tree/release-polkadot-v1.3.0/cumulus/pallets/aura-ext[{github-icon},role=heading-link]
+== Configuration and Integration link:https://github.com/paritytech/polkadot-sdk/tree/release-polkadot-v1.7.0/cumulus/pallets/aura-ext[{github-icon},role=heading-link]
 
 There is no special config for this integration and it has no dispatchables, but you need to integrate it with other `parachain-system` crate:
 

@@ -2,9 +2,9 @@
 :highlightjs-languages: rust
 :github-icon: pass:[<svg class="icon"><use href="#github-icon"/></svg>]
 
-= cumulus_pallet_parachain_system
+= pallet_transaction_payment
 
-Branch/Release: `release-polkadot-v1.3.0`
+Branch/Release: `release-polkadot-v1.7.0`
 
 == Purpose
 
@@ -25,7 +25,7 @@ final_fee = inclusion_fee + tip;
 ```
 The inputs are defined below in the glossary and config sections.
 
-== Config link:https://github.com/paritytech/polkadot-sdk/blob/release-polkadot-v1.3.0/substrate/frame/pallet-transaction-payment/src/lib.rs#L445[{github-icon},role=heading-link]
+== Config link:https://github.com/paritytech/polkadot-sdk/blob/release-polkadot-v1.7.0/substrate/frame/transaction-payment/src/lib.rs#L342[{github-icon},role=heading-link]
 
 * Pallet-specific handlers:
 ** `OnChargeTransaction` -- Handler for withdrawing, refunding and depositing the transaction fee. Type must implement the trait  `OnChargeTransaction<Self>`.
