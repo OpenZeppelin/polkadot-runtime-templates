@@ -151,6 +151,9 @@ impl xcm_executor::Config for XcmConfig {
     type Barrier = Barrier;
     type CallDispatcher = RuntimeCall;
     type FeeManager = ();
+    type HrmpChannelAcceptedHandler = ();
+    type HrmpChannelClosingHandler = ();
+    type HrmpNewChannelOpenRequestHandler = ();
     type IsReserve = NativeAsset;
     type IsTeleporter = ();
     type MaxAssetsIntoHolding = MaxAssetsIntoHolding;
