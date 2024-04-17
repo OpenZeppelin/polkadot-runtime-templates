@@ -4,7 +4,9 @@
 
 = XCM Executor
 
-Branch/Release: `release-polkadot-v1.3.0`
+Branch/Release: `release-polkadot-v1.10.0`
+
+Source Code link:https://github.com/paritytech/polkadot-sdk/blob/release-polkadot-v1.10.0/polkadot/xcm/xcm-executor/src/config.rs[{github-icon},role=heading-link]
 
 == Purpose
 
@@ -14,7 +16,7 @@ Branch/Release: `release-polkadot-v1.3.0`
 
 NOTE: `XcmExecutor` is not a pallet, but rather it is a `struct` type parameterized by a `Config` trait. The inner config is the `trait Config` which parameterizes the outer config `struct XcmExecutor<Config>`. Both the inner and outer configs are configured in the runtime.
 
-== Inner Config link:https://github.com/paritytech/polkadot-sdk/blob/master/polkadot/xcm/xcm-executor/src/config.rs#L30[{github-icon},role=heading-link]
+== Inner Config
 
 The inner `trait Config` used to parameterize `XcmExecutor` has the following associated types.
 
@@ -31,6 +33,9 @@ The inner `trait Config` used to parameterize `XcmExecutor` has the following as
 - `FeeManager` --  Configure the fees. Type must implement the trait `FeeManager`.
 - `MessageExporter` -- The method of exporting a message. Type must implement the trait `ExportXcm`.
 - `CallDispatcher` -- The call dispatcher used by XCM. Type must implement the trait `CallDispatcher<Self::RuntimeCall>`.
+- `HrmpNewChannelOpenRequestHandler` -- Allows optional logic execution for the `HrmpNewChannelOpenRequest` XCM notification.
+- `HrmpChannelAcceptedHandler` -- Allows optional logic execution for the `HrmpChannelAccepted` XCM notification.
+- `HrmpChannelClosingHandler` -- Allows optional logic execution for the `HrmpChannelClosing` XCM notification.
 
 * Filters:
 - `IsReserve` -- Combinations of (Asset, Location) pairs which we trust as reserves. Type must implement the trait `ContainsPair<MultiAsset, MultiLocation>`.
@@ -54,9 +59,10 @@ The inner `trait Config` used to parameterize `XcmExecutor` has the following as
 * Common configs:
 - `RuntimeCall`
 
-== Outer Config link:https://github.com/paritytech/polkadot-sdk/blob/master/polkadot/xcm/xcm-executor/src/lib.rs#L58[{github-icon},role=heading-link]
+== Outer Config
 
-* The outer `struct XcmExecutor<Config>` configures the following fields:
+The outer `struct XcmExecutor<Config>` configures the following fields:
+
 - `holding` -- Assets allowed in the holding register. Type must be `Assets`.
 - `holding_limit` -- The maximum number of assets in the holding register. Type must be `usize`.
 - `context` -- Type must be `XcmContext`.
