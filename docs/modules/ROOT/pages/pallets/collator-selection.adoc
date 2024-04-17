@@ -4,13 +4,15 @@
 
 = collator_selection
 
-Branch/Release: `release-polkadot-v1.7.0`
+Branch/Release: `release-polkadot-v1.10.0`
+
+== Source Code link:https://github.com/paritytech/polkadot-sdk/blob/release-polkadot-v1.10.0/cumulus/pallets/collator-selection/src/lib.rs[{github-icon},role=heading-link]
 
 == Purpose
 
 This pallet is needed to manage the set of xref:glossary.adoc#collator[collators] for each session and to provision the next session with the actual list of collators.
 
-== Config link:https://github.com/paritytech/polkadot-sdk/blob/release-polkadot-v1.7.0/cumulus/pallets/collator-selection/src/lib.rs#L138[{github-icon},role=heading-link]
+== Config
 
 * Pallet-specific configs
 ** `UpdateOrigin` — defines the list of origins that are able to modify the settings of collators (e.g. set and remove list of xref:glossary.adoc#invulnerable[invulnerables], desired xref:glossary.adoc#candidates[candidates], xref:glossary.adoc#candidacy_bond[candidacy bond]). This type should implement the trait `EnsureOrigin`.
@@ -27,7 +29,7 @@ This pallet is needed to manage the set of xref:glossary.adoc#collator[collators
 ** `Currency`
 ** `WeightInfo`
 
-== Dispatchables link:https://github.com/paritytech/polkadot-sdk/blob/release-polkadot-v1.7.0/cumulus/pallets/collator-selection/src/lib.rs#L354[{github-icon},role=heading-link]
+== Dispatchables
 
 [.contract-item]
 [[set_invulnerables]]
@@ -36,7 +38,7 @@ This pallet is needed to manage the set of xref:glossary.adoc#collator[collators
 ----
 pub fn set_invulnerables(new: Vec<T::AccountId>)
 ----
-Sets a new list of invulnerable collators. The call must be signed and origin of the call must fulfill the EnsureOrigin check. 
+Sets a new list of invulnerable collators. The call must be signed and origin of the call must fulfill the EnsureOrigin check.
 
 IMPORTANT: This call does not maintain the mutual exclusiveness of candidates and invulnerables lists.
 
@@ -83,7 +85,7 @@ Set a new maximum possible number of candidates. If it is higher than `Config::M
 ----
 pub fn set_candidacy_bond(max: u32)
 ----
-Set the amount for the deposit to be a candidate for collator. 
+Set the amount for the deposit to be a candidate for collator.
 
 **Params:**
 
@@ -228,7 +230,7 @@ pub fn take_candidate_slot(
 	target: T::AccountId,
 )
 ----
-Try to replace the target's candidacy by making a bigger candidacy bond. 
+Try to replace the target's candidacy by making a bigger candidacy bond.
 
 *Params:*
 

@@ -4,13 +4,15 @@
 
 = pallet_proxy
 
-Branch/Release: `release-polkadot-v1.7.0`
+Branch/Release: `release-polkadot-v1.10.0`
+
+== Source Code link:https://github.com/paritytech/polkadot-sdk/blob/release-polkadot-v1.10.0/substrate/frame/proxy/src/lib.rs[{github-icon},role=heading-link]
 
 == Purpose
 
 This pallet enables delegation of rights to execute certain call types from one origin to another.
 
-== Config link:https://github.com/paritytech/polkadot-sdk/blob/release-polkadot-v1.7.0/substrate/frame/proxy/src/lib.rs#L107[{github-icon},role=heading-link]
+== Config
 
 * Pallet-specific configs:
 ** `ProxyType` -- a type that describes different variants of xref:glossary.adoc#proxy[proxy]. It must implement `Default` trait and `InstanceFilter<RuntimeCall>` trait.
@@ -26,7 +28,7 @@ This pallet enables delegation of rights to execute certain call types from one 
 ** `RuntimeCall`
 ** `Currency`
 
-== Dispatchables link:https://github.com/paritytech/polkadot-sdk/blob/release-polkadot-v1.7.0/substrate/frame/proxy/src/lib.rs#L179[{github-icon},role=heading-link]
+== Dispatchables
 
 [.contract-item]
 [[add_proxy]]

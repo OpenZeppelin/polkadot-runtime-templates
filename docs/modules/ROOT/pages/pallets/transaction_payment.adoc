@@ -4,7 +4,9 @@
 
 = pallet_transaction_payment
 
-Branch/Release: `release-polkadot-v1.7.0`
+Branch/Release: `release-polkadot-v1.10.0`
+
+== Source Code link:https://github.com/paritytech/polkadot-sdk/blob/release-polkadot-v1.10.0/substrate/frame/transaction-payment/src/lib.rs[{github-icon},role=heading-link]
 
 == Purpose
 
@@ -25,7 +27,7 @@ final_fee = inclusion_fee + tip;
 ```
 The inputs are defined below in the glossary and config sections.
 
-== Config link:https://github.com/paritytech/polkadot-sdk/blob/release-polkadot-v1.7.0/substrate/frame/transaction-payment/src/lib.rs#L342[{github-icon},role=heading-link]
+== Config
 
 * Pallet-specific handlers:
 ** `OnChargeTransaction` -- Handler for withdrawing, refunding and depositing the transaction fee. Type must implement the trait  `OnChargeTransaction<Self>`.
