@@ -941,11 +941,28 @@ impl_runtime_apis! {
 
             parameter_types! {
                 pub const RandomParaId: ParaId = ParaId::new(43211234);
-            }
-
+				pub ExistentialDepositAsset: Option<Asset> = Some((
+					RelayLocation::get(),
+					ExistentialDeposit::get()
+				).into());
+                /// The base fee for the message delivery fees. Kusama is based for the reference.
+                pub const ToParentBaseDeliveryFee: u128 = CENTS.saturating_mul(3);
+			}
+            pub type PriceForParentDelivery = polkadot_runtime_common::xcm_sender::ExponentialPrice<
+                FeeAssetId,
+                ToParentBaseDeliveryFee,
+                TransactionByteFee,
+                ParachainSystem,
+            >;
             use pallet_xcm::benchmarking::Pallet as PalletXcmExtrinsicsBenchmark;
             use xcm::latest::prelude::{Asset, AssetId, Assets as AssetList, Fungible, Location, Parachain, Parent, ParentThen};
             impl pallet_xcm::benchmarking::Config for Runtime {
+                type DeliveryHelper = cumulus_primitives_utility::ToParentDeliveryHelper<
+                    xcm_config::XcmConfig,
+                    ExistentialDepositAsset,
+                    PriceForParentDelivery,
+                >;
+
                 fn reachable_dest() -> Option<Location> {
                     Some(Parent.into())
                 }
@@ -968,6 +985,13 @@ impl_runtime_apis! {
                 ) -> Option<(AssetList, u32, Location, Box<dyn FnOnce()>)> {
                     None
                 }
+
+				fn get_asset() -> Asset {
+					Asset {
+						id: AssetId(Location::parent()),
+						fun: Fungible(ExistentialDeposit::get()),
+					}
+				}
             }
 
             use cumulus_pallet_session_benchmarking::Pallet as SessionBench;
