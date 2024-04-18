@@ -650,7 +650,6 @@ pub type CollatorSelectionUpdateOrigin = EitherOfDiverse<
     EnsureXcm<IsVoiceOfBody<RelayLocation, StakingAdminBodyId>>,
 >;
 
-
 impl pallet_collator_selection::Config for Runtime {
     type Currency = Balances;
     // should be a multiple of session or things will get inconsistent
