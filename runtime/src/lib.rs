@@ -209,7 +209,7 @@ pub const VERSION: RuntimeVersion = RuntimeVersion {
 pub const MILLISECS_PER_BLOCK: u64 = 12000;
 
 // NOTE: Currently it is not possible to change the slot duration after the
-// chain has started.       Attempting to do so will brick block production.
+// chain has started. Attempting to do so will brick block production.
 pub const SLOT_DURATION: u64 = MILLISECS_PER_BLOCK;
 
 // Time is measured by number of blocks.
@@ -276,6 +276,7 @@ parameter_types! {
         })
         .avg_block_initialization(AVERAGE_ON_INITIALIZE_RATIO)
         .build_or_panic();
+    // generic substrate prefix. For more info, see: [Polkadot Accounts In-Depth](https://wiki.polkadot.network/docs/learn-account-advanced#:~:text=The%20address%20format%20used%20in,belonging%20to%20a%20specific%20network)
     pub const SS58Prefix: u16 = 42;
 }
 
@@ -597,6 +598,10 @@ impl pallet_multisig::Config for Runtime {
 }
 
 parameter_types! {
+    // pallet_session ends the session after a fixed period of blocks.
+    // The first session will have length of Offset,
+    // and the following sessions will have length of Period.
+    // This may prove nonsensical if Offset >= Period.
     pub const Period: u32 = 6 * HOURS;
     pub const Offset: u32 = 0;
 }
@@ -633,6 +638,9 @@ parameter_types! {
     pub const SessionLength: BlockNumber = 6 * HOURS;
     // StakingAdmin pluralistic body.
     pub const StakingAdminBodyId: BodyId = BodyId::Defense;
+    pub const MaxCandidates: u32 = 100;
+    pub const MaxInvulnerables: u32 = 20;
+    pub const MinEligibleCollators: u32 = 4;
 }
 
 /// We allow root and the StakingAdmin to execute privileged collator selection
@@ -642,11 +650,6 @@ pub type CollatorSelectionUpdateOrigin = EitherOfDiverse<
     EnsureXcm<IsVoiceOfBody<RelayLocation, StakingAdminBodyId>>,
 >;
 
-parameter_types! {
-    pub const MaxCandidates: u32 = 100;
-    pub const MaxInvulnerables: u32 = 20;
-    pub const MinEligibleCollators: u32 = 4;
-}
 
 impl pallet_collator_selection::Config for Runtime {
     type Currency = Balances;
