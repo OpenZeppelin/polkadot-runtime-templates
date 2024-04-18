@@ -941,13 +941,13 @@ impl_runtime_apis! {
 
             parameter_types! {
                 pub const RandomParaId: ParaId = ParaId::new(43211234);
-				pub ExistentialDepositAsset: Option<Asset> = Some((
-					RelayLocation::get(),
-					ExistentialDeposit::get()
-				).into());
+                pub ExistentialDepositAsset: Option<Asset> = Some((
+                    RelayLocation::get(),
+                    ExistentialDeposit::get()
+                ).into());
                 /// The base fee for the message delivery fees. Kusama is based for the reference.
                 pub const ToParentBaseDeliveryFee: u128 = CENTS.saturating_mul(3);
-			}
+            }
             pub type PriceForParentDelivery = polkadot_runtime_common::xcm_sender::ExponentialPrice<
                 FeeAssetId,
                 ToParentBaseDeliveryFee,
@@ -986,12 +986,12 @@ impl_runtime_apis! {
                     None
                 }
 
-				fn get_asset() -> Asset {
-					Asset {
-						id: AssetId(Location::parent()),
-						fun: Fungible(ExistentialDeposit::get()),
-					}
-				}
+                fn get_asset() -> Asset {
+                    Asset {
+                        id: AssetId(Location::parent()),
+                        fun: Fungible(ExistentialDeposit::get()),
+                    }
+                }
             }
 
             use cumulus_pallet_session_benchmarking::Pallet as SessionBench;
