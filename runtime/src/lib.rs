@@ -34,7 +34,6 @@ use frame_system::{
 use pallet_xcm::{EnsureXcm, IsVoiceOfBody};
 use parachains_common::message_queue::{NarrowOriginToSibling, ParaIdToSibling};
 use parity_scale_codec::{Decode, Encode, MaxEncodedLen};
-use polkadot_runtime_common::xcm_sender::NoPriceForMessageDelivery;
 // Polkadot imports
 use polkadot_runtime_common::{BlockHashCount, SlowAdjustingFeeUpdate};
 use scale_info::TypeInfo;
@@ -56,7 +55,7 @@ use sp_std::prelude::*;
 use sp_version::NativeVersion;
 use sp_version::RuntimeVersion;
 // XCM Imports
-use xcm::latest::prelude::BodyId;
+use xcm::latest::prelude::{AssetId, BodyId};
 
 use crate::{
     constants::currency::{deposit, CENTS, EXISTENTIAL_DEPOSIT, MICROCENTS, MILLICENTS},
@@ -556,21 +555,32 @@ impl pallet_message_queue::Config for Runtime {
     type RuntimeEvent = RuntimeEvent;
     type ServiceWeight = MessageQueueServiceWeight;
     type Size = u32;
-    type WeightInfo = ();
+    type WeightInfo = weights::pallet_message_queue::WeightInfo<Runtime>;
 }
 
 impl cumulus_pallet_aura_ext::Config for Runtime {}
 
 parameter_types! {
     pub const MaxInboundSuspended: u32 = 1000;
+    /// The asset ID for the asset that we use to pay for message delivery fees.
+    pub FeeAssetId: AssetId = AssetId(RelayLocation::get());
+    /// The base fee for the message delivery fees. Kusama is based for the reference.
+    pub const ToSiblingBaseDeliveryFee: u128 = CENTS.saturating_mul(3);
 }
+
+pub type PriceForSiblingParachainDelivery = polkadot_runtime_common::xcm_sender::ExponentialPrice<
+    FeeAssetId,
+    ToSiblingBaseDeliveryFee,
+    TransactionByteFee,
+    XcmpQueue,
+>;
 
 impl cumulus_pallet_xcmp_queue::Config for Runtime {
     type ChannelInfo = ParachainSystem;
     type ControllerOrigin = EnsureRoot<AccountId>;
     type ControllerOriginConverter = XcmOriginToTransactDispatchOrigin;
     type MaxInboundSuspended = MaxInboundSuspended;
-    type PriceForSiblingDelivery = NoPriceForMessageDelivery<ParaId>;
+    type PriceForSiblingDelivery = PriceForSiblingParachainDelivery;
     type RuntimeEvent = RuntimeEvent;
     type VersionWrapper = ();
     type WeightInfo = weights::cumulus_pallet_xcmp_queue::WeightInfo<Runtime>;
@@ -725,6 +735,7 @@ mod benches {
         [pallet_proxy, Proxy]
         [pallet_utility, Utility]
         [pallet_multisig, Multisig]
+        [pallet_xcm, PalletXcmExtrinsicsBenchmark::<Runtime>]
     );
 }
 
@@ -902,6 +913,8 @@ impl_runtime_apis! {
             use frame_system_benchmarking::Pallet as SystemBench;
             use cumulus_pallet_session_benchmarking::Pallet as SessionBench;
 
+            use pallet_xcm::benchmarking::Pallet as PalletXcmExtrinsicsBenchmark;
+
             let mut list = Vec::<BenchmarkList>::new();
             list_benchmarks!(list, extra);
 
@@ -923,6 +936,61 @@ impl_runtime_apis! {
 
                 fn verify_set_code() {
                     System::assert_last_event(cumulus_pallet_parachain_system::Event::<Runtime>::ValidationFunctionStored.into());
+                }
+            }
+
+            parameter_types! {
+                pub const RandomParaId: ParaId = ParaId::new(43211234);
+                pub ExistentialDepositAsset: Option<Asset> = Some((
+                    RelayLocation::get(),
+                    ExistentialDeposit::get()
+                ).into());
+                /// The base fee for the message delivery fees. Kusama is based for the reference.
+                pub const ToParentBaseDeliveryFee: u128 = CENTS.saturating_mul(3);
+            }
+            pub type PriceForParentDelivery = polkadot_runtime_common::xcm_sender::ExponentialPrice<
+                FeeAssetId,
+                ToParentBaseDeliveryFee,
+                TransactionByteFee,
+                ParachainSystem,
+            >;
+            use pallet_xcm::benchmarking::Pallet as PalletXcmExtrinsicsBenchmark;
+            use xcm::latest::prelude::{Asset, AssetId, Assets as AssetList, Fungible, Location, Parachain, Parent, ParentThen};
+            impl pallet_xcm::benchmarking::Config for Runtime {
+                type DeliveryHelper = cumulus_primitives_utility::ToParentDeliveryHelper<
+                    xcm_config::XcmConfig,
+                    ExistentialDepositAsset,
+                    PriceForParentDelivery,
+                >;
+
+                fn reachable_dest() -> Option<Location> {
+                    Some(Parent.into())
+                }
+
+                fn teleportable_asset_and_dest() -> Option<(Asset, Location)> {
+                    None
+                }
+
+                fn reserve_transferable_asset_and_dest() -> Option<(Asset, Location)> {
+                    Some((
+                        Asset {
+                            fun: Fungible(ExistentialDeposit::get()),
+                            id: AssetId(Parent.into())
+                        }.into(),
+                        ParentThen(Parachain(RandomParaId::get().into()).into()).into(),
+                    ))
+                }
+
+                fn set_up_complex_asset_transfer(
+                ) -> Option<(AssetList, u32, Location, Box<dyn FnOnce()>)> {
+                    None
+                }
+
+                fn get_asset() -> Asset {
+                    Asset {
+                        id: AssetId(Location::parent()),
+                        fun: Fungible(ExistentialDeposit::get()),
+                    }
                 }
             }
 
