@@ -4,13 +4,15 @@
 
 = pallet_message_queue
 
-Branch/Release: `release-polkadot-v{1.3.0}`
+Branch/Release: `release-polkadot-v1.10.0`
+
+Source Code link:https://github.com/paritytech/polkadot-sdk/blob/release-polkadot-v1.10.0/substrate/frame/message-queue/src/lib.rs[{github-icon},role=heading-link]
 
 == Purpose
 
 Flexible FRAME pallet for implementing message queues. This pallet can also initiate message processing using the `MessageProcessor` (see `Config`).
 
-== Config link:https://github.com/paritytech/polkadot-sdk/blob/release-polkadot-v1.3.0/substrate/frame/message-queue/src/lib.rs#L445[{github-icon},role=heading-link]
+== Config
 * Pallet-specific configs:
 ** `MessageProcessor` -- Processor for messages
 ** `Size` -- Page/heap size type.
@@ -18,12 +20,13 @@ Flexible FRAME pallet for implementing message queues. This pallet can also init
 ** `QueuePausedQuery` -- Queried by the pallet to check whether a queue can be serviced.
 ** `HeapSize` -- The size of the page; this also serves as the maximum message size which can be sent.
 ** `MaxStale` -- The maximum number of stale pages (i.e. of overweight messages) allowed before culling can happen. Once there are more stale pages than this, then historical pages may be dropped, even if they contain unprocessed overweight messages.
-** `ServiceWeight` -- The amount of weight (if any) which should be provided to the message queue for servicing enqueued items. This may be legitimately `None` in the case that you will call `ServiceQueues::service_queues` manually.
+** `ServiceWeight` -- The amount of weight (if any) which should be provided to the message queue for servicing enqueued items `on_initialize`. This may be legitimately `None` in the case that you will call `ServiceQueues::service_queues` manually or set [`Self::IdleMaxServiceWeight`] to have it run in `on_idle`.
+** `IdleMaxServiceWeight` -- The maximum amount of weight (if any) to be used from remaining weight `on_idle` which should be provided to the message queue for servicing enqueued items `on_idle`. Useful for parachains to process messages at the same block they are received. If `None`, it will not call `ServiceQueues::service_queues` in `on_idle`.
 * Common configs:
 ** `RuntimeEvent` -- The overarching event type.
 ** `WeightInfo` -- Weight information for extrinsics in this pallet.
 
-== Dispatchables link:https://github.com/paritytech/polkadot-sdk/blob/release-polkadot-v1.3.0/substrate/frame/message-queue/src/lib.rs#L594[{github-icon},role=heading-link]
+== Dispatchables
 
 [.contract-item]
 [[execute_overweight]]

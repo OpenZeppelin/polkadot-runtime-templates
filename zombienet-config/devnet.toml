@@ -2,13 +2,13 @@
 chain = "rococo-local"
 default_command = "./bin-v1.6.0/polkadot"
 
-	[[relaychain.nodes]]
-	name = "alice"
-	validator = true
+[[relaychain.nodes]]
+name = "alice"
+validator = true
 
-	[[relaychain.nodes]]
-	name = "bob"
-	validator = true
+[[relaychain.nodes]]
+name = "bob"
+validator = true
 
 [[parachains]]
 id = 1000
@@ -16,16 +16,16 @@ addToGenesis = true
 cumulus_based = true
 chain = "dev"
 
-	[[parachains.collators]]
-	name = "collator01"
-	command = "./target/release/parachain-template-node"
-	ws_port = 9933
-	rpc_port = 8833
-	args = ["--rpc-max-connections 10000"]
+[[parachains.collators]]
+name = "collator01"
+command = "./target/release/parachain-template-node"
+ws_port = 9933
+rpc_port = 8833
+args = ["--rpc-max-connections 10000"]
 
-	[[parachains.collators]]
-	name = "collator02"
-	ws_port = 9822
-	rpc_port = 8822
-	command = "./target/release/parachain-template-node"
-	args = ["--rpc-max-connections 10000"]
+[[parachains.collators]]
+name = "collator02"
+ws_port = 9822
+rpc_port = 8822
+command = "./target/release/parachain-template-node"
+args = ["--rpc-max-connections 10000"]

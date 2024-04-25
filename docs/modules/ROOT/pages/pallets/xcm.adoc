@@ -4,13 +4,15 @@
 
 = pallet_xcm
 
-Branch/Release: `release-polkadot-v1.3.0`
+Branch/Release: `release-polkadot-v1.10.0`
+
+Source Code link:https://github.com/paritytech/polkadot-sdk/blob/release-polkadot-v1.10.0/polkadot/xcm/pallet-xcm/src/lib.rs[{github-icon},role=heading-link]
 
 == Purpose
 
 `pallet-xcm` is responsible for filtering, routing, and executing incoming XCM.
 
-== Config link:https://github.com/paritytech/polkadot-sdk/blob/release-polkadot-v1.3.0/polkadot/xcm/pallet-xcm/src/lib.rs#L192[{github-icon},role=heading-link]
+== Config
 
 * Pallet-specific origins:
 ** `AdminOrigin` -- The origin that is allowed to call privileged operations on the XCM pallet. Type must implement trait `EnsureOrigin`.
@@ -21,7 +23,6 @@ Branch/Release: `release-polkadot-v1.3.0`
 ** `RemoteLockConsumerIdentifier` -- The ID type for local consumers of remote locks. The type must implement `Copy`.
 
 * Pallet-specific handlers:
-** `OnChargeTransaction` -- Handler for withdrawing, refunding and depositing the transaction fee. Type must implement the trait  `OnChargeTransaction<Self>`.
 ** `Currency` -- Lockable currency used in the pallet. Type must implement the trait `LockableCurrency`.
 ** `Weigher` -- Measures xref:glossary.adoc#weight[weight] consumed by XCM local execution. Type must implement the trait `WeightBounds`.
 ** `XcmExecutor` -- Means of executing XCM. Type must implement the trait `ExecuteXcm`.
@@ -44,9 +45,6 @@ Branch/Release: `release-polkadot-v1.3.0`
 ** `MaxRemoteLockConsumers` -- The maximum number of consumers a single remote lock may have. Type must implement the trait `Get<u32>`.
 ** `UniversalLocation` -- This chain's Universal Location. Type must implement the trait `Get<InteriorMultiLocation>`.
 
-* Benchmark-only configs:
-** `ReachableDest` -- A `MultiLocation` that can be reached via `XcmRouter`. Used only in benchmarks. Type must implement trait `ReachableDest`.
-
 * Common configs:
 ** `RuntimeEvent`
 ** `RuntimeCall`
@@ -66,6 +64,15 @@ pub fn send(
     message: Box<VersionedXcm<()>>,
 )
 ----
+
+WARNING: DEPRECATED. `send` will be removed after June 2024. Use `send_blob` instead.
+
+* Deprecation explanation:
+** `pallet-xcm` has a new pair of extrinsics, `execute_blob` and `send_blob`. These are meant to be used instead of `execute` and `send`, which are now deprecated and will be removed eventually. These new extrinsics just require you to input the encoded XCM.
+** There's a new utility in PolkadotJS Apps for encoding XCMs you can use: https://polkadot.js.org/apps/#/utilities/xcm Just pass in the encoded XCM to the new extrinsics and you're done.
+** The migration from the old extrinsic to the new is very simple. If you have your message `xcm: VersionedXcm<Call>`, then instead of passing in `Box::new(xcm)` to both `execute` and `send`, you would pass in `xcm.encode().try_into()` and handle the potential error of its encoded length being bigger than `MAX_XCM_ENCODED_SIZE`.
+** `pallet-contracts` takes the XCM encoded now as well. It follows the same API as `execute_blob` and `send_blob`.
+
 Send a versioned XCM `message` to the destination `dest`.
 
 The origin must be `SendXcmOrigin` for this call.
@@ -96,6 +103,15 @@ pub fn execute(
     max_weight: Weight,
 )
 ----
+
+WARNING: DEPRECATED. `execute` will be removed after June 2024. Use `execute_blob` instead.
+
+* Deprecation explanation:
+** `pallet-xcm` has a new pair of extrinsics, `execute_blob` and `send_blob`. These are meant to be used instead of `execute` and `send`, which are now deprecated and will be removed eventually. These new extrinsics just require you to input the encoded XCM.
+** There's a new utility in PolkadotJS Apps for encoding XCMs you can use: https://polkadot.js.org/apps/#/utilities/xcm Just pass in the encoded XCM to the new extrinsics and you're done.
+** The migration from the old extrinsic to the new is very simple. If you have your message `xcm: VersionedXcm<Call>`, then instead of passing in `Box::new(xcm)` to both `execute` and `send`, you would pass in `xcm.encode().try_into()` and handle the potential error of its encoded length being bigger than `MAX_XCM_ENCODED_SIZE`.
+** `pallet-contracts` takes the XCM encoded now as well. It follows the same API as `execute_blob` and `send_blob`.
+
 Execute an XCM message from a local, signed, origin.
 
 The origin must be `ExecuteXcmOrigin` for this call.
@@ -324,9 +340,153 @@ None
 
 None
 
+[.contract-item]
+[[transfer_assets]]
+==== `[.contract-item-name]#++transfer_assets++#`
+[source,rust]
+----
+pub fn transfer_assets(
+	origin: OriginFor<T>,
+	dest: Box<VersionedLocation>,
+	beneficiary: Box<VersionedLocation>,
+	assets: Box<VersionedAssets>,
+	fee_asset_item: u32,
+	weight_limit: WeightLimit,
+)
+----
+Transfer some assets from the local chain to the destination chain through their local, destination or remote reserve, or through teleports.
+
+**Params:**
+
+- `dest: Box<VersionedLocation>` -- Destination context for the assets. Will typically be `X2(Parent, Parachain(..))` to send from parachain to parachain, or `X1(Parachain(..))` to send from relay to parachain.
+- `beneficiary: Box<VersionedLocation>` -- A beneficiary location for the assets in the context of `dest`. Will generally be an `AccountId32` value.
+- `assets`: The assets to be withdrawn. This should include the assets used to pay the fee on the `dest` (and possibly reserve) chains.
+- `fee_asset_item: u32` -- The index into `assets` of the item which should be used to pay fees.
+- `weight_limit: WeightLimit` -- The remote-side weight limit, if any, for the XCM fee purchase.
+
+**Errors:**
+
+* `BadOrigin` —- origin did not match `ExecuteXcmOrigin`.
+* `BadVersion` -- v2/v3 conversion to v4 failed for `assets`, `dest`, or `beneficiary`.
+* `TooManyAssets` -- `assets` contain more than `MAX_ASSETS_FOR_TRANSFER = 2` to transfer.
+* `Empty` -- can be a number of different errors:
+** `fee_asset_item` is not present in `assets`.
+** some fungible asset in `assets` has a value of 0.
+** fees or asset transfer type was not determined.
+* `TooManyReserves` -- there are more than one transfer type for an asset.
+* `InvalidAssetUnknownReserve` -- transfer type can not be determined for a given asset.
+* `InvalidAssetUnsupportedReserve` -- asset or fees transfer type is remote reserve and asset and fees asset are different.
+* `Filtered` -- can be a number of different errors:
+** `XcmReserveTransferFilter` filtered the asset.
+** `XcmTeleportFilter` filtered the asset
+* `CannotReanchor` -- asset can't be reanchored.
+* `CannotCheckOutTeleport` -- asset can't be teleported
+* `UnweighableMessage` -- prepared XCM message had issues with weighing (i.e. more instructions than the limit).
+* `LocalExecutionIncomplete` -- local execution of XCM message have failed.
+* `FeesNotMet` -- unable to charge fees. See the error log of any node to see the details.
+
+**Events:**
+
+- `Sent(origin, destination, message, message_id)`
+
 **Deprecated Extrinsics**:
 - `teleport_assets` -- Use `limited_teleport_assets` instead.
 - `reserve_transfer_assets` -- Use `limited_reserve_transfer_assets` instead.
+
+[.contract-item]
+[[claim_assets]]
+==== `[.contract-item-name]#++claim_assets++#`
+[source,rust]
+----
+pub fn claim_assets(
+    origin: OriginFor<T>,
+    assets: Box<VersionedAssets>,
+    beneficiary: Box<VersionedLocation>,
+) -> DispatchResult
+----
+
+**Params:**
+
+- `origin: OriginFor<T>` -- Must be signed.
+- `assets: Box<VersionedAssets>` -- The exact assets that were trapped. Use the version to specify what version was the latest when they were trapped.
+- `beneficiary: Box<VersionedLocation>` -- A beneficiary location for the assets in the context of `dest`. Will generally be an `AccountId32` value.
+
+**Errors:**
+
+* `BadOrigin` —- origin did not match `ExecuteXcmOrigin`.
+* `BadVersion` -- v2/v3 conversion to v4 failed for `assets`, `dest`, or `beneficiary`.
+* `UnweighableMessage` -- prepared XCM message had issues with weighing (i.e. more instructions than the limit).
+* `LocalExecutionIncomplete` -- local execution of XCM message have failed.
+
+**Events:**
+
+None
+
+[.contract-item]
+[[execute_blob]]
+==== `[.contract-item-name]#++execute_blob++#`
+[source,rust]
+----
+pub fn execute_blob(
+    origin: OriginFor<T>,
+    encoded_message: BoundedVec<u8, MaxXcmEncodedSize>,
+    max_weight: Weight,
+) -> DispatchResultWithPostInfo
+----
+
+Execute an XCM from a local, signed, origin.
+
+**Params:**
+
+- `origin: OriginFor<T>` -- Must be signed.
+- `encoded_message: BoundedVec<u8, MaxXcmEncodedSize>` -- The message is passed in encoded. It needs to be decodable as a [`VersionedXcm`].
+- `max_weight: Weight` -- No more than `max_weight` will be used in its attempted execution. If this is less than the maximum amount of weight that the message could take to be executed, then no execution attempt will be made.
+
+**Errors:**
+
+* `BadOrigin` —- origin did not match `ExecuteXcmOrigin`.
+* `BadVersion` -- v2/v3 conversion to v4 failed for `assets`, `dest`, or `beneficiary`.
+* `Filtered` -- can be a number of different errors:
+* `LocalExecutionIncomplete` -- local execution of XCM message have failed.
+* `UnableToDecode` -- unable to decode the XCM.
+* `XcmTooLarge` -- XCM encoded length is larger than `MaxXcmEncodedSize`.
+
+**Events:**
+
+- `Attempted(outcome)` -- Indicates whether the `msg` was executed completely or only partially.
+
+[.contract-item]
+[[send_blob]]
+==== `[.contract-item-name]#++send_blob++#`
+[source,rust]
+----
+pub fn send_blob(
+    origin: OriginFor<T>,
+    dest: Box<VersionedLocation>,
+    encoded_message: BoundedVec<u8, MaxXcmEncodedSize>,
+) -> DispatchResult
+----
+
+Send an XCM from a local, signed, origin.
+
+**Params:**
+
+- `origin: OriginFor<T>` -- Must be signed.
+- `dest: Box<VersionedLocation>` -- The destination, `dest`, will receive this message with a `DescendOrigin` instruction that makes the origin of the message be the origin on this system.
+- `encoded_message: BoundedVec<u8, MaxXcmEncodedSize>` -- The message is passed in encoded. It needs to be decodable as a [`VersionedXcm`].
+
+**Errors:**
+
+* `InvalidOrigin` -- origin did not match `SendXcmOrigin`
+* `BadVersion` -- v2/v3 conversion to v4 failed for `assets`, `dest`, or `beneficiary`.
+* `UnableToDecode` -- unable to decode the XCM.
+* `FeesNotMet` -- unable to charge fees. See the error log of any node to see the details.
+* `Unreachable` -- The desired destination was unreachable, generally because there is a no way of routing to it.
+* `SendFailure` -- There was some other issue (i.e. not to do with routing) in sending the message. Perhaps a lack of space for buffering the message.
+
+**Events:**
+
+- `Sent(origin, destination, message, message_id)` -- The versioned XCM `message` was sent from the `origin` to the `destination`.
 
 == More Reading
 
