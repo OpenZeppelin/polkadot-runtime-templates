@@ -5,16 +5,16 @@ description = "A generic parachain runtime template"
 edition = { workspace = true }
 license = { workspace = true }
 repository = { workspace = true }
-version = "0.1.2"
+version = "1.0.0"
 
 [package.metadata.docs.rs]
-targets = [ "x86_64-unknown-linux-gnu" ]
+targets = ["x86_64-unknown-linux-gnu"]
 
 [dependencies]
 hex-literal = { workspace = true, optional = true }
 log = { workspace = true }
-parity-scale-codec = { workspace = true, features = [ "derive" ] }
-scale-info = { workspace = true, features = [ "derive" ] }
+parity-scale-codec = { workspace = true, features = ["derive"] }
+scale-info = { workspace = true, features = ["derive"] }
 smallvec = { workspace = true }
 
 # Substrate
@@ -81,7 +81,7 @@ sp-io = { workspace = true }
 substrate-wasm-builder = { workspace = true }
 
 [features]
-default = [ "std" ]
+default = ["std"]
 std = [
 	"assets-common/std",
 	"cumulus-pallet-aura-ext/std",
@@ -196,4 +196,4 @@ try-runtime = [
 	"sp-runtime/try-runtime",
 ]
 
-experimental = [ "pallet-aura/experimental" ]
+experimental = ["pallet-aura/experimental"]
