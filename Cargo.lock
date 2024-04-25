@@ -7225,7 +7225,7 @@ dependencies = [
 
 [[package]]
 name = "parachain-template-node"
-version = "0.1.2"
+version = "1.0.0"
 dependencies = [
  "clap",
  "color-print",
@@ -7283,7 +7283,7 @@ dependencies = [
 
 [[package]]
 name = "parachain-template-runtime"
-version = "0.1.2"
+version = "1.0.0"
 dependencies = [
  "assets-common",
  "cumulus-pallet-aura-ext",
