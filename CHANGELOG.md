@@ -5,6 +5,24 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Released]
+
+## [1.0.0] - 2024-04-25
+
+### Added
+
+- Audit report (#170)
+- Upgraded from v1.7.0 to v1.10.0 (#165)
+- Upgraded docs to v1.10.0 (#166)
+
+### Fixed
+
+- removed `polkadot launch` (#169)
+- explanation for runtime constants (#167)
+- proxy filters (#146)
+- weights for non-XCM related pallets (#149)
+
+
 ## [Unreleased]
 
 ## [0.1.2] - 2024-02-20
