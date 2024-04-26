@@ -407,6 +407,7 @@ fn start_consensus(
         collator_key,
         para_id,
         overseer_handle,
+        #[cfg(not(feature = "async-backing"))]
         slot_duration,
         relay_chain_slot_duration,
         proposer,
