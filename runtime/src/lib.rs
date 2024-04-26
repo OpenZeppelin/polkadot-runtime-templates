@@ -69,7 +69,11 @@ use sp_version::NativeVersion;
 use sp_version::RuntimeVersion;
 // XCM Imports
 use xcm::{
-    latest::{prelude::{AssetId, BodyId}, InteriorLocation, Junction::PalletInstance},
+    latest::{
+        prelude::{AssetId, BodyId},
+        InteriorLocation,
+        Junction::PalletInstance,
+    },
     VersionedLocation,
 };
 use xcm_builder::PayOverXcm;
