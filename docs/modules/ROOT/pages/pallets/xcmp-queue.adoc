@@ -4,13 +4,15 @@
 
 = cumulus_pallet_xcmp_queue
 
-Branch/Release: `release-polkadot-v1.5.0`
+Branch/Release: `release-polkadot-v1.10.0`
+
+== Source Code link:https://github.com/paritytech/polkadot-sdk/blob/release-polkadot-v1.10.0/cumulus/pallets/xcmp-queue/src/lib.rs[{github-icon},role=heading-link]
 
 == Purpose
 
 Responsible for the Queues (both incoming and outgoing) for XCMP messages. This pallet does not actually receive or send messages. Its responsibility is to place the incoming and outgoing XCMP messages in their respective queues and manage these queues.
 
-== Config link:https://github.com/paritytech/polkadot-sdk/blob/release-polkadot-v1.5.0/cumulus/pallets/xcmp-queue/src/lib.rs#L112[{github-icon},role=heading-link]
+== Config
 
 * Pallet-specific configs
 ** `ChannelInfo` -- Configures two functions `get_channel_status` and `get_channel_info` to provide information about channels (`ChannelStatus` and `ChannelInfo`).
@@ -18,13 +20,13 @@ Responsible for the Queues (both incoming and outgoing) for XCMP messages. This 
 ** `XcmpQueue` -- Defines max length of an XCMP message, and how `enqueue_message` should behave.
 ** `MaxInboundSuspended` -- The maximum number of inbound XCMP channels that can be suspended simultaneously. Any further channel suspensions will fail and messages may get dropped without further notice. Choosing a high value (1000) is okay.
 ** `ControllerOrigin` -- The origin that is allowed to resume or suspend the XCMP queue.
-** `ControllerOriginConverter>` -- The conversion function used to attempt to convert an XCM `xref:glossary.adoc#multilocation[MultiLocation]` origin to a superuser origin. This is used for allowing the superuser's queue to send messages even to paused queues.
+** `ControllerOriginConverter` -- The conversion function used to attempt to convert an XCM `xref:glossary.adoc#multilocation[MultiLocation]` origin to a superuser origin. This is used for allowing the superuser's queue to send messages even to paused queues.
 ** `PriceForSiblingDelivery` -- The price for delivering an XCM to a sibling parachain destination.
 * Common configs
 ** `RuntimeEvent` -- The overarching event type.
 ** `WeightInfo` -- The xref:glossary.adoc#weight[weight] information of this pallet.
 
-== Dispatchables link:https://github.com/paritytech/polkadot-sdk/blob/release-polkadot-v1.5.0/cumulus/pallets/xcmp-queue/src/lib.rs#L150[{github-icon},role=heading-link]
+== Dispatchables
 
 [.contract-item]
 [[suspend_xcm_execution]]

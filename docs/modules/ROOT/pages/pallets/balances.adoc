@@ -4,7 +4,9 @@
 
 = pallet_balances
 
-Branch/Release: `release-polkadot-v1.3.0`
+Branch/Release: `release-polkadot-v1.10.0`
+
+== Source Code link:https://github.com/paritytech/polkadot-sdk/blob/release-polkadot-v1.10.0/substrate/frame/balances/src/lib.rs[{github-icon},role=heading-link]
 
 == Purpose
 
@@ -19,7 +21,7 @@ The Balances pallet provides functions for:
 * Managing total issuance.
 * Setting and managing xref:glossary.adoc#lock[locks].
 
-== Config link:https://github.com/paritytech/polkadot-sdk/blob/release-polkadot-v1.3.0/substrate/frame/balances/src/lib.rs#L253[{github-icon},role=heading-link]
+== Config
 
 * Pallet-specific configs
 ** `RuntimeHoldReason` -- The overarching xref:glossary.adoc#hold[hold] reason.
@@ -32,13 +34,12 @@ The Balances pallet provides functions for:
 ** `FreezeIdentifier` -- The ID type for freezes.
 ** `MaxLocks` -- The maximum number of locks that should exist on an account.
 ** `MaxReserves` -- The maximum number of named reserves that can exist on an account. The use of reserves is deprecated in favor of holds. See `https://github.com/paritytech/substrate/pull/12951/`
-** `MaxHolds` -- The maximum number of holds that can exist on an account at any time.
 ** `MaxFreezes` -- The maximum number of individual freeze locks that can exist on an account at any time.
 * Common configs
 ** `RuntimeEvent` -- The overarching event type.
 ** `WeightInfo` -- xref:glossary.adoc#weight[Weight] information for extrinsics in this pallet.
 
-== Events link:https://github.com/paritytech/polkadot-sdk/blob/release-polkadot-v1.3.0/substrate/frame/balances/src/lib.rs#L339[{github-icon},role=heading-link]
+== Events
 
 * `Endowed(account, free_balance)` -- An account was created with some free balance.
 * `DustLost(account, amount)` -- An account was removed whose balance was non-zero but below ExistentialDeposit, resulting in an outright loss.
@@ -61,8 +62,9 @@ The Balances pallet provides functions for:
 * `Unlocked(who, amount)` -- Some balance was unlocked.
 * `Frozen(who, amount)` -- Some balance was frozen.
 * `Thawed(who, amount)` -- Some balance was thawed.
+* `TotalIssuanceForced(old, new)` -- Total issuance was forcefully changed.
 
-== Errors link:https://github.com/paritytech/polkadot-sdk/blob/release-polkadot-v1.3.0/substrate/frame/balances/src/lib.rs#L392[{github-icon},role=heading-link]
+== Errors
 
 * `VestingBalance` -- Vesting balance too high to send value.
 * `LiquidityRestrictions` -- Account liquidity restrictions prevent withdrawal.
@@ -74,8 +76,10 @@ The Balances pallet provides functions for:
 * `TooManyReserves` -- Number of named reserves exceed `MaxReserves`.
 * `TooManyHolds` -- Number of holds exceeds `MaxHolds`.
 * `TooManyFreezes` -- Number of freezes exceeds `MaxFreezes`.
+* `IssuanceDeactivated` -- The issuance cannot be modified since it is already deactivated.
+* `DeltaZero` -- The delta cannot be zero.
 
-== Dispatchables link:https://github.com/paritytech/polkadot-sdk/blob/release-polkadot-v1.3.0/substrate/frame/balances/src/lib.rs#L570[{github-icon},role=heading-link]
+== Dispatchables
 
 [.contract-item]
 [[transfer_allow_death]]
@@ -220,3 +224,24 @@ Set the regular balance of a given account. The caller (origin) must be root.
 * `origin: OriginFor<T>` -- caller, must be root.
 * `who: AccountIdLookupOf<T>` -- the account for which the balance will be set.
 * `new_free: T::Balance` -- the amount of free balance that will be set to the given account.
+
+[.contract-item]
+[[force_adjust_total_issuance]]
+==== `[.contract-item-name]#++force_adjust_total_issuance++#`
+[source,rust]
+----
+pub fn force_adjust_total_issuance(
+    origin: OriginFor<T>,
+	direction: AdjustmentDirection,
+	#[pallet::compact] delta: T::Balance,
+) -> DispatchResult
+----
+Adjust the total issuance in a saturating way.
+
+Can only be called by root and always needs a positive delta.
+
+**Params:**
+
+* `origin: OriginFor<T>` -- caller, must be root.
+* `direction: AdjustmentDirection` -- the direction of issuance change (increase or decrease).
+* `delta: T::Balance` -- the amount of free balance that will be set to the given account.
