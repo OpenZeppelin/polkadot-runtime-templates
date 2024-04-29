@@ -4,13 +4,15 @@
 
 = pallet_treasury
 
-Branch/Release: `release-polkadot-v1.7.0`
+Branch/Release: `release-polkadot-v1.10.0`
+
+== Source Code link:https://github.com/paritytech/polkadot-sdk/blob/release-polkadot-v1.10.0/substrate/frame/treasury/src/lib.rs[{github-icon},role=heading-link]
 
 == Purpose
 
 The Treasury pallet provides a “pot” of funds that can be managed by stakeholders in the system and a structure for making spending proposals from this pot.
 
-== Config link:https://github.com/paritytech/polkadot-sdk/blob/release-polkadot-v1.7.0/substrate/frame/treasury/src/lib.rs#L202[{github-icon},role=heading-link]
+== Config
 
 * Pallet-specific configs
 ** `SpendPeriod` -- Period between successive spends. "Spend" means, treasury spending money to a proposal. `SpendPeriod` determines how often the treasury pallet distributes the assets to the proposals.
@@ -36,7 +38,7 @@ The Treasury pallet provides a “pot” of funds that can be managed by stakeho
 ** `WeightInfo` -- Weight information for extrinsics in this pallet.
 ** `BenchmarkHelper` --  Helper type for benchmarks.
 
-== Dispatchables link:https://github.com/paritytech/polkadot-sdk/blob/master/substrate/frame/treasury/src/lib.rs#L475[{github-icon},role=heading-link]
+== Dispatchables
 
 [.contract-item]
 [[spend_local]]
