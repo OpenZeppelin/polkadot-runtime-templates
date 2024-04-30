@@ -1,5 +1,4 @@
-//! Service and ServiceFactory implementation. Specialized wrapper over
-//! substrate service.
+//! Service and ServiceFactory implementation. Specialized wrapper over substrate service.
 
 // std
 use std::{sync::Arc, time::Duration};
@@ -11,7 +10,8 @@ use cumulus_client_consensus_common::ParachainBlockImport as TParachainBlockImpo
 use cumulus_client_consensus_proposer::Proposer;
 use cumulus_client_service::{
     build_network, build_relay_chain_interface, prepare_node_config, start_relay_chain_tasks,
-    BuildNetworkParams, CollatorSybilResistance, DARecoveryProfile, StartRelayChainTasksParams,
+    BuildNetworkParams, CollatorSybilResistance, DARecoveryProfile, ParachainHostFunctions,
+    StartRelayChainTasksParams,
 };
 #[cfg(feature = "async-backing")]
 use cumulus_primitives_core::relay_chain::ValidationCode;
@@ -26,9 +26,7 @@ use parachain_template_runtime::{
 };
 use sc_client_api::Backend;
 use sc_consensus::ImportQueue;
-use sc_executor::{
-    HeapAllocStrategy, NativeElseWasmExecutor, WasmExecutor, DEFAULT_HEAP_ALLOC_STRATEGY,
-};
+use sc_executor::{HeapAllocStrategy, WasmExecutor, DEFAULT_HEAP_ALLOC_STRATEGY};
 use sc_network::NetworkBlock;
 use sc_network_sync::SyncingService;
 use sc_service::{Configuration, PartialComponents, TFullBackend, TFullClient, TaskManager};
@@ -37,22 +35,7 @@ use sc_transaction_pool_api::OffchainTransactionPoolFactory;
 use sp_keystore::KeystorePtr;
 use substrate_prometheus_endpoint::Registry;
 
-/// Native executor type.
-pub struct ParachainNativeExecutor;
-
-impl sc_executor::NativeExecutionDispatch for ParachainNativeExecutor {
-    type ExtendHostFunctions = frame_benchmarking::benchmarking::HostFunctions;
-
-    fn dispatch(method: &str, data: &[u8]) -> Option<Vec<u8>> {
-        parachain_template_runtime::api::dispatch(method, data)
-    }
-
-    fn native_version() -> sc_executor::NativeVersion {
-        parachain_template_runtime::native_version()
-    }
-}
-
-type ParachainExecutor = NativeElseWasmExecutor<ParachainNativeExecutor>;
+type ParachainExecutor = WasmExecutor<ParachainHostFunctions>;
 
 type ParachainClient = TFullClient<Block, RuntimeApi, ParachainExecutor>;
 
@@ -60,23 +43,21 @@ type ParachainBackend = TFullBackend<Block>;
 
 type ParachainBlockImport = TParachainBlockImport<Block, Arc<ParachainClient>, ParachainBackend>;
 
+/// Assembly of PartialComponents (enough to run chain ops subcommands)
+pub type Service = PartialComponents<
+    ParachainClient,
+    ParachainBackend,
+    (),
+    sc_consensus::DefaultImportQueue<Block>,
+    sc_transaction_pool::FullPool<Block, ParachainClient>,
+    (ParachainBlockImport, Option<Telemetry>, Option<TelemetryWorkerHandle>),
+>;
+
 /// Starts a `ServiceBuilder` for a full service.
 ///
-/// Use this macro if you don't actually need the full service, but just the
-/// builder in order to be able to perform chain operations.
-pub fn new_partial(
-    config: &Configuration,
-) -> Result<
-    PartialComponents<
-        ParachainClient,
-        ParachainBackend,
-        (),
-        sc_consensus::DefaultImportQueue<Block>,
-        sc_transaction_pool::FullPool<Block, ParachainClient>,
-        (ParachainBlockImport, Option<Telemetry>, Option<TelemetryWorkerHandle>),
-    >,
-    sc_service::Error,
-> {
+/// Use this macro if you don't actually need the full service, but just the builder in order to
+/// be able to perform chain operations.
+pub fn new_partial(config: &Configuration) -> Result<Service, sc_service::Error> {
     let telemetry = config
         .telemetry_endpoints
         .clone()
@@ -92,7 +73,7 @@ pub fn new_partial(
         .default_heap_pages
         .map_or(DEFAULT_HEAP_ALLOC_STRATEGY, |h| HeapAllocStrategy::Static { extra_pages: h as _ });
 
-    let wasm = WasmExecutor::builder()
+    let executor = ParachainExecutor::builder()
         .with_execution_method(config.wasm_method)
         .with_onchain_heap_alloc_strategy(heap_pages)
         .with_offchain_heap_alloc_strategy(heap_pages)
@@ -100,13 +81,12 @@ pub fn new_partial(
         .with_runtime_cache_size(config.runtime_cache_size)
         .build();
 
-    let executor = ParachainExecutor::new_with_wasm_executor(wasm);
-
     let (client, backend, keystore_container, task_manager) =
-        sc_service::new_full_parts::<Block, RuntimeApi, _>(
+        sc_service::new_full_parts_record_import::<Block, RuntimeApi, _>(
             config,
             telemetry.as_ref().map(|(_, telemetry)| telemetry.handle()),
             executor,
+            true,
         )?;
     let client = Arc::new(client);
 
@@ -147,11 +127,9 @@ pub fn new_partial(
     })
 }
 
-/// Start a node with the given parachain `Configuration` and relay chain
-/// `Configuration`.
+/// Start a node with the given parachain `Configuration` and relay chain `Configuration`.
 ///
-/// This is the actual implementation that is abstract over the executor and the
-/// runtime api.
+/// This is the actual implementation that is abstract over the executor and the runtime api.
 #[sc_tracing::logging::prefix_logs_with("Parachain")]
 async fn start_node_impl(
     parachain_config: Configuration,
@@ -258,10 +236,9 @@ async fn start_node_impl(
 
     if let Some(hwbench) = hwbench {
         sc_sysinfo::print_hwbench(&hwbench);
-        // Here you can check whether the hardware meets your chains' requirements.
-        // Putting a link in there and swapping out the requirements for your
-        // own are probably a good idea. The requirements for a para-chain are
-        // dictated by its relay-chain.
+        // Here you can check whether the hardware meets your chains' requirements. Putting a link
+        // in there and swapping out the requirements for your own are probably a good idea. The
+        // requirements for a para-chain are dictated by its relay-chain.
         match SUBSTRATE_REFERENCE_HARDWARE.check_hardware(&hwbench) {
             Err(err) if validator => {
                 log::warn!(
@@ -389,8 +366,9 @@ fn start_consensus(
     #[cfg(feature = "async-backing")]
     use cumulus_client_consensus_aura::collators::lookahead::{self as aura, Params};
 
-    // NOTE: because we use Aura here explicitly, we can use
-    // `CollatorSybilResistance::Resistant` when starting the network.
+    // NOTE: because we use Aura here explicitly, we can use `CollatorSybilResistance::Resistant`
+    // when starting the network.
+
     let slot_duration = cumulus_client_consensus_aura::slot_duration(&*client)?;
 
     let proposer_factory = sc_basic_authorship::ProposerFactory::with_proof_recording(
@@ -429,6 +407,7 @@ fn start_consensus(
         collator_key,
         para_id,
         overseer_handle,
+        #[cfg(not(feature = "async-backing"))]
         slot_duration,
         relay_chain_slot_duration,
         proposer,

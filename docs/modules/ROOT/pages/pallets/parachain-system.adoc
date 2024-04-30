@@ -4,7 +4,9 @@
 
 = parachain_system
 
-Branch/Release: `release-polkadot-v1.3.0`
+Branch/Release: `release-polkadot-v1.10.0`
+
+== Source Code link:https://github.com/paritytech/polkadot-sdk/blob/release-polkadot-v1.10.0/cumulus/pallets/parachain-system/src/lib.rs[{github-icon},role=heading-link]
 
 == Purpose
 
@@ -16,14 +18,13 @@ This pallet is a core element of each parachain. It will:
 - Send outgoing messages to relay chain and other parachains
 - Build collation info when requested by xref:glossary.adoc#collator[collator]
 
-== Config link:https://github.com/paritytech/polkadot-sdk/blob/release-polkadot-v1.3.0/cumulus/pallets/parachain-system/src/lib.rs#L207[{github-icon},role=heading-link]
+== Config
 
 * Pallet-specific configs:
 ** `OnSystemEvent` — a handler that will be called when new xref:glossary.adoc#validation_data[validation data] will be set (once each block). New validation data will also be passed to it. Look to `trait OnSystemEvent` for more details.
 ** `SelfParaId` — getter for a parachain id of this chain
 ** `OutboundXcmpMessageSource` — source of  outgoing XCMP messages. It is queried in `finalize_block` and later included into collation information
-// it was added after 1.3.0. I am leaving it commented for the future updates 
-// ** `DmpQueue` — a handler for the incoming *downward* messages from relay chain
+** `DmpQueue` — a handler for the incoming *downward* messages from relay chain
 ** `ReservedDmpWeight` — xref:glossary.adoc#weight[weight] reserved for DMP message processing. This config seems to be is not used as the function that processes these messages (`enqueue_inbound_downward_messages`) returns used weight.
 ** `XcmpMessageHandler` — a handler for the incoming _horizontal_ messages from other parachains
 ** `ReservedXcmpWeight` — default weight limit for the for the XCMP message processing. May be overriden by storage `ReservedXcmpWeightOverride` . If incoming messages in block will exceed the weight limit, they won’t be processed.
@@ -33,7 +34,7 @@ This pallet is a core element of each parachain. It will:
 ** `RuntimeEvent`
 ** `WeightInfo`
 
-== Dispatchables link:https://github.com/paritytech/polkadot-sdk/blob/release-polkadot-v1.3.0/cumulus/pallets/parachain-system/src/lib.rs#L506[{github-icon},role=heading-link]
+== Dispatchables
 
 [.contract-item]
 [[set_validation_data]]

@@ -8,16 +8,18 @@ Branch/Release: `release-polkadot-v{x.x.x}`
 
 == Purpose
 
+== Source Code link:https://github.com[{github-icon},role=heading-link]
+
 This is a freeform description of the tasks that this pallet fulfills
 
-== Config link:https://google.com[{github-icon},role=heading-link]
+== Config
 
 * Pallet-specific configs
 ** `ConfigType` -- description of config. Include the possible values if there is a set of them.
 * Common configs
 ** `ConfigType` -- description of config, if needed
 
-== Dispatchables link:https://google.com[{github-icon},role=heading-link]
+== Dispatchables
 
 [.contract-item]
 [[dispatchable_name]]

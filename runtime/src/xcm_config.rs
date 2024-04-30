@@ -1,27 +1,31 @@
 use frame_support::{
     parameter_types,
-    traits::{ConstU32, Contains, Everything, Nothing, PalletInfoAccess},
+    traits::{ConstU32, Contains, Everything, Get, Nothing, PalletInfoAccess},
     weights::Weight,
+    PalletId,
 };
 use frame_system::EnsureRoot;
 use pallet_xcm::XcmPassthrough;
-use polkadot_parachain_primitives::primitives::Sibling;
+use polkadot_parachain_primitives::primitives::{self, Sibling};
 use polkadot_runtime_common::impls::ToAuthor;
+use sp_runtime::traits::AccountIdConversion;
 use xcm::latest::prelude::*;
 use xcm_builder::{
     AccountId32Aliases, AllowExplicitUnpaidExecutionFrom, AllowTopLevelPaidExecutionFrom,
     DenyReserveTransferToRelayChain, DenyThenTry, EnsureXcmOrigin, FixedWeightBounds,
-    FrameTransactionalProcessor, FungibleAdapter, FungiblesAdapter, IsConcrete, NativeAsset,
-    NoChecking, ParentIsPreset, RelayChainAsNative, SiblingParachainAsNative,
-    SiblingParachainConvertsVia, SignedAccountId32AsNative, SignedToAccountId32,
-    SovereignSignedViaLocation, TakeWeightCredit, TrailingSetTopicAsId, UsingComponents,
-    WithComputedOrigin, WithUniqueTopic,
+    FrameTransactionalProcessor, FungibleAdapter, FungiblesAdapter, IsChildSystemParachain,
+    IsConcrete, NativeAsset, NoChecking, ParentIsPreset, RelayChainAsNative,
+    SiblingParachainAsNative, SiblingParachainConvertsVia, SignedAccountId32AsNative,
+    SignedToAccountId32, SovereignSignedViaLocation, TakeWeightCredit, TrailingSetTopicAsId,
+    UsingComponents, WithComputedOrigin, WithUniqueTopic, XcmFeeManagerFromComponents,
+    XcmFeeToAccount,
 };
 use xcm_executor::XcmExecutor;
 
 use super::{
-    AccountId, AllPalletsWithSystem, Assets, Balance, Balances, ParachainInfo, ParachainSystem,
-    PolkadotXcm, Runtime, RuntimeCall, RuntimeEvent, RuntimeOrigin, WeightToFee, XcmpQueue,
+    weights, AccountId, AllPalletsWithSystem, Assets, Balance, Balances, ParachainInfo,
+    ParachainSystem, PolkadotXcm, Runtime, RuntimeCall, RuntimeEvent, RuntimeOrigin, WeightToFee,
+    XcmpQueue,
 };
 
 parameter_types! {
@@ -107,6 +111,18 @@ pub type XcmOriginToTransactDispatchOrigin = (
     XcmPassthrough<RuntimeOrigin>,
 );
 
+// This is a workaround. We have added Treasury in the master and it will be added in the next release.
+// We will collect fees on this pseudo treasury account until Treasury is rolled out.
+// When treasury will be introduced, it will use the same account for fee collection so transition should be smooth.
+pub struct TreasuryAccount;
+
+impl Get<AccountId> for TreasuryAccount {
+    fn get() -> AccountId {
+        const ID: PalletId = PalletId(*b"py/trsry");
+        AccountIdConversion::<AccountId>::into_account_truncating(&ID)
+    }
+}
+
 parameter_types! {
     // One XCM operation is 1_000_000_000 weight - almost certainly a conservative estimate.
     pub const UnitWeightCost: Weight = Weight::from_parts(1_000_000_000, 64 * 1024);
@@ -150,7 +166,13 @@ impl xcm_executor::Config for XcmConfig {
     type AssetTrap = PolkadotXcm;
     type Barrier = Barrier;
     type CallDispatcher = RuntimeCall;
-    type FeeManager = ();
+    type FeeManager = XcmFeeManagerFromComponents<
+        IsChildSystemParachain<primitives::Id>,
+        XcmFeeToAccount<Self::AssetTransactor, AccountId, TreasuryAccount>,
+    >;
+    type HrmpChannelAcceptedHandler = ();
+    type HrmpChannelClosingHandler = ();
+    type HrmpNewChannelOpenRequestHandler = ();
     type IsReserve = NativeAsset;
     type IsTeleporter = ();
     type MaxAssetsIntoHolding = MaxAssetsIntoHolding;
@@ -206,14 +228,14 @@ impl pallet_xcm::Config for Runtime {
     type TrustedLockers = ();
     type UniversalLocation = UniversalLocation;
     type Weigher = FixedWeightBounds<UnitWeightCost, RuntimeCall, MaxInstructions>;
-    type WeightInfo = pallet_xcm::TestWeightInfo;
+    type WeightInfo = weights::pallet_xcm::WeightInfo<Runtime>;
     type XcmExecuteFilter = Nothing;
     // ^ Disable dispatchable execute on the XCM pallet.
     // Needs to be `Everything` for local testing.
     type XcmExecutor = XcmExecutor<XcmConfig>;
     type XcmReserveTransferFilter = Nothing;
     type XcmRouter = XcmRouter;
-    type XcmTeleportFilter = Everything;
+    type XcmTeleportFilter = Nothing;
 
     const VERSION_DISCOVERY_QUEUE_SIZE: u32 = 100;
 }

@@ -4,7 +4,9 @@
 
 = pallet_assets
 
-Branch/Release: `release-polkadot-v1.3.0`
+Branch/Release: `release-polkadot-v1.10.0`
+
+== Source Code link:https://github.com/paritytech/polkadot-sdk/blob/release-polkadot-v1.10.0/substrate/frame/assets/src/lib.rs[{github-icon},role=heading-link]
 
 == Purpose
 
@@ -17,7 +19,7 @@ The `pallet_assets` module is designed to manage and manipulate custom fungible 
 ** `Admin` - The account that has administrative privileges over an asset, such as: `minting`, `burning`, `freezing`, and `thawing`.
 ** `Sufficiency` - The amount of an asset that is required to be held in an account in order to perform certain operations, such as: `transfers`, `freezing`, and `thawing`.
 
-== Config link:https://github.com/paritytech/polkadot-sdk/blob/master/substrate/frame/assets/src/lib.rs#L231[{github-icon},role=heading-link]
+== Config
 
 * Pallet-specific configs
 ** `Balance` -- The balance unit type.
@@ -41,7 +43,7 @@ The `pallet_assets` module is designed to manage and manipulate custom fungible 
 ** `RuntimeEvent` -- The overarching event type.
 ** `WeightInfo` -- xref:glossary.adoc#weight[Weight] information for extrinsics in this pallet.
 
-== Events link:https://github.com/paritytech/polkadot-sdk/blob/master/substrate/frame/assets/src/lib.rs#L442[{github-icon},role=heading-link]
+== Events
 
 * `Created(asset_id, creator, owner)` -- An asset was created.
 * `Issued(asset_id, owner, amount)` -- An asset was issued.
@@ -68,7 +70,7 @@ The `pallet_assets` module is designed to manage and manipulate custom fungible 
 * `Touched(asset_id, who, depositor)` -- An account `who` was created with a deposit from `depositor`.
 * `Blocked(asset_id, who)` -- An account `who` was blocked.
 
-== Errors link:https://github.com/paritytech/polkadot-sdk/blob/master/substrate/frame/assets/src/lib.rs#L526[{github-icon},role=heading-link]
+== Errors
 
 * `BalanceLow` -- Account balance must be greater than or equal to the transfer amount.
 * `NoAccount` -- The account to alter does not exist.
@@ -91,7 +93,7 @@ The `pallet_assets` module is designed to manage and manipulate custom fungible 
 * `NotFrozen` -- The asset should be frozen before the given operation.
 * `CallbackFailed` -- Callback action resulted in error.
 
-== Dispatchables link:https://github.com/paritytech/polkadot-sdk/blob/release-polkadot-v1.3.0/substrate/frame/assets/src/lib.rs#L576[{github-icon},role=heading-link]
+== Dispatchables
 
 [.contract-item]
 [[create]]

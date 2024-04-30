@@ -1,5 +1,5 @@
 name: substrate-runtimes
-title: Substrate Runtime
+title: Substrate Runtimes
 version: 0.1.0
 nav:
   - modules/ROOT/nav.adoc
