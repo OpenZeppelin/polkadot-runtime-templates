@@ -377,12 +377,11 @@ impl frame_system::Config for Runtime {
 parameter_types! {
     pub MaximumSchedulerWeight: frame_support::weights::Weight = Perbill::from_percent(80) *
         RuntimeBlockWeights::get().max_block;
-    pub const MaxScheduledPerBlock: u32 = 50;
-    pub const NoPreimagePostponement: Option<u32> = Some(10);
+    pub const MaxScheduledRuntimeCallsPerBlock: u32 = 50;
 }
 
 impl pallet_scheduler::Config for Runtime {
-    type MaxScheduledPerBlock = MaxScheduledPerBlock;
+    type MaxScheduledPerBlock = MaxScheduledRuntimeCallsPerBlock;
     type MaximumWeight = MaximumSchedulerWeight;
     type OriginPrivilegeCmp = frame_support::traits::EqualPrivilegeOnly;
     type PalletsOrigin = OriginCaller;
@@ -785,9 +784,6 @@ parameter_types! {
     // pallet instance (which sits at index 13).
     pub TreasuryInteriorLocation: InteriorLocation = PalletInstance(13).into();
     pub const MaxApprovals: u32 = 100;
-}
-
-parameter_types! {
     pub TreasuryAccount: AccountId = Treasury::account_id();
 }
 
