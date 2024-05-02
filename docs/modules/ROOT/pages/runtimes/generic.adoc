@@ -16,10 +16,11 @@ We designed this template to be generic, so that it can be used as a starting po
 and we aim to base our future templates off of this one.
 
 To demystify the hard concepts, we provided a documentation, in which you can find:
-* explanation of the pallets that are used in this template (purpose, terminology, configuration, dispatchables, etc.),
-* general guides regarding this template,
-* runtime related guides,
-* and miscellaneous topics.
+
+* Explanation of the pallets that are used in this template (purpose, terminology, configuration, dispatchables, etc.).
+* General guides regarding this template.
+* Runtime related guides.
+* And miscellaneous topics.
 
 == Configuration
 
