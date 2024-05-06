@@ -1,0 +1,245 @@
+:source-highlighter: highlight.js
+:highlightjs-languages: rust
+:github-icon: pass:[<svg class="icon"><use href="#github-icon"/></svg>]
+
+= pallet_treasury
+
+Branch/Release: `release-polkadot-v1.10.0`
+
+== Source Code link:https://github.com/paritytech/polkadot-sdk/blob/release-polkadot-v1.10.0/substrate/frame/treasury/src/lib.rs[{github-icon},role=heading-link]
+
+== Purpose
+
+The Treasury pallet provides a “pot” of funds that can be managed by stakeholders in the system and a structure for making spending proposals from this pot.
+
+== Config
+
+* Pallet-specific configs
+** `SpendPeriod` -- Period between successive spends. "Spend" means, treasury spending money to a proposal. `SpendPeriod` determines how often the treasury pallet distributes the assets to the proposals.
+** `Burn` -- Percentage of spare funds (if any) that are burnt per spend period.
+** `BurnDestination` -- Handler for the unbalanced decrease when treasury funds are burned.
+** `SpendFunds` -- Runtime hooks to external pallet using treasury to compute spend funds.
+** `MaxApprovals` -- The maximum number of approvals that can wait in the spending queue. NOTE: This parameter is also used within the Bounties Pallet extension if enabled.
+** `AssetKind` -- Type parameter representing the asset kinds to be spent from the treasury.
+** `Beneficiary` -- Type parameter used to identify the beneficiaries eligible to receive treasury spends.
+** `BeneficiaryLookup` -- Converting trait to take a source type and convert to [`Self::Beneficiary`].
+** `Paymaster` -- Type for processing spends of [Self::AssetKind] in favor of [`Self::Beneficiary`].
+** `BalanceConverter` -- Type for converting the balance of an [Self::AssetKind] to the balance of the native asset, solely for the purpose of asserting the result against the maximum allowed spend amount of the [`Self::SpendOrigin`].
+** `PayoutPeriod` -- The period during which an approved treasury spend has to be claimed by the beneficiary of the proposal.
+
+* Pallet-specific origins:
+** `RejectOrigin` -- Origin from which rejections must come.
+** `SpendOrigin` -- The origin required for approving spends from the treasury outside of the proposal process. The `Success` value is the maximum amount in a native asset that this origin is allowed to spend at a time.
+
+* Common configs
+** `Currency` -- The staking balance.
+** `RuntimeEvent` -- The overarching event type.
+** `PalletId` -- The treasury's pallet id, used for deriving its sovereign account ID.
+** `WeightInfo` -- Weight information for extrinsics in this pallet.
+** `BenchmarkHelper` --  Helper type for benchmarks.
+
+== Dispatchables
+
+[.contract-item]
+[[spend_local]]
+==== `[.contract-item-name]#++spend_local++#`
+[source,rust]
+----
+pub fn spend_local(
+    origin: OriginFor<T>,
+    #[pallet::compact] amount: BalanceOf<T, I>,
+    beneficiary: AccountIdLookupOf<T>,
+) -> DispatchResult
+----
+Propose and approve a spend of treasury funds, enables the creation of spends using the native currency of the chain, utilizing the funds stored in the pot.
+
+NOTE: For record-keeping purposes, the proposer is deemed to be equivalent to the beneficiary.
+
+NOTE: The behavior and API of the old `spend` call capable of spending local DOT tokens remain unchanged, and is now under the name `spend_local`. The revised
+new `spend` call is able to spend any asset kind managed by the treasury.
+
+
+**Params:**
+
+* `origin: OriginFor<T>` -- Must be [`Config::SpendOrigin`] with the `Success` value being at least `amount`.
+* `value: BalanceOf<T, I>` -- The amount to be transferred from the treasury to the `beneficiary`.
+* `beneficiary: AccountIdLookupOf<T>` --  The destination account for the transfer.
+
+**Errors:**
+
+* `InsufficientPermission` -- if the amount to be spent is greater than what the dispatcher of this call is allowed to spend.
+* `TooManyApprovals` -- when `MaxApprovals` limit is hit, and cannot add a new proposal to the storage.
+
+**Events:**
+
+* `SpendApproved(proposal_index, amount, beneficiary)`
+
+
+[.contract-item]
+[[spend]]
+==== `[.contract-item-name]#++spend++#`
+[source,rust]
+----
+pub fn spend(
+    origin: OriginFor<T>,
+    asset_kind: Box<T::AssetKind>,
+    amount: AssetBalanceOf<T, I>,
+    beneficiary: Box<<<T as Config<I>>::BeneficiaryLookup as StaticLookup>::Source>,
+    valid_from: Option<BlockNumberFor<T>>
+) -> DispatchResult
+----
+
+Propose and approve a spend of treasury funds, allows spending any asset kind managed by the treasury.
+
+NOTE: The behavior and the API of the previous version of this function is kept the same and renamed to `spend_local`. The new feature `valid_from` is not added to `spend_local` for backward compatibility.
+
+**Params:**
+
+* `origin: OriginFor<T>` -- Must be [`Config::SpendOrigin`] with the `Success` value being at least `amount`.
+* `asset_kind: Box<T::AssetKind>` -- An indicator of the specific asset class to be spent.
+* `value: BalanceOf<T, I>` -- The amount to be transferred from the treasury to the `beneficiary`.
+* `beneficiary: AccountIdLookupOf<T>` --  The destination account for the transfer.
+* `valid_from: Option<BlockNumberFor<T>>` -- The block number from which the spend can be claimed. It can refer to the past if the resulting spend has not yet expired according to the  [`Config::PayoutPeriod`]. If `None`, the spend can be claimed immediately after approval.
+
+**Errors:**
+
+* `InsufficientPermission` -- if the amount to be spent is greater than what the dispatcher of this call is allowed to spend.
+* `SpendExpired` -- if expiration date is older than now.
+* `FailedToConvertBalance` -- when conversion between `asset_kind` and `native currency` fails.
+
+**Events:**
+
+* `AssetSpendApproved(index, asset_kind, amount, beneficiary, valid_from, expire_at)` -- `index` is the index of the proposal. Rest is self-explanatory.
+
+
+[.contract-item]
+[[remove_approval]]
+==== `[.contract-item-name]#++remove_approval++#`
+[source,rust]
+----
+pub fn remove_approval(
+    origin: OriginFor<T>,
+    proposal_id: ProposalIndex
+) -> DispatchResult
+----
+
+Force a previously approved proposal to be removed from the approval queue.
+
+**Params:**
+
+* `origin: OriginFor<T>` -- Must be [Config::RejectOrigin].
+* `proposal_id: ProposalIndex` -- The index of a proposal.
+
+**Errors:**
+
+* `ProposalNotApproved` -- The proposal does not exist in the approved proposals queue.
+
+**Events:**
+
+* `AssetSpendApproved(index, asset_kind, amount, beneficiary, valid_from, expire_at)` -- `index` is the index of the proposal. Rest is self-explanatory.
+
+
+[.contract-item]
+[[payout]]
+==== `[.contract-item-name]#++payout++#`
+[source,rust]
+----
+pub fn payout(origin: OriginFor<T>, index: SpendIndex) -> DispatchResult
+----
+
+Claims a spend.
+
+Spends must be claimed within some temporal bounds. A spend may be claimed within one [`Config::PayoutPeriod`] from the `valid_from` block.
+In case of a payout failure, the spend status must be updated with the `check_status` dispatchable before retrying with the current function.
+
+**Params:**
+
+* `origin: OriginFor<T>` -- Must be signed.
+* `index: SpendIndex` -- The index of the spend.
+
+**Errors:**
+
+* `InvalidIndex` -- The spend could not be found.
+* `EarlyPayout` -- The spend tried to be claimed before it became valid (see `valid_from` field).
+* `SpendExpired` -- The spend tried to be claimed after it expired.
+* `AlreadyAttempted` -- The same spend tried to be claimed before.
+* `PayoutError` -- An error occurred during the payment, related to `Paymaster::pay` function.
+
+**Events:**
+
+* `Paid(index, payment_id)`
+
+
+[.contract-item]
+[[check_status]]
+==== `[.contract-item-name]#++check_status++#`
+[source,rust]
+----
+pub fn check_status(
+    origin: OriginFor<T>,
+    index: SpendIndex
+) -> DispatchResultWithPostInfo
+----
+
+Check the status of the spend and remove it from the storage if processed.
+
+**Params:**
+
+* `origin: OriginFor<T>` -- Must be signed.
+* `index: SpendIndex` -- The index of the spend.
+
+**Errors:**
+
+* `InvalidIndex` -- The spend could not be found.
+* `NotAttempted` -- The payout was not attempted.
+* `Inconclusive` -- The spend is still in progress.
+
+**Events:**
+
+* `SpendProcessed(index)` -- Spend is successfully processed.
+* `PaymentFailed(index, payment_id)` -- The payout was failed, and can be retried again. This error also gives the `payment_id` info for further investigation.
+
+
+[.contract-item]
+[[void_spend]]
+==== `[.contract-item-name]#++void_spend++#`
+[source,rust]
+----
+pub fn void_spend(origin: OriginFor<T>, index: SpendIndex) -> DispatchResult
+----
+
+Void previously approved spend.
+
+A spend void is only possible if the payout has not been attempted yet.
+
+IMPORTANT: even if the payout is failed, it still counts towards an attempt, and cannot be voided at this point.
+
+**Params:**
+
+* `origin: OriginFor<T>` -- Must be [Config::RejectOrigin].
+* `index: SpendIndex` -- The index of the spend.
+
+**Errors:**
+
+* `InvalidIndex` -- The spend could not be found.
+* `AlreadyAttempted` -- The same spend tried to be claimed before.
+
+**Events:**
+
+* `AssetSpendVoided(index)`
+
+
+== Important Mentions and FAQ's
+
+You might have come across the below from official documentation or source-code:
+
+* `propose_spend` will be removed in February 2024. Use spend instead.
+* `reject_proposal` will be removed in February 2024. Use spend instead.
+* `approve_proposal` will be removed in February 2024. Use spend instead.
+
+The new `spend` dispatchable will not be able to solely `propose` or `approve` proposals separately, nor `reject` them.
+
+After the deprecation update, `treasury` pallet no longer tracks `unapproved` proposals, but only approved ones.
+
+The idea is to use the `treausry` pallet combined with some other pallet which will provide the functionality of tracking unapproved proposals (reject, approve, propose). For Polkadot it's OpenGov (referenda and conviction voting pallets).
+

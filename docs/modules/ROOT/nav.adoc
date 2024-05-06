@@ -6,16 +6,17 @@
 * Runtime Descriptions
 ** xref:runtime/xcm_executor.adoc[XCM Executor]
 * Pallet Specifications
-** xref:pallets/collator-selection.adoc[collator_selection]
 ** xref:pallets/aura_ext.adoc[cumulus_pallet_aura_ext]
 ** xref:pallets/parachain-system.adoc[cumulus_pallet_parachain_system]
 ** xref:pallets/xcmp-queue.adoc[cumulus_pallet_xcmp_queue]
 ** xref:pallets/assets.adoc[pallet_assets]
 ** xref:pallets/balances.adoc[pallet_balances]
+** xref:pallets/collator-selection.adoc[pallet_collator_selection]
 ** xref:pallets/message-queue.adoc[pallet_message_queue]
 ** xref:pallets/multisig.adoc[pallet_multisig]
 ** xref:pallets/proxy.adoc[pallet_proxy]
 ** xref:pallets/transaction_payment.adoc[pallet_transaction_payment]
+** xref:pallets/treasury.adoc[pallet_treasury]
 ** xref:pallets/xcm.adoc[pallet_xcm]
 * Misc
 ** xref:misc/multisig-accounts.adoc[Multisig Accounts]
