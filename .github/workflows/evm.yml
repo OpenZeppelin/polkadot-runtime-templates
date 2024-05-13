@@ -1,4 +1,4 @@
-name: "cargo tests"
+name: "evm template cargo tests"
 
 on:
   push:
@@ -31,7 +31,7 @@ env:
   RUSTFLAGS: -C strip=symbols -C opt-level=s
 
 jobs:
-  clippy-fmt-test:
+  evm-clippy-fmt-test:
     strategy:
       fail-fast: false
       matrix:
@@ -45,12 +45,12 @@ jobs:
             os: macos-12
 
     runs-on: ${{ matrix.os }}
+    defaults:
+      run:
+        working-directory: ./evm-template
     steps:
       - name: git checkout
         uses: actions/checkout@v4
-
-      - name: cd to `evm` template
-        run: cd evm-template
 
       - name: Install Protoc
         uses: arduino/setup-protoc@9b1ee5b22b0a3f1feb8c2ff99b32c89b3c3191e9 # v2.0.0
