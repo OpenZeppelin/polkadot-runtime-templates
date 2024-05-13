@@ -1,0 +1,95 @@
+name: "cargo tests"
+
+on:
+  push:
+    branches:
+      - main
+    paths-ignore:
+      - "generic-template/**"
+      - "**.md"
+      - "**.adoc"
+  pull_request:
+    paths-ignore:
+      - "generic-template/**"
+      - "**.md"
+      - "**.adoc"
+  workflow_dispatch:
+    inputs:
+      test-macos:
+        description: "run tests on macOS"
+        required: true
+        default: false
+        type: boolean
+
+env:
+  # Not needed in CI, should make things a bit faster
+  CARGO_INCREMENTAL: 0
+  CARGO_TERM_COLOR: always
+  # Remove unnecessary WASM build artifacts
+  WASM_BUILD_CLEAN_TARGET: 1
+  # stripping symbols and optimizing for binary size
+  RUSTFLAGS: -C strip=symbols -C opt-level=s
+
+jobs:
+  clippy-fmt-test:
+    strategy:
+      fail-fast: false
+      matrix:
+        os:
+          - ubuntu-22.04
+          - macos-12
+        run-all:
+          - ${{ inputs.test-macos == true || github.ref == 'refs/heads/main' }}
+        exclude: # exclude macos-12 when the condition is false
+          - run-all: false
+            os: macos-12
+
+    runs-on: ${{ matrix.os }}
+    steps:
+      - name: git checkout
+        uses: actions/checkout@v4
+
+      - name: cd to `evm` template
+        run: cd evm-template
+
+      - name: Install Protoc
+        uses: arduino/setup-protoc@9b1ee5b22b0a3f1feb8c2ff99b32c89b3c3191e9 # v2.0.0
+        with:
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: install rust toolchain
+        uses: actions-rust-lang/setup-rust-toolchain@v1
+
+      - name: Install toml-sort
+        run: cargo install --git https://github.com/4meta5/toml_sort
+      - name: Add file permissions for toml-sort
+        run: chmod +x ./scripts/toml-sort.sh
+      - name: Add file permissions for check-toml-sorted
+        run: chmod +x ./scripts/check-toml-sorted.sh
+      - name: Check Cargo.toml files are formatted using toml_sort
+        run: ./scripts/check-toml-sorted.sh
+
+      - name: Check format
+        run: cargo fmt --all -- --check
+
+      - name: Run tests
+        run: cargo test --release
+
+      - name: Check benchmarking compilation
+        run: cargo check --release --features runtime-benchmarks
+
+      - name: Run tests with async backing
+        run: cargo test --release --features="async-backing"
+
+      - name: Check clippy
+        run: cargo clippy --release --locked --all-targets -- -D warnings
+
+      - name: Check Documentation
+        run: cargo doc --release --locked --all --no-deps
+        env:
+          RUSTDOCFLAGS: "-D rustdoc::broken-intra-doc-links -D rustdoc::private_intra_doc_links"
+
+      - name: Upload coverage reports to Codecov
+        uses: codecov/codecov-action@v3
+        env:
+          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}

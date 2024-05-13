@@ -4,12 +4,13 @@ on:
   push:
     branches:
       - main
-      - plain-cumulus-template
     paths-ignore:
+      - "evm-template/**"
       - "**.md"
       - "**.adoc"
   pull_request:
     paths-ignore:
+      - "evm-template/**"
       - "**.md"
       - "**.adoc"
   workflow_dispatch:
@@ -48,6 +49,9 @@ jobs:
       - name: git checkout
         uses: actions/checkout@v4
 
+      - name: cd to `generic` template
+        run: cd generic-template
+
       - name: Install Protoc
         uses: arduino/setup-protoc@9b1ee5b22b0a3f1feb8c2ff99b32c89b3c3191e9 # v2.0.0
         with:
@@ -70,7 +74,7 @@ jobs:
 
       - name: Run tests
         run: cargo test --release
-      
+
       - name: Check benchmarking compilation
         run: cargo check --release --features runtime-benchmarks
 
