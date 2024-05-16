@@ -33,7 +33,7 @@ cargo build --release
 ** Generate a plain chainspec with this command:
 +
 ```bash
-./target/release/parachain-template-node build-spec --disable-default-nodes > plain-parachain-chainspec.json
+./target/release/parachain-template-node build-spec --disable-default-bootnode > plain-parachain-chainspec.json
 ```
 
 ** Edit the chainspec:
