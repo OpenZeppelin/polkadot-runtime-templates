@@ -1,15 +1,16 @@
-name: "cargo tests"
+name: "evm template cargo tests"
 
 on:
   push:
     branches:
       - main
-      - plain-cumulus-template
     paths-ignore:
+      - "generic-template/**"
       - "**.md"
       - "**.adoc"
   pull_request:
     paths-ignore:
+      - "generic-template/**"
       - "**.md"
       - "**.adoc"
   workflow_dispatch:
@@ -30,7 +31,7 @@ env:
   RUSTFLAGS: -C strip=symbols -C opt-level=s
 
 jobs:
-  clippy-fmt-test:
+  evm-clippy-fmt-test:
     strategy:
       fail-fast: false
       matrix:
@@ -44,6 +45,9 @@ jobs:
             os: macos-12
 
     runs-on: ${{ matrix.os }}
+    defaults:
+      run:
+        working-directory: ./evm-template
     steps:
       - name: git checkout
         uses: actions/checkout@v4
@@ -70,7 +74,7 @@ jobs:
 
       - name: Run tests
         run: cargo test --release
-      
+
       - name: Check benchmarking compilation
         run: cargo check --release --features runtime-benchmarks
 

@@ -1,0 +1,19 @@
+name: 🏗️ Core Implementation
+description: Create a report to help us improve
+title: "🏗️ [Core Feature]: "
+labels: ["core"]
+body:
+  - type: textarea
+    id: feature
+    attributes:
+      label: What is the key feature we're aiming to implement?
+    validations:
+      required: true
+  - type: checkboxes
+    id: terms
+    attributes:
+      label: Contribution Guidelines
+      description: By submitting this issue, you agree to follow our [Contribution Guidelines](https://github.com/OpenZeppelin/substrate-runtime-template/blob/main/CONTRIBUTING.md)
+      options:
+        - label: I agree to follow this project's Contribution Guidelines
+          required: true
