@@ -84,6 +84,12 @@ parachains-common = { workspace = true }
 
 # Frontier
 fp-account = { workspace = true }
+fp-evm = { workspace = true }
+fp-rpc = { workspace = true }
+pallet-base-fee = { workspace = true }
+pallet-ethereum = { workspace = true }
+pallet-evm = { workspace = true }
+pallet-evm-chain-id = { workspace = true }
 
 [dev-dependencies]
 sp-io = { workspace = true }
@@ -103,6 +109,9 @@ std = [
 	"cumulus-primitives-core/std",
 	"cumulus-primitives-utility/std",
 	"fp-account/std",
+	"fp-account/std",
+	"fp-evm/std",
+	"fp-rpc/std",
 	"frame-benchmarking?/std",
 	"frame-executive/std",
 	"frame-support/std",
@@ -115,8 +124,12 @@ std = [
 	"pallet-aura/std",
 	"pallet-authorship/std",
 	"pallet-balances/std",
+	"pallet-base-fee/std",
 	"pallet-collator-selection/std",
 	"pallet-conviction-voting/std",
+	"pallet-ethereum/std",
+	"pallet-evm-chain-id/std",
+	"pallet-evm/std",
 	"pallet-message-queue/std",
 	"pallet-multisig/std",
 	"pallet-preimage/std",
@@ -172,6 +185,8 @@ runtime-benchmarks = [
 	"pallet-balances/runtime-benchmarks",
 	"pallet-collator-selection/runtime-benchmarks",
 	"pallet-conviction-voting/runtime-benchmarks",
+	"pallet-ethereum/runtime-benchmarks",
+	"pallet-evm/runtime-benchmarks",
 	"pallet-message-queue/runtime-benchmarks",
 	"pallet-multisig/runtime-benchmarks",
 	"pallet-preimage/runtime-benchmarks",
@@ -204,8 +219,11 @@ try-runtime = [
 	"pallet-aura/try-runtime",
 	"pallet-authorship/try-runtime",
 	"pallet-balances/try-runtime",
+	"pallet-base-fee/try-runtime",
 	"pallet-collator-selection/try-runtime",
 	"pallet-conviction-voting/try-runtime",
+	"pallet-ethereum/try-runtime",
+	"pallet-evm-chain-id/try-runtime",
 	"pallet-message-queue/try-runtime",
 	"pallet-multisig/try-runtime",
 	"pallet-preimage/try-runtime",
