@@ -6,7 +6,7 @@ Along with the templates, OpenZeppelin also provides a documentation website tha
 
 ## About this repository and templates
 
-This is a monorepo, listing all of our templates. Each template has its own sub-directory, and completely independent from other templates.
+This repository is structured as a monorepo to improve discoverability and maintanability. It contains all of our templates. Each template has its own sub-directory, and is completely standalone and can be used independently.
 
 For example: if you want to use our `generic runtime template`, you can just copy that subdirectory, and it will work on its own. You don't need anything from other templates nor from the root directory of this repository for your selected template to work.
 
