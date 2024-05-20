@@ -11,7 +11,8 @@ This repository is structured as a monorepo to improve discoverability and maint
 For example: if you want to use our `generic runtime template`, you can just copy that subdirectory, and it will work on its own. You don't need anything from other templates nor from the root directory of this repository for your selected template to work.
 
 ---
-
+> [!WARNING]
+> Avoid using `main` for production deployments and use release branches instead. `main` is a development branch that should be avoided in favor of tagged releases. The release process involves security measures that the `main` branch does not guarantee.
 ### Generic Runtime Template
 
 This template has all the basic features you expect to find on a typical L1 blockchain or parachain. Basic, yet preserving the most important pallets that are used in the Polkadot ecosystem today and a safe runtime base configuration.
