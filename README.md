@@ -14,7 +14,8 @@ For example: if you want to use our `generic runtime template`, you can just cop
 
 ### Generic Runtime Template
 
-This template has all the key features you expect to find on a typical L1 blockchain. Basic, yet comprehensive pallet set and runtime configuration.
+This template has all the basic features you expect to find on a typical L1 blockchain or parachain. Basic, yet preserving the most important pallets that are used in the Polkadot ecosystem today and a safe runtime base configuration.
+You can find a full list of the pallets included in this template in our [docs](https://docs.openzeppelin.com/substrate-runtimes/1.0.0/)
 
 
 ### EVM template
