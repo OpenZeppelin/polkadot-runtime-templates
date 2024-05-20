@@ -140,7 +140,7 @@ pub fn new_partial(
     )?;
 
 	let overrides = crate::rpc::overrides_handle(client.clone());
-    let dbcf = &config.database;
+
     let frontier_backend = match eth_config.frontier_backend_type {
 		BackendType::KeyValue => FrontierBackend::KeyValue(fc_db::kv::Backend::open(
 			Arc::clone(&client),
