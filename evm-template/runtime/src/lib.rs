@@ -965,7 +965,7 @@ construct_runtime!(
         CumulusXcm: cumulus_pallet_xcm = 32,
         MessageQueue: pallet_message_queue = 33,
 
-        // // EVM
+        // EVM
         Ethereum: pallet_ethereum = 40,
         EVM: pallet_evm = 41,
         BaseFee: pallet_base_fee = 42,
