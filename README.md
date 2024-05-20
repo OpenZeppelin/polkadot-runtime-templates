@@ -2,7 +2,7 @@
 
 Substrate has a steep learning curve. In order to make it easier for newcomers to get started, OpenZeppelin is providing runtime templates that can be used to quickly bootstrap a Substrate project.
 
-Along with the templates, OpenZeppelin also provides a documentation website that explains the templates and the niche details.
+Along with the templates, OpenZeppelin also provides a [documentation website](https://docs.openzeppelin.com/substrate-runtimes) that explains the templates and the details.
 
 ## About this repository and templates
 
