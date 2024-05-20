@@ -30,6 +30,7 @@ sc-chain-spec = { workspace = true }
 sc-cli = { workspace = true }
 sc-client-api = { workspace = true }
 sc-consensus = { workspace = true }
+sc-consensus-aura = { workspace = true }
 sc-executor = { workspace = true }
 sc-network = { workspace = true }
 sc-network-sync = { workspace = true }
@@ -46,6 +47,7 @@ sp-block-builder = { workspace = true }
 sp-blockchain = { workspace = true }
 sp-consensus-aura = { workspace = true }
 sp-core = { workspace = true }
+sp-inherents = { workspace = true }
 sp-io = { workspace = true }
 sp-keystore = { workspace = true }
 sp-runtime = { workspace = true }
@@ -69,6 +71,17 @@ cumulus-client-service = { workspace = true }
 cumulus-primitives-core = { workspace = true }
 cumulus-primitives-parachain-inherent = { workspace = true }
 cumulus-relay-chain-interface = { workspace = true }
+
+# Frontier
+fc-api = { workspace = true }
+fc-consensus = { workspace = true }
+fc-db = { workspace = true, features = ["rocksdb"]}
+fc-mapping-sync = { workspace = true, features = ["sql"]}
+fc-rpc = { workspace = true }
+fc-rpc-core = { workspace = true }
+fc-storage = { workspace = true }
+fp-dynamic-fee = { workspace = true, features = ["std"]}
+fp-rpc = { workspace = true }
 
 [build-dependencies]
 substrate-build-script-utils = { workspace = true }

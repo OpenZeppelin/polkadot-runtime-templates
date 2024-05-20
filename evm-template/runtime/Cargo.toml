@@ -86,6 +86,7 @@ parachains-common = { workspace = true }
 fp-account = { workspace = true }
 fp-evm = { workspace = true }
 fp-rpc = { workspace = true }
+fp-self-contained = { workspace = true }
 pallet-base-fee = { workspace = true }
 pallet-ethereum = { workspace = true }
 pallet-evm = { workspace = true }
@@ -112,6 +113,7 @@ std = [
 	"fp-account/std",
 	"fp-evm/std",
 	"fp-rpc/std",
+	"fp-self-contained/std",
 	"frame-benchmarking?/std",
 	"frame-executive/std",
 	"frame-support/std",
@@ -168,7 +170,9 @@ std = [
 	"xcm-executor/std",
 	"xcm/std",
 ]
-async-backing = []
+async-backing = [
+	"fp-self-contained/serde"
+]
 
 runtime-benchmarks = [
 	"assets-common/runtime-benchmarks",
@@ -242,6 +246,7 @@ try-runtime = [
 	"parachain-info/try-runtime",
 	"polkadot-runtime-common/try-runtime",
 	"sp-runtime/try-runtime",
+	"fp-self-contained/try-runtime",
 ]
 
 experimental = [ "pallet-aura/experimental" ]
