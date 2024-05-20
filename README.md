@@ -21,6 +21,9 @@ You can find a full list of the pallets included in this template in our [docs](
 
 ### EVM template
 
+> [!WARNING]
+> EVM template is still under development.
+
 This template has evm compatibility out of the box. You can migrate your solidity contracts or evm compatible dapps easily to your blockchain using this template.
 
 
