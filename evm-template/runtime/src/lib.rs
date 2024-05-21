@@ -8,6 +8,8 @@ include!(concat!(env!("OUT_DIR"), "/wasm_binary.rs"));
 
 pub mod constants;
 pub mod governance;
+mod precompiles;
+use precompiles::OpenZeppelinPrecompiles;
 mod weights;
 pub mod xcm_config;
 
@@ -847,6 +849,7 @@ pub const WEIGHT_PER_GAS: u64 = WEIGHT_REF_TIME_PER_SECOND / GAS_PER_SECOND;
 parameter_types! {
     pub BlockGasLimit: U256 = U256::from(NORMAL_DISPATCH_RATIO * MAXIMUM_BLOCK_WEIGHT.ref_time() / WEIGHT_PER_GAS);
     pub GasLimitPovSizeRatio: u64 = BlockGasLimit::get().as_u64().saturating_div(MAX_POV_SIZE);
+    pub PrecompilesValue: OpenZeppelinPrecompiles<Runtime> = OpenZeppelinPrecompiles::<_>::new();
     pub WeightPerGas: Weight = Weight::from_parts(WEIGHT_PER_GAS, 0);
     pub SuicideQuickClearLimit: u32 = 0;
 }
@@ -864,10 +867,8 @@ impl pallet_evm::Config for Runtime {
     type GasWeightMapping = pallet_evm::FixedGasWeightMapping<Self>;
     type OnChargeTransaction = EVMCurrencyAdapter<Balances, ()>;
     type OnCreate = ();
-    // FIXME: Will be implemented in #11
-    type PrecompilesType = ();
-    // FIXME: Will be implemented in #11
-    type PrecompilesValue = ();
+    type PrecompilesType = OpenZeppelinPrecompiles<Self>;
+    type PrecompilesValue = PrecompilesValue;
     type Runner = pallet_evm::runner::stack::Runner<Self>;
     type RuntimeEvent = RuntimeEvent;
     type SuicideQuickClearLimit = SuicideQuickClearLimit;
