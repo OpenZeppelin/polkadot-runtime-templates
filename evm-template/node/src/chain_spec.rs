@@ -1,3 +1,4 @@
+use hex_literal::hex;
 use cumulus_primitives_core::ParaId;
 use parachain_template_runtime::{
     constants::currency::EXISTENTIAL_DEPOSIT, AccountId, AuraId, Signature,
@@ -106,6 +107,8 @@ pub fn development_config() -> ChainSpec {
             get_account_id_from_seed::<ecdsa::Public>("Dave//stash"),
             get_account_id_from_seed::<ecdsa::Public>("Eve//stash"),
             get_account_id_from_seed::<ecdsa::Public>("Ferdie//stash"),
+            AccountId::from(hex!("33c7c88f2B2Fcb83975fCDB08d2B5bf7eA29FDCE")),
+            AccountId::from(hex!("c02db867898f227416BCB6d97190126A6b04988A")),
         ],
         get_account_id_from_seed::<ecdsa::Public>("Alice"),
         1000.into(),
