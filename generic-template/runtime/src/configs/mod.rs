@@ -1,4 +1,5 @@
-mod xcm_config;
+pub mod governance;
+pub mod xcm_config;
 
 #[cfg(feature = "async-backing")]
 use cumulus_pallet_parachain_system::RelayNumberMonotonicallyIncreases;
@@ -20,7 +21,9 @@ use frame_system::{
     limits::{BlockLength, BlockWeights},
     EnsureRoot, EnsureSigned,
 };
-use pallet_xcm::{EnsureXcm, IsVoiceOfBody};
+pub use governance::origins::pallet_custom_origins;
+// Local Imports
+use governance::{origins::Treasurer, TreasurySpender};
 use parachains_common::message_queue::{NarrowOriginToSibling, ParaIdToSibling};
 use parity_scale_codec::{Decode, Encode, MaxEncodedLen};
 use polkadot_runtime_common::{
@@ -46,22 +49,23 @@ use xcm::{
 use xcm_builder::PayOverXcm;
 #[cfg(not(feature = "runtime-benchmarks"))]
 use xcm_builder::ProcessXcmMessage;
-pub use xcm_config::{RelayLocation, XcmOriginToTransactDispatchOrigin};
+use xcm_config::{RelayLocation, XcmOriginToTransactDispatchOrigin};
 
 use crate::{
     constants::{
         currency::{deposit, CENTS, EXISTENTIAL_DEPOSIT, MICROCENTS},
-        AVERAGE_ON_INITIALIZE_RATIO, BLOCK_PROCESSING_VELOCITY, DAYS, HOURS, MAXIMUM_BLOCK_WEIGHT,
-        MAX_BLOCK_LENGTH, NORMAL_DISPATCH_RATIO, RELAY_CHAIN_SLOT_DURATION_MILLIS, SLOT_DURATION,
-        UNINCLUDED_SEGMENT_CAPACITY, VERSION,
+        AVERAGE_ON_INITIALIZE_RATIO, DAYS, HOURS, MAXIMUM_BLOCK_WEIGHT, MAX_BLOCK_LENGTH,
+        NORMAL_DISPATCH_RATIO, SLOT_DURATION, VERSION,
     },
-    governance::{origins::Treasurer, TreasurySpender},
+    types::{
+        AccountId, Balance, Block, BlockNumber, CollatorSelectionUpdateOrigin, ConsensusHook, Hash,
+        Nonce, PriceForSiblingParachainDelivery,
+    },
     weights,
     weights::{BlockExecutionWeight, ExtrinsicBaseWeight, RocksDbWeight},
-    AccountId, Aura, Balance, Balances, Block, BlockNumber, CollatorSelection, Hash, MessageQueue,
-    Nonce, OriginCaller, PalletInfo, ParachainSystem, Preimage, Runtime, RuntimeCall, RuntimeEvent,
-    RuntimeFreezeReason, RuntimeHoldReason, RuntimeOrigin, RuntimeTask, Session, SessionKeys,
-    System, Treasury, WeightToFee, XcmpQueue,
+    Aura, Balances, CollatorSelection, MessageQueue, OriginCaller, PalletInfo, ParachainSystem,
+    Preimage, Runtime, RuntimeCall, RuntimeEvent, RuntimeFreezeReason, RuntimeHoldReason,
+    RuntimeOrigin, RuntimeTask, Session, SessionKeys, System, Treasury, WeightToFee, XcmpQueue,
 };
 
 parameter_types! {
@@ -370,13 +374,6 @@ parameter_types! {
     pub const RelayOrigin: AggregateMessageOrigin = AggregateMessageOrigin::Parent;
 }
 
-type ConsensusHook = cumulus_pallet_aura_ext::FixedVelocityConsensusHook<
-    Runtime,
-    RELAY_CHAIN_SLOT_DURATION_MILLIS,
-    BLOCK_PROCESSING_VELOCITY,
-    UNINCLUDED_SEGMENT_CAPACITY,
->;
-
 impl cumulus_pallet_parachain_system::Config for Runtime {
     #[cfg(not(feature = "async-backing"))]
     type CheckAssociatedRelayNumber = RelayNumberStrictlyIncreases;
@@ -434,13 +431,6 @@ parameter_types! {
     /// The base fee for the message delivery fees. Kusama is based for the reference.
     pub const ToSiblingBaseDeliveryFee: u128 = CENTS.saturating_mul(3);
 }
-
-pub type PriceForSiblingParachainDelivery = polkadot_runtime_common::xcm_sender::ExponentialPrice<
-    FeeAssetId,
-    ToSiblingBaseDeliveryFee,
-    TransactionByteFee,
-    XcmpQueue,
->;
 
 impl cumulus_pallet_xcmp_queue::Config for Runtime {
     type ChannelInfo = ParachainSystem;
@@ -525,13 +515,6 @@ parameter_types! {
     pub const MaxInvulnerables: u32 = 20;
     pub const MinEligibleCollators: u32 = 4;
 }
-
-/// We allow root and the StakingAdmin to execute privileged collator selection
-/// operations.
-pub type CollatorSelectionUpdateOrigin = EitherOfDiverse<
-    EnsureRoot<AccountId>,
-    EnsureXcm<IsVoiceOfBody<RelayLocation, StakingAdminBodyId>>,
->;
 
 impl pallet_collator_selection::Config for Runtime {
     type Currency = Balances;

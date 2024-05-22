@@ -9,7 +9,7 @@ use frame_support::{
 };
 use parachain_template_runtime::{
     AllPalletsWithSystem, Balance, Balances, BlockNumber, Executive, Runtime, RuntimeCall,
-    RuntimeOrigin, SudoConfig, UncheckedExtrinsic, SLOT_DURATION,
+    RuntimeOrigin, SudoConfig, UncheckedExtrinsic, constants::SLOT_DURATION,
 };
 use parachains_common::AccountId;
 use sp_consensus_aura::AURA_ENGINE_ID;

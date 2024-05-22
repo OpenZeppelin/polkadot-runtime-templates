@@ -24,9 +24,10 @@ use xcm_executor::XcmExecutor;
 
 use crate::{
     configs::{
-        weights, AccountId, Balance, Balances, ParachainSystem, Runtime, RuntimeCall, RuntimeEvent,
-        RuntimeOrigin, WeightToFee, XcmpQueue,
+        weights, Balances, ParachainSystem, Runtime, RuntimeCall, RuntimeEvent, RuntimeOrigin,
+        WeightToFee, XcmpQueue,
     },
+    types::{AccountId, Balance},
     AllPalletsWithSystem, Assets, ParachainInfo, PolkadotXcm,
 };
 

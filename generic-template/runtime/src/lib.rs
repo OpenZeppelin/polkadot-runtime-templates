@@ -7,104 +7,36 @@
 include!(concat!(env!("OUT_DIR"), "/wasm_binary.rs"));
 
 pub mod apis;
-mod configs;
+pub mod configs;
 pub mod constants;
-pub mod governance;
+mod types;
 mod weights;
 
 use frame_support::{
-    construct_runtime, parameter_types,
-    traits::ConstU32,
+    construct_runtime,
     weights::{WeightToFeeCoefficient, WeightToFeeCoefficients, WeightToFeePolynomial},
 };
-use frame_system::{EnsureRoot, EnsureSigned};
-use governance::origins::pallet_custom_origins;
 use smallvec::smallvec;
 pub use sp_consensus_aura::sr25519::AuthorityId as AuraId;
+use sp_runtime::impl_opaque_keys;
 #[cfg(any(feature = "std", test))]
 pub use sp_runtime::BuildStorage;
-use sp_runtime::{
-    generic, impl_opaque_keys,
-    traits::{BlakeTwo256, IdentifyAccount, Verify},
-    MultiSignature,
-};
 pub use sp_runtime::{MultiAddress, Perbill, Permill};
 use sp_std::prelude::*;
 #[cfg(feature = "std")]
 use sp_version::NativeVersion;
 
-pub use crate::{
-    configs::{
-        RelayLocation, RuntimeBlockWeights, TransactionByteFee, XcmOriginToTransactDispatchOrigin,
-    },
-    constants::{
-        currency::{deposit, CENTS, EXISTENTIAL_DEPOSIT, MICROCENTS, MILLICENTS},
-        AVERAGE_ON_INITIALIZE_RATIO, BLOCK_PROCESSING_VELOCITY, DAYS, HOURS, MAXIMUM_BLOCK_WEIGHT,
-        MAX_BLOCK_LENGTH, NORMAL_DISPATCH_RATIO, POLY_DEGREE, P_FACTOR, Q_FACTOR,
-        RELAY_CHAIN_SLOT_DURATION_MILLIS, SLOT_DURATION, UNINCLUDED_SEGMENT_CAPACITY, VERSION,
-    },
-    weights::{BlockExecutionWeight, ExtrinsicBaseWeight, RocksDbWeight},
+use crate::{
+    configs::pallet_custom_origins,
+    constants::{currency::MILLICENTS, POLY_DEGREE, P_FACTOR, Q_FACTOR, VERSION},
+    weights::ExtrinsicBaseWeight,
 };
-
-/// Alias to 512-bit hash when used in the context of a transaction signature on
-/// the chain.
-pub type Signature = MultiSignature;
-
-/// Some way of identifying an account on the chain. We intentionally make it
-/// equivalent to the public key of our transaction signing scheme.
-pub type AccountId = <<Signature as Verify>::Signer as IdentifyAccount>::AccountId;
-
-/// Balance of an account.
-pub type Balance = u128;
-
-/// Index of a transaction in the chain.
-pub type Nonce = u32;
-
-/// A hash of some data used by the chain.
-pub type Hash = sp_core::H256;
-
-/// An index to a block.
-pub type BlockNumber = u32;
-
-/// The address format for describing accounts.
-pub type Address = MultiAddress<AccountId, ()>;
-
-/// Block header type as expected by this runtime.
-pub type Header = generic::Header<BlockNumber, BlakeTwo256>;
-
-/// Block type as expected by this runtime.
-pub type Block = generic::Block<Header, UncheckedExtrinsic>;
-
-/// A Block signed with a Justification
-pub type SignedBlock = generic::SignedBlock<Block>;
-
-/// BlockId type as expected by this runtime.
-pub type BlockId = generic::BlockId<Block>;
-
-/// The SignedExtension to the basic transaction logic.
-pub type SignedExtra = (
-    frame_system::CheckNonZeroSender<Runtime>,
-    frame_system::CheckSpecVersion<Runtime>,
-    frame_system::CheckTxVersion<Runtime>,
-    frame_system::CheckGenesis<Runtime>,
-    frame_system::CheckEra<Runtime>,
-    frame_system::CheckNonce<Runtime>,
-    frame_system::CheckWeight<Runtime>,
-    pallet_transaction_payment::ChargeTransactionPayment<Runtime>,
-);
-
-/// Unchecked extrinsic type as expected by this runtime.
-pub type UncheckedExtrinsic =
-    generic::UncheckedExtrinsic<Address, RuntimeCall, Signature, SignedExtra>;
-
-/// Executive: handles dispatch to the various modules.
-pub type Executive = frame_executive::Executive<
-    Runtime,
-    Block,
-    frame_system::ChainContext<Runtime>,
-    Runtime,
-    AllPalletsWithSystem,
->;
+pub use crate::{
+    configs::RuntimeBlockWeights,
+    types::{
+        AccountId, Balance, Block, BlockNumber, Executive, Nonce, Signature, UncheckedExtrinsic,
+    },
+};
 
 /// Handles converting a weight scalar to a fee value, based on the scale and
 /// granularity of the node's balance type.

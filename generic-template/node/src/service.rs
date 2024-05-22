@@ -368,7 +368,6 @@ fn start_consensus(
 
     // NOTE: because we use Aura here explicitly, we can use `CollatorSybilResistance::Resistant`
     // when starting the network.
-
     #[cfg(not(feature = "async-backing"))]
     let slot_duration = cumulus_client_consensus_aura::slot_duration(&*client)?;
 
