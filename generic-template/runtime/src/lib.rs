@@ -11,17 +11,14 @@ mod configs;
 pub mod constants;
 pub mod governance;
 mod weights;
-pub mod xcm_config;
 
 use frame_support::{
     construct_runtime, parameter_types,
-    traits::{ConstU32},
+    traits::ConstU32,
     weights::{WeightToFeeCoefficient, WeightToFeeCoefficients, WeightToFeePolynomial},
 };
 use frame_system::{EnsureRoot, EnsureSigned};
-use governance::{
-    origins::{pallet_custom_origins },
-};
+use governance::origins::pallet_custom_origins;
 use smallvec::smallvec;
 pub use sp_consensus_aura::sr25519::AuthorityId as AuraId;
 #[cfg(any(feature = "std", test))]
@@ -36,10 +33,10 @@ use sp_std::prelude::*;
 #[cfg(feature = "std")]
 use sp_version::NativeVersion;
 
-
-
 pub use crate::{
-    configs::{RuntimeBlockWeights, TransactionByteFee},
+    configs::{
+        RelayLocation, RuntimeBlockWeights, TransactionByteFee, XcmOriginToTransactDispatchOrigin,
+    },
     constants::{
         currency::{deposit, CENTS, EXISTENTIAL_DEPOSIT, MICROCENTS, MILLICENTS},
         AVERAGE_ON_INITIALIZE_RATIO, BLOCK_PROCESSING_VELOCITY, DAYS, HOURS, MAXIMUM_BLOCK_WEIGHT,
@@ -47,7 +44,6 @@ pub use crate::{
         RELAY_CHAIN_SLOT_DURATION_MILLIS, SLOT_DURATION, UNINCLUDED_SEGMENT_CAPACITY, VERSION,
     },
     weights::{BlockExecutionWeight, ExtrinsicBaseWeight, RocksDbWeight},
-    xcm_config::{RelayLocation, XcmOriginToTransactDispatchOrigin},
 };
 
 /// Alias to 512-bit hash when used in the context of a transaction signature on
