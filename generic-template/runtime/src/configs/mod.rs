@@ -59,12 +59,10 @@ use crate::{
     weights,
     weights::{BlockExecutionWeight, ExtrinsicBaseWeight, RocksDbWeight},
     AccountId, Aura, Balance, Balances, Block, BlockNumber, CollatorSelection, Hash, MessageQueue,
-    Nonce, PalletInfo, ParachainSystem, Runtime, RuntimeCall, RuntimeEvent, RuntimeFreezeReason,
-    RuntimeHoldReason, RuntimeOrigin, RuntimeTask, Session, SessionKeys, System, Treasury,
-    WeightToFee, XcmpQueue,
+    Nonce, OriginCaller, PalletInfo, ParachainSystem, Preimage, Runtime, RuntimeCall, RuntimeEvent,
+    RuntimeFreezeReason, RuntimeHoldReason, RuntimeOrigin, RuntimeTask, Session, SessionKeys,
+    System, Treasury, WeightToFee, XcmpQueue,
 };
-// TODO: may delete below
-use crate::{OriginCaller, Preimage};
 
 parameter_types! {
     pub const Version: RuntimeVersion = VERSION;
