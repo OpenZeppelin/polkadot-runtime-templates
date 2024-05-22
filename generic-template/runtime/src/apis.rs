@@ -16,8 +16,7 @@ use sp_version::RuntimeVersion;
 // Local module imports
 use super::{
     AccountId, Aura, Balance, Block, Executive, InherentDataExt, Nonce, ParachainSystem, Runtime,
-    RuntimeBlockWeights, RuntimeCall, RuntimeGenesisConfig, SessionKeys, System,
-    TransactionPayment,
+    RuntimeCall, RuntimeGenesisConfig, SessionKeys, System, TransactionPayment,
 };
 use crate::constants::VERSION;
 
@@ -181,6 +180,8 @@ impl_runtime_apis! {
     #[cfg(feature = "try-runtime")]
     impl frame_try_runtime::TryRuntime<Block> for Runtime {
         fn on_runtime_upgrade(checks: frame_try_runtime::UpgradeCheckSelect) -> (Weight, Weight) {
+            use super::configs::RuntimeBlockWeights;
+
             let weight = Executive::try_runtime_upgrade(checks).unwrap();
             (weight, RuntimeBlockWeights::get().max_block)
         }
