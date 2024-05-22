@@ -22,6 +22,26 @@ mod runtime_tests {
     use frame_support::{pallet_prelude::Weight, traits::TypedGet, PalletId};
     use parachain_template_runtime::{constants::currency::*, *};
     use xcm::latest::prelude::BodyId;
+    use sp_runtime::create_runtime_str;
+    use sp_version::RuntimeVersion;
+
+    #[test]
+    fn check_runtime_api_version() {
+        assert_eq!(
+            VERSION,
+            RuntimeVersion {
+                spec_name: create_runtime_str!("template-parachain"),
+                impl_name: create_runtime_str!("template-parachain"),
+                authoring_version: 1,
+                spec_version: 1,
+                impl_version: 0,
+                apis: apis::RUNTIME_API_VERSIONS,
+                transaction_version: 1,
+                state_version: 1,
+            }
+        );
+    }
+
 
     #[test]
     fn weight_to_fee_constants() {
