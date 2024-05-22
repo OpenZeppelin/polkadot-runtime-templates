@@ -1,7 +1,6 @@
-use sp_runtime::create_runtime_str;
-use sp_version::RuntimeVersion;
-use sp_runtime::Perbill;
 use frame_support::weights::{constants::WEIGHT_REF_TIME_PER_SECOND, Weight};
+use sp_runtime::{create_runtime_str, Perbill};
+use sp_version::RuntimeVersion;
 
 use crate::{apis, BlockNumber};
 
@@ -21,6 +20,9 @@ pub mod currency {
     }
 }
 
+pub const P_FACTOR: u128 = 10;
+pub const Q_FACTOR: u128 = 100;
+pub const POLY_DEGREE: u8 = 1;
 
 #[sp_version::runtime_version]
 pub const VERSION: RuntimeVersion = RuntimeVersion {

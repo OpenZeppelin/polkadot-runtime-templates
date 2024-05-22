@@ -21,9 +21,9 @@ mod constant_tests {
 mod runtime_tests {
     use frame_support::{pallet_prelude::Weight, traits::TypedGet, PalletId};
     use parachain_template_runtime::{constants::currency::*, *};
-    use xcm::latest::prelude::BodyId;
     use sp_runtime::create_runtime_str;
     use sp_version::RuntimeVersion;
+    use xcm::latest::prelude::BodyId;
 
     #[test]
     fn check_runtime_api_version() {
@@ -41,7 +41,6 @@ mod runtime_tests {
             }
         );
     }
-
 
     #[test]
     fn weight_to_fee_constants() {
