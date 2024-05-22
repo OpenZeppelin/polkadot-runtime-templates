@@ -21,8 +21,8 @@ use cumulus_relay_chain_interface::{OverseerHandle, RelayChainInterface};
 use frame_benchmarking_cli::SUBSTRATE_REFERENCE_HARDWARE;
 // Local Runtime Types
 use parachain_template_runtime::{
+    apis::RuntimeApi,
     opaque::{Block, Hash},
-    RuntimeApi,
 };
 use sc_client_api::Backend;
 use sc_consensus::ImportQueue;
