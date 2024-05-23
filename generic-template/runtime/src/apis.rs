@@ -218,6 +218,8 @@ impl_runtime_apis! {
 
             use pallet_xcm::benchmarking::Pallet as PalletXcmExtrinsicsBenchmark;
 
+            use super::*;
+
             let mut list = Vec::<BenchmarkList>::new();
             list_benchmarks!(list, extra);
 
@@ -229,6 +231,10 @@ impl_runtime_apis! {
             config: frame_benchmarking::BenchmarkConfig
         ) -> Result<Vec<frame_benchmarking::BenchmarkBatch>, sp_runtime::RuntimeString> {
             use frame_benchmarking::{BenchmarkError, Benchmarking, BenchmarkBatch};
+            use frame_support::parameter_types;
+            use cumulus_primitives_core::ParaId;
+
+            use super::{*, types::*, configs::*, constants::currency::CENTS};
 
             use frame_system_benchmarking::Pallet as SystemBench;
             impl frame_system_benchmarking::Config for Runtime {
