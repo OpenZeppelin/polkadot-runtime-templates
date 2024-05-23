@@ -20,7 +20,11 @@ mod constant_tests {
 
 mod runtime_tests {
     use frame_support::{pallet_prelude::Weight, traits::TypedGet, PalletId};
-    use parachain_template_runtime::{constants::{currency::*, *}, configs::*, *};
+    use parachain_template_runtime::{
+        configs::*,
+        constants::{currency::*, *},
+        *,
+    };
     use sp_runtime::create_runtime_str;
     use sp_version::RuntimeVersion;
     use xcm::latest::prelude::BodyId;

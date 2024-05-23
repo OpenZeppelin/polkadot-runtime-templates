@@ -13,19 +13,19 @@ use sp_runtime::{
 use sp_std::prelude::Vec;
 use sp_version::RuntimeVersion;
 
-// Local module imports
-use crate::{
-    constants::VERSION,
-    types::{AccountId, Balance, Block, Executive, Nonce},
-    InherentDataExt, ParachainSystem, Runtime, RuntimeCall, RuntimeGenesisConfig,
-    SessionKeys, System, TransactionPayment,
-};
-#[cfg(not(feature = "async-backing"))]
-use crate::Aura;
 #[cfg(feature = "async-backing")]
 use crate::constants::SLOT_DURATION;
 #[cfg(feature = "async-backing")]
 use crate::types::ConsensusHook;
+#[cfg(not(feature = "async-backing"))]
+use crate::Aura;
+// Local module imports
+use crate::{
+    constants::VERSION,
+    types::{AccountId, Balance, Block, Executive, Nonce},
+    InherentDataExt, ParachainSystem, Runtime, RuntimeCall, RuntimeGenesisConfig, SessionKeys,
+    System, TransactionPayment,
+};
 
 impl_runtime_apis! {
     impl sp_consensus_aura::AuraApi<Block, AuraId> for Runtime {

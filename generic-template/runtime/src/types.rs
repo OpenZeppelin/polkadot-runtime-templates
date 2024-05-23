@@ -9,7 +9,8 @@ use sp_runtime::{
 
 pub use crate::{
     configs::{
-        FeeAssetId, xcm_config::RelayLocation, StakingAdminBodyId, ToSiblingBaseDeliveryFee, TransactionByteFee,
+        xcm_config::RelayLocation, FeeAssetId, StakingAdminBodyId, ToSiblingBaseDeliveryFee,
+        TransactionByteFee,
     },
     constants::{
         BLOCK_PROCESSING_VELOCITY, RELAY_CHAIN_SLOT_DURATION_MILLIS, UNINCLUDED_SEGMENT_CAPACITY,
