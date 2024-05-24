@@ -3,6 +3,16 @@ description: Create a report to help us improve
 title: "🏗️ [Core Feature]: "
 labels: ["core"]
 body:
+  - type: checkboxes
+    id: templates
+    attributes:
+      label: templates
+      description: Which template is this issue related to?
+      options:
+        - label: Generic Runtime Template
+          required: false
+        - label: Evm Template
+          required: false
   - type: textarea
     id: feature
     attributes:
