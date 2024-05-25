@@ -1,8 +1,8 @@
-# OpenZeppelin Runtime Template for Substrate
+# OpenZeppelin Runtime Template for Polkadot
 
-Substrate has a steep learning curve. In order to make it easier for newcomers to get started, OpenZeppelin is providing runtime templates that can be used to quickly bootstrap a Substrate project.
+[Polkadot SDK](https://github.com/paritytech/polkadot-sdk) has a steep learning curve. In order to make it easier for newcomers to get started, OpenZeppelin is providing runtime templates that can be used to quickly bootstrap a [Substrate](https://github.com/paritytech/polkadot-sdk/tree/master/substrate) project using Polkadot SDK.
 
-Along with the templates, OpenZeppelin also provides a documentation website that explains the templates and the niche details.
+Along with the templates, OpenZeppelin also provides a [documentation website](https://docs.openzeppelin.com/substrate-runtimes/1.0.0/) that explains the templates and the niche details.
 
 
 ## Security
