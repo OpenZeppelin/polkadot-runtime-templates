@@ -1,5 +1,5 @@
 [workspace]
-members = [ "node", "runtime", "template-fuzzer" ]
+members = [ "node", "pallets/multicurrency", "runtime", "template-fuzzer" ]
 resolver = "2"
 
 [workspace.package]
@@ -130,9 +130,25 @@ parachains-common = { git = "https://github.com/paritytech/polkadot-sdk", defaul
 
 # Frontier
 fp-account = { git = "https://github.com/OpenZeppelin/frontier", branch = "polkadot-v1.7.0", default-features = false, features = [ "serde" ] }
+evm = { version = "0.41.1", default-features = false }
+
+# Open Runtime Module Library
+#orml-benchmarking = { git = "https://github.com/OpenZeppelin/open-runtime-module-library.git", branch = "polkadot-v1.7.0", default-features = false }
+orml-currencies = { git = "https://github.com/OpenZeppelin/open-runtime-module-library.git", branch = "polkadot-v1.7.0",  default-features = false }
+#orml-tokens = { git = "https://github.com/OpenZeppelin/open-runtime-module-library.git", branch = "polkadot-v1.7.0", default-features = false }
+#orml-traits = { git = "https://github.com/OpenZeppelin/open-runtime-module-library.git", branch = "polkadot-v1.7.0", default-features = false }
+#orml-utilities = { git = "https://github.com/OpenZeppelin/open-runtime-module-library.git", branch = "polkadot-v1.7.0", default-features = false }
+#orml-vesting = { git = "https://github.com/OpenZeppelin/open-runtime-module-library.git", branch = "polkadot-v1.7.0", default-features = false }
+#orml-unknown-tokens = { git = "https://github.com/OpenZeppelin/open-runtime-module-library.git",branch = "polkadot-v1.7.0",  default-features = false }
+#orml-xcm = { git = "https://github.com/OpenZeppelin/open-runtime-module-library.git",branch = "polkadot-v1.7.0", default-features = false }
+#orml-xcm-support = { git = "https://github.com/OpenZeppelin/open-runtime-module-library.git",branch = "polkadot-v1.7.0", default-features = false }
+#orml-xtokens = { git = "https://github.com/OpenZeppelin/open-runtime-module-library.git",branch = "polkadot-v1.7.0", default-features = false }
 
 # HydraDX
 pallet-transaction-multi-payment = { git = "https://github.com/OpenZeppelin/HydraDX-node", branch = "polkadot-v1.7.0", default-features = false }
+
+# Custom
+pallet-multicurrency = { path = "pallets/multicurrency", default-features = false }
 
 # Fuzzer
 substrate-runtime-fuzzer = { git = "https://github.com/srlabs/substrate-runtime-fuzzer.git", default-features = false }

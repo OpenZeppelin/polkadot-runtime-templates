@@ -7,6 +7,7 @@
 include!(concat!(env!("OUT_DIR"), "/wasm_binary.rs"));
 
 pub mod constants;
+pub mod defi;
 pub mod governance;
 mod weights;
 pub mod xcm_config;
@@ -567,22 +568,6 @@ impl pallet_transaction_payment::Config for Runtime {
     type WeightToFee = WeightToFee;
 }
 
-impl pallet_transaction_multi_payment::Config for Runtime {
-    type AcceptedCurrencyOrigin = EnsureRoot<AccountId>;
-    type Currencies = Currencies;
-    type EvmAssetId = evm::WethAssetId;
-    type EvmPermit = evm::permit::EvmPermitHandler<Runtime>;
-    type InspectEvmAccounts = EVMAccounts;
-    //TODO
-    type NativeAssetId = NativeAssetId;
-    type OraclePriceProvider = OraclePriceProvider<AssetId, EmaOracle, LRNA>;
-    type RouteProvider = Router;
-    type RuntimeEvent = RuntimeEvent;
-    type TryCallCurrency<'a> = pallet_transaction_multi_payment::TryCallCurrency<Runtime>;
-    type WeightInfo = ();
-    type WeightToFee = WeightToFee;
-}
-
 impl pallet_sudo::Config for Runtime {
     type RuntimeCall = RuntimeCall;
     type RuntimeEvent = RuntimeEvent;
@@ -846,7 +831,6 @@ construct_runtime!(
         TransactionPayment: pallet_transaction_payment = 11,
         Assets: pallet_assets = 12,
         Treasury: pallet_treasury::{Pallet, Call, Storage, Config<T>, Event<T>} = 13,
-        MultiTransactionPayment: pallet_transaction_multi_payment = 14,
 
         // Governance
         Sudo: pallet_sudo = 15,
@@ -867,6 +851,10 @@ construct_runtime!(
         PolkadotXcm: pallet_xcm = 31,
         CumulusXcm: cumulus_pallet_xcm = 32,
         MessageQueue: pallet_message_queue = 33,
+
+        // DeFi
+        Currencies: orml_currencies = 40,
+        //MultiTransactionPayment: pallet_transaction_multi_payment = 36,
     }
 );
 
