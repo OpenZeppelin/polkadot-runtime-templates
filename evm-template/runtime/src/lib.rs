@@ -567,6 +567,22 @@ impl pallet_transaction_payment::Config for Runtime {
     type WeightToFee = WeightToFee;
 }
 
+impl pallet_transaction_multi_payment::Config for Runtime {
+    type AcceptedCurrencyOrigin = EnsureRoot<AccountId>;
+    type Currencies = Currencies;
+    type EvmAssetId = evm::WethAssetId;
+    type EvmPermit = evm::permit::EvmPermitHandler<Runtime>;
+    type InspectEvmAccounts = EVMAccounts;
+    //TODO
+    type NativeAssetId = NativeAssetId;
+    type OraclePriceProvider = OraclePriceProvider<AssetId, EmaOracle, LRNA>;
+    type RouteProvider = Router;
+    type RuntimeEvent = RuntimeEvent;
+    type TryCallCurrency<'a> = pallet_transaction_multi_payment::TryCallCurrency<Runtime>;
+    type WeightInfo = ();
+    type WeightToFee = WeightToFee;
+}
+
 impl pallet_sudo::Config for Runtime {
     type RuntimeCall = RuntimeCall;
     type RuntimeEvent = RuntimeEvent;
@@ -830,6 +846,7 @@ construct_runtime!(
         TransactionPayment: pallet_transaction_payment = 11,
         Assets: pallet_assets = 12,
         Treasury: pallet_treasury::{Pallet, Call, Storage, Config<T>, Event<T>} = 13,
+        MultiTransactionPayment: pallet_transaction_multi_payment = 14,
 
         // Governance
         Sudo: pallet_sudo = 15,
