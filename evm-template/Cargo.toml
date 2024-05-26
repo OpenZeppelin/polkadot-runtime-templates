@@ -136,8 +136,8 @@ evm = { version = "0.41.1", default-features = false }
 #orml-benchmarking = { git = "https://github.com/OpenZeppelin/open-runtime-module-library.git", branch = "polkadot-v1.7.0", default-features = false }
 orml-currencies = { git = "https://github.com/OpenZeppelin/open-runtime-module-library.git", branch = "polkadot-v1.7.0",  default-features = false }
 #orml-tokens = { git = "https://github.com/OpenZeppelin/open-runtime-module-library.git", branch = "polkadot-v1.7.0", default-features = false }
-#orml-traits = { git = "https://github.com/OpenZeppelin/open-runtime-module-library.git", branch = "polkadot-v1.7.0", default-features = false }
-#orml-utilities = { git = "https://github.com/OpenZeppelin/open-runtime-module-library.git", branch = "polkadot-v1.7.0", default-features = false }
+orml-traits = { git = "https://github.com/OpenZeppelin/open-runtime-module-library.git", branch = "polkadot-v1.7.0", default-features = false }
+orml-utilities = { git = "https://github.com/OpenZeppelin/open-runtime-module-library.git", branch = "polkadot-v1.7.0", default-features = false }
 #orml-vesting = { git = "https://github.com/OpenZeppelin/open-runtime-module-library.git", branch = "polkadot-v1.7.0", default-features = false }
 #orml-unknown-tokens = { git = "https://github.com/OpenZeppelin/open-runtime-module-library.git",branch = "polkadot-v1.7.0",  default-features = false }
 #orml-xcm = { git = "https://github.com/OpenZeppelin/open-runtime-module-library.git",branch = "polkadot-v1.7.0", default-features = false }

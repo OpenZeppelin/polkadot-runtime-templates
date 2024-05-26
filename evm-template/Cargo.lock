@@ -6891,6 +6891,25 @@ dependencies = [
 ]
 
 [[package]]
+name = "pallet-multicurrency"
+version = "0.1.0"
+dependencies = [
+ "frame-support",
+ "frame-system",
+ "orml-traits",
+ "orml-utilities",
+ "pallet-assets",
+ "pallet-balances",
+ "parity-scale-codec",
+ "scale-info",
+ "serde",
+ "sp-core",
+ "sp-io",
+ "sp-runtime",
+ "sp-std 14.0.0 (git+https://github.com/paritytech/polkadot-sdk?tag=polkadot-v1.7.0)",
+]
+
+[[package]]
 name = "pallet-multisig"
 version = "28.0.0"
 source = "git+https://github.com/paritytech/polkadot-sdk?tag=polkadot-v1.7.0#2fe3145ab9bd26ceb5a26baf2a64105b0035a5a6"
@@ -7576,6 +7595,7 @@ dependencies = [
  "pallet-collator-selection",
  "pallet-conviction-voting",
  "pallet-message-queue",
+ "pallet-multicurrency",
  "pallet-multisig",
  "pallet-preimage",
  "pallet-proxy",
