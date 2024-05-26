@@ -85,6 +85,9 @@ parachains-common = { workspace = true }
 # Frontier
 fp-account = { workspace = true }
 
+# HydraDX
+pallet-transaction-multi-payment = { workspace = true }
+
 [dev-dependencies]
 sp-io = { workspace = true }
 
@@ -128,6 +131,7 @@ std = [
 	"pallet-timestamp/std",
 	"pallet-transaction-payment-rpc-runtime-api/std",
 	"pallet-transaction-payment/std",
+    "pallet-transaction-multi-payment/std",
 	"pallet-treasury/std",
 	"pallet-utility/std",
 	"pallet-whitelist/std",
@@ -217,6 +221,7 @@ try-runtime = [
 	"pallet-sudo/try-runtime",
 	"pallet-timestamp/try-runtime",
 	"pallet-transaction-payment/try-runtime",
+    "pallet-transaction-multi-payment/try-runtime",
 	"pallet-treasury/try-runtime",
 	"pallet-utility/try-runtime",
 	"pallet-whitelist/try-runtime",
