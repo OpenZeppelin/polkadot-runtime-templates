@@ -38,7 +38,10 @@ use sp_core::U256;
 use sp_keystore::KeystorePtr;
 use substrate_prometheus_endpoint::Registry;
 
-use crate::eth::{db_config_dir, new_frontier_partial, spawn_frontier_tasks, BackendType, EthConfiguration, FrontierBackend, FrontierPartialComponents};
+use crate::eth::{
+    db_config_dir, new_frontier_partial, spawn_frontier_tasks, BackendType, EthConfiguration,
+    FrontierBackend, FrontierPartialComponents,
+};
 
 /// Native executor type.
 pub struct ParachainNativeExecutor;
@@ -69,7 +72,7 @@ type ParachainBlockImport = TParachainBlockImport<Block, Arc<ParachainClient>, P
 /// builder in order to be able to perform chain operations.
 pub fn new_partial(
     config: &Configuration,
-	eth_config: &EthConfiguration,
+    eth_config: &EthConfiguration,
 ) -> Result<
     PartialComponents<
         ParachainClient,
@@ -77,7 +80,13 @@ pub fn new_partial(
         (),
         sc_consensus::DefaultImportQueue<Block>,
         sc_transaction_pool::FullPool<Block, ParachainClient>,
-        (ParachainBlockImport, Option<Telemetry>, Option<TelemetryWorkerHandle>, FrontierBackend, Arc<fc_rpc::OverrideHandle<Block>>),
+        (
+            ParachainBlockImport,
+            Option<Telemetry>,
+            Option<TelemetryWorkerHandle>,
+            FrontierBackend,
+            Arc<fc_rpc::OverrideHandle<Block>>,
+        ),
     >,
     sc_service::Error,
 > {
@@ -139,36 +148,36 @@ pub fn new_partial(
         &task_manager,
     )?;
 
-	let overrides = crate::rpc::overrides_handle(client.clone());
+    let overrides = crate::rpc::overrides_handle(client.clone());
 
     let frontier_backend = match eth_config.frontier_backend_type {
-		BackendType::KeyValue => FrontierBackend::KeyValue(fc_db::kv::Backend::open(
-			Arc::clone(&client),
-			&config.database,
-			&db_config_dir(config),
-		)?),
-		BackendType::Sql => {
-			let db_path = db_config_dir(config).join("sql");
-			std::fs::create_dir_all(&db_path).expect("failed creating sql db directory");
-			let backend = futures::executor::block_on(fc_db::sql::Backend::new(
-				fc_db::sql::BackendConfig::Sqlite(fc_db::sql::SqliteBackendConfig {
-					path: Path::new("sqlite:///")
-						.join(db_path)
-						.join("frontier.db3")
-						.to_str()
-						.unwrap(),
-					create_if_missing: true,
-					thread_count: eth_config.frontier_sql_backend_thread_count,
-					cache_size: eth_config.frontier_sql_backend_cache_size,
-				}),
-				eth_config.frontier_sql_backend_pool_size,
-				std::num::NonZeroU32::new(eth_config.frontier_sql_backend_num_ops_timeout),
-				overrides.clone(),
-			))
-			.unwrap_or_else(|err| panic!("failed creating sql backend: {:?}", err));
-			FrontierBackend::Sql(backend)
-		}
-	};
+        BackendType::KeyValue => FrontierBackend::KeyValue(fc_db::kv::Backend::open(
+            Arc::clone(&client),
+            &config.database,
+            &db_config_dir(config),
+        )?),
+        BackendType::Sql => {
+            let db_path = db_config_dir(config).join("sql");
+            std::fs::create_dir_all(&db_path).expect("failed creating sql db directory");
+            let backend = futures::executor::block_on(fc_db::sql::Backend::new(
+                fc_db::sql::BackendConfig::Sqlite(fc_db::sql::SqliteBackendConfig {
+                    path: Path::new("sqlite:///")
+                        .join(db_path)
+                        .join("frontier.db3")
+                        .to_str()
+                        .unwrap(),
+                    create_if_missing: true,
+                    thread_count: eth_config.frontier_sql_backend_thread_count,
+                    cache_size: eth_config.frontier_sql_backend_cache_size,
+                }),
+                eth_config.frontier_sql_backend_pool_size,
+                std::num::NonZeroU32::new(eth_config.frontier_sql_backend_num_ops_timeout),
+                overrides.clone(),
+            ))
+            .unwrap_or_else(|err| panic!("failed creating sql backend: {:?}", err));
+            FrontierBackend::Sql(backend)
+        }
+    };
 
     Ok(PartialComponents {
         backend,
@@ -192,7 +201,7 @@ async fn start_node_impl(
     parachain_config: Configuration,
     polkadot_config: Configuration,
     collator_options: CollatorOptions,
-	eth_config: &EthConfiguration,
+    eth_config: &EthConfiguration,
     para_id: ParaId,
     hwbench: Option<sc_sysinfo::HwBench>,
 ) -> sc_service::error::Result<(TaskManager, Arc<ParachainClient>)> {
@@ -200,13 +209,11 @@ async fn start_node_impl(
 
     let params = new_partial(&parachain_config, eth_config)?;
 
-    let FrontierPartialComponents {
-		filter_pool,
-		fee_history_cache,
-		fee_history_cache_limit,
-	} = new_frontier_partial(&eth_config)?;
+    let FrontierPartialComponents { filter_pool, fee_history_cache, fee_history_cache_limit } =
+        new_frontier_partial(&eth_config)?;
 
-    let (block_import, mut telemetry, telemetry_worker_handle, frontier_backend, overrides) = params.other;
+    let (block_import, mut telemetry, telemetry_worker_handle, frontier_backend, overrides) =
+        params.other;
     let net_config = sc_network::config::FullNetworkConfiguration::new(&parachain_config.network);
 
     let client = params.client.clone();
@@ -276,27 +283,27 @@ async fn start_node_impl(
         let client = client.clone();
         let transaction_pool = transaction_pool.clone();
         let target_gas_price = eth_config.target_gas_price;
-		let enable_dev_signer = eth_config.enable_dev_signer;
+        let enable_dev_signer = eth_config.enable_dev_signer;
         let pending_create_inherent_data_providers = move |_, ()| async move {
-			let current = sp_timestamp::InherentDataProvider::from_system_time();
-			let next_slot = current.timestamp().as_millis() + slot_duration.as_millis();
-			let timestamp = sp_timestamp::InherentDataProvider::new(next_slot.into());
-			let slot = sp_consensus_aura::inherents::InherentDataProvider::from_timestamp_and_slot_duration(
+            let current = sp_timestamp::InherentDataProvider::from_system_time();
+            let next_slot = current.timestamp().as_millis() + slot_duration.as_millis();
+            let timestamp = sp_timestamp::InherentDataProvider::new(next_slot.into());
+            let slot = sp_consensus_aura::inherents::InherentDataProvider::from_timestamp_and_slot_duration(
 				*timestamp,
-				slot_duration, 
+				slot_duration,
 			);
-			let dynamic_fee = fp_dynamic_fee::InherentDataProvider(U256::from(target_gas_price));
-			Ok((slot, timestamp, dynamic_fee))
-		};
+            let dynamic_fee = fp_dynamic_fee::InherentDataProvider(U256::from(target_gas_price));
+            Ok((slot, timestamp, dynamic_fee))
+        };
         let block_data_cache = Arc::new(fc_rpc::EthBlockDataCacheTask::new(
-			task_manager.spawn_handle(),
-			overrides.clone(),
-			eth_config.eth_log_block_cache,
-			eth_config.eth_statuses_cache,
-			prometheus_registry.clone(),
-		));
-		let execute_gas_limit_multiplier = eth_config.execute_gas_limit_multiplier;
-		let max_past_logs = eth_config.max_past_logs;
+            task_manager.spawn_handle(),
+            overrides.clone(),
+            eth_config.eth_log_block_cache,
+            eth_config.eth_statuses_cache,
+            prometheus_registry.clone(),
+        ));
+        let execute_gas_limit_multiplier = eth_config.execute_gas_limit_multiplier;
+        let max_past_logs = eth_config.max_past_logs;
         let network = network.clone();
         let sync_service = sync_service.clone();
         let frontier_backend = frontier_backend.clone();
@@ -316,9 +323,9 @@ async fn start_node_impl(
                 network: network.clone(),
                 sync: sync_service.clone(),
                 frontier_backend: match frontier_backend.clone() {
-					fc_db::Backend::KeyValue(b) => Arc::new(b),
-					fc_db::Backend::Sql(b) => Arc::new(b),
-				},
+                    fc_db::Backend::KeyValue(b) => Arc::new(b),
+                    fc_db::Backend::Sql(b) => Arc::new(b),
+                },
                 overrides: overrides.clone(),
                 block_data_cache: block_data_cache.clone(),
                 filter_pool: filter_pool.clone(),
@@ -327,16 +334,21 @@ async fn start_node_impl(
                 fee_history_cache_limit,
                 execute_gas_limit_multiplier,
                 forced_parent_hashes: None,
-                pending_create_inherent_data_providers
+                pending_create_inherent_data_providers,
             };
             let deps = crate::rpc::FullDeps {
                 client: client.clone(),
                 pool: transaction_pool.clone(),
                 deny_unsafe,
-                eth
+                eth,
             };
 
-            crate::rpc::create_full(deps, subscription_task_executor, pubsub_notification_sinks.clone()).map_err(Into::into)
+            crate::rpc::create_full(
+                deps,
+                subscription_task_executor,
+                pubsub_notification_sinks.clone(),
+            )
+            .map_err(Into::into)
         })
     };
 
@@ -411,18 +423,18 @@ async fn start_node_impl(
     })?;
 
     spawn_frontier_tasks(
-		&task_manager,
-		client.clone(),
-		backend.clone(),
-		frontier_backend,
-		filter_pool,
-		overrides,
-		fee_history_cache,
-		fee_history_cache_limit,
-		sync_service.clone(),
-		pubsub_notification_sinks,
-	)
-	.await;
+        &task_manager,
+        client.clone(),
+        backend.clone(),
+        frontier_backend,
+        filter_pool,
+        overrides,
+        fee_history_cache,
+        fee_history_cache_limit,
+        sync_service.clone(),
+        pubsub_notification_sinks,
+    )
+    .await;
 
     if validator {
         start_consensus(
@@ -577,9 +589,17 @@ pub async fn start_parachain_node(
     parachain_config: Configuration,
     polkadot_config: Configuration,
     collator_options: CollatorOptions,
-	eth_config: &EthConfiguration,
+    eth_config: &EthConfiguration,
     para_id: ParaId,
     hwbench: Option<sc_sysinfo::HwBench>,
 ) -> sc_service::error::Result<(TaskManager, Arc<ParachainClient>)> {
-    start_node_impl(parachain_config, polkadot_config, collator_options, eth_config, para_id, hwbench).await
+    start_node_impl(
+        parachain_config,
+        polkadot_config,
+        collator_options,
+        eth_config,
+        para_id,
+        hwbench,
+    )
+    .await
 }
