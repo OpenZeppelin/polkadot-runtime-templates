@@ -8,8 +8,8 @@ use frame_support::{
     weights::{constants::WEIGHT_REF_TIME_PER_SECOND, Weight},
 };
 use parachain_template_runtime::{
-    AccountId, AllPalletsWithSystem, Balance, Balances, BlockNumber, Executive, Runtime,
-    RuntimeCall, RuntimeOrigin, SudoConfig, UncheckedExtrinsic, SLOT_DURATION,
+    AccountId, AllPalletsWithSystem, Balance, Balances, BlockNumber, EVMChainIdConfig, Executive,
+    Runtime, RuntimeCall, RuntimeOrigin, SudoConfig, UncheckedExtrinsic, SLOT_DURATION,
 };
 use sp_consensus_aura::AURA_ENGINE_ID;
 use sp_runtime::{
@@ -61,6 +61,13 @@ fn main() {
             transaction_payment: Default::default(),
             sudo: SudoConfig { key: Some(root) },
             treasury: Default::default(),
+            base_fee: Default::default(), // TODO: reconsider default value
+            evm_chain_id: EVMChainIdConfig {
+                chain_id: 1000, // TODO: select a good value
+                ..Default::default()
+            },
+            evm: Default::default(),
+            ethereum: Default::default(),
         }
         .build_storage()
         .unwrap()

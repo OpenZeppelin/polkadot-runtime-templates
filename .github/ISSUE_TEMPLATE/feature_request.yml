@@ -7,6 +7,16 @@ body:
     attributes:
       value: |
         Thanks for taking the time to fill this feature request!
+  - type: checkboxes
+    id: templates
+    attributes:
+      label: templates
+      description: Which template is this issue related to?
+      options:
+        - label: Generic Runtime Template
+          required: false
+        - label: Evm Template
+          required: false
   - type: textarea
     id: feature
     attributes:
