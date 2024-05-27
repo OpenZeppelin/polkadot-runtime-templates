@@ -210,7 +210,7 @@ async fn start_node_impl(
     let params = new_partial(&parachain_config, eth_config)?;
 
     let FrontierPartialComponents { filter_pool, fee_history_cache, fee_history_cache_limit } =
-        new_frontier_partial(&eth_config)?;
+        new_frontier_partial(eth_config)?;
 
     let (block_import, mut telemetry, telemetry_worker_handle, frontier_backend, overrides) =
         params.other;
