@@ -27,12 +27,6 @@ You can find a full list of the pallets included in this template in our [docs](
 This template has evm compatibility out of the box. You can migrate your solidity contracts or evm compatible dapps easily to your blockchain using this template.
 
 
-How it compares to:
-- frontier:
-- moonbeam:
-- acala:
-
-
 ### How to use
 
 Please refer to our docs for a `quick start` [guide](https://docs.openzeppelin.com/substrate-runtimes/):
