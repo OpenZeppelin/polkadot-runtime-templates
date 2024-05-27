@@ -75,12 +75,12 @@ cumulus-relay-chain-interface = { workspace = true }
 # Frontier
 fc-api = { workspace = true }
 fc-consensus = { workspace = true }
-fc-db = { workspace = true, features = ["rocksdb"]}
-fc-mapping-sync = { workspace = true, features = ["sql"]}
+fc-db = { workspace = true, features = [ "rocksdb" ] }
+fc-mapping-sync = { workspace = true, features = [ "sql" ] }
 fc-rpc = { workspace = true }
 fc-rpc-core = { workspace = true }
 fc-storage = { workspace = true }
-fp-dynamic-fee = { workspace = true, features = ["std"]}
+fp-dynamic-fee = { workspace = true, features = [ "std" ] }
 fp-rpc = { workspace = true }
 
 [build-dependencies]
