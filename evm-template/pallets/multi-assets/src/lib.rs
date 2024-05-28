@@ -9,7 +9,7 @@ use frame_support::{
     pallet_prelude::*,
     traits::{
         fungibles::{Balanced, Inspect, InspectEnumerable, Mutate},
-        tokens::Preservation,
+        tokens::{Fortitude, Precision, Preservation},
         Currency as PalletCurrency, ExistenceRequirement, Get, Imbalance,
         LockableCurrency as PalletLockableCurrency,
         NamedReservableCurrency as PalletNamedReservableCurrency,
@@ -120,7 +120,9 @@ impl<T: Config> MultiCurrency<T::AccountId> for Pallet<T> {
         who: &T::AccountId,
         amount: Self::Balance,
     ) -> DispatchResult {
-        pallet_assets::Pallet::<T>::ensure_can_withdraw(currency_id, who, amount)
+        pallet_assets::Pallet::<T>::can_withdraw(currency_id.into(), who, amount.into())
+            .into_result(true)
+            .map(|_| ())
     }
 
     fn transfer(
@@ -144,7 +146,7 @@ impl<T: Config> MultiCurrency<T::AccountId> for Pallet<T> {
         who: &T::AccountId,
         amount: Self::Balance,
     ) -> DispatchResult {
-        pallet_assets::Pallet::<T>::deposit(currency_id.into(), who, amount.into())
+        pallet_assets::Pallet::<T>::mint_into(currency_id.into(), who, amount.into()).map(|_| ())
     }
 
     fn withdraw(
@@ -152,7 +154,14 @@ impl<T: Config> MultiCurrency<T::AccountId> for Pallet<T> {
         who: &T::AccountId,
         amount: Self::Balance,
     ) -> DispatchResult {
-        pallet_assets::Pallet::<T>::withdraw(currency_id.into(), who, amount.into()).map(|_| ())
+        pallet_assets::Pallet::<T>::burn_from(
+            currency_id.into(),
+            who,
+            amount.into(),
+            Precision::BestEffort,
+            Fortitude::Force,
+        )
+        .map(|_| ())
     }
 
     fn can_slash(currency_id: Self::CurrencyId, who: &T::AccountId, amount: Self::Balance) -> bool {
@@ -218,6 +227,7 @@ impl<T: Config> MultiReservableCurrency<T::AccountId> for Pallet<T> {
         who: &T::AccountId,
         value: Self::Balance,
     ) -> bool {
+        // can_freeze
         pallet_assets::Pallet::<T>::can_reserve(currency_id, who, value)
     }
 
@@ -226,10 +236,12 @@ impl<T: Config> MultiReservableCurrency<T::AccountId> for Pallet<T> {
         who: &T::AccountId,
         value: Self::Balance,
     ) -> Self::Balance {
+        // unfreeze + burn
         pallet_assets::Pallet::<T>::slash_reserved(currency_id, who, value)
     }
 
     fn reserved_balance(currency_id: Self::CurrencyId, who: &T::AccountId) -> Self::Balance {
+        // frozen_balance
         pallet_assets::Pallet::<T>::reserved_balance(currency_id, who)
     }
 
@@ -238,6 +250,7 @@ impl<T: Config> MultiReservableCurrency<T::AccountId> for Pallet<T> {
         who: &T::AccountId,
         value: Self::Balance,
     ) -> DispatchResult {
+        // freeze
         pallet_assets::Pallet::<T>::reserve(currency_id, who, value)
     }
 
@@ -246,6 +259,7 @@ impl<T: Config> MultiReservableCurrency<T::AccountId> for Pallet<T> {
         who: &T::AccountId,
         value: Self::Balance,
     ) -> Self::Balance {
+        // thaw
         pallet_assets::Pallet::<T>::unreserve(currency_id, who, value)
     }
 
@@ -256,6 +270,8 @@ impl<T: Config> MultiReservableCurrency<T::AccountId> for Pallet<T> {
         value: Self::Balance,
         status: BalanceStatus,
     ) -> result::Result<Self::Balance, DispatchError> {
+        // unfreeze from slashed
+        // transfer to beneficiary
         pallet_assets::Pallet::<T>::repatriate_reserved(
             currency_id,
             slashed,
@@ -266,59 +282,61 @@ impl<T: Config> MultiReservableCurrency<T::AccountId> for Pallet<T> {
     }
 }
 
-impl<T: Config> NamedMultiReservableCurrency<T::AccountId> for Pallet<T> {
-    type ReserveIdentifier = ();
+// check what ReserveIdentifier is for orml_tokens::Config to determine
+// what needs to be implemented here
+// we may need to store named reserves in a storage map on top of pallet-assets
+// impl<T: Config> NamedMultiReservableCurrency<T::AccountId> for Pallet<T> {
+//     type ReserveIdentifier = ();
 
-    fn slash_reserved_named(
-        id: &Self::ReserveIdentifier,
-        currency_id: Self::CurrencyId,
-        who: &T::AccountId,
-        value: Self::Balance,
-    ) -> Self::Balance {
-        pallet_assets::Pallet::<T>::slash_reserved_named(id, currency_id, who, value)
-    }
+//     fn slash_reserved_named(
+//         _id: &Self::ReserveIdentifier,
+//         currency_id: Self::CurrencyId,
+//         who: &T::AccountId,
+//         value: Self::Balance,
+//     ) -> Self::Balance {
+//         Self::slash_reserved(currency_id, who, value)
+//     }
 
-    fn reserved_balance_named(
-        id: &Self::ReserveIdentifier,
-        currency_id: Self::CurrencyId,
-        who: &T::AccountId,
-    ) -> Self::Balance {
-        pallet_assets::Pallet::<T>::reserved_balance_named(id, currency_id, who)
-    }
+//     fn reserved_balance_named(
+//         id: &Self::ReserveIdentifier,
+//         currency_id: Self::CurrencyId,
+//         who: &T::AccountId,
+//     ) -> Self::Balance {
+//         Self::reserved_balance(currency_id, who)
+//     }
 
-    fn reserve_named(
-        id: &Self::ReserveIdentifier,
-        currency_id: Self::CurrencyId,
-        who: &T::AccountId,
-        value: Self::Balance,
-    ) -> DispatchResult {
-        pallet_assets::Pallet::<T>::reserve_named(id, currency_id, who, value)
-    }
+//     fn reserve_named(
+//         id: &Self::ReserveIdentifier,
+//         currency_id: Self::CurrencyId,
+//         who: &T::AccountId,
+//         value: Self::Balance,
+//     ) -> DispatchResult {
+//         Self::reserve(currency_id, who, value)
+//     }
 
-    fn unreserve_named(
-        id: &Self::ReserveIdentifier,
-        currency_id: Self::CurrencyId,
-        who: &T::AccountId,
-        value: Self::Balance,
-    ) -> Self::Balance {
-        pallet_assets::Pallet::<T>::unreserve_named(id, currency_id, who, value)
-    }
+//     fn unreserve_named(
+//         id: &Self::ReserveIdentifier,
+//         currency_id: Self::CurrencyId,
+//         who: &T::AccountId,
+//         value: Self::Balance,
+//     ) -> Self::Balance {
+//         Self::unreserve(id, currency_id, who, value)
+//     }
 
-    fn repatriate_reserved_named(
-        id: &Self::ReserveIdentifier,
-        currency_id: Self::CurrencyId,
-        slashed: &T::AccountId,
-        beneficiary: &T::AccountId,
-        value: Self::Balance,
-        status: BalanceStatus,
-    ) -> result::Result<Self::Balance, DispatchError> {
-        pallet_assets::Pallet::<T>::repatriate_reserved_named(
-            id,
-            currency_id,
-            slashed,
-            beneficiary,
-            value,
-            status,
-        )
-    }
-}
+//     fn repatriate_reserved_named(
+//         id: &Self::ReserveIdentifier,
+//         currency_id: Self::CurrencyId,
+//         slashed: &T::AccountId,
+//         beneficiary: &T::AccountId,
+//         value: Self::Balance,
+//         status: BalanceStatus,
+//     ) -> result::Result<Self::Balance, DispatchError> {
+//         Self::repatriate_reserved(
+//             currency_id,
+//             slashed,
+//             beneficiary,
+//             value,
+//             status,
+//         )
+//     }
+// }
