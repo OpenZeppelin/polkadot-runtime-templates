@@ -30,7 +30,7 @@ This template has evm compatibility out of the box. You can migrate your solidit
 
 ### How to use
 
-Please refer to our docs for a `quick start` [guide](https://docs.openzeppelin.com/substrate-runtimes/)
+Please refer to our docs for a `quick start` [guide](https://docs.openzeppelin.com/substrate-runtimes/).
 
 
 ## Security
