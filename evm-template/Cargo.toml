@@ -59,6 +59,7 @@ sc-chain-spec = { git = "https://github.com/paritytech/polkadot-sdk", default-fe
 sc-cli = { git = "https://github.com/paritytech/polkadot-sdk", default-features = false, tag = "polkadot-v1.7.0" }
 sc-client-api = { git = "https://github.com/paritytech/polkadot-sdk", default-features = false, tag = "polkadot-v1.7.0" }
 sc-consensus = { git = "https://github.com/paritytech/polkadot-sdk", default-features = false, tag = "polkadot-v1.7.0" }
+sc-consensus-aura = { git = "https://github.com/paritytech/polkadot-sdk", default-features = false, tag = "polkadot-v1.7.0" }
 sc-executor = { git = "https://github.com/paritytech/polkadot-sdk", default-features = false, tag = "polkadot-v1.7.0" }
 sc-network = { git = "https://github.com/paritytech/polkadot-sdk", default-features = false, tag = "polkadot-v1.7.0" }
 sc-network-sync = { git = "https://github.com/paritytech/polkadot-sdk", default-features = false, tag = "polkadot-v1.7.0" }
@@ -129,9 +130,18 @@ parachain-info = { package = "staging-parachain-info", git = "https://github.com
 parachains-common = { git = "https://github.com/paritytech/polkadot-sdk", default-features = false, tag = "polkadot-v1.7.0" }
 
 # EVM
+fc-api = { git = "https://github.com/OpenZeppelin/frontier", branch = "polkadot-v1.7.0", default-features = false }
+fc-consensus = { git = "https://github.com/OpenZeppelin/frontier", branch = "polkadot-v1.7.0", default-features = false }
+fc-db = { git = "https://github.com/OpenZeppelin/frontier", branch = "polkadot-v1.7.0", default-features = false }
+fc-mapping-sync = { git = "https://github.com/OpenZeppelin/frontier", branch = "polkadot-v1.7.0", default-features = false }
+fc-rpc = { git = "https://github.com/OpenZeppelin/frontier", branch = "polkadot-v1.7.0", default-features = false }
+fc-rpc-core = { git = "https://github.com/OpenZeppelin/frontier", branch = "polkadot-v1.7.0", default-features = false }
+fc-storage = { git = "https://github.com/OpenZeppelin/frontier", branch = "polkadot-v1.7.0", default-features = false }
 fp-account = { git = "https://github.com/OpenZeppelin/frontier", branch = "polkadot-v1.7.0", default-features = false, features = [ "serde" ] }
+fp-dynamic-fee = { git = "https://github.com/OpenZeppelin/frontier", branch = "polkadot-v1.7.0", default-features = false }
 fp-evm = { git = "https://github.com/OpenZeppelin/frontier", branch = "polkadot-v1.7.0", default-features = false }
 fp-rpc = { git = "https://github.com/OpenZeppelin/frontier", branch = "polkadot-v1.7.0", default-features = false }
+fp-self-contained = { git = "https://github.com/OpenZeppelin/frontier", branch = "polkadot-v1.7.0", default-features = false }
 pallet-base-fee = { git = "https://github.com/OpenZeppelin/frontier", branch = "polkadot-v1.7.0", default-features = false }
 pallet-ethereum = { git = "https://github.com/OpenZeppelin/frontier", branch = "polkadot-v1.7.0", default-features = false, features = [
 	"forbid-evm-reentrancy",
