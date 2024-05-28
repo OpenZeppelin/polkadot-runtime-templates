@@ -5,6 +5,7 @@
 use frame_support::{
     pallet_prelude::*,
     traits::{
+        fungibles::{Balanced, Inspect, InspectEnumerable},
         Currency as PalletCurrency, ExistenceRequirement, Get, Imbalance,
         LockableCurrency as PalletLockableCurrency,
         NamedReservableCurrency as PalletNamedReservableCurrency,
@@ -16,7 +17,6 @@ pub use module::*;
 use orml_traits::{
     arithmetic::{Signed, SimpleArithmetic},
     currency::TransferAll,
-    fungibles::{Balanced, Inspect, InspectEnumerable},
     BalanceStatus, BasicCurrency, BasicCurrencyExtended, BasicLockableCurrency,
     BasicReservableCurrency, LockIdentifier, MultiCurrency, MultiCurrencyExtended,
     MultiLockableCurrency, MultiReservableCurrency, NamedBasicReservableCurrency,
