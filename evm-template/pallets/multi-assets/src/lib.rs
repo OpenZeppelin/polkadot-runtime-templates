@@ -1,11 +1,15 @@
-//! This pallet implements MultiCurrency trait bounds for pallet-assets
+//! This pallet implements MultiCurrency trait bounds for pallet-assets thereby enable assignment in an orml_currencies Config alongside pallet-balances.
+//! The resulting config is different from the happy path config for orml_currencies::Config::MultiCurrency which uses orml_tokens instead of pallet-assets for orml_currencies::Config::MultiCurrency.
+//! Associated types are used to satisfy the orml_currencies strict(er) trait bounds with pallet_asset::Config (more) general associated types.
+//! This pallet's associated types may be removed once upstream compatibility between orml_currencies and pallet_assets is improved.
 #![cfg_attr(not(feature = "std"), no_std)]
 #![allow(clippy::unused_unit)]
 
 use frame_support::{
     pallet_prelude::*,
     traits::{
-        fungibles::{Balanced, Inspect, InspectEnumerable},
+        fungibles::{Balanced, Inspect, InspectEnumerable, Mutate},
+        tokens::Preservation,
         Currency as PalletCurrency, ExistenceRequirement, Get, Imbalance,
         LockableCurrency as PalletLockableCurrency,
         NamedReservableCurrency as PalletNamedReservableCurrency,
@@ -23,9 +27,9 @@ use orml_traits::{
     NamedMultiReservableCurrency,
 };
 use orml_utilities::with_transaction_result;
-use parity_scale_codec::Codec;
+use parity_scale_codec::FullCodec;
 use sp_runtime::{
-    traits::{CheckedSub, MaybeSerializeDeserialize, StaticLookup, Zero},
+    traits::{CheckedSub, Convert, MaybeSerializeDeserialize, StaticLookup, Zero},
     DispatchError, DispatchResult,
 };
 use sp_std::{fmt::Debug, marker, result};
@@ -35,7 +39,36 @@ pub mod module {
     use super::*;
 
     #[pallet::config]
-    pub trait Config: frame_system::Config + pallet_assets::Config {}
+    pub trait Config: frame_system::Config + pallet_assets::Config {
+        // LocalAssetId
+        // TODO: remove once Copy trait bound is removed from orml_currencies::CurrencyId or Clone trait bound is removed from pallet_assets::AssetId
+        // - also remove `.into()`s throughout
+        type Id: FullCodec
+            + Eq
+            + PartialEq
+            + Copy
+            + MaybeSerializeDeserialize
+            + Debug
+            + scale_info::TypeInfo
+            + MaxEncodedLen
+            + Into<Self::AssetId>
+            + From<Self::AssetId>;
+        // LocalBalance
+        // TODO: remove once `orml_traits::arithmetic::Signed` is implemented and/or enforced as a trait bound for `<T as pallet_assets::Config>::Balance`
+        // - also remove `.into()`s throughout
+        type OrmlBalance: FullCodec
+            + Eq
+            + PartialEq
+            + Copy
+            + MaybeSerializeDeserialize
+            + Debug
+            + scale_info::TypeInfo
+            + MaxEncodedLen
+            + orml_traits::arithmetic::Signed
+            + frame_support::traits::tokens::Balance
+            + Into<Self::Balance>
+            + From<Self::Balance>;
+    }
 
     #[pallet::pallet]
     pub struct Pallet<T>(_);
@@ -44,35 +77,42 @@ pub mod module {
 impl<T: Config> TransferAll<T::AccountId> for Pallet<T> {
     fn transfer_all(source: &T::AccountId, dest: &T::AccountId) -> DispatchResult {
         with_transaction_result(|| {
-            for asset_id in pallet_assets::Pallet::<T>::asset_ids() {
-                if let Some(balance) = pallet_assets::Pallet::<T>::maybe_balance(asset_id, source) {
-                    pallet_assets::Pallet::<T>::transfer(asset_id, source, dest, balance)?;
+            for id in pallet_assets::Pallet::<T>::asset_ids() {
+                if let Some(balance) = pallet_assets::Pallet::<T>::maybe_balance(id.clone(), source)
+                {
+                    <pallet_assets::Pallet<T> as Mutate<T::AccountId>>::transfer(
+                        id,
+                        source,
+                        dest,
+                        balance,
+                        Preservation::Preserve,
+                    )
+                    .map(|_| ())?;
                 }
             }
+            Ok(())
         })
     }
 }
 
 impl<T: Config> MultiCurrency<T::AccountId> for Pallet<T> {
-    // the trait `orml_traits::arithmetic::Signed` is not implemented for `<T as pallet_assets::Config>::Balance`
-    type Balance = <T as pallet_assets::Config>::Balance;
-    // the trait `std::marker::Copy` is not implemented for `<T as pallet_assets::Config>::AssetId`
-    type CurrencyId = <T as pallet_assets::Config>::AssetId;
+    type Balance = T::OrmlBalance;
+    type CurrencyId = T::Id;
 
     fn minimum_balance(currency_id: Self::CurrencyId) -> Self::Balance {
-        pallet_assets::Pallet::<T>::minimum_balance(currency_id)
+        pallet_assets::Pallet::<T>::minimum_balance(currency_id.into()).into()
     }
 
     fn total_issuance(currency_id: Self::CurrencyId) -> Self::Balance {
-        pallet_assets::Pallet::<T>::total_issuance(currency_id)
+        pallet_assets::Pallet::<T>::total_issuance(currency_id.into()).into()
     }
 
     fn total_balance(currency_id: Self::CurrencyId, who: &T::AccountId) -> Self::Balance {
-        pallet_assets::Pallet::<T>::total_balance(currency_id, who)
+        pallet_assets::Pallet::<T>::total_balance(currency_id.into(), who).into()
     }
 
     fn free_balance(currency_id: Self::CurrencyId, who: &T::AccountId) -> Self::Balance {
-        pallet_assets::Pallet::<T>::free_balance(currency_id, who)
+        pallet_assets::Pallet::<T>::balance(currency_id.into(), who).into()
     }
 
     fn ensure_can_withdraw(
@@ -89,7 +129,14 @@ impl<T: Config> MultiCurrency<T::AccountId> for Pallet<T> {
         to: &T::AccountId,
         amount: Self::Balance,
     ) -> DispatchResult {
-        pallet_assets::Pallet::<T>::transfer(currency_id, from, to, amount)
+        <pallet_assets::Pallet<T> as Mutate<T::AccountId>>::transfer(
+            currency_id.into(),
+            from,
+            to,
+            amount.into(),
+            Preservation::Preserve,
+        )
+        .map(|_| ())
     }
 
     fn deposit(
@@ -97,7 +144,7 @@ impl<T: Config> MultiCurrency<T::AccountId> for Pallet<T> {
         who: &T::AccountId,
         amount: Self::Balance,
     ) -> DispatchResult {
-        pallet_assets::Pallet::<T>::deposit(currency_id, who, amount)
+        pallet_assets::Pallet::<T>::deposit(currency_id.into(), who, amount.into())
     }
 
     fn withdraw(
@@ -105,11 +152,11 @@ impl<T: Config> MultiCurrency<T::AccountId> for Pallet<T> {
         who: &T::AccountId,
         amount: Self::Balance,
     ) -> DispatchResult {
-        pallet_assets::Pallet::<T>::withdraw(currency_id, who, amount)
+        pallet_assets::Pallet::<T>::withdraw(currency_id.into(), who, amount.into()).map(|_| ())
     }
 
     fn can_slash(currency_id: Self::CurrencyId, who: &T::AccountId, amount: Self::Balance) -> bool {
-        pallet_assets::Pallet::<T>::can_slash(currency_id, who, amount)
+        pallet_assets::Pallet::<T>::can_slash(currency_id.into(), who, amount)
     }
 
     fn slash(
@@ -117,12 +164,12 @@ impl<T: Config> MultiCurrency<T::AccountId> for Pallet<T> {
         who: &T::AccountId,
         amount: Self::Balance,
     ) -> Self::Balance {
-        pallet_assets::Pallet::<T>::slash(currency_id, who, amount)
+        pallet_assets::Pallet::<T>::slash(currency_id.into(), who, amount.into())
     }
 }
 
 impl<T: Config> MultiCurrencyExtended<T::AccountId> for Pallet<T> {
-    type Amount = <T as pallet_assets::Config>::Balance;
+    type Amount = T::OrmlBalance;
 
     fn update_balance(
         currency_id: Self::CurrencyId,
