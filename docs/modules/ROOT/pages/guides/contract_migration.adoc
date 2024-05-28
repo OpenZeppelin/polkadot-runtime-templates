@@ -9,7 +9,10 @@ This EVM template is powered by Frontier. It allows you to deploy almost any Sol
 == Step 1: Prepare and run the chain
 
 This step is basic, you can use our xref:index.adoc[guide for generic template]. It is recommended to use xref:guides/async_backing.adoc[async backing] for better experience.
-The only additional thing that you will need to specify is the EVM Chain Id in your chainspec.
+The only additional thing that you will need to specify is the EVM Chain Id in your chainspec. For that, you need:
+
+* During the "Edit the chainspec" step execute one additional step:
+** Edit the `evmChainId.chainId` to the value of your choice. Try to select a value that has no existing EVM chain assigned to it.
 
 == Step 2: Set up the development environment
 
@@ -17,15 +20,20 @@ For Solidity development you can use link:https://book.getfoundry.sh/getting-sta
 
 With the chain running, to start the development you need only two values: a private key from the account with some tokens on it and a url from EVM RPC.
 
-* Private Key. If you have formed your own chainspec, you should have some keys ready. Alternatively, you can generate the key using any wallet of your choice (e.g. Metamask) and get some tokens to it. By default, we have these keys for prefunded accounts in the chainspec:
-** Private: `0x94834ac72c525a539097542a738816e8d2d18a60d6460c25e82b306441635dc4`
+
+=== Private Key. 
+If you have formed your own chainspec, you should have some keys ready. Alternatively, you can generate the key using any wallet of your choice (e.g. Metamask) and get some tokens to it. By default, we have these keys for prefunded accounts in the chainspec:
+
+* Private: `0x94834ac72c525a539097542a738816e8d2d18a60d6460c25e82b306441635dc4`
    Public: `0x33c7c88f2B2Fcb83975fCDB08d2B5bf7eA29FDCE`
-** Private: `0x3c959c97d3b687af91c27b93bbe8deb2bb2148f01bd48126ae757e202ab625a0`
+* Private: `0x3c959c97d3b687af91c27b93bbe8deb2bb2148f01bd48126ae757e202ab625a0`
    Public: `0xc02db867898f227416BCB6d97190126A6b04988A`
 
 WARNING: You must not use these keys for any production purpose
 
-* Url for the EVM RPC. This part is simple. You can use the same url that you would use with the polkadot.js wallet -- it serves the EVM JSON-RPC as well. If you have followed our guide, you can use http://localhost:8844.
+=== Url for the EVM RPC.
+
+This part is simple. You can use the same url that you would use with the polkadot.js wallet -- it serves the EVM JSON-RPC as well. If you have followed our guide, you can use http://localhost:8844.
 
 == Step 3: Deploy your contract
 
