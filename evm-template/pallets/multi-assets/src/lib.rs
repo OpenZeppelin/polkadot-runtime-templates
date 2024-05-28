@@ -16,6 +16,7 @@ pub use module::*;
 use orml_traits::{
     arithmetic::{Signed, SimpleArithmetic},
     currency::TransferAll,
+    fungibles::{Balanced, Inspect, InspectEnumerable},
     BalanceStatus, BasicCurrency, BasicCurrencyExtended, BasicLockableCurrency,
     BasicReservableCurrency, LockIdentifier, MultiCurrency, MultiCurrencyExtended,
     MultiLockableCurrency, MultiReservableCurrency, NamedBasicReservableCurrency,
@@ -29,20 +30,14 @@ use sp_runtime::{
 };
 use sp_std::{fmt::Debug, marker, result};
 
+// Errors:
+// - the trait `std::marker::Copy` is not implemented for `<T as pallet_assets::Config>::AssetId` --> patch: convert using associated type)
+// -  the trait `orml_traits::arithmetic::Signed` is not implemented for `<T as pallet_assets::Config>::Balance` --> look ar Signed definition to decide what to do
+//  - pallet_assets has transfer, not transfer_all so it must be implemented here or upstream --> iterate through all asset_ids held by the owner?
+
 #[frame_support::pallet]
 pub mod module {
     use super::*;
-
-    // replace BalanceOf<T> with AmountOf<T> maybe?
-    // TODO: replace CurrencyIdOf<T> with CurrencyId
-
-    // pub(crate) type CurrencyIdOf<T> =
-    // 	<<T as Config>::MultiCurrency as MultiCurrency<<T as frame_system::Config>::AccountId>>::CurrencyId;
-    // pub(crate) type AmountOf<T> =
-    // 	<<T as Config>::MultiCurrency as MultiCurrencyExtended<<T as frame_system::Config>::AccountId>>::Amount;
-    // pub(crate) type ReserveIdentifierOf<T> = <<T as Config>::MultiCurrency as NamedMultiReservableCurrency<
-    // 	<T as frame_system::Config>::AccountId,
-    // >>::ReserveIdentifier;
 
     #[pallet::config]
     pub trait Config: frame_system::Config + pallet_assets::Config {}
@@ -54,7 +49,11 @@ pub mod module {
 impl<T: Config> TransferAll<T::AccountId> for Pallet<T> {
     fn transfer_all(source: &T::AccountId, dest: &T::AccountId) -> DispatchResult {
         with_transaction_result(|| {
-            pallet_assets::Pallet::<T>::transfer_all(source, dest)?;
+            for asset_id in pallet_assets::Pallet::<T>::asset_ids() {
+                if let Some(balance) = pallet_assets::Pallet::<T>::maybe_balance(asset_id, source) {
+                    pallet_assets::Pallet::<T>::transfer(asset_id, source, dest, balance)?;
+                }
+            }
         })
     }
 }
