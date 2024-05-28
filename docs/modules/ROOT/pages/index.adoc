@@ -1,7 +1,7 @@
 :source-highlighter: highlight.js
 :highlightjs-languages: bash
 
-= Substrate Parachain Runtimes
+= Polkadot Parachain Runtimes
 
 A collection of runtimes that describe parachains with different purposes.
 
