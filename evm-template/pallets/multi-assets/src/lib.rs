@@ -30,11 +30,6 @@ use sp_runtime::{
 };
 use sp_std::{fmt::Debug, marker, result};
 
-// Errors:
-// - the trait `std::marker::Copy` is not implemented for `<T as pallet_assets::Config>::AssetId` --> patch: convert using associated type)
-// -  the trait `orml_traits::arithmetic::Signed` is not implemented for `<T as pallet_assets::Config>::Balance` --> look ar Signed definition to decide what to do
-//  - pallet_assets has transfer, not transfer_all so it must be implemented here or upstream --> iterate through all asset_ids held by the owner?
-
 #[frame_support::pallet]
 pub mod module {
     use super::*;
@@ -59,7 +54,9 @@ impl<T: Config> TransferAll<T::AccountId> for Pallet<T> {
 }
 
 impl<T: Config> MultiCurrency<T::AccountId> for Pallet<T> {
+    // the trait `orml_traits::arithmetic::Signed` is not implemented for `<T as pallet_assets::Config>::Balance`
     type Balance = <T as pallet_assets::Config>::Balance;
+    // the trait `std::marker::Copy` is not implemented for `<T as pallet_assets::Config>::AssetId`
     type CurrencyId = <T as pallet_assets::Config>::AssetId;
 
     fn minimum_balance(currency_id: Self::CurrencyId) -> Self::Balance {
