@@ -1,5 +1,5 @@
-use hex_literal::hex;
 use cumulus_primitives_core::ParaId;
+use hex_literal::hex;
 use parachain_template_runtime::{
     constants::currency::EXISTENTIAL_DEPOSIT, AccountId, AuraId, Signature,
 };
