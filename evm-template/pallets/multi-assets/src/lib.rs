@@ -8,31 +8,21 @@
 use frame_support::{
     pallet_prelude::*,
     traits::{
-        fungibles::{Balanced, Inspect, InspectEnumerable, Mutate},
+        fungibles::{Inspect, InspectEnumerable, Mutate},
         tokens::{Fortitude, Precision, Preservation},
-        Currency as PalletCurrency, ExistenceRequirement, Get, Imbalance,
-        LockableCurrency as PalletLockableCurrency,
-        NamedReservableCurrency as PalletNamedReservableCurrency,
-        ReservableCurrency as PalletReservableCurrency, WithdrawReasons,
     },
 };
-use frame_system::{ensure_root, ensure_signed, pallet_prelude::*};
+use frame_system::pallet_prelude::*;
 pub use module::*;
 use orml_traits::{
-    arithmetic::{Signed, SimpleArithmetic},
-    currency::TransferAll,
-    BalanceStatus, BasicCurrency, BasicCurrencyExtended, BasicLockableCurrency,
-    BasicReservableCurrency, LockIdentifier, MultiCurrency, MultiCurrencyExtended,
-    MultiLockableCurrency, MultiReservableCurrency, NamedBasicReservableCurrency,
+    arithmetic::Signed, currency::TransferAll, BalanceStatus, LockIdentifier, MultiCurrency,
+    MultiCurrencyExtended, MultiLockableCurrency, MultiReservableCurrency,
     NamedMultiReservableCurrency,
 };
 use orml_utilities::with_transaction_result;
 use parity_scale_codec::FullCodec;
-use sp_runtime::{
-    traits::{CheckedSub, Convert, MaybeSerializeDeserialize, StaticLookup, Zero},
-    DispatchError, DispatchResult,
-};
-use sp_std::{fmt::Debug, marker, result};
+use sp_runtime::{traits::MaybeSerializeDeserialize, DispatchError, DispatchResult};
+use sp_std::{fmt::Debug, result};
 
 #[frame_support::pallet]
 pub mod module {
@@ -43,7 +33,7 @@ pub mod module {
         // LocalAssetId
         // TODO: remove once Copy trait bound is removed from orml_currencies::CurrencyId or Clone trait bound is removed from pallet_assets::AssetId
         // - also remove `.into()`s throughout
-        type Id: FullCodec
+        type CurrencyId: FullCodec
             + Eq
             + PartialEq
             + Copy
@@ -56,7 +46,7 @@ pub mod module {
         // LocalBalance
         // TODO: remove once `orml_traits::arithmetic::Signed` is implemented and/or enforced as a trait bound for `<T as pallet_assets::Config>::Balance`
         // - also remove `.into()`s throughout
-        type OrmlBalance: FullCodec
+        type Amount: FullCodec
             + Eq
             + PartialEq
             + Copy
@@ -101,8 +91,8 @@ impl<T: Config> TransferAll<T::AccountId> for Pallet<T> {
 }
 
 impl<T: Config> MultiCurrency<T::AccountId> for Pallet<T> {
-    type Balance = T::OrmlBalance;
-    type CurrencyId = T::Id;
+    type Balance = T::Amount;
+    type CurrencyId = T::CurrencyId;
 
     fn minimum_balance(currency_id: Self::CurrencyId) -> Self::Balance {
         pallet_assets::Pallet::<T>::minimum_balance(currency_id.into()).into()
@@ -191,9 +181,7 @@ impl<T: Config> MultiCurrency<T::AccountId> for Pallet<T> {
 }
 
 impl<T: Config> MultiCurrencyExtended<T::AccountId> for Pallet<T> {
-    type Amount = T::OrmlBalance;
-
-    // ~= T::Amount in orml_tokens
+    type Amount = T::Amount;
 
     fn update_balance(
         currency_id: Self::CurrencyId,
@@ -212,27 +200,27 @@ impl<T: Config> MultiLockableCurrency<T::AccountId> for Pallet<T> {
     type Moment = BlockNumberFor<T>;
 
     fn set_lock(
-        lock_id: LockIdentifier,
-        currency_id: Self::CurrencyId,
-        who: &T::AccountId,
-        amount: Self::Balance,
+        _lock_id: LockIdentifier,
+        _currency_id: Self::CurrencyId,
+        _who: &T::AccountId,
+        _amount: Self::Balance,
     ) -> DispatchResult {
         Err(Error::<T>::Unimplemented.into())
     }
 
     fn extend_lock(
-        lock_id: LockIdentifier,
-        currency_id: Self::CurrencyId,
-        who: &T::AccountId,
-        amount: Self::Balance,
+        _lock_id: LockIdentifier,
+        _currency_id: Self::CurrencyId,
+        _who: &T::AccountId,
+        _amount: Self::Balance,
     ) -> DispatchResult {
         Err(Error::<T>::Unimplemented.into())
     }
 
     fn remove_lock(
-        lock_id: LockIdentifier,
-        currency_id: Self::CurrencyId,
-        who: &T::AccountId,
+        _lock_id: LockIdentifier,
+        _currency_id: Self::CurrencyId,
+        _who: &T::AccountId,
     ) -> DispatchResult {
         Err(Error::<T>::Unimplemented.into())
     }
@@ -240,52 +228,52 @@ impl<T: Config> MultiLockableCurrency<T::AccountId> for Pallet<T> {
 
 impl<T: Config> MultiReservableCurrency<T::AccountId> for Pallet<T> {
     fn can_reserve(
-        currency_id: Self::CurrencyId,
-        who: &T::AccountId,
-        value: Self::Balance,
+        _currency_id: Self::CurrencyId,
+        _who: &T::AccountId,
+        _value: Self::Balance,
     ) -> bool {
         // can_freeze
         false
     }
 
     fn slash_reserved(
-        currency_id: Self::CurrencyId,
-        who: &T::AccountId,
-        value: Self::Balance,
+        _currency_id: Self::CurrencyId,
+        _who: &T::AccountId,
+        _value: Self::Balance,
     ) -> Self::Balance {
         // unfreeze + burn
         Default::default()
     }
 
-    fn reserved_balance(currency_id: Self::CurrencyId, who: &T::AccountId) -> Self::Balance {
+    fn reserved_balance(_currency_id: Self::CurrencyId, _who: &T::AccountId) -> Self::Balance {
         // frozen_balance
         Default::default()
     }
 
     fn reserve(
-        currency_id: Self::CurrencyId,
-        who: &T::AccountId,
-        value: Self::Balance,
+        _currency_id: Self::CurrencyId,
+        _who: &T::AccountId,
+        _value: Self::Balance,
     ) -> DispatchResult {
         // freeze
         Err(Error::<T>::Unimplemented.into())
     }
 
     fn unreserve(
-        currency_id: Self::CurrencyId,
-        who: &T::AccountId,
-        value: Self::Balance,
+        _currency_id: Self::CurrencyId,
+        _who: &T::AccountId,
+        _value: Self::Balance,
     ) -> Self::Balance {
         // thaw
         Default::default()
     }
 
     fn repatriate_reserved(
-        currency_id: Self::CurrencyId,
-        slashed: &T::AccountId,
-        beneficiary: &T::AccountId,
-        value: Self::Balance,
-        status: BalanceStatus,
+        _currency_id: Self::CurrencyId,
+        _slashed: &T::AccountId,
+        _beneficiary: &T::AccountId,
+        _value: Self::Balance,
+        _status: BalanceStatus,
     ) -> result::Result<Self::Balance, DispatchError> {
         // unfreeze from slashed
         // transfer to beneficiary
@@ -298,46 +286,46 @@ impl<T: Config> NamedMultiReservableCurrency<T::AccountId> for Pallet<T> {
 
     fn slash_reserved_named(
         _id: &Self::ReserveIdentifier,
-        currency_id: Self::CurrencyId,
-        who: &T::AccountId,
-        value: Self::Balance,
+        _currency_id: Self::CurrencyId,
+        _who: &T::AccountId,
+        _value: Self::Balance,
     ) -> Self::Balance {
         Default::default()
     }
 
     fn reserved_balance_named(
-        id: &Self::ReserveIdentifier,
-        currency_id: Self::CurrencyId,
-        who: &T::AccountId,
+        _id: &Self::ReserveIdentifier,
+        _currency_id: Self::CurrencyId,
+        _who: &T::AccountId,
     ) -> Self::Balance {
         Default::default()
     }
 
     fn reserve_named(
-        id: &Self::ReserveIdentifier,
-        currency_id: Self::CurrencyId,
-        who: &T::AccountId,
-        value: Self::Balance,
+        _id: &Self::ReserveIdentifier,
+        _currency_id: Self::CurrencyId,
+        _who: &T::AccountId,
+        _value: Self::Balance,
     ) -> DispatchResult {
         Err(Error::<T>::Unimplemented.into())
     }
 
     fn unreserve_named(
-        id: &Self::ReserveIdentifier,
-        currency_id: Self::CurrencyId,
-        who: &T::AccountId,
-        value: Self::Balance,
+        _id: &Self::ReserveIdentifier,
+        _currency_id: Self::CurrencyId,
+        _who: &T::AccountId,
+        _value: Self::Balance,
     ) -> Self::Balance {
         Default::default()
     }
 
     fn repatriate_reserved_named(
-        id: &Self::ReserveIdentifier,
-        currency_id: Self::CurrencyId,
-        slashed: &T::AccountId,
-        beneficiary: &T::AccountId,
-        value: Self::Balance,
-        status: BalanceStatus,
+        _id: &Self::ReserveIdentifier,
+        _currency_id: Self::CurrencyId,
+        _slashed: &T::AccountId,
+        _beneficiary: &T::AccountId,
+        _value: Self::Balance,
+        _status: BalanceStatus,
     ) -> result::Result<Self::Balance, DispatchError> {
         Err(Error::<T>::Unimplemented.into())
     }

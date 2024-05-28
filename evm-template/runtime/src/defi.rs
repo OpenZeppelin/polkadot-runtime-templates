@@ -15,24 +15,17 @@ parameter_types! {
     pub const GetNativeCurrencyId: CurrencyId = CurrencyId::Native;
 }
 
-// TODO: keep custom pallet in pallets until successfull upstreams
-// pa
-// MultiCurrency trait bounds to satisfy with pallet to upstream
-// TransferAll<Self::AccountId>
-// + MultiCurrencyExtended<Self::AccountId>
-// + MultiLockableCurrency<Self::AccountId>
-// + MultiReservableCurrency<Self::AccountId>
-// + NamedMultiReservableCurrency<Self::AccountId>;
+impl pallet_multi_assets::Config for Runtime {
+    type Id = AssetId;
+    type OrmlBalance = u128;
+}
 
 impl orml_currencies::Config for Runtime {
     type GetNativeCurrencyId = GetNativeCurrencyId;
-    // TODO: make this work or impl MultiCurrency trait for runtime using Assets + Balances
-    // > consider extracting this and other configs out into own defi file
-    type MultiCurrency = ();
-    // TODO: impl Assets + Balances for this functionality
+    type MultiCurrency = MultiAssets;
     type NativeCurrency =
         orml_currencies::BasicCurrencyAdapter<Runtime, Balances, Amount, BlockNumber>;
-    type WeightInfo = (); // TODO: run weights for this runtime and use generated weights
+    type WeightInfo = (); // TODO: generate weights
 }
 
 // parameter_types! {

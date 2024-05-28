@@ -853,7 +853,8 @@ construct_runtime!(
         MessageQueue: pallet_message_queue = 33,
 
         // DeFi
-        Currencies: orml_currencies = 40,
+        MultiAssets: pallet_multi_assets = 40,
+        Currencies: orml_currencies = 41,
         //MultiTransactionPayment: pallet_transaction_multi_payment = 36,
     }
 );
