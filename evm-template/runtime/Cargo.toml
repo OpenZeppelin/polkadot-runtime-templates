@@ -90,7 +90,7 @@ evm = { workspace = true, features = ["with-codec"] }
 orml-currencies = { workspace = true }
 
 # Custom
-pallet-multicurrency = { workspace = true }
+pallet-multi-assets = { workspace = true }
 
 # HydraDX
 pallet-transaction-multi-payment = { workspace = true }
@@ -128,7 +128,7 @@ std = [
 	"pallet-collator-selection/std",
 	"pallet-conviction-voting/std",
 	"pallet-message-queue/std",
-	"pallet-multicurrency/std",
+	"pallet-multi-assets/std",
 	"pallet-multisig/std",
 	"pallet-preimage/std",
 	"pallet-proxy/std",
@@ -220,7 +220,7 @@ try-runtime = [
 	"pallet-collator-selection/try-runtime",
 	"pallet-conviction-voting/try-runtime",
 	"pallet-message-queue/try-runtime",
-	"pallet-multicurrency/try-runtime",
+	"pallet-multi-assets/try-runtime",
 	"pallet-multisig/try-runtime",
 	"pallet-preimage/try-runtime",
 	"pallet-proxy/try-runtime",

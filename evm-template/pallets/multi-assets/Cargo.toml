@@ -1,6 +1,6 @@
 [package]
-name = "pallet-multicurrency"
-description = "Combine pallet-assets + pallet-balances to satisfy MultiCurrency bounds for orml-currencies::Config::MultiCurrency"
+name = "pallet-multi-assets"
+description = "Wrap pallet-assets to implement MultiCurrency trait bounds for orml-currencies"
 authors = { workspace = true }
 edition = { workspace = true }
 license = { workspace = true }
@@ -14,12 +14,10 @@ serde = { workspace = true, optional = true }
 
 frame-support = { workspace = true }
 frame-system = { workspace = true }
+pallet-assets = { workspace = true }
 sp-io = { workspace = true }
 sp-runtime = { workspace = true }
 sp-std = { workspace = true }
-
-pallet-balances = { workspace = true }
-pallet-assets = { workspace = true }
 
 orml-traits = { workspace = true }
 orml-utilities = { workspace = true }
@@ -35,7 +33,6 @@ std = [
 	"orml-traits/std",
 	"orml-utilities/std",
 	"pallet-assets/std",
-	"pallet-balances/std",
 	"parity-scale-codec/std",
 	"scale-info/std",
 	"serde",

@@ -6891,7 +6891,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "pallet-multicurrency"
+name = "pallet-multi-assets"
 version = "0.1.0"
 dependencies = [
  "frame-support",
@@ -6899,7 +6899,6 @@ dependencies = [
  "orml-traits",
  "orml-utilities",
  "pallet-assets",
- "pallet-balances",
  "parity-scale-codec",
  "scale-info",
  "serde",
@@ -7595,7 +7594,7 @@ dependencies = [
  "pallet-collator-selection",
  "pallet-conviction-voting",
  "pallet-message-queue",
- "pallet-multicurrency",
+ "pallet-multi-assets",
  "pallet-multisig",
  "pallet-preimage",
  "pallet-proxy",

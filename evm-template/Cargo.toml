@@ -1,5 +1,5 @@
 [workspace]
-members = [ "node", "pallets/multicurrency", "runtime", "template-fuzzer" ]
+members = [ "node", "pallets/multi-assets", "runtime", "template-fuzzer" ]
 resolver = "2"
 
 [workspace.package]
@@ -148,7 +148,7 @@ orml-utilities = { git = "https://github.com/OpenZeppelin/open-runtime-module-li
 pallet-transaction-multi-payment = { git = "https://github.com/OpenZeppelin/HydraDX-node", branch = "polkadot-v1.7.0", default-features = false }
 
 # Custom
-pallet-multicurrency = { path = "pallets/multicurrency", default-features = false }
+pallet-multi-assets = { path = "pallets/multi-assets", default-features = false }
 
 # Fuzzer
 substrate-runtime-fuzzer = { git = "https://github.com/srlabs/substrate-runtime-fuzzer.git", default-features = false }
