@@ -1,7 +1,7 @@
 :source-highlighter: highlight.js
 :highlightjs-languages: bash
 
-= Substrate Parachain Runtimes
+= Polkadot Parachain Runtimes
 
 A collection of runtimes that describe parachains with different purposes.
 
@@ -10,6 +10,11 @@ A collection of runtimes that describe parachains with different purposes.
 * Begin by visiting our link:https://github.com/OpenZeppelin/polkadot-runtime-template[repository]. You can fork it, use it as a template, or simply clone it to your local directory.
 ```bash
 git clone git@github.com:OpenZeppelin/polkadot-runtime-template.git
+```
+
+* Move to the directory of the template you want to use. We will use the `generic runtime template` for this tutorial.
+```bash
+cd generic-template
 ```
 
 * Build a release version of the runtime and node:
