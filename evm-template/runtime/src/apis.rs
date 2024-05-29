@@ -22,8 +22,9 @@ use sp_version::RuntimeVersion;
 use super::{
     AccountId, Aura, Balance, Block, Ethereum, Executive, InherentDataExt, Nonce, ParachainSystem,
     Runtime, RuntimeBlockWeights, RuntimeCall, RuntimeGenesisConfig, SessionKeys, System,
-    TransactionPayment, UncheckedExtrinsic, VERSION,
+    TransactionPayment, UncheckedExtrinsic,
 };
+use crate::constants::VERSION;
 
 impl_runtime_apis! {
     impl sp_consensus_aura::AuraApi<Block, AuraId> for Runtime {

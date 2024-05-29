@@ -27,8 +27,8 @@ use frame_support::{
         InstanceFilter, TransformOrigin,
     },
     weights::{
-        constants::WEIGHT_REF_TIME_PER_SECOND, ConstantMultiplier, Weight, WeightToFeeCoefficient,
-        WeightToFeeCoefficients, WeightToFeePolynomial,
+        ConstantMultiplier, Weight, WeightToFeeCoefficient, WeightToFeeCoefficients,
+        WeightToFeePolynomial,
     },
     PalletId,
 };
@@ -57,7 +57,7 @@ use sp_core::{H160, U256};
 #[cfg(any(feature = "std", test))]
 pub use sp_runtime::BuildStorage;
 use sp_runtime::{
-    create_runtime_str, generic, impl_opaque_keys,
+    generic, impl_opaque_keys,
     traits::{
         AccountIdLookup, BlakeTwo256, DispatchInfoOf, Dispatchable, IdentifyAccount,
         IdentityLookup, PostDispatchInfoOf, Verify,
@@ -79,8 +79,14 @@ use xcm_builder::PayOverXcm;
 #[cfg(not(feature = "runtime-benchmarks"))]
 use xcm_builder::ProcessXcmMessage;
 
-use crate::{
-    constants::currency::{deposit, CENTS, EXISTENTIAL_DEPOSIT, MICROCENTS, MILLICENTS},
+pub use crate::{
+    constants::{
+        currency::{deposit, CENTS, EXISTENTIAL_DEPOSIT, MICROCENTS, MILLICENTS},
+        AVERAGE_ON_INITIALIZE_RATIO, BLOCK_PROCESSING_VELOCITY, DAYS, HOURS, MAXIMUM_BLOCK_WEIGHT,
+        MAX_BLOCK_LENGTH, MAX_POV_SIZE, NORMAL_DISPATCH_RATIO, POLY_DEGREE, P_FACTOR, Q_FACTOR,
+        RELAY_CHAIN_SLOT_DURATION_MILLIS, SLOT_DURATION, UNINCLUDED_SEGMENT_CAPACITY, VERSION,
+        WEIGHT_PER_GAS,
+    },
     weights::{BlockExecutionWeight, ExtrinsicBaseWeight, RocksDbWeight},
     xcm_config::{RelayLocation, XcmOriginToTransactDispatchOrigin},
 };
@@ -213,10 +219,6 @@ pub type Executive = frame_executive::Executive<
 ///     charged.
 pub struct WeightToFee;
 
-pub const P_FACTOR: u128 = 10;
-pub const Q_FACTOR: u128 = 100;
-pub const POLY_DEGREE: u8 = 1;
-
 impl WeightToFeePolynomial for WeightToFee {
     type Balance = Balance;
 
@@ -262,71 +264,6 @@ impl_opaque_keys! {
         pub aura: Aura,
     }
 }
-
-#[sp_version::runtime_version]
-pub const VERSION: RuntimeVersion = RuntimeVersion {
-    spec_name: create_runtime_str!("template-parachain"),
-    impl_name: create_runtime_str!("template-parachain"),
-    authoring_version: 1,
-    spec_version: 1,
-    impl_version: 0,
-    apis: apis::RUNTIME_API_VERSIONS,
-    transaction_version: 1,
-    state_version: 1,
-};
-
-/// This determines the average expected block time that we are targeting.
-/// Blocks will be produced at a minimum duration defined by `SLOT_DURATION`.
-/// `SLOT_DURATION` is picked up by `pallet_timestamp` which is in turn picked
-/// up by `pallet_aura` to implement `fn slot_duration()`.
-///
-/// Change this to adjust the block time.
-#[cfg(feature = "async-backing")]
-pub const MILLISECS_PER_BLOCK: u64 = 6000;
-#[cfg(not(feature = "async-backing"))]
-pub const MILLISECS_PER_BLOCK: u64 = 12000;
-
-// NOTE: Currently it is not possible to change the slot duration after the
-// chain has started.       Attempting to do so will brick block production.
-pub const SLOT_DURATION: u64 = MILLISECS_PER_BLOCK;
-
-// Time is measured by number of blocks.
-pub const MINUTES: BlockNumber = 60_000 / (MILLISECS_PER_BLOCK as BlockNumber);
-pub const HOURS: BlockNumber = MINUTES * 60;
-pub const DAYS: BlockNumber = HOURS * 24;
-
-/// We assume that ~5% of the block weight is consumed by `on_initialize`
-/// handlers. This is used to limit the maximal weight of a single extrinsic.
-pub const AVERAGE_ON_INITIALIZE_RATIO: Perbill = Perbill::from_percent(5);
-
-/// We allow `Normal` extrinsics to fill up the block up to 75%, the rest can be
-/// used by `Operational` extrinsics.
-pub const NORMAL_DISPATCH_RATIO: Perbill = Perbill::from_percent(75);
-
-pub const WEIGHT_MILLISECS_PER_BLOCK: u64 = 2000;
-
-/// We allow for 0.5 of a second of compute with a 12 second average block time.
-pub const MAXIMUM_BLOCK_WEIGHT: Weight = Weight::from_parts(
-    #[cfg(feature = "async-backing")]
-    WEIGHT_REF_TIME_PER_SECOND.saturating_mul(2),
-    #[cfg(not(feature = "async-backing"))]
-    WEIGHT_REF_TIME_PER_SECOND.saturating_div(2),
-    cumulus_primitives_core::relay_chain::MAX_POV_SIZE as u64,
-);
-
-/// Maximum number of blocks simultaneously accepted by the Runtime, not yet
-/// included into the relay chain.
-#[cfg(feature = "async-backing")]
-pub const UNINCLUDED_SEGMENT_CAPACITY: u32 = 3;
-#[cfg(not(feature = "async-backing"))]
-pub const UNINCLUDED_SEGMENT_CAPACITY: u32 = 1;
-/// How many parachain blocks are processed by the relay chain per parent.
-/// Limits the number of blocks authored per slot.
-pub const BLOCK_PROCESSING_VELOCITY: u32 = 1;
-/// Relay chain slot duration, in milliseconds.
-pub const RELAY_CHAIN_SLOT_DURATION_MILLIS: u32 = 6000;
-/// Maximum length for a block.
-pub const MAX_BLOCK_LENGTH: u32 = 5 * 1024 * 1024;
 
 /// The version information used to identify this runtime when compiled
 /// natively.
@@ -881,19 +818,6 @@ impl pallet_ethereum::Config for Runtime {
     type StateRoot = pallet_ethereum::IntermediateStateRoot<Self>;
 }
 
-const MAX_POV_SIZE: u64 = 5 * 1024 * 1024;
-
-/// Current approximation of the gas/s consumption considering
-/// EVM execution over compiled WASM (on 4.4Ghz CPU).
-/// Given the 500ms Weight, from which 75% only are used for transactions,
-/// the total EVM execution gas limit is: GAS_PER_SECOND * 0.500 * 0.75 ~= 15_000_000.
-/// With the async backing enabled the gas limit will rise 4 times because of execution time.
-pub const GAS_PER_SECOND: u64 = 40_000_000;
-
-/// Approximate ratio of the amount of Weight per Gas.
-/// u64 works for approximations because Weight is a very small unit compared to gas.
-pub const WEIGHT_PER_GAS: u64 = WEIGHT_REF_TIME_PER_SECOND / GAS_PER_SECOND;
-
 parameter_types! {
     pub BlockGasLimit: U256 = U256::from(NORMAL_DISPATCH_RATIO * MAXIMUM_BLOCK_WEIGHT.ref_time() / WEIGHT_PER_GAS);
     pub GasLimitPovSizeRatio: u64 = BlockGasLimit::get().as_u64().saturating_div(MAX_POV_SIZE);
@@ -1066,28 +990,4 @@ mod benches {
 cumulus_pallet_parachain_system::register_validate_block! {
     Runtime = Runtime,
     BlockExecutor = cumulus_pallet_aura_ext::BlockExecutor::<Runtime, Executive>,
-}
-
-// tests
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    // RUNTIME_API_VERSIONS constant is generated by a macro and is private.
-    #[test]
-    fn check_version() {
-        assert_eq!(
-            VERSION,
-            RuntimeVersion {
-                spec_name: create_runtime_str!("template-parachain"),
-                impl_name: create_runtime_str!("template-parachain"),
-                authoring_version: 1,
-                spec_version: 1,
-                impl_version: 0,
-                apis: RUNTIME_API_VERSIONS,
-                transaction_version: 1,
-                state_version: 1,
-            }
-        );
-    }
 }
