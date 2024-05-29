@@ -230,10 +230,10 @@ impl_runtime_apis! {
             use frame_benchmarking::{BenchmarkError, Benchmarking, BenchmarkBatch};
             use frame_support::parameter_types;
             use cumulus_primitives_core::ParaId;
+            use frame_system_benchmarking::Pallet as SystemBench;
 
             use super::{*, types::*, configs::*, constants::currency::CENTS};
 
-            use frame_system_benchmarking::Pallet as SystemBench;
             impl frame_system_benchmarking::Config for Runtime {
                 fn setup_set_code_requirements(code: &sp_std::vec::Vec<u8>) -> Result<(), BenchmarkError> {
                     ParachainSystem::initialize_for_set_code_benchmark(code.len() as u32);

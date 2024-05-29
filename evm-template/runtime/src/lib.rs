@@ -36,7 +36,7 @@ use sp_version::NativeVersion;
 
 use crate::{
     configs::pallet_custom_origins,
-    constants::{currency::MILLICENTS, POLY_DEGREE, P_FACTOR, Q_FACTOR, VERSION},
+    constants::{currency::MILLICENTS, POLY_DEGREE, P_FACTOR, Q_FACTOR},
     weights::ExtrinsicBaseWeight,
 };
 pub use crate::{
@@ -168,6 +168,8 @@ impl_opaque_keys! {
 /// natively.
 #[cfg(feature = "std")]
 pub fn native_version() -> NativeVersion {
+    use crate::constants::VERSION;
+
     NativeVersion { runtime_version: VERSION, can_author_with: Default::default() }
 }
 
@@ -227,16 +229,4 @@ cumulus_pallet_parachain_system::register_validate_block! {
 }
 
 #[cfg(feature = "runtime-benchmarks")]
-mod benches {
-    frame_benchmarking::define_benchmarks!(
-        [frame_system, SystemBench::<Runtime>]
-        [pallet_assets, Assets]
-        [pallet_balances, Balances]
-        [pallet_session, SessionBench::<Runtime>]
-        [pallet_timestamp, Timestamp]
-        [pallet_message_queue, MessageQueue]
-        [pallet_sudo, Sudo]
-        [pallet_collator_selection, CollatorSelection]
-        [cumulus_pallet_xcmp_queue, XcmpQueue]
-    );
-}
+mod benchmark;
