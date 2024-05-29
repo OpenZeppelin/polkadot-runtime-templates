@@ -13,10 +13,10 @@ use sp_runtime::{
 use sp_std::prelude::Vec;
 use sp_version::RuntimeVersion;
 
-#[cfg(feature = "async-backing")]
-use crate::{constants::SLOT_DURATION, ConsensusHook};
 #[cfg(not(feature = "async-backing"))]
 use crate::Aura;
+#[cfg(feature = "async-backing")]
+use crate::{constants::SLOT_DURATION, ConsensusHook};
 use crate::{
     constants::VERSION,
     types::{AccountId, Balance, Block, Executive, Nonce},
