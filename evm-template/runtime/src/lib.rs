@@ -682,6 +682,7 @@ parameter_types! {
 
 impl pallet_message_queue::Config for Runtime {
     type HeapSize = HeapSize;
+    type IdleMaxServiceWeight = MessageQueueServiceWeight;
     type MaxStale = MaxStale;
     #[cfg(feature = "runtime-benchmarks")]
     type MessageProcessor = pallet_message_queue::mock_helpers::NoopMessageProcessor<
@@ -775,9 +776,9 @@ impl pallet_aura::Config for Runtime {
     type AuthorityId = AuraId;
     type DisabledValidators = ();
     type MaxAuthorities = MaxAuthorities;
-    #[cfg(all(feature = "experimental", feature = "async-backing"))]
+    #[cfg(feature = "async-backing")]
     type SlotDuration = ConstU64<SLOT_DURATION>;
-    #[cfg(all(feature = "experimental", not(feature = "async-backing")))]
+    #[cfg(not(feature = "async-backing"))]
     type SlotDuration = pallet_aura::MinimumPeriodTimesTwo<Self>;
 }
 
@@ -1080,7 +1081,7 @@ impl_runtime_apis! {
         }
 
         fn authorities() -> Vec<AuraId> {
-            Aura::authorities().into_inner()
+            pallet_aura::Authorities::<Runtime>::get().into_inner()
         }
     }
 
@@ -1093,7 +1094,7 @@ impl_runtime_apis! {
             Executive::execute_block(block)
         }
 
-        fn initialize_block(header: &<Block as BlockT>::Header) {
+        fn initialize_block(header: &<Block as BlockT>::Header) -> sp_runtime::ExtrinsicInclusionMode {
             Executive::initialize_block(header)
         }
     }
