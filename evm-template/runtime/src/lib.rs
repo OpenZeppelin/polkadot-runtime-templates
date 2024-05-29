@@ -829,6 +829,7 @@ construct_runtime!(
         // Monetary
         Balances: pallet_balances = 10,
         TransactionPayment: pallet_transaction_payment = 11,
+        // TODO: remove once orml_tokens working
         Assets: pallet_assets = 12,
         Treasury: pallet_treasury::{Pallet, Call, Storage, Config<T>, Event<T>} = 13,
 
@@ -853,7 +854,8 @@ construct_runtime!(
         MessageQueue: pallet_message_queue = 33,
 
         // DeFi
-        Currencies: orml_currencies = 40,
+        Tokens: orml_tokens = 40,
+        Currencies: orml_currencies = 41,
         //MultiTransactionPayment: pallet_transaction_multi_payment = 36,
     }
 );

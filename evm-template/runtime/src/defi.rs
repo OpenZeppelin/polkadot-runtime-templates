@@ -1,38 +1,47 @@
-use parity_scale_codec::{Decode, Encode};
-use scale_info::TypeInfo;
+//! DeFi runtime configurations
+use frame_support::parameter_types;
+use orml_traits::parameter_type_with_key;
 
-/// High-level currency categories supported on this chain
-// TODO: add Erc20 variant like Moonbeam which calls contract_address in EVM via ERC 20 interface
-#[derive(Clone, Eq, Debug, PartialEq, Ord, PartialOrd, Encode, Decode, TypeInfo)]
-pub enum CurrencyId {
-    // Our native token
-    Native,
-    // Assets representing other chain's native tokens
-    ForeignAsset(AssetId),
+use super::{Balance, Balances, BlockNumber, Runtime, RuntimeEvent, Tokens};
+
+pub type Amount = i128;
+pub type AssetId = u32;
+
+parameter_types! {
+    pub const MaxLocks: u32 = 50;
+    pub const MaxReserves: u32 = 50;
+}
+
+parameter_type_with_key! {
+    pub ExistentialDeposits: |currency_id: AssetId| -> Balance {
+        Balance::default()
+    };
+}
+
+impl orml_tokens::Config for Runtime {
+    type Amount = Amount;
+    type Balance = Balance;
+    type CurrencyHooks = ();
+    type CurrencyId = AssetId;
+    type DustRemovalWhitelist = ();
+    type ExistentialDeposits = ExistentialDeposits;
+    type MaxLocks = MaxLocks;
+    type MaxReserves = MaxReserves;
+    type ReserveIdentifier = [u8; 8];
+    type RuntimeEvent = RuntimeEvent;
+    type WeightInfo = ();
 }
 
 parameter_types! {
-    pub const GetNativeCurrencyId: CurrencyId = CurrencyId::Native;
+    pub const GetNativeCurrencyId: AssetId = 0u32;
 }
-
-// TODO: keep custom pallet in pallets until successfull upstreams
-// pa
-// MultiCurrency trait bounds to satisfy with pallet to upstream
-// TransferAll<Self::AccountId>
-// + MultiCurrencyExtended<Self::AccountId>
-// + MultiLockableCurrency<Self::AccountId>
-// + MultiReservableCurrency<Self::AccountId>
-// + NamedMultiReservableCurrency<Self::AccountId>;
 
 impl orml_currencies::Config for Runtime {
     type GetNativeCurrencyId = GetNativeCurrencyId;
-    // TODO: make this work or impl MultiCurrency trait for runtime using Assets + Balances
-    // > consider extracting this and other configs out into own defi file
-    type MultiCurrency = ();
-    // TODO: impl Assets + Balances for this functionality
+    type MultiCurrency = Tokens;
     type NativeCurrency =
         orml_currencies::BasicCurrencyAdapter<Runtime, Balances, Amount, BlockNumber>;
-    type WeightInfo = (); // TODO: run weights for this runtime and use generated weights
+    type WeightInfo = (); // TODO: generate weights
 }
 
 // parameter_types! {
