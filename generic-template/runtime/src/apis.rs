@@ -14,9 +14,7 @@ use sp_std::prelude::Vec;
 use sp_version::RuntimeVersion;
 
 #[cfg(feature = "async-backing")]
-use crate::constants::SLOT_DURATION;
-#[cfg(feature = "async-backing")]
-use crate::types::ConsensusHook;
+use crate::{constants::SLOT_DURATION, ConsensusHook};
 #[cfg(not(feature = "async-backing"))]
 use crate::Aura;
 use crate::{

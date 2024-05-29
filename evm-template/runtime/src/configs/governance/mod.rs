@@ -1,22 +1,23 @@
 //! OpenGov governance config
 
 pub mod origins;
-pub use origins::{
-    pallet_custom_origins, ReferendumCanceller, ReferendumKiller, Spender, Treasurer,
-    WhitelistedCaller,
-};
+pub use origins::{Spender, WhitelistedCaller};
 mod tracks;
 
-use frame_support::traits::EitherOf;
-use frame_system::EnsureRootWithSuccess;
+use frame_support::{
+    parameter_types,
+    traits::{ConstU32, EitherOf},
+};
+use frame_system::{EnsureRoot, EnsureRootWithSuccess, EnsureSigned};
 
-use super::*;
 use crate::{
     constants::{
         currency::{CENTS, GRAND},
         DAYS,
     },
-    Balance,
+    types::{AccountId, Balance, BlockNumber},
+    Balances, Preimage, Referenda, Runtime, RuntimeCall, RuntimeEvent, RuntimeOrigin,
+    Scheduler, Treasury,
 };
 
 parameter_types! {

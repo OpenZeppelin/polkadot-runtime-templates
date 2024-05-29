@@ -4,26 +4,28 @@ use pallet_xcm::{EnsureXcm, IsVoiceOfBody};
 use sp_runtime::{
     generic,
     traits::{BlakeTwo256, IdentifyAccount, Verify},
-    MultiAddress, MultiSignature,
+    MultiAddress,
 };
+use fp_account::EthereumSignature;
 
 pub use crate::{
     configs::{
-        xcm_config::RelayLocation, FeeAssetId, StakingAdminBodyId, ToSiblingBaseDeliveryFee,
-        TransactionByteFee,
+        xcm_config::RelayLocation, StakingAdminBodyId,
     },
     constants::{
         BLOCK_PROCESSING_VELOCITY, RELAY_CHAIN_SLOT_DURATION_MILLIS, UNINCLUDED_SEGMENT_CAPACITY,
     },
-    AllPalletsWithSystem, Runtime, RuntimeCall, XcmpQueue,
+    AllPalletsWithSystem, Runtime, RuntimeCall,
 };
 
-/// Alias to 512-bit hash when used in the context of a transaction signature on
-/// the chain.
-pub type Signature = MultiSignature;
+/// Unchecked extrinsic type as expected by this runtime.
+pub type UncheckedExtrinsic =
+    fp_self_contained::UncheckedExtrinsic<Address, RuntimeCall, Signature, SignedExtra>;
 
-/// Some way of identifying an account on the chain. We intentionally make it
-/// equivalent to the public key of our transaction signing scheme.
+/// Ethereum Signature
+pub type Signature = EthereumSignature;
+
+/// AccountId20 because 20 bytes long like H160 Ethereum Addresses
 pub type AccountId = <<Signature as Verify>::Signer as IdentifyAccount>::AccountId;
 
 /// Balance of an account.
@@ -59,10 +61,6 @@ pub type SignedExtra = (
     pallet_transaction_payment::ChargeTransactionPayment<Runtime>,
 );
 
-/// Unchecked extrinsic type as expected by this runtime.
-pub type UncheckedExtrinsic =
-    generic::UncheckedExtrinsic<Address, RuntimeCall, Signature, SignedExtra>;
-
 /// Executive: handles dispatch to the various modules.
 pub type Executive = frame_executive::Executive<
     Runtime,
@@ -72,11 +70,12 @@ pub type Executive = frame_executive::Executive<
     AllPalletsWithSystem,
 >;
 
-pub type PriceForSiblingParachainDelivery = polkadot_runtime_common::xcm_sender::ExponentialPrice<
-    FeeAssetId,
-    ToSiblingBaseDeliveryFee,
-    TransactionByteFee,
-    XcmpQueue,
+/// Configures the number of blocks that can be created without submission of validity proof to the relay chain
+pub type ConsensusHook = cumulus_pallet_aura_ext::FixedVelocityConsensusHook<
+    Runtime,
+    RELAY_CHAIN_SLOT_DURATION_MILLIS,
+    BLOCK_PROCESSING_VELOCITY,
+    UNINCLUDED_SEGMENT_CAPACITY,
 >;
 
 /// We allow root and the StakingAdmin to execute privileged collator selection
@@ -84,12 +83,4 @@ pub type PriceForSiblingParachainDelivery = polkadot_runtime_common::xcm_sender:
 pub type CollatorSelectionUpdateOrigin = EitherOfDiverse<
     EnsureRoot<AccountId>,
     EnsureXcm<IsVoiceOfBody<RelayLocation, StakingAdminBodyId>>,
->;
-
-/// Configures the number of blocks that can be created without submission of validity proof to the relay chain
-pub type ConsensusHook = cumulus_pallet_aura_ext::FixedVelocityConsensusHook<
-    Runtime,
-    RELAY_CHAIN_SLOT_DURATION_MILLIS,
-    BLOCK_PROCESSING_VELOCITY,
-    UNINCLUDED_SEGMENT_CAPACITY,
 >;

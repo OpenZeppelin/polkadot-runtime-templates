@@ -17,11 +17,14 @@ use xcm_builder::{
 };
 use xcm_executor::XcmExecutor;
 
-use crate::configs::{
-    AccountId, Balance, Balances, ParachainSystem, Runtime, RuntimeCall, RuntimeEvent,
-    RuntimeOrigin, WeightToFee, XcmpQueue,
+use crate::{
+    configs::{
+        Balances, ParachainSystem, Runtime, RuntimeCall, RuntimeEvent, RuntimeOrigin, WeightToFee,
+        XcmpQueue,
+    },
+    types::{AccountId, Balance},
+    AllPalletsWithSystem, Assets, ParachainInfo, PolkadotXcm,
 };
-use crate::{AllPalletsWithSystem, Assets, ParachainInfo, PolkadotXcm};
 
 parameter_types! {
     pub const RelayLocation: Location = Location::parent();

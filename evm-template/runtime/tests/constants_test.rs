@@ -20,10 +20,7 @@ mod constant_tests {
 
 mod runtime_tests {
     use frame_support::{pallet_prelude::Weight, traits::TypedGet, PalletId};
-    use parachain_template_runtime::{
-        constants::{currency::*, *},
-        *,
-    };
+    use parachain_template_runtime::{constants::{currency::*, *}, configs::*, *};
     use sp_runtime::create_runtime_str;
     use sp_version::RuntimeVersion;
     use xcm::latest::prelude::BodyId;
@@ -39,7 +36,7 @@ mod runtime_tests {
                 authoring_version: 1,
                 spec_version: 1,
                 impl_version: 0,
-                apis: apis::RUNTIME_API_VERSIONS,
+                apis: parachain_template_runtime::apis::RUNTIME_API_VERSIONS,
                 transaction_version: 1,
                 state_version: 1,
             }
@@ -222,7 +219,7 @@ mod runtime_tests {
 
 mod xcm_tests {
     use frame_support::weights::Weight;
-    use parachain_template_runtime::xcm_config::*;
+    use parachain_template_runtime::configs::xcm_config::*;
 
     #[test]
     fn xcm_executor_constants() {

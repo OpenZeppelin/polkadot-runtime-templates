@@ -19,16 +19,15 @@ use sp_runtime::{
 use sp_std::prelude::Vec;
 use sp_version::RuntimeVersion;
 
-#[cfg(feature = "async-backing")]
-use crate::constants::SLOT_DURATION;
-#[cfg(feature = "async-backing")]
-use crate::ConsensusHook;
 #[cfg(not(feature = "async-backing"))]
 use crate::Aura;
+#[cfg(feature = "async-backing")]
+use crate::{constants::SLOT_DURATION, ConsensusHook};
 use crate::{
-    constants::VERSION, AccountId, Balance, Block, Ethereum, Executive, InherentDataExt, Nonce,
-    ParachainSystem, Runtime, RuntimeCall, RuntimeGenesisConfig, SessionKeys, System,
-    TransactionPayment, UncheckedExtrinsic,
+    constants::VERSION,
+    types::{AccountId, Balance, Block, Executive, Nonce},
+    Ethereum, InherentDataExt, ParachainSystem, Runtime, RuntimeCall, RuntimeGenesisConfig,
+    SessionKeys, System, TransactionPayment, UncheckedExtrinsic,
 };
 
 impl_runtime_apis! {

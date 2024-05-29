@@ -1,4 +1,5 @@
-mod xcm_config;
+pub mod governance;
+pub mod xcm_config;
 
 #[cfg(feature = "async-backing")]
 use cumulus_pallet_parachain_system::RelayNumberMonotonicallyIncreases;
@@ -20,6 +21,8 @@ use frame_system::{
     limits::{BlockLength, BlockWeights},
     EnsureRoot, EnsureSigned,
 };
+pub use governance::origins::pallet_custom_origins;
+use governance::{origins::Treasurer, TreasurySpender};
 use pallet_ethereum::PostLogContent;
 use pallet_evm::{EVMCurrencyAdapter, EnsureAccountId20, IdentityAddressMapping};
 use parachains_common::message_queue::{NarrowOriginToSibling, ParaIdToSibling};
@@ -46,26 +49,25 @@ use xcm::{
 use xcm_builder::PayOverXcm;
 #[cfg(not(feature = "runtime-benchmarks"))]
 use xcm_builder::ProcessXcmMessage;
-pub use xcm_config::{RelayLocation, XcmOriginToTransactDispatchOrigin};
+use xcm_config::{XcmOriginToTransactDispatchOrigin};
 
 use crate::{
     constants::{
         currency::{deposit, CENTS, EXISTENTIAL_DEPOSIT, MICROCENTS, MILLICENTS},
-        AVERAGE_ON_INITIALIZE_RATIO, DAYS, HOURS, MAXIMUM_BLOCK_WEIGHT,
-        MAX_BLOCK_LENGTH, MAX_POV_SIZE, NORMAL_DISPATCH_RATIO,
-        SLOT_DURATION, VERSION, WEIGHT_PER_GAS,
+        AVERAGE_ON_INITIALIZE_RATIO, DAYS, HOURS, MAXIMUM_BLOCK_WEIGHT, MAX_BLOCK_LENGTH,
+        MAX_POV_SIZE, NORMAL_DISPATCH_RATIO, SLOT_DURATION, VERSION, WEIGHT_PER_GAS,
     },
-    governance::{origins::Treasurer, TreasurySpender},
     opaque,
+    types::{
+        AccountId, Balance, Block, BlockNumber, CollatorSelectionUpdateOrigin, ConsensusHook, Hash,
+        Nonce,
+    },
     weights::{BlockExecutionWeight, ExtrinsicBaseWeight, RocksDbWeight},
-    AccountId, Aura, Balance, Balances, BaseFee, Block, BlockNumber, CollatorSelection,
-    CollatorSelectionUpdateOrigin, EVMChainId, Hash, MessageQueue, Nonce, PalletInfo,
-    ParachainSystem, Runtime, RuntimeCall, RuntimeEvent, RuntimeFreezeReason, RuntimeHoldReason,
-    RuntimeOrigin, RuntimeTask, Session, SessionKeys, System, Timestamp, Treasury,
-    UncheckedExtrinsic, WeightToFee, XcmpQueue, ConsensusHook
+    Aura, Balances, BaseFee, CollatorSelection, EVMChainId, MessageQueue, OriginCaller, PalletInfo,
+    ParachainSystem, Preimage, Runtime, RuntimeCall, RuntimeEvent, RuntimeFreezeReason,
+    RuntimeHoldReason, RuntimeOrigin, RuntimeTask, Session, SessionKeys, System, Timestamp,
+    Treasury, UncheckedExtrinsic, WeightToFee, XcmpQueue,
 };
-// TODO: may delete below
-use crate::{OriginCaller, Preimage};
 
 parameter_types! {
     pub const Version: RuntimeVersion = VERSION;
@@ -370,8 +372,6 @@ parameter_types! {
     pub const ReservedDmpWeight: Weight = MAXIMUM_BLOCK_WEIGHT.saturating_div(4);
     pub const RelayOrigin: AggregateMessageOrigin = AggregateMessageOrigin::Parent;
 }
-
-
 
 impl cumulus_pallet_parachain_system::Config for Runtime {
     #[cfg(not(feature = "async-backing"))]

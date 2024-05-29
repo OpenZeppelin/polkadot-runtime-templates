@@ -2,10 +2,10 @@ use frame_support::weights::{constants::WEIGHT_REF_TIME_PER_SECOND, Weight};
 use sp_runtime::{create_runtime_str, Perbill};
 use sp_version::RuntimeVersion;
 
-use crate::{apis, BlockNumber};
+use crate::{apis, types::BlockNumber};
 
 pub mod currency {
-    use crate::Balance;
+    use crate::types::Balance;
 
     pub const MICROCENTS: Balance = 1_000_000;
     pub const MILLICENTS: Balance = 1_000_000_000;
