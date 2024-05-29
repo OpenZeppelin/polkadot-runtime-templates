@@ -11,7 +11,6 @@ pub mod configs;
 pub mod constants;
 pub mod governance;
 mod weights;
-pub mod xcm_config;
 
 use fp_account::EthereumSignature;
 use frame_support::{
@@ -40,7 +39,9 @@ use sp_std::prelude::*;
 use sp_version::NativeVersion;
 
 pub use crate::{
-    configs::StakingAdminBodyId,
+    configs::{
+        RelayLocation, XcmOriginToTransactDispatchOrigin, StakingAdminBodyId
+    },
     constants::{
         currency::{deposit, CENTS, EXISTENTIAL_DEPOSIT, MICROCENTS, MILLICENTS},
         AVERAGE_ON_INITIALIZE_RATIO, BLOCK_PROCESSING_VELOCITY, DAYS, HOURS, MAXIMUM_BLOCK_WEIGHT,
@@ -49,7 +50,7 @@ pub use crate::{
         WEIGHT_PER_GAS,
     },
     weights::{BlockExecutionWeight, ExtrinsicBaseWeight, RocksDbWeight},
-    xcm_config::{RelayLocation, XcmOriginToTransactDispatchOrigin},
+
 };
 
 /// Ethereum Signature

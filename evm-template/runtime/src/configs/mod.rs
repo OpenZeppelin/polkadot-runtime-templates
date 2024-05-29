@@ -1,3 +1,5 @@
+mod xcm_config;
+
 #[cfg(feature = "async-backing")]
 use cumulus_pallet_parachain_system::RelayNumberMonotonicallyIncreases;
 #[cfg(not(feature = "async-backing"))]
@@ -44,6 +46,7 @@ use xcm::{
 use xcm_builder::PayOverXcm;
 #[cfg(not(feature = "runtime-benchmarks"))]
 use xcm_builder::ProcessXcmMessage;
+pub use xcm_config::{RelayLocation, XcmOriginToTransactDispatchOrigin};
 
 use crate::{
     constants::{
@@ -55,8 +58,6 @@ use crate::{
     governance::{origins::Treasurer, TreasurySpender},
     opaque,
     weights::{BlockExecutionWeight, ExtrinsicBaseWeight, RocksDbWeight},
-    xcm_config,
-    xcm_config::XcmOriginToTransactDispatchOrigin,
     AccountId, Aura, Balance, Balances, BaseFee, Block, BlockNumber, CollatorSelection,
     CollatorSelectionUpdateOrigin, EVMChainId, Hash, MessageQueue, Nonce, PalletInfo,
     ParachainSystem, Runtime, RuntimeCall, RuntimeEvent, RuntimeFreezeReason, RuntimeHoldReason,
@@ -569,7 +570,7 @@ impl pallet_treasury::Config for Runtime {
     type PalletId = TreasuryPalletId;
     type Paymaster = PayOverXcm<
         TreasuryInteriorLocation,
-        crate::xcm_config::XcmRouter,
+        xcm_config::XcmRouter,
         crate::PolkadotXcm,
         ConstU32<{ 6 * HOURS }>,
         Self::Beneficiary,
