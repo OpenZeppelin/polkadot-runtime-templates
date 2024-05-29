@@ -856,7 +856,7 @@ construct_runtime!(
         // DeFi
         Tokens: orml_tokens = 40,
         Currencies: orml_currencies = 41,
-        //MultiTransactionPayment: pallet_transaction_multi_payment = 36,
+        MultiTransactionPayment: pallet_transaction_multi_payment = 42,
     }
 );
 
