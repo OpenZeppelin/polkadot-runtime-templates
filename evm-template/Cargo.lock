@@ -801,8 +801,6 @@ dependencies = [
  "futures-util",
  "memchr",
  "pin-project-lite 0.2.14",
-<<<<<<< HEAD
-=======
 ]
 
 [[package]]
@@ -812,7 +810,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "f28d99ec8bfea296261ca1af174f24225171fea9664ba9003cbebee704810528"
 dependencies = [
  "num-traits",
->>>>>>> main
 ]
 
 [[package]]
@@ -2908,12 +2905,9 @@ name = "either"
 version = "1.11.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "a47c1c47d2f5964e29c61246e81db715514cd532db6b5116a25ea3c03d6780a2"
-<<<<<<< HEAD
-=======
 dependencies = [
  "serde",
 ]
->>>>>>> main
 
 [[package]]
 name = "elliptic-curve"
@@ -3638,8 +3632,6 @@ dependencies = [
 ]
 
 [[package]]
-<<<<<<< HEAD
-=======
 name = "fp-dynamic-fee"
 version = "1.0.0"
 source = "git+https://github.com/OpenZeppelin/frontier?branch=polkadot-v1.10.0#17e7b6f09c5a1845ba65563a9f9859cf07c4c635"
@@ -3650,7 +3642,6 @@ dependencies = [
 ]
 
 [[package]]
->>>>>>> main
 name = "fp-ethereum"
 version = "1.0.0-dev"
 source = "git+https://github.com/OpenZeppelin/frontier?branch=polkadot-v1.10.0#17e7b6f09c5a1845ba65563a9f9859cf07c4c635"
@@ -3697,8 +3688,6 @@ dependencies = [
 ]
 
 [[package]]
-<<<<<<< HEAD
-=======
 name = "fp-self-contained"
 version = "1.0.0-dev"
 source = "git+https://github.com/OpenZeppelin/frontier?branch=polkadot-v1.10.0#17e7b6f09c5a1845ba65563a9f9859cf07c4c635"
@@ -3711,7 +3700,6 @@ dependencies = [
 ]
 
 [[package]]
->>>>>>> main
 name = "fp-storage"
 version = "2.0.0"
 source = "git+https://github.com/OpenZeppelin/frontier?branch=polkadot-v1.10.0#17e7b6f09c5a1845ba65563a9f9859cf07c4c635"
@@ -4440,21 +4428,9 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "2304e00983f87ffb38b55b444b5e3b60a884b5d30c0fca7d82fe33449bbe55ea"
 
 [[package]]
-<<<<<<< HEAD
-name = "heck"
-version = "0.5.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "2304e00983f87ffb38b55b444b5e3b60a884b5d30c0fca7d82fe33449bbe55ea"
-
-[[package]]
 name = "hermit-abi"
 version = "0.3.9"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-=======
-name = "hermit-abi"
-version = "0.3.9"
-source = "registry+https://github.com/rust-lang/crates.io-index"
->>>>>>> main
 checksum = "d231dfb89cfffdbc30e7fc41579ed6066ad03abda9e567ccafae602b97ec5024"
 
 [[package]]
@@ -5648,11 +5624,6 @@ dependencies = [
 ]
 
 [[package]]
-<<<<<<< HEAD
-name = "libz-sys"
-version = "1.1.16"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-=======
 name = "libsqlite3-sys"
 version = "0.27.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -5667,7 +5638,6 @@ dependencies = [
 name = "libz-sys"
 version = "1.1.16"
 source = "registry+https://github.com/rust-lang/crates.io-index"
->>>>>>> main
 checksum = "5e143b5e666b2695d28f6bca6497720813f699c9602dd7f5cac91008b8ada7f9"
 dependencies = [
  "cc",
@@ -6591,8 +6561,6 @@ name = "opaque-debug"
 version = "0.3.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "c08d65885ee38876c4f86fa503fb49d7b507c2b62552df7c70b2fce627e06381"
-<<<<<<< HEAD
-=======
 
 [[package]]
 name = "openssl"
@@ -6619,7 +6587,6 @@ dependencies = [
  "quote",
  "syn 2.0.59",
 ]
->>>>>>> main
 
 [[package]]
 name = "openssl-probe"
@@ -7980,10 +7947,7 @@ dependencies = [
  "fp-account",
  "fp-evm",
  "fp-rpc",
-<<<<<<< HEAD
-=======
  "fp-self-contained",
->>>>>>> main
  "frame-benchmarking",
  "frame-executive",
  "frame-support",
@@ -12748,11 +12712,7 @@ dependencies = [
 [[package]]
 name = "sp-crypto-ec-utils"
 version = "0.10.0"
-<<<<<<< HEAD
-source = "git+https://github.com/paritytech/polkadot-sdk#c594b10a803e218f63c1bd97d2b27454efb4e852"
-=======
 source = "git+https://github.com/paritytech/polkadot-sdk#115c2477eb287df55107cd95594100ba395ed239"
->>>>>>> main
 dependencies = [
  "ark-bls12-377",
  "ark-bls12-377-ext",
@@ -12814,11 +12774,7 @@ dependencies = [
 [[package]]
 name = "sp-debug-derive"
 version = "14.0.0"
-<<<<<<< HEAD
-source = "git+https://github.com/paritytech/polkadot-sdk#c594b10a803e218f63c1bd97d2b27454efb4e852"
-=======
 source = "git+https://github.com/paritytech/polkadot-sdk#115c2477eb287df55107cd95594100ba395ed239"
->>>>>>> main
 dependencies = [
  "proc-macro2",
  "quote",
@@ -12838,11 +12794,7 @@ dependencies = [
 [[package]]
 name = "sp-externalities"
 version = "0.25.0"
-<<<<<<< HEAD
-source = "git+https://github.com/paritytech/polkadot-sdk#c594b10a803e218f63c1bd97d2b27454efb4e852"
-=======
 source = "git+https://github.com/paritytech/polkadot-sdk#115c2477eb287df55107cd95594100ba395ed239"
->>>>>>> main
 dependencies = [
  "environmental",
  "parity-scale-codec",
@@ -13055,11 +13007,7 @@ dependencies = [
 [[package]]
 name = "sp-runtime-interface"
 version = "24.0.0"
-<<<<<<< HEAD
-source = "git+https://github.com/paritytech/polkadot-sdk#c594b10a803e218f63c1bd97d2b27454efb4e852"
-=======
 source = "git+https://github.com/paritytech/polkadot-sdk#115c2477eb287df55107cd95594100ba395ed239"
->>>>>>> main
 dependencies = [
  "bytes",
  "impl-trait-for-tuples",
@@ -13091,11 +13039,7 @@ dependencies = [
 [[package]]
 name = "sp-runtime-interface-proc-macro"
 version = "17.0.0"
-<<<<<<< HEAD
-source = "git+https://github.com/paritytech/polkadot-sdk#c594b10a803e218f63c1bd97d2b27454efb4e852"
-=======
 source = "git+https://github.com/paritytech/polkadot-sdk#115c2477eb287df55107cd95594100ba395ed239"
->>>>>>> main
 dependencies = [
  "Inflector",
  "expander 2.1.0",
@@ -13184,11 +13128,7 @@ source = "git+https://github.com/paritytech/polkadot-sdk?tag=polkadot-v1.10.0#70
 [[package]]
 name = "sp-std"
 version = "14.0.0"
-<<<<<<< HEAD
-source = "git+https://github.com/paritytech/polkadot-sdk#c594b10a803e218f63c1bd97d2b27454efb4e852"
-=======
 source = "git+https://github.com/paritytech/polkadot-sdk#115c2477eb287df55107cd95594100ba395ed239"
->>>>>>> main
 
 [[package]]
 name = "sp-storage"
@@ -13205,11 +13145,7 @@ dependencies = [
 [[package]]
 name = "sp-storage"
 version = "19.0.0"
-<<<<<<< HEAD
-source = "git+https://github.com/paritytech/polkadot-sdk#c594b10a803e218f63c1bd97d2b27454efb4e852"
-=======
 source = "git+https://github.com/paritytech/polkadot-sdk#115c2477eb287df55107cd95594100ba395ed239"
->>>>>>> main
 dependencies = [
  "impl-serde",
  "parity-scale-codec",
@@ -13244,11 +13180,7 @@ dependencies = [
 [[package]]
 name = "sp-tracing"
 version = "16.0.0"
-<<<<<<< HEAD
-source = "git+https://github.com/paritytech/polkadot-sdk#c594b10a803e218f63c1bd97d2b27454efb4e852"
-=======
 source = "git+https://github.com/paritytech/polkadot-sdk#115c2477eb287df55107cd95594100ba395ed239"
->>>>>>> main
 dependencies = [
  "parity-scale-codec",
  "tracing",
@@ -13345,11 +13277,7 @@ dependencies = [
 [[package]]
 name = "sp-wasm-interface"
 version = "20.0.0"
-<<<<<<< HEAD
-source = "git+https://github.com/paritytech/polkadot-sdk#c594b10a803e218f63c1bd97d2b27454efb4e852"
-=======
 source = "git+https://github.com/paritytech/polkadot-sdk#115c2477eb287df55107cd95594100ba395ed239"
->>>>>>> main
 dependencies = [
  "impl-trait-for-tuples",
  "log",
@@ -13416,11 +13344,6 @@ dependencies = [
 ]
 
 [[package]]
-<<<<<<< HEAD
-name = "ss58-registry"
-version = "1.47.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-=======
 name = "sqlformat"
 version = "0.2.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -13545,7 +13468,6 @@ dependencies = [
 name = "ss58-registry"
 version = "1.47.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
->>>>>>> main
 checksum = "4743ce898933fbff7bbf414f497c459a782d496269644b3d650a398ae6a487ba"
 dependencies = [
  "Inflector",
