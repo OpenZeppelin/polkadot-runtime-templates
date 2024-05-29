@@ -22,13 +22,13 @@ use sp_version::RuntimeVersion;
 #[cfg(feature = "async-backing")]
 use crate::constants::SLOT_DURATION;
 #[cfg(feature = "async-backing")]
-use crate::types::ConsensusHook;
+use crate::ConsensusHook;
 #[cfg(not(feature = "async-backing"))]
 use crate::Aura;
 use crate::{
     constants::VERSION, AccountId, Balance, Block, Ethereum, Executive, InherentDataExt, Nonce,
-    ParachainSystem, Runtime, RuntimeBlockWeights, RuntimeCall, RuntimeGenesisConfig, SessionKeys,
-    System, TransactionPayment, UncheckedExtrinsic,
+    ParachainSystem, Runtime, RuntimeCall, RuntimeGenesisConfig, SessionKeys, System,
+    TransactionPayment, UncheckedExtrinsic,
 };
 
 impl_runtime_apis! {
@@ -388,6 +388,8 @@ impl_runtime_apis! {
     #[cfg(feature = "try-runtime")]
     impl frame_try_runtime::TryRuntime<Block> for Runtime {
         fn on_runtime_upgrade(checks: frame_try_runtime::UpgradeCheckSelect) -> (Weight, Weight) {
+            use super::configs::RuntimeBlockWeights;
+
             let weight = Executive::try_runtime_upgrade(checks).unwrap();
             (weight, RuntimeBlockWeights::get().max_block)
         }

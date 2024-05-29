@@ -22,8 +22,8 @@ use frame_benchmarking_cli::SUBSTRATE_REFERENCE_HARDWARE;
 // Local Runtime Types
 use parachain_template_runtime::{
     apis::RuntimeApi,
+    configs::TransactionConverter,
     opaque::{Block, Hash},
-    TransactionConverter,
 };
 use sc_client_api::Backend;
 use sc_consensus::ImportQueue;
