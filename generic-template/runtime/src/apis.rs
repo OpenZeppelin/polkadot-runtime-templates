@@ -16,7 +16,7 @@ use sp_version::RuntimeVersion;
 #[cfg(not(feature = "async-backing"))]
 use crate::Aura;
 #[cfg(feature = "async-backing")]
-use crate::{constants::SLOT_DURATION, ConsensusHook};
+use crate::{constants::SLOT_DURATION, types::ConsensusHook};
 use crate::{
     constants::VERSION,
     types::{AccountId, Balance, Block, Executive, Nonce},

@@ -21,10 +21,8 @@ use frame_system::{
     limits::{BlockLength, BlockWeights},
     EnsureRoot, EnsureSigned,
 };
-use governance::{
-    origins::{pallet_custom_origins, Treasurer},
-    TreasurySpender,
-};
+pub use governance::origins::pallet_custom_origins;
+use governance::{origins::Treasurer, TreasurySpender};
 use parachains_common::message_queue::{NarrowOriginToSibling, ParaIdToSibling};
 use parity_scale_codec::{Decode, Encode, MaxEncodedLen};
 use polkadot_runtime_common::{
