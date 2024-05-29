@@ -22,7 +22,6 @@ use frame_system::{
     EnsureRoot, EnsureSigned,
 };
 pub use governance::origins::pallet_custom_origins;
-// Local Imports
 use governance::{origins::Treasurer, TreasurySpender};
 use parachains_common::message_queue::{NarrowOriginToSibling, ParaIdToSibling};
 use parity_scale_codec::{Decode, Encode, MaxEncodedLen};
@@ -37,7 +36,6 @@ use sp_runtime::{
     Perbill, Permill, RuntimeDebug,
 };
 use sp_version::RuntimeVersion;
-// XCM Imports
 use xcm::{
     latest::{
         prelude::{AssetId, BodyId},

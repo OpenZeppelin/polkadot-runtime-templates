@@ -19,7 +19,6 @@ use crate::constants::SLOT_DURATION;
 use crate::types::ConsensusHook;
 #[cfg(not(feature = "async-backing"))]
 use crate::Aura;
-// Local module imports
 use crate::{
     constants::VERSION,
     types::{AccountId, Balance, Block, Executive, Nonce},
@@ -327,9 +326,4 @@ impl_runtime_apis! {
             build_config::<RuntimeGenesisConfig>(config)
         }
     }
-}
-
-cumulus_pallet_parachain_system::register_validate_block! {
-    Runtime = Runtime,
-    BlockExecutor = cumulus_pallet_aura_ext::BlockExecutor::<Runtime, Executive>,
 }
