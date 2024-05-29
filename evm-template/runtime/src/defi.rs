@@ -1,8 +1,11 @@
 //! DeFi runtime configurations
 use frame_support::parameter_types;
+use frame_system::EnsureRoot;
 use orml_traits::parameter_type_with_key;
 
-use super::{Balance, Balances, BlockNumber, Runtime, RuntimeEvent, Tokens};
+use super::{
+    Balance, Balances, BlockNumber, Currencies, Runtime, RuntimeEvent, Tokens, WeightToFee,
+};
 
 pub type Amount = i128;
 pub type AssetId = u32;
@@ -44,35 +47,24 @@ impl orml_currencies::Config for Runtime {
     type WeightInfo = (); // TODO: generate weights
 }
 
-// parameter_types! {
-//     // TODO: make sure this is Balances pallet AssetId everywhere else
-//     pub const NativeAssetId : AssetId = 0;
-// }
-////UNCOMMENT ONLY AFTER construct_runtime part uncommented
-// impl pallet_transaction_multi_payment::Config for Runtime {
-//     type AcceptedCurrencyOrigin = EnsureRoot<AccountId>;
-//     // TODO: impl orml-currency to combine pallet-asset + pallet-balances
-//     // for a sensible MultiCurrency impl
-//     // or impl MultiCurrency by runtime using pallet-asset + pallet-balances
-//     type Currencies = Currencies;
-//     //Currencies
-//  // TODO: ensure matches EVM used in `pallet_evm`
-//     type EvmAssetId = evm::WethAssetId;
-//     type EvmPermit = evm::permit::EvmPermitHandler<Runtime>;
-//     // TODO: impl InspectEVMAccounts by Runtime in separate folder
-//     // because we do not require pallet-evm-accounts config
-//     type InspectEvmAccounts = ();
-//     //EVMAccounts
-//  //TODO
-//     type NativeAssetId = ();
-//     //NativeAssetId
-//     type OraclePriceProvider = ();
-//     //OraclePriceProvider<AssetId, EmaOracle, LRNA>;
-//     type RouteProvider = ();
-//     //Router;
-//     type RuntimeEvent = RuntimeEvent;
-//     type TryCallCurrency<'a> = pallet_transaction_multi_payment::TryCallCurrency<Runtime>;
-//     type WeightInfo = ();
-//     //TODO: run weights in context of this runtime, first add to benchmarking runtime config
-//     type WeightToFee = WeightToFee;
-// }
+impl pallet_transaction_multi_payment::Config for Runtime {
+    type AcceptedCurrencyOrigin = EnsureRoot<AccountId>;
+    type Currencies = Currencies;
+    // TODO: ensure matches EVM used in `pallet_evm`
+    type EvmAssetId = evm::WethAssetId;
+    type EvmPermit = evm::permit::EvmPermitHandler<Runtime>;
+    // TODO: impl InspectEVMAccounts by Runtime in separate folder
+    // because we do not require pallet-evm-accounts config
+    type InspectEvmAccounts = ();
+    //EVMAccounts
+    type NativeAssetId = GetNativeCurrencyId;
+    type OraclePriceProvider = ();
+    //OraclePriceProvider<AssetId, EmaOracle, LRNA>;
+    type RouteProvider = ();
+    //Router;
+    type RuntimeEvent = RuntimeEvent;
+    type TryCallCurrency<'a> = pallet_transaction_multi_payment::TryCallCurrency<Runtime>;
+    type WeightInfo = ();
+    //TODO: run weights in context of this runtime, first add to benchmarking runtime config
+    type WeightToFee = WeightToFee;
+}
