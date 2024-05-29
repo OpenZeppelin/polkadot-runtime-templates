@@ -1,5 +1,7 @@
 use std::path::PathBuf;
 
+use crate::eth::EthConfiguration;
+
 /// Sub-commands supported by the collator.
 #[derive(Debug, clap::Subcommand)]
 pub enum Subcommand {
@@ -84,6 +86,9 @@ pub struct Cli {
     /// Relay chain arguments
     #[arg(raw = true)]
     pub relay_chain_args: Vec<String>,
+
+    #[command(flatten)]
+    pub eth: EthConfiguration,
 }
 
 #[derive(Debug)]

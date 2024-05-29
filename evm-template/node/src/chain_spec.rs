@@ -194,6 +194,9 @@ fn testnet_genesis(
             .collect::<Vec<_>>(),
         },
         "treasury": {},
+        "evmChainId": {
+            "chainId": 9999
+        },
         "polkadotXcm": {
             "safeXcmVersion": Some(SAFE_XCM_VERSION),
         },
