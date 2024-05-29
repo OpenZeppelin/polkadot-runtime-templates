@@ -1,3 +1,4 @@
+use fp_account::EthereumSignature;
 use frame_support::traits::EitherOfDiverse;
 use frame_system::EnsureRoot;
 use pallet_xcm::{EnsureXcm, IsVoiceOfBody};
@@ -6,12 +7,9 @@ use sp_runtime::{
     traits::{BlakeTwo256, IdentifyAccount, Verify},
     MultiAddress,
 };
-use fp_account::EthereumSignature;
 
 pub use crate::{
-    configs::{
-        xcm_config::RelayLocation, StakingAdminBodyId,
-    },
+    configs::{xcm_config::RelayLocation, StakingAdminBodyId},
     constants::{
         BLOCK_PROCESSING_VELOCITY, RELAY_CHAIN_SLOT_DURATION_MILLIS, UNINCLUDED_SEGMENT_CAPACITY,
     },

@@ -49,7 +49,7 @@ use xcm::{
 use xcm_builder::PayOverXcm;
 #[cfg(not(feature = "runtime-benchmarks"))]
 use xcm_builder::ProcessXcmMessage;
-use xcm_config::{XcmOriginToTransactDispatchOrigin};
+use xcm_config::XcmOriginToTransactDispatchOrigin;
 
 use crate::{
     constants::{

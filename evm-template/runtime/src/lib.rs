@@ -12,7 +12,6 @@ pub mod constants;
 mod types;
 mod weights;
 
-
 use frame_support::{
     construct_runtime,
     weights::{WeightToFeeCoefficient, WeightToFeeCoefficients, WeightToFeePolynomial},
@@ -24,9 +23,7 @@ use sp_core::H160;
 pub use sp_runtime::BuildStorage;
 use sp_runtime::{
     impl_opaque_keys,
-    traits::{
-        DispatchInfoOf, Dispatchable, PostDispatchInfoOf,
-    },
+    traits::{DispatchInfoOf, Dispatchable, PostDispatchInfoOf},
     transaction_validity::{TransactionValidity, TransactionValidityError},
 };
 pub use sp_runtime::{MultiAddress, Perbill, Permill};
@@ -45,8 +42,6 @@ pub use crate::{
         AccountId, Balance, Block, BlockNumber, Executive, Nonce, Signature, UncheckedExtrinsic,
     },
 };
-
-
 
 impl fp_self_contained::SelfContainedCall for RuntimeCall {
     type SignedInfo = H160;

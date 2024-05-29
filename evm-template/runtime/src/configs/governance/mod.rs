@@ -16,8 +16,8 @@ use crate::{
         DAYS,
     },
     types::{AccountId, Balance, BlockNumber},
-    Balances, Preimage, Referenda, Runtime, RuntimeCall, RuntimeEvent, RuntimeOrigin,
-    Scheduler, Treasury,
+    Balances, Preimage, Referenda, Runtime, RuntimeCall, RuntimeEvent, RuntimeOrigin, Scheduler,
+    Treasury,
 };
 
 parameter_types! {
