@@ -503,6 +503,8 @@ fn start_consensus(
 
     // NOTE: because we use Aura here explicitly, we can use
     // `CollatorSybilResistance::Resistant` when starting the network.
+
+    #[cfg(not(feature = "async-backing"))]
     let slot_duration = cumulus_client_consensus_aura::slot_duration(&*client)?;
 
     let proposer_factory = sc_basic_authorship::ProposerFactory::with_proof_recording(
@@ -541,6 +543,7 @@ fn start_consensus(
         collator_key,
         para_id,
         overseer_handle,
+        #[cfg(not(feature = "async-backing"))]
         slot_duration,
         relay_chain_slot_duration,
         proposer,
