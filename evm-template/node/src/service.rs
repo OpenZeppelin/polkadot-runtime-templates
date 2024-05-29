@@ -11,8 +11,7 @@ use cumulus_client_consensus_common::ParachainBlockImport as TParachainBlockImpo
 use cumulus_client_consensus_proposer::Proposer;
 use cumulus_client_service::{
     build_network, build_relay_chain_interface, prepare_node_config, start_relay_chain_tasks,
-    BuildNetworkParams, CollatorSybilResistance, DARecoveryProfile, ParachainHostFunctions,
-    StartRelayChainTasksParams,
+    BuildNetworkParams, CollatorSybilResistance, DARecoveryProfile, StartRelayChainTasksParams,
 };
 #[cfg(feature = "async-backing")]
 use cumulus_primitives_core::relay_chain::ValidationCode;
@@ -27,7 +26,7 @@ use parachain_template_runtime::{
 };
 use sc_client_api::Backend;
 use sc_consensus::ImportQueue;
-use sc_executor::{HeapAllocStrategy, WasmExecutor, DEFAULT_HEAP_ALLOC_STRATEGY};
+use sc_executor::NativeElseWasmExecutor;
 use sc_network::NetworkBlock;
 use sc_network_sync::SyncingService;
 use sc_service::{Configuration, PartialComponents, TFullBackend, TFullClient, TaskManager};
@@ -42,7 +41,22 @@ use crate::eth::{
     FrontierBackend, FrontierPartialComponents,
 };
 
-type ParachainExecutor = WasmExecutor<ParachainHostFunctions>;
+/// Native executor type.
+pub struct ParachainNativeExecutor;
+
+impl sc_executor::NativeExecutionDispatch for ParachainNativeExecutor {
+    type ExtendHostFunctions = frame_benchmarking::benchmarking::HostFunctions;
+
+    fn dispatch(method: &str, data: &[u8]) -> Option<Vec<u8>> {
+        parachain_template_runtime::api::dispatch(method, data)
+    }
+
+    fn native_version() -> sc_executor::NativeVersion {
+        parachain_template_runtime::native_version()
+    }
+}
+
+type ParachainExecutor = NativeElseWasmExecutor<ParachainNativeExecutor>;
 
 type ParachainClient = TFullClient<Block, RuntimeApi, ParachainExecutor>;
 
@@ -57,14 +71,23 @@ pub type Service = PartialComponents<
     (),
     sc_consensus::DefaultImportQueue<Block>,
     sc_transaction_pool::FullPool<Block, ParachainClient>,
-    (ParachainBlockImport, Option<Telemetry>, Option<TelemetryWorkerHandle>),
+    (
+        ParachainBlockImport,
+        Option<Telemetry>,
+        Option<TelemetryWorkerHandle>,
+        FrontierBackend,
+        Arc<fc_rpc::OverrideHandle<Block>>,
+    ),
 >;
 
 /// Starts a `ServiceBuilder` for a full service.
 ///
 /// Use this macro if you don't actually need the full service, but just the builder in order to
 /// be able to perform chain operations.
-pub fn new_partial(config: &Configuration, eth_config: &EthConfiguration) -> Result<Service, sc_service::Error> {
+pub fn new_partial(
+    config: &Configuration,
+    eth_config: &EthConfiguration,
+) -> Result<Service, sc_service::Error> {
     let telemetry = config
         .telemetry_endpoints
         .clone()
@@ -76,17 +99,7 @@ pub fn new_partial(config: &Configuration, eth_config: &EthConfiguration) -> Res
         })
         .transpose()?;
 
-    let heap_pages = config
-        .default_heap_pages
-        .map_or(DEFAULT_HEAP_ALLOC_STRATEGY, |h| HeapAllocStrategy::Static { extra_pages: h as _ });
-
-    let executor = ParachainExecutor::builder()
-        .with_execution_method(config.wasm_method)
-        .with_onchain_heap_alloc_strategy(heap_pages)
-        .with_offchain_heap_alloc_strategy(heap_pages)
-        .with_max_runtime_instances(config.max_runtime_instances)
-        .with_runtime_cache_size(config.runtime_cache_size)
-        .build();
+    let executor = sc_service::new_native_or_wasm_executor(config);
 
     let (client, backend, keystore_container, task_manager) =
         sc_service::new_full_parts_record_import::<Block, RuntimeApi, _>(
