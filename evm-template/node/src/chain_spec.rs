@@ -1,6 +1,7 @@
 use cumulus_primitives_core::ParaId;
+use fp_evm::GenesisAccount;
 use parachain_template_runtime::{
-    constants::currency::EXISTENTIAL_DEPOSIT, AccountId, AuraId, Signature,
+    constants::currency::EXISTENTIAL_DEPOSIT, AccountId, AuraId, OpenZeppelinPrecompiles, Signature,
 };
 use sc_chain_spec::{ChainSpecExtension, ChainSpecGroup};
 use sc_service::ChainType;
@@ -196,6 +197,24 @@ fn testnet_genesis(
         "treasury": {},
         "evmChainId": {
             "chainId": 9999
+        },
+        "evm": {
+            "accounts": OpenZeppelinPrecompiles::used_addresses()
+                .map(|addr| {
+                    (
+                        addr.into(),
+                        GenesisAccount {
+                            nonce: Default::default(),
+                            balance: Default::default(),
+                            storage: Default::default(),
+                            // bytecode to revert without returning data
+                            // (PUSH1 0x00 PUSH1 0x00 REVERT)
+                            code: vec![0x60, 0x00, 0x60, 0x00, 0xFD],
+                        },
+                    )
+                })
+                .into_iter()
+                .collect(),
         },
         "polkadotXcm": {
             "safeXcmVersion": Some(SAFE_XCM_VERSION),

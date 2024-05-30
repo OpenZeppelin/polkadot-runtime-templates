@@ -9,7 +9,7 @@ include!(concat!(env!("OUT_DIR"), "/wasm_binary.rs"));
 pub mod constants;
 pub mod governance;
 mod precompiles;
-use precompiles::OpenZeppelinPrecompiles;
+pub use precompiles::OpenZeppelinPrecompiles;
 mod weights;
 pub mod xcm_config;
 
