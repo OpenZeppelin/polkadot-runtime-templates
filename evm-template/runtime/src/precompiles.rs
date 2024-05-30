@@ -8,6 +8,7 @@ use pallet_evm_precompile_sha3fips::Sha3FIPS256;
 use pallet_evm_precompile_simple::{ECRecover, ECRecoverPublicKey, Identity, Ripemd160, Sha256};
 use sp_core::H160;
 
+#[derive(Default)]
 pub struct OpenZeppelinPrecompiles<R>(PhantomData<R>);
 
 impl<R> OpenZeppelinPrecompiles<R>
