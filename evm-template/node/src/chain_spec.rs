@@ -1,12 +1,15 @@
+use std::collections::BTreeMap;
+
 use cumulus_primitives_core::ParaId;
 use fp_evm::GenesisAccount;
 use parachain_template_runtime::{
-    constants::currency::EXISTENTIAL_DEPOSIT, AccountId, AuraId, OpenZeppelinPrecompiles, Signature,
+    constants::currency::EXISTENTIAL_DEPOSIT, AccountId, AuraId,
+    OpenZeppelinPrecompiles as Precompiles, Runtime, Signature,
 };
 use sc_chain_spec::{ChainSpecExtension, ChainSpecGroup};
 use sc_service::ChainType;
 use serde::{Deserialize, Serialize};
-use sp_core::{ecdsa, Pair, Public};
+use sp_core::{ecdsa, Pair, Public, H160};
 use sp_runtime::traits::{IdentifyAccount, Verify};
 
 /// Specialized `ChainSpec` for the normal parachain runtime.
@@ -199,10 +202,10 @@ fn testnet_genesis(
             "chainId": 9999
         },
         "evm": {
-            "accounts": OpenZeppelinPrecompiles::used_addresses()
+            "accounts": Precompiles::<Runtime>::used_addresses()
                 .map(|addr| {
                     (
-                        addr.into(),
+                        addr,
                         GenesisAccount {
                             nonce: Default::default(),
                             balance: Default::default(),
@@ -214,7 +217,7 @@ fn testnet_genesis(
                     )
                 })
                 .into_iter()
-                .collect(),
+                .collect::<BTreeMap<H160, GenesisAccount>>(),
         },
         "polkadotXcm": {
             "safeXcmVersion": Some(SAFE_XCM_VERSION),
