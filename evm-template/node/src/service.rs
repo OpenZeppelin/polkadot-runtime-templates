@@ -21,8 +21,9 @@ use cumulus_relay_chain_interface::{OverseerHandle, RelayChainInterface};
 use frame_benchmarking_cli::SUBSTRATE_REFERENCE_HARDWARE;
 // Local Runtime Types
 use parachain_template_runtime::{
+    apis::RuntimeApi,
+    configs::TransactionConverter,
     opaque::{Block, Hash},
-    RuntimeApi, TransactionConverter,
 };
 use sc_client_api::Backend;
 use sc_consensus::ImportQueue;
@@ -48,7 +49,7 @@ impl sc_executor::NativeExecutionDispatch for ParachainNativeExecutor {
     type ExtendHostFunctions = frame_benchmarking::benchmarking::HostFunctions;
 
     fn dispatch(method: &str, data: &[u8]) -> Option<Vec<u8>> {
-        parachain_template_runtime::api::dispatch(method, data)
+        parachain_template_runtime::apis::api::dispatch(method, data)
     }
 
     fn native_version() -> sc_executor::NativeVersion {
@@ -503,7 +504,6 @@ fn start_consensus(
 
     // NOTE: because we use Aura here explicitly, we can use
     // `CollatorSybilResistance::Resistant` when starting the network.
-
     #[cfg(not(feature = "async-backing"))]
     let slot_duration = cumulus_client_consensus_aura::slot_duration(&*client)?;
 
