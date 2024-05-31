@@ -1,0 +1,34 @@
+:source-highlighter: highlight.js
+:highlightjs-languages: rust
+:github-icon: pass:[<svg class="icon"><use href="#github-icon"/></svg>]
+
+= Sending Cross-Chain Messages between Parachains
+
+The supported way to exchange cross-chain messages (XCM) between parachains is via Hierarchical Relay Message Passing (HRMP) channels.
+
+For full connectivity between two parachains, two HRMP channels must be opened because each HRMP channel is unidirectional. One channel is reserved exclusively for sending outgoing XCM while the other is reserved exclusively for receiving incoming XCM.
+
+TODO: is this stuff also required for system parachains? or how do system parachains agree to accept? is it automatic?
+
+== Steps to Open an HRMP Channel
+
+> sender calls proposeOpen
+> receipient calls acceptOpen
+
+=== Opening HRMP Channel to Receive XCM
+
+=== Opening HRMP Channel to Send XCM
+
+== Where to Find all Open HRMP Channels
+
+describe where the list is shown in polkadot-js and link it
+
+== Closing HRMP Channels
+
+POLKADOT DOCS
+Channels and Bridges · Polkadot Wiki
+https://wiki.polkadot.network/docs/learn-xcm-transport
+
+MOONBEAM DOCS:
+XC Channel Registration
+Register XC Assets | Moonbeam Docs
