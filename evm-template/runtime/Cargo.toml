@@ -100,7 +100,7 @@ pallet-evm-precompile-simple = { workspace = true }
 sp-io = { workspace = true }
 
 [build-dependencies]
-substrate-wasm-builder = { workspace = true, features = ["metadata-hash"] }
+substrate-wasm-builder = { workspace = true, features = [ "metadata-hash" ] }
 
 [features]
 default = [ "std" ]
