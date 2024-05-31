@@ -20,6 +20,7 @@ smallvec = { workspace = true }
 # Substrate
 frame-benchmarking = { workspace = true, optional = true }
 frame-executive = { workspace = true }
+frame-metadata-hash-extension = { workspace = true }
 frame-support = { workspace = true }
 frame-system = { workspace = true }
 frame-system-benchmarking = { workspace = true, optional = true }
@@ -86,7 +87,7 @@ parachains-common = { workspace = true }
 sp-io = { workspace = true }
 
 [build-dependencies]
-substrate-wasm-builder = { workspace = true }
+substrate-wasm-builder = { workspace = true, features = ["metadata-hash"] }
 
 [features]
 default = [ "std" ]
@@ -152,7 +153,7 @@ std = [
 	"xcm/std",
 ]
 async-backing = []
-
+metadata-hash = []
 runtime-benchmarks = [
 	"assets-common/runtime-benchmarks",
 	"cumulus-pallet-parachain-system/runtime-benchmarks",
