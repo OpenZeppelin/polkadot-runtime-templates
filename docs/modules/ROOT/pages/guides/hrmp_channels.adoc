@@ -4,31 +4,20 @@
 
 = Sending Cross-Chain Messages between Parachains
 
-The supported way to exchange cross-chain messages (XCM) between parachains is via Hierarchical Relay Message Passing (HRMP) channels.
+The supported way to exchange cross-chain messages (XCM) between parachains is to use Horizontal Relay-routed Message Passing (HRMP) channels.
 
-For full connectivity between two parachains, two HRMP channels must be opened because each HRMP channel is unidirectional. One channel is reserved exclusively for sending outgoing XCM while the other is reserved exclusively for receiving incoming XCM.
+Each HRMP channel is unidirectional. In order to enable full connectivity between two parachains, two HRMP channels must be opened: one for sending outgoing XCM and the other for receiving incoming XCM.
 
-TODO: is this stuff also required for system parachains? or how do system parachains agree to accept? is it automatic?
+== Opening an HRMP Channel
 
-== Steps to Open an HRMP Channel
+Opening a channel between two parachains A and B takes 2 steps:
+1. parachain A initiates a channel request
+2. parachain B accepts the channel request
 
-> sender calls proposeOpen
-> receipient calls acceptOpen
+For step (1), parachain A calls `hrmp > hrmpInitOpenChannel(recipient, proposedMaxCapacity, proposedMaxMessageSize)` to create a channel request with the input configuration.
 
-=== Opening HRMP Channel to Receive XCM
+For step (2), parachain B calls `hrmp > hrmpAcceptOpenChannel(sender)` to accept the channel open request from the input sender.
 
-=== Opening HRMP Channel to Send XCM
+In order to dispatch a call from its sovereign origin, a parachain may use governance to send the encoded call in a Transact instruction to the Relay Chain, but it may also execute this logic autonomously (e.g. on the notification that a channel was requested).
 
-== Where to Find all Open HRMP Channels
-
-describe where the list is shown in polkadot-js and link it
-
-== Closing HRMP Channels
-
-POLKADOT DOCS
-Channels and Bridges · Polkadot Wiki
-https://wiki.polkadot.network/docs/learn-xcm-transport
-
-MOONBEAM DOCS:
-XC Channel Registration
-Register XC Assets | Moonbeam Docs
+For more details related to opening HRMP channels, see the link:https://wiki.polkadot.network/docs/build-hrmp-channels[Polkadot documentation].

@@ -1,6 +1,7 @@
 * General Guides
 ** xref:guides/weights_fees.adoc[Weights & Fees]
 ** xref:guides/async_backing.adoc[Async Backing]
+** xref:guides/hrmp_channels.adoc[Sending XCM between Parachains]
 * EVM Template Guides
 ** xref:guides/contract_migration.adoc[Contract Migration]
 * Runtimes
