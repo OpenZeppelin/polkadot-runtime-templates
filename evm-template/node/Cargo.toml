@@ -12,6 +12,7 @@ version = "0.1.2"
 [dependencies]
 clap = { workspace = true }
 futures = { workspace = true }
+hex-literal = { workspace = true }
 jsonrpsee = { workspace = true, features = [ "server" ] }
 log = { workspace = true }
 parity-scale-codec = { workspace = true }
