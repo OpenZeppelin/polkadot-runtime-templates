@@ -8,8 +8,9 @@ use frame_support::{
     weights::{constants::WEIGHT_REF_TIME_PER_SECOND, Weight},
 };
 use parachain_template_runtime::{
-    AccountId, AllPalletsWithSystem, Balance, Balances, BlockNumber, EVMChainIdConfig, Executive,
-    Runtime, RuntimeCall, RuntimeOrigin, SudoConfig, UncheckedExtrinsic, SLOT_DURATION,
+    constants::SLOT_DURATION, AccountId, AllPalletsWithSystem, Balance, Balances, BlockNumber,
+    EVMChainIdConfig, Executive, Runtime, RuntimeCall, RuntimeOrigin, SudoConfig,
+    UncheckedExtrinsic,
 };
 use sp_consensus_aura::AURA_ENGINE_ID;
 use sp_runtime::{
