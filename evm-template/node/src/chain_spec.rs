@@ -1,12 +1,16 @@
+use std::collections::BTreeMap;
+
 use cumulus_primitives_core::ParaId;
+use fp_evm::GenesisAccount;
 use hex_literal::hex;
 use parachain_template_runtime::{
-    constants::currency::EXISTENTIAL_DEPOSIT, AccountId, AuraId, Signature,
+    constants::currency::EXISTENTIAL_DEPOSIT, AccountId, AuraId,
+    OpenZeppelinPrecompiles as Precompiles, Runtime, Signature,
 };
 use sc_chain_spec::{ChainSpecExtension, ChainSpecGroup};
 use sc_service::ChainType;
 use serde::{Deserialize, Serialize};
-use sp_core::{ecdsa, Pair, Public};
+use sp_core::{ecdsa, Pair, Public, H160};
 use sp_runtime::traits::{IdentifyAccount, Verify};
 
 /// Specialized `ChainSpec` for the normal parachain runtime.
@@ -199,6 +203,24 @@ fn testnet_genesis(
         "treasury": {},
         "evmChainId": {
             "chainId": 9999
+        },
+        "evm": {
+            "accounts": Precompiles::<Runtime>::used_addresses()
+                .map(|addr| {
+                    (
+                        addr,
+                        GenesisAccount {
+                            nonce: Default::default(),
+                            balance: Default::default(),
+                            storage: Default::default(),
+                            // bytecode to revert without returning data
+                            // (PUSH1 0x00 PUSH1 0x00 REVERT)
+                            code: vec![0x60, 0x00, 0x60, 0x00, 0xFD],
+                        },
+                    )
+                })
+                .into_iter()
+                .collect::<BTreeMap<H160, GenesisAccount>>(),
         },
         "polkadotXcm": {
             "safeXcmVersion": Some(SAFE_XCM_VERSION),
