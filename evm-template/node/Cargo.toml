@@ -12,6 +12,7 @@ version = "0.1.2"
 [dependencies]
 clap = { workspace = true }
 futures = { workspace = true }
+hex-literal = { workspace = true }
 jsonrpsee = { workspace = true, features = [ "server" ] }
 log = { workspace = true }
 parity-scale-codec = { workspace = true }
@@ -81,6 +82,7 @@ fc-rpc = { workspace = true }
 fc-rpc-core = { workspace = true }
 fc-storage = { workspace = true }
 fp-dynamic-fee = { workspace = true, features = [ "std" ] }
+fp-evm = { workspace = true }
 fp-rpc = { workspace = true }
 
 [build-dependencies]

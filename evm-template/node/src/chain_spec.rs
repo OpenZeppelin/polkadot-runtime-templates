@@ -1,11 +1,16 @@
+use std::collections::BTreeMap;
+
 use cumulus_primitives_core::ParaId;
+use fp_evm::GenesisAccount;
+use hex_literal::hex;
 use parachain_template_runtime::{
-    constants::currency::EXISTENTIAL_DEPOSIT, AccountId, AuraId, Signature,
+    constants::currency::EXISTENTIAL_DEPOSIT, AccountId, AuraId,
+    OpenZeppelinPrecompiles as Precompiles, Runtime, Signature,
 };
 use sc_chain_spec::{ChainSpecExtension, ChainSpecGroup};
 use sc_service::ChainType;
 use serde::{Deserialize, Serialize};
-use sp_core::{ecdsa, Pair, Public};
+use sp_core::{ecdsa, Pair, Public, H160};
 use sp_runtime::traits::{IdentifyAccount, Verify};
 
 /// Specialized `ChainSpec` for the normal parachain runtime.
@@ -106,6 +111,8 @@ pub fn development_config() -> ChainSpec {
             get_account_id_from_seed::<ecdsa::Public>("Dave//stash"),
             get_account_id_from_seed::<ecdsa::Public>("Eve//stash"),
             get_account_id_from_seed::<ecdsa::Public>("Ferdie//stash"),
+            AccountId::from(hex!("33c7c88f2B2Fcb83975fCDB08d2B5bf7eA29FDCE")),
+            AccountId::from(hex!("c02db867898f227416BCB6d97190126A6b04988A")),
         ],
         get_account_id_from_seed::<ecdsa::Public>("Alice"),
         1000.into(),
@@ -196,6 +203,24 @@ fn testnet_genesis(
         "treasury": {},
         "evmChainId": {
             "chainId": 9999
+        },
+        "evm": {
+            "accounts": Precompiles::<Runtime>::used_addresses()
+                .map(|addr| {
+                    (
+                        addr,
+                        GenesisAccount {
+                            nonce: Default::default(),
+                            balance: Default::default(),
+                            storage: Default::default(),
+                            // bytecode to revert without returning data
+                            // (PUSH1 0x00 PUSH1 0x00 REVERT)
+                            code: vec![0x60, 0x00, 0x60, 0x00, 0xFD],
+                        },
+                    )
+                })
+                .into_iter()
+                .collect::<BTreeMap<H160, GenesisAccount>>(),
         },
         "polkadotXcm": {
             "safeXcmVersion": Some(SAFE_XCM_VERSION),

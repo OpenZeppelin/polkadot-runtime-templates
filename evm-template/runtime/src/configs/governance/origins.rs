@@ -6,7 +6,7 @@ pub use pallet_custom_origins::*;
 pub mod pallet_custom_origins {
     use frame_support::pallet_prelude::*;
 
-    use crate::governance::{Balance, CENTS, GRAND};
+    use crate::configs::governance::{Balance, CENTS, GRAND};
 
     #[pallet::config]
     pub trait Config: frame_system::Config {}
