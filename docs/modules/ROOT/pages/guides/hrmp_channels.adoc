@@ -20,4 +20,29 @@ For step (2), parachain B calls `hrmp > hrmpAcceptOpenChannel(sender)` to accept
 
 In order to dispatch a call from its sovereign origin, a parachain may use governance to send the encoded call in a Transact instruction to the Relay Chain, but it may also execute this logic autonomously (e.g. on the notification that a channel was requested).
 
-For more details related to opening HRMP channels, see the link:https://wiki.polkadot.network/docs/build-hrmp-channels[Polkadot documentation].
+== Configuring Channel Notification Handlers
+
+There are 3 handlers to configure for when a `HRMP` notification is received.
+* `HrmpChannelAcceptedHandler`
+* `HrmpChannelClosingHandler`
+* `HrmpNewChannelOpenRequestHandler`
+
+Each follows a similar interface:
+```rust
+pub trait HandleHrmpNewChannelOpenRequest {
+	fn handle(sender: u32, max_message_size: u32, max_capacity: u32) -> XcmResult;
+}
+
+pub trait HandleHrmpChannelAccepted {
+	fn handle(recipient: u32) -> XcmResult;
+}
+
+pub trait HandleHrmpChannelClosing {
+	fn handle(initiator: u32, sender: u32, recipient: u32) -> XcmResult;
+}
+```
+The default implementation `()` returns `Ok(())` without executing any effects.
+
+== More Documentation
+
+- link:https://wiki.polkadot.network/docs/build-hrmp-channels[Polkadot documentation].
