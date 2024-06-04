@@ -1,0 +1,24 @@
+:source-highlighter: highlight.js
+:highlightjs-languages: rust
+:github-icon: pass:[<svg class="icon"><use href="#github-icon"/></svg>]
+
+= Ethereum Precompiled Contracts
+
+Precompiled contracts in Ethereum are contracts that execute complex cryptographic computations and do not require the overhead of the EVM. There are nine precompiles that can be used within the EVM that handle specific common operations such as hashing and signature schemes.
+
+The following precompiles are currently included in the `evm-template`:
+1. ecrecover
+2. sha256
+3. sha3FIPS256
+4. ripemd-160
+5. Bn128Add
+6. Bn128Mul
+7. Bn128Pairing
+8. the identity function
+9. modular exponentiation
+
+These precompiles are natively available on Ethereum. The `evm-template` reserves them at the same addresses as Ethereum.
+
+== ecrecover
+
+Usage example TODO
