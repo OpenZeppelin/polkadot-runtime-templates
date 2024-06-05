@@ -13,11 +13,13 @@ version = "0.1.2"
 clap = { workspace = true }
 futures = { workspace = true }
 hex-literal = { workspace = true }
+hex = { workspace = true }
 jsonrpsee = { workspace = true, features = [ "server" ] }
 log = { workspace = true }
 parity-scale-codec = { workspace = true }
 serde = { workspace = true, features = [ "derive" ] }
 serde_json = { workspace = true }
+serde_derive = { workspace = true }
 
 # Local
 parachain-template-runtime = { path = "../runtime" }

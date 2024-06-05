@@ -1,12 +1,15 @@
 use std::path::PathBuf;
 
-use crate::eth::EthConfiguration;
+use sc_cli::{ChainSpec, Result};
+use sc_network::config::NetworkConfiguration;
+
+use crate::{contracts::ContractsPath, eth::EthConfiguration};
 
 /// Sub-commands supported by the collator.
 #[derive(Debug, clap::Subcommand)]
 pub enum Subcommand {
     /// Build a chain specification.
-    BuildSpec(sc_cli::BuildSpecCmd),
+    BuildSpec(ExtendedBuildSpecCmd),
 
     /// Validate blocks.
     CheckBlock(sc_cli::CheckBlockCmd),
@@ -45,6 +48,47 @@ pub enum Subcommand {
     /// deprecation notice. It will be removed entirely some time after Janurary
     /// 2024.
     TryRuntime,
+}
+
+impl Subcommand {
+    pub fn contract_directory(&self) -> ContractsPath {
+        match self {
+            Self::BuildSpec(cmd) => match (cmd.no_contracts, cmd.predeployed_contracts.clone()) {
+                (true, _) => ContractsPath::None,
+                (false, None) => ContractsPath::Default,
+                (false, Some(path)) => ContractsPath::Some(path),
+            },
+            _ => ContractsPath::None,
+        }
+    }
+}
+
+#[derive(Debug, Clone, clap::Parser)]
+pub struct ExtendedBuildSpecCmd {
+    #[clap(flatten)]
+    pub cmd: sc_cli::BuildSpecCmd,
+
+    /// Path to a directory that contains precompiled contracts.
+    /// A directory should contain file `contracts.json`.
+    /// It should contain a JSON array of objects with "address" and "filename" files in it. See the example in `evm-template/contracts/contracts.json`
+    /// If you don't specify any contract, only Entrypoint contract will be deployed at the address `0x81ead4918134AE386dbd04346216E20AB8F822C4`
+    #[arg(long, default_value = None)]
+    pub predeployed_contracts: Option<String>,
+
+    /// Set this to true to if you do not want any contracts to be deployed
+    #[arg(long, default_value = "false")]
+    pub no_contracts: bool,
+}
+
+impl ExtendedBuildSpecCmd {
+    /// Run the build-spec command
+    pub fn run(
+        &self,
+        spec: Box<dyn ChainSpec>,
+        network_config: NetworkConfiguration,
+    ) -> Result<()> {
+        self.cmd.run(spec, network_config)
+    }
 }
 
 const AFTER_HELP_EXAMPLE: &str = color_print::cstr!(
