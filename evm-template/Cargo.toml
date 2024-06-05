@@ -13,8 +13,8 @@ repository = "https://github.com/OpenZeppelin/polkadot-runtime-template"
 clap = { version = "4.5.3", features = [ "derive" ] }
 color-print = "0.3.4"
 futures = "0.3.28"
-hex-literal = "0.4.1"
 hex = "0.4.3"
+hex-literal = "0.4.1"
 jsonrpsee = { version = "0.22", features = [ "server" ] }
 log = { version = "0.4.20", default-features = false }
 parity-scale-codec = { version = "3.0.0", default-features = false, features = [
