@@ -6678,6 +6678,39 @@ dependencies = [
 ]
 
 [[package]]
+name = "orml-traits"
+version = "0.10.0"
+source = "git+https://github.com/OpenZeppelin/open-runtime-module-library?branch=polkadot-v1.10.0#92fa20ffd3bef00f4838b6a0a6bcb7610b06cfaf"
+dependencies = [
+ "frame-support",
+ "impl-trait-for-tuples",
+ "num-traits",
+ "orml-utilities",
+ "parity-scale-codec",
+ "paste",
+ "scale-info",
+ "sp-core",
+ "sp-io",
+ "sp-runtime",
+ "sp-std 14.0.0 (git+https://github.com/paritytech/polkadot-sdk?tag=polkadot-v1.10.0)",
+ "staging-xcm",
+]
+
+[[package]]
+name = "orml-utilities"
+version = "0.10.0"
+source = "git+https://github.com/OpenZeppelin/open-runtime-module-library?branch=polkadot-v1.10.0#92fa20ffd3bef00f4838b6a0a6bcb7610b06cfaf"
+dependencies = [
+ "frame-support",
+ "parity-scale-codec",
+ "scale-info",
+ "sp-core",
+ "sp-io",
+ "sp-runtime",
+ "sp-std 14.0.0 (git+https://github.com/paritytech/polkadot-sdk?tag=polkadot-v1.10.0)",
+]
+
+[[package]]
 name = "overload"
 version = "0.1.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -6699,6 +6732,24 @@ dependencies = [
  "sp-io",
  "sp-runtime",
  "sp-std 14.0.0 (git+https://github.com/paritytech/polkadot-sdk?tag=polkadot-v1.10.0)",
+]
+
+[[package]]
+name = "pallet-asset-manager"
+version = "0.1.0"
+source = "git+https://github.com/OpenZeppelin/moonbeam.git?branch=polkadot-v1.10.0#e1cb96f42dbd156a9f12de8ce6d3143a0ffde1df"
+dependencies = [
+ "frame-support",
+ "frame-system",
+ "log",
+ "parity-scale-codec",
+ "scale-info",
+ "serde",
+ "sp-io",
+ "sp-runtime",
+ "sp-std 14.0.0 (git+https://github.com/paritytech/polkadot-sdk?tag=polkadot-v1.10.0)",
+ "staging-xcm",
+ "xcm-primitives",
 ]
 
 [[package]]
@@ -8010,6 +8061,7 @@ dependencies = [
  "frame-try-runtime",
  "hex-literal",
  "log",
+ "pallet-asset-manager",
  "pallet-assets",
  "pallet-aura",
  "pallet-authorship",
@@ -15693,6 +15745,34 @@ dependencies = [
  "sp-std 14.0.0 (git+https://github.com/paritytech/polkadot-sdk?tag=polkadot-v1.10.0)",
  "sp-weights",
  "staging-xcm",
+]
+
+[[package]]
+name = "xcm-primitives"
+version = "0.1.1"
+source = "git+https://github.com/OpenZeppelin/moonbeam.git?branch=polkadot-v1.10.0#e1cb96f42dbd156a9f12de8ce6d3143a0ffde1df"
+dependencies = [
+ "cumulus-primitives-core",
+ "ethereum",
+ "ethereum-types",
+ "frame-support",
+ "frame-system",
+ "hex",
+ "impl-trait-for-tuples",
+ "log",
+ "orml-traits",
+ "pallet-staking",
+ "parity-scale-codec",
+ "polkadot-runtime-common",
+ "scale-info",
+ "serde",
+ "sha3",
+ "sp-io",
+ "sp-runtime",
+ "sp-std 14.0.0 (git+https://github.com/paritytech/polkadot-sdk?tag=polkadot-v1.10.0)",
+ "staging-xcm",
+ "staging-xcm-builder",
+ "staging-xcm-executor",
 ]
 
 [[package]]

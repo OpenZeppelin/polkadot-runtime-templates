@@ -95,6 +95,9 @@ pallet-evm-precompile-modexp = { workspace = true }
 pallet-evm-precompile-sha3fips = { workspace = true }
 pallet-evm-precompile-simple = { workspace = true }
 
+# Moonbeam
+pallet-asset-manager = { workspace = true }
+
 [dev-dependencies]
 sp-io = { workspace = true }
 
@@ -125,6 +128,7 @@ std = [
 	"frame-system/std",
 	"frame-try-runtime?/std",
 	"log/std",
+	"pallet-asset-manager/std",
 	"pallet-assets/std",
 	"pallet-aura/std",
 	"pallet-authorship/std",
