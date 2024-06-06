@@ -34,16 +34,16 @@ use polkadot_runtime_common::{
 };
 use scale_info::TypeInfo;
 use sp_consensus_aura::sr25519::AuthorityId as AuraId;
-use sp_core::{H160, U256};
+use sp_core::{H160, H256, U256};
 use sp_runtime::{
-    traits::{AccountIdLookup, BlakeTwo256, IdentityLookup},
+    traits::{AccountIdLookup, BlakeTwo256, Hash as THash, IdentityLookup, MaybeEquivalence},
     ConsensusEngineId, Perbill, Permill, RuntimeDebug,
 };
 use sp_std::{marker::PhantomData, vec::Vec};
 use sp_version::RuntimeVersion;
 // XCM Imports
 use xcm::{
-    latest::{prelude::BodyId, InteriorLocation, Junction::PalletInstance},
+    latest::{prelude::BodyId, InteriorLocation, Junction::PalletInstance, Location},
     VersionedLocation,
 };
 use xcm_builder::PayOverXcm;
@@ -397,7 +397,7 @@ impl From<AssetType> for AssetId {
                 let mut result: [u8; 16] = [0u8; 16];
                 let hash: H256 = id.using_encoded(<Runtime as frame_system::Config>::Hashing::hash);
                 result.copy_from_slice(&hash.as_fixed_bytes()[0..16]);
-                u128::from_le_bytes(result)
+                u128::from_le_bytes(result).try_into().unwrap()
             }
         }
     }
@@ -422,7 +422,7 @@ impl pallet_asset_manager::AssetRegistrar<Runtime> for AssetRegistrar {
         Assets::force_create(
             RuntimeOrigin::root(),
             asset.into(),
-            AssetManager::account_id(),
+            sp_runtime::MultiAddress::Id(AssetManager::account_id()),
             is_sufficient,
             min_balance,
         )?;
