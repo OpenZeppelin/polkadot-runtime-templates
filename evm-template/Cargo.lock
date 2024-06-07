@@ -6739,6 +6739,7 @@ name = "pallet-asset-manager"
 version = "0.1.0"
 source = "git+https://github.com/OpenZeppelin/moonbeam.git?branch=polkadot-v1.10.0#e1cb96f42dbd156a9f12de8ce6d3143a0ffde1df"
 dependencies = [
+ "frame-benchmarking",
  "frame-support",
  "frame-system",
  "log",
@@ -15756,6 +15757,7 @@ dependencies = [
  "cumulus-primitives-core",
  "ethereum",
  "ethereum-types",
+ "frame-benchmarking",
  "frame-support",
  "frame-system",
  "hex",
