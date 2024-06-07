@@ -128,6 +128,7 @@ construct_runtime!(
         TransactionPayment: pallet_transaction_payment = 11,
         Assets: pallet_assets = 12,
         Treasury: pallet_treasury::{Pallet, Call, Storage, Config<T>, Event<T>} = 13,
+        AssetManager: pallet_asset_manager = 14,
 
         // Governance
         Sudo: pallet_sudo = 15,

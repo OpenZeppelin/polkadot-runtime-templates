@@ -132,6 +132,9 @@ parachains-common = { git = "https://github.com/paritytech/polkadot-sdk", defaul
 substrate-runtime-fuzzer = { git = "https://github.com/srlabs/substrate-runtime-fuzzer.git", default-features = false }
 ziggy = { version = "0.8", default-features = false }
 
+# Moonbeam
+pallet-asset-manager = { git = "https://github.com/OpenZeppelin/moonbeam.git", branch = "polkadot-v1.10.0", default-features = false }
+xcm-primitives = { git = "https://github.com/OpenZeppelin/moonbeam.git", branch = "polkadot-v1.10.0", default-features = false }
 
 [workspace.lints.clippy]
 large_enum_variant = "allow"
