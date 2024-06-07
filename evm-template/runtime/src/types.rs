@@ -30,7 +30,7 @@ pub type AccountId = <<Signature as Verify>::Signer as IdentifyAccount>::Account
 pub type Balance = u128;
 
 /// Identifier of an asset
-pub type AssetId = u32;
+pub type AssetId = u128;
 
 /// Index of a transaction in the chain.
 pub type Nonce = u32;

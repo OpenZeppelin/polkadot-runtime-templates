@@ -328,7 +328,7 @@ impl pallet_assets::Config for Runtime {
     type AssetAccountDeposit = AssetAccountDeposit;
     type AssetDeposit = AssetDeposit;
     type AssetId = AssetId;
-    type AssetIdParameter = parity_scale_codec::Compact<u32>;
+    type AssetIdParameter = parity_scale_codec::Compact<AssetId>;
     type Balance = Balance;
     #[cfg(feature = "runtime-benchmarks")]
     type BenchmarkHelper = ();
