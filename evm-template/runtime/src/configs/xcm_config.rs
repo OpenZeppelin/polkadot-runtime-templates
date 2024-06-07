@@ -23,7 +23,7 @@ use crate::{
         AssetType, ParachainSystem, Runtime, RuntimeCall, RuntimeEvent, RuntimeOrigin, WeightToFee,
         XcmpQueue,
     },
-    types::{AccountId, Balance},
+    types::{AccountId, AssetId, Balance},
     AllPalletsWithSystem, AssetManager, Assets, Balances, ParachainInfo, PolkadotXcm, Treasury,
 };
 
