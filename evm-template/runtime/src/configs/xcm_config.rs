@@ -9,21 +9,22 @@ use polkadot_parachain_primitives::primitives::Sibling;
 use xcm::latest::prelude::*;
 use xcm_builder::{
     AccountKey20Aliases, AllowExplicitUnpaidExecutionFrom, AllowTopLevelPaidExecutionFrom,
-    DenyReserveTransferToRelayChain, DenyThenTry, EnsureXcmOrigin, FixedWeightBounds,
-    FrameTransactionalProcessor, FungibleAdapter, FungiblesAdapter, IsConcrete, NativeAsset,
-    NoChecking, ParentIsPreset, RelayChainAsNative, SiblingParachainAsNative,
+    ConvertedConcreteId, DenyReserveTransferToRelayChain, DenyThenTry, EnsureXcmOrigin,
+    FixedWeightBounds, FrameTransactionalProcessor, FungibleAdapter, FungiblesAdapter, IsConcrete,
+    NativeAsset, NoChecking, ParentIsPreset, RelayChainAsNative, SiblingParachainAsNative,
     SiblingParachainConvertsVia, SignedAccountKey20AsNative, SovereignSignedViaLocation,
     TakeWeightCredit, TrailingSetTopicAsId, UsingComponents, WithComputedOrigin, WithUniqueTopic,
 };
-use xcm_executor::XcmExecutor;
+use xcm_executor::{traits::JustTry, XcmExecutor};
+use xcm_primitives::AsAssetType;
 
 use crate::{
     configs::{
-        Balances, ParachainSystem, Runtime, RuntimeCall, RuntimeEvent, RuntimeOrigin, WeightToFee,
+        AssetType, ParachainSystem, Runtime, RuntimeCall, RuntimeEvent, RuntimeOrigin, WeightToFee,
         XcmpQueue,
     },
     types::{AccountId, Balance},
-    AllPalletsWithSystem, Assets, ParachainInfo, PolkadotXcm,
+    AllPalletsWithSystem, AssetManager, Assets, Balances, ParachainInfo, PolkadotXcm, Treasury,
 };
 
 parameter_types! {
@@ -32,6 +33,7 @@ parameter_types! {
     pub PlaceholderAccount: AccountId = PolkadotXcm::check_account();
     pub AssetsPalletLocation: Location =
         PalletInstance(<Assets as PalletInfoAccess>::index() as u8).into();
+    pub BalancesPalletLocation: Location = PalletInstance(<Balances as PalletInfoAccess>::index() as u8).into();
     pub RelayChainOrigin: RuntimeOrigin = cumulus_pallet_xcm::Origin::Relay.into();
     pub UniversalLocation: InteriorLocation = Parachain(ParachainInfo::parachain_id().into()).into();
 }
@@ -110,6 +112,28 @@ pub type XcmOriginToTransactDispatchOrigin = (
 );
 
 parameter_types! {
+    /// Xcm fees will go to the treasury account
+    pub XcmFeesAccount: AccountId = Treasury::account_id();
+}
+
+/// This is the struct that will handle the revenue from xcm fees
+/// We do not burn anything because we want to mimic exactly what
+/// the sovereign account has
+pub type XcmFeesToAccount = xcm_primitives::XcmFeesToAccount<
+    crate::Assets,
+    (
+        ConvertedConcreteId<
+            AssetId,
+            Balance,
+            AsAssetType<AssetId, AssetType, AssetManager>,
+            JustTry,
+        >,
+    ),
+    AccountId,
+    XcmFeesAccount,
+>;
+
+parameter_types! {
     // One XCM operation is 1_000_000_000 weight - almost certainly a conservative estimate.
     pub const UnitWeightCost: Weight = Weight::from_parts(1_000_000_000, 64 * 1024);
     pub const MaxInstructions: u32 = 100;
@@ -166,7 +190,10 @@ impl xcm_executor::Config for XcmConfig {
     type RuntimeCall = RuntimeCall;
     type SafeCallFilter = Everything;
     type SubscriptionService = PolkadotXcm;
-    type Trader = UsingComponents<WeightToFee, RelayLocation, AccountId, Balances, ()>;
+    type Trader = (
+        UsingComponents<WeightToFee, BalancesPalletLocation, AccountId, Balances, ()>,
+        xcm_primitives::FirstAssetTrader<AssetType, AssetManager, XcmFeesToAccount>,
+    );
     type TransactionalProcessor = FrameTransactionalProcessor;
     type UniversalAliases = Nothing;
     // Teleporting is disabled.

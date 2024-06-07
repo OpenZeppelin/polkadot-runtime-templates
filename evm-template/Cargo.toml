@@ -158,6 +158,7 @@ pallet-evm-precompile-simple = { git = "https://github.com/OpenZeppelin/frontier
 
 # Moonbeam
 pallet-asset-manager = { git = "https://github.com/OpenZeppelin/moonbeam.git", branch = "polkadot-v1.10.0", default-features = false }
+xcm-primitives = { git = "https://github.com/OpenZeppelin/moonbeam.git", branch = "polkadot-v1.10.0", default-features = false }
 
 # Fuzzer
 substrate-runtime-fuzzer = { git = "https://github.com/srlabs/substrate-runtime-fuzzer.git", default-features = false }

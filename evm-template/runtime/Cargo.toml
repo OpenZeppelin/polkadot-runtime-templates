@@ -97,6 +97,7 @@ pallet-evm-precompile-simple = { workspace = true }
 
 # Moonbeam
 pallet-asset-manager = { workspace = true }
+xcm-primitives = { workspace = true }
 
 [dev-dependencies]
 sp-io = { workspace = true }
@@ -175,6 +176,7 @@ std = [
 	"sp-version/std",
 	"xcm-builder/std",
 	"xcm-executor/std",
+	"xcm-primitives/std",
 	"xcm/std",
 ]
 async-backing = []
