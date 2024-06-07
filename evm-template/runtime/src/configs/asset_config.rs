@@ -1,7 +1,7 @@
 use frame_support::{
     dispatch::GetDispatchInfo, parameter_types, traits::AsEnsureOriginWithArg, weights::Weight,
 };
-use frame_system::{EnsureNever, EnsureRoot};
+use frame_system::{EnsureRoot, EnsureSigned};
 use parity_scale_codec::{Compact, Decode, Encode};
 use scale_info::TypeInfo;
 use sp_core::H256;
@@ -38,7 +38,7 @@ impl pallet_assets::Config for Runtime {
     #[cfg(feature = "runtime-benchmarks")]
     type BenchmarkHelper = ();
     type CallbackHandle = ();
-    type CreateOrigin = AsEnsureOriginWithArg<EnsureNever<AccountId>>;
+    type CreateOrigin = AsEnsureOriginWithArg<EnsureSigned<AccountId>>;
     type Currency = Balances;
     type Extra = ();
     type ForceOrigin = EnsureRoot<AccountId>;
