@@ -196,7 +196,7 @@ fn testnet_genesis(
                     storage: Default::default(),
                     // bytecode to revert without returning data
                     // (PUSH1 0x00 PUSH1 0x00 REVERT)
-                    code: vec![0x60, 0x00, 0x60, 0x00, 0xFF],
+                    code: vec![0x60, 0x00, 0x60, 0x00, 0xFD],
                 },
             )
         })
