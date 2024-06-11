@@ -53,7 +53,7 @@ pub enum Subcommand {
 impl Subcommand {
     pub fn contract_directory(&self) -> ContractsPath {
         match self {
-            Self::BuildSpec(cmd) => match (cmd.no_contracts, cmd.predeployed_contracts.clone()) {
+            Self::BuildSpec(cmd) => match (cmd.no_predeployed_contracts, cmd.predeployed_contracts.clone()) {
                 (true, _) => ContractsPath::None,
                 (false, None) => ContractsPath::Default,
                 (false, Some(path)) => ContractsPath::Some(path),
@@ -77,7 +77,7 @@ pub struct ExtendedBuildSpecCmd {
 
     /// Set this to true to if you do not want any contracts to be deployed
     #[arg(long, default_value = "false")]
-    pub no_contracts: bool,
+    pub no_predeployed_contracts: bool,
 }
 
 impl ExtendedBuildSpecCmd {
