@@ -154,11 +154,9 @@ impl pallet_asset_manager::AssetRegistrar<Runtime> for AssetRegistrar {
         // the assets pallet
 
         // This is the dispatch info of destroy
-        RuntimeCall::Assets(pallet_assets::Call::<Runtime, ForeignAssetInstance>::start_destroy {
-            id: asset.into(),
-        })
-        .get_dispatch_info()
-        .weight
+        RuntimeCall::Assets(pallet_assets::Call::<Runtime>::start_destroy { id: asset.into() })
+            .get_dispatch_info()
+            .weight
     }
 }
 
