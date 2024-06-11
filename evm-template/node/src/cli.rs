@@ -53,11 +53,12 @@ pub enum Subcommand {
 impl Subcommand {
     pub fn contract_directory(&self) -> ContractsPath {
         match self {
-            Self::BuildSpec(cmd) => match (cmd.no_predeployed_contracts, cmd.predeployed_contracts.clone()) {
-                (true, _) => ContractsPath::None,
-                (false, None) => ContractsPath::Default,
-                (false, Some(path)) => ContractsPath::Some(path),
-            },
+            Self::BuildSpec(cmd) =>
+                match (cmd.no_predeployed_contracts, cmd.predeployed_contracts.clone()) {
+                    (true, _) => ContractsPath::None,
+                    (false, None) => ContractsPath::Default,
+                    (false, Some(path)) => ContractsPath::Some(path),
+                },
             _ => ContractsPath::None,
         }
     }
