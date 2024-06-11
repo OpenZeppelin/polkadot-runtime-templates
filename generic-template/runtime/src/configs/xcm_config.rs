@@ -6,6 +6,7 @@ use frame_support::{
 use frame_system::EnsureRoot;
 use pallet_xcm::XcmPassthrough;
 use polkadot_parachain_primitives::{primitives, primitives::Sibling};
+use polkadot_runtime_common::impls::ToAuthor;
 use xcm::latest::prelude::*;
 use xcm_builder::{
     AccountId32Aliases, AllowExplicitUnpaidExecutionFrom, AllowTopLevelPaidExecutionFrom,
@@ -194,7 +195,13 @@ impl xcm_executor::Config for XcmConfig {
     type SafeCallFilter = Everything;
     type SubscriptionService = PolkadotXcm;
     type Trader = (
-        UsingComponents<WeightToFee, BalancesPalletLocation, AccountId, Balances, ()>,
+        UsingComponents<
+            WeightToFee,
+            BalancesPalletLocation,
+            AccountId,
+            Balances,
+            ToAuthor<Runtime>,
+        >,
         xcm_primitives::FirstAssetTrader<AssetType, AssetManager, XcmFeesToAccount>,
     );
     type TransactionalProcessor = FrameTransactionalProcessor;
