@@ -28,6 +28,7 @@ parameter_types! {
     pub const RemoveItemsLimit: u32 = 1000;
 }
 
+// Foreign assets
 impl pallet_assets::Config for Runtime {
     type ApprovalDeposit = ApprovalDeposit;
     type AssetAccountDeposit = AssetAccountDeposit;
@@ -112,9 +113,6 @@ impl From<AssetType> for AssetId {
 // In this case, we tell it to Create an Asset in pallet-assets
 pub struct AssetRegistrar;
 use frame_support::{pallet_prelude::DispatchResult, transactional};
-
-// Not to disrupt the previous asset instance, we assign () to Foreign
-pub type ForeignAssetInstance = ();
 
 impl pallet_asset_manager::AssetRegistrar<Runtime> for AssetRegistrar {
     #[transactional]
