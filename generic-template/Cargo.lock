@@ -2971,52 +2971,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "ethbloom"
-version = "0.13.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "c22d4b5885b6aa2fe5e8b9329fb8d232bf739e434e6b87347c63bdd00c120f60"
-dependencies = [
- "crunchy",
- "fixed-hash",
- "impl-codec",
- "impl-rlp",
- "scale-info",
- "tiny-keccak",
-]
-
-[[package]]
-name = "ethereum"
-version = "0.15.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "2e04d24d20b8ff2235cffbf242d5092de3aa45f77c5270ddbfadd2778ca13fea"
-dependencies = [
- "bytes",
- "ethereum-types",
- "hash-db",
- "hash256-std-hasher",
- "parity-scale-codec",
- "rlp",
- "scale-info",
- "sha3",
- "trie-root",
-]
-
-[[package]]
-name = "ethereum-types"
-version = "0.14.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "02d215cbf040552efcbe99a38372fe80ab9d00268e20012b79fcd0f073edd8ee"
-dependencies = [
- "ethbloom",
- "fixed-hash",
- "impl-codec",
- "impl-rlp",
- "primitive-types",
- "scale-info",
- "uint",
-]
-
-[[package]]
 name = "event-listener"
 version = "2.5.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -4253,15 +4207,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "ba6a270039626615617f3f36d15fc827041df3b78c439da2cadfa47455a77f2f"
 dependencies = [
  "parity-scale-codec",
-]
-
-[[package]]
-name = "impl-rlp"
-version = "0.3.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "f28220f89297a075ddc7245cd538076ee98b01f2a9c23a53a4f1105d5a322808"
-dependencies = [
- "rlp",
 ]
 
 [[package]]
@@ -6117,39 +6062,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "orml-traits"
-version = "0.10.0"
-source = "git+https://github.com/OpenZeppelin/open-runtime-module-library?branch=polkadot-v1.10.0#92fa20ffd3bef00f4838b6a0a6bcb7610b06cfaf"
-dependencies = [
- "frame-support",
- "impl-trait-for-tuples",
- "num-traits",
- "orml-utilities",
- "parity-scale-codec",
- "paste",
- "scale-info",
- "sp-core",
- "sp-io",
- "sp-runtime",
- "sp-std 14.0.0 (git+https://github.com/paritytech/polkadot-sdk?tag=polkadot-v1.10.0)",
- "staging-xcm",
-]
-
-[[package]]
-name = "orml-utilities"
-version = "0.10.0"
-source = "git+https://github.com/OpenZeppelin/open-runtime-module-library?branch=polkadot-v1.10.0#92fa20ffd3bef00f4838b6a0a6bcb7610b06cfaf"
-dependencies = [
- "frame-support",
- "parity-scale-codec",
- "scale-info",
- "sp-core",
- "sp-io",
- "sp-runtime",
- "sp-std 14.0.0 (git+https://github.com/paritytech/polkadot-sdk?tag=polkadot-v1.10.0)",
-]
-
-[[package]]
 name = "pallet-asset-conversion"
 version = "10.0.0"
 source = "git+https://github.com/paritytech/polkadot-sdk?tag=polkadot-v1.10.0#7049c3c98836b3e9253f6aaa69b6bf3d622e3962"
@@ -6165,25 +6077,6 @@ dependencies = [
  "sp-io",
  "sp-runtime",
  "sp-std 14.0.0 (git+https://github.com/paritytech/polkadot-sdk?tag=polkadot-v1.10.0)",
-]
-
-[[package]]
-name = "pallet-asset-manager"
-version = "0.1.0"
-source = "git+https://github.com/OpenZeppelin/moonbeam.git?branch=polkadot-v1.10.0#e1cb96f42dbd156a9f12de8ce6d3143a0ffde1df"
-dependencies = [
- "frame-benchmarking",
- "frame-support",
- "frame-system",
- "log",
- "parity-scale-codec",
- "scale-info",
- "serde",
- "sp-io",
- "sp-runtime",
- "sp-std 14.0.0 (git+https://github.com/paritytech/polkadot-sdk?tag=polkadot-v1.10.0)",
- "staging-xcm",
- "xcm-primitives",
 ]
 
 [[package]]
@@ -7376,7 +7269,6 @@ dependencies = [
  "frame-try-runtime",
  "hex-literal",
  "log",
- "pallet-asset-manager",
  "pallet-assets",
  "pallet-aura",
  "pallet-authorship",
@@ -7423,7 +7315,6 @@ dependencies = [
  "staging-xcm-builder",
  "staging-xcm-executor",
  "substrate-wasm-builder",
- "xcm-primitives",
 ]
 
 [[package]]
@@ -9087,7 +8978,6 @@ checksum = "0b34d9fd68ae0b74a41b21c03c2f62847aa0ffea044eee893b4c140b37e244e2"
 dependencies = [
  "fixed-hash",
  "impl-codec",
- "impl-rlp",
  "impl-serde",
  "scale-info",
  "uint",
@@ -9709,28 +9599,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "bd124222d17ad93a644ed9d011a40f4fb64aa54275c08cc216524a9ea82fb09f"
 dependencies = [
  "digest 0.10.7",
-]
-
-[[package]]
-name = "rlp"
-version = "0.5.2"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "bb919243f34364b6bd2fc10ef797edbfa75f33c252e7998527479c6d6b47e1ec"
-dependencies = [
- "bytes",
- "rlp-derive",
- "rustc-hex",
-]
-
-[[package]]
-name = "rlp-derive"
-version = "0.1.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "e33d7b2abe0c340d8797fe2907d3f20d3b5ea5908683618bfe80df7f621f672a"
-dependencies = [
- "proc-macro2",
- "quote",
- "syn 1.0.109",
 ]
 
 [[package]]
@@ -14957,35 +14825,6 @@ dependencies = [
  "sp-std 14.0.0 (git+https://github.com/paritytech/polkadot-sdk?tag=polkadot-v1.10.0)",
  "sp-weights",
  "staging-xcm",
-]
-
-[[package]]
-name = "xcm-primitives"
-version = "0.1.1"
-source = "git+https://github.com/OpenZeppelin/moonbeam.git?branch=polkadot-v1.10.0#e1cb96f42dbd156a9f12de8ce6d3143a0ffde1df"
-dependencies = [
- "cumulus-primitives-core",
- "ethereum",
- "ethereum-types",
- "frame-benchmarking",
- "frame-support",
- "frame-system",
- "hex",
- "impl-trait-for-tuples",
- "log",
- "orml-traits",
- "pallet-staking",
- "parity-scale-codec",
- "polkadot-runtime-common",
- "scale-info",
- "serde",
- "sha3",
- "sp-io",
- "sp-runtime",
- "sp-std 14.0.0 (git+https://github.com/paritytech/polkadot-sdk?tag=polkadot-v1.10.0)",
- "staging-xcm",
- "staging-xcm-builder",
- "staging-xcm-executor",
 ]
 
 [[package]]
