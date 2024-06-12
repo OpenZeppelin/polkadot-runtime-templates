@@ -14,15 +14,19 @@ use sp_runtime::traits::AccountIdConversion;
 
 use crate::{
     chain_spec,
-    cli::{Cli, RelayChainCli, Subcommand},
+    cli::{Cli, ExtendedBuildSpecCmd, RelayChainCli, Subcommand},
+    contracts::ContractsPath,
     service::new_partial,
 };
 
-fn load_spec(id: &str) -> std::result::Result<Box<dyn ChainSpec>, String> {
+fn load_spec(
+    id: &str,
+    contracts_path: ContractsPath,
+) -> std::result::Result<Box<dyn ChainSpec>, String> {
     Ok(match id {
-        "dev" => Box::new(chain_spec::development_config()),
-        "template-rococo" => Box::new(chain_spec::local_testnet_config()),
-        "" | "local" => Box::new(chain_spec::local_testnet_config()),
+        "dev" => Box::new(chain_spec::development_config(contracts_path)),
+        "template-rococo" => Box::new(chain_spec::local_testnet_config(contracts_path)),
+        "" | "local" => Box::new(chain_spec::local_testnet_config(contracts_path)),
         path => Box::new(chain_spec::ChainSpec::from_json_file(std::path::PathBuf::from(path))?),
     })
 }
@@ -58,7 +62,10 @@ impl SubstrateCli for Cli {
     }
 
     fn load_spec(&self, id: &str) -> std::result::Result<Box<dyn sc_service::ChainSpec>, String> {
-        load_spec(id)
+        load_spec(
+            id,
+            self.subcommand.as_ref().map(Subcommand::contract_directory).unwrap_or_default(),
+        )
     }
 }
 
@@ -387,5 +394,15 @@ impl CliConfiguration<Self> for RelayChainCli {
 
     fn node_name(&self) -> Result<String> {
         self.base.base.node_name()
+    }
+}
+
+impl CliConfiguration for ExtendedBuildSpecCmd {
+    fn shared_params(&self) -> &SharedParams {
+        self.cmd.shared_params()
+    }
+
+    fn node_key_params(&self) -> Option<&sc_cli::NodeKeyParams> {
+        self.cmd.node_key_params()
     }
 }

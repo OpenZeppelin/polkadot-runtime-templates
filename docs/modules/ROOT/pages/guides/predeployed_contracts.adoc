@@ -1,0 +1,51 @@
+:source-highlighter: highlight.js
+:highlightjs-languages: rust
+:github-icon: pass:[<svg class="icon"><use href="#github-icon"/></svg>]
+
+= Predeployed Contracts:
+
+To enable some bleeding-edge features that EVM provides (like pay gas with any tokens), we have developed an ability to deploy contracts in genesis config. Initially it was done to deploy Entrypoint contract only, but we have supported this functionality for any contract with some limitations.  
+
+== How to use:
+
+=== Step 1: Compiling your contracts
+
+Currently we are supporting contracts that are compiled with Forge or Hardhat. If you want any other tool to be supported, consider creating an issue and attach and example of compiled contract.
+
+Here are compilation guides:
+
+* link:https://hardhat.org/hardhat-runner/docs/guides/compile-contracts[Hardhat]
+* link:https://book.getfoundry.sh/reference/forge/forge-build[Forge]
+
+When you have compiled the contracts, take the resulting JSON for your contract and save into a single directory for the future deployment.
+
+=== Step 2: Creating the configuration
+
+In the directory where you have saved the contracts, create a file name "contracts.json". In this file you should store an array of contract metadata, that contains filename of the artifact and the address where you want this contract to be deployed to. So, it should like like this:
+
+```json
+[
+    {
+        "address": "0x81ead4918134AE386dbd04346216E20AB8F822C4",
+        "filename": "Entrypoint.json"
+    }
+]
+```
+
+You can take as an example a file in our EVM template in path `contracts/contracts.json`.
+
+=== Step 3: Building the chainspec
+
+During the step when you generate a chainspec pass the parameter `--predeployed-contracts` with a path to the directory where you have stored the contract artifacts and the configuration:
+
+```bash
+./target/release/parachain-template-node build-spec --disable-default-bootnode --predeployed-contracts=<path_to_dir> > plain-parachain-chainspec.json
+```
+
+== Exclude any contracts from genesis config
+
+If you do not want any contract to be predeployed, you can use the `--no-predeployed-contracts` option when you are generating a plain chainspec. With this flag set you will receive a pristine chainspec without any additional smartcontracts deployed.
+
+== Limitations
+
+* Contructors are not executed at the moment. So if your contract needs any initialization, consider deploying it as usual.
