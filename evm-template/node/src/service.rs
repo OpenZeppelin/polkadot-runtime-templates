@@ -53,18 +53,6 @@ type HostFunctions = (
     frame_benchmarking::benchmarking::HostFunctions,
 );
 
-// impl sc_executor::NativeExecutionDispatch for ParachainNativeExecutor {
-//     type ExtendHostFunctions = HostFunctions;
-
-//     fn dispatch(method: &str, data: &[u8]) -> Option<Vec<u8>> {
-//         parachain_template_runtime::apis::api::dispatch(method, data)
-//     }
-
-//     fn native_version() -> sc_executor::NativeVersion {
-//         parachain_template_runtime::native_version()
-//     }
-// }
-
 type ParachainExecutor = WasmExecutor<HostFunctions>;
 
 type ParachainClient = TFullClient<Block, RuntimeApi, ParachainExecutor>;
