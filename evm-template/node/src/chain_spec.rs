@@ -3,6 +3,7 @@ use std::collections::BTreeMap;
 use cumulus_primitives_core::ParaId;
 use fp_evm::GenesisAccount;
 use hex_literal::hex;
+use log::error;
 use parachain_template_runtime::{
     constants::currency::EXISTENTIAL_DEPOSIT, AccountId, AuraId,
     OpenZeppelinPrecompiles as Precompiles, Runtime, Signature,
@@ -12,6 +13,8 @@ use sc_service::ChainType;
 use serde::{Deserialize, Serialize};
 use sp_core::{ecdsa, Pair, Public, H160};
 use sp_runtime::traits::{IdentifyAccount, Verify};
+
+use crate::contracts::{parse_contracts, ContractsPath};
 
 /// Specialized `ChainSpec` for the normal parachain runtime.
 pub type ChainSpec =
@@ -70,7 +73,7 @@ pub fn template_session_keys(keys: AuraId) -> parachain_template_runtime::Sessio
     parachain_template_runtime::SessionKeys { aura: keys }
 }
 
-pub fn development_config() -> ChainSpec {
+pub fn development_config(contracts_path: ContractsPath) -> ChainSpec {
     // Give your base currency a unit name and decimal places
     let mut properties = sc_chain_spec::Properties::new();
     properties.insert("tokenSymbol".into(), "UNIT".into());
@@ -118,11 +121,12 @@ pub fn development_config() -> ChainSpec {
         ],
         get_account_id_from_seed::<ecdsa::Public>("Alice"),
         1000.into(),
+        contracts_path,
     ))
     .build()
 }
 
-pub fn local_testnet_config() -> ChainSpec {
+pub fn local_testnet_config(contracts_path: ContractsPath) -> ChainSpec {
     // Give your base currency a unit name and decimal places
     let mut properties = sc_chain_spec::Properties::new();
     properties.insert("tokenSymbol".into(), "UNIT".into());
@@ -167,6 +171,7 @@ pub fn local_testnet_config() -> ChainSpec {
         ],
         get_account_id_from_seed::<ecdsa::Public>("Alice"),
         1000.into(),
+        contracts_path,
     ))
     .with_protocol_id("template-local")
     .with_properties(properties)
@@ -178,7 +183,41 @@ fn testnet_genesis(
     endowed_accounts: Vec<AccountId>,
     root: AccountId,
     id: ParaId,
+    contracts_path: ContractsPath,
 ) -> serde_json::Value {
+    let contracts = parse_contracts(contracts_path)
+        .map_err(|e| error!("Error while parsing contracts: {e:?}"))
+        .unwrap_or_default();
+    let precompiles = Precompiles::<Runtime>::used_addresses()
+        .map(|addr| {
+            (
+                addr,
+                GenesisAccount {
+                    nonce: Default::default(),
+                    balance: Default::default(),
+                    storage: Default::default(),
+                    // bytecode to revert without returning data
+                    // (PUSH1 0x00 PUSH1 0x00 REVERT)
+                    code: vec![0x60, 0x00, 0x60, 0x00, 0xFD],
+                },
+            )
+        })
+        .into_iter();
+    let accounts: BTreeMap<H160, GenesisAccount> = contracts
+        .into_iter()
+        .map(|(address, contract)| {
+            (
+                address,
+                GenesisAccount {
+                    code: contract.bytecode(),
+                    nonce: Default::default(),
+                    balance: Default::default(),
+                    storage: Default::default(),
+                },
+            )
+        })
+        .chain(precompiles)
+        .collect();
     serde_json::json!({
         "balances": {
             "balances": endowed_accounts.iter().cloned().map(|k| (k, 1u64 << 60)).collect::<Vec<_>>(),
@@ -207,22 +246,7 @@ fn testnet_genesis(
             "chainId": 9999
         },
         "evm": {
-            "accounts": Precompiles::<Runtime>::used_addresses()
-                .map(|addr| {
-                    (
-                        addr,
-                        GenesisAccount {
-                            nonce: Default::default(),
-                            balance: Default::default(),
-                            storage: Default::default(),
-                            // bytecode to revert without returning data
-                            // (PUSH1 0x00 PUSH1 0x00 REVERT)
-                            code: vec![0x60, 0x00, 0x60, 0x00, 0xFD],
-                        },
-                    )
-                })
-                .into_iter()
-                .collect::<BTreeMap<H160, GenesisAccount>>(),
+            "accounts": accounts
         },
         "polkadotXcm": {
             "safeXcmVersion": Some(SAFE_XCM_VERSION),
