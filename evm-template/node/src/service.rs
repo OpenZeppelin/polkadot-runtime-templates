@@ -45,8 +45,19 @@ use crate::eth::{
 /// Native executor type.
 pub struct ParachainNativeExecutor;
 
+#[cfg(not(feature = "runtime-benchmarks"))]
+type HostFunctions =
+    (sp_io::SubstrateHostFunctions, cumulus_client_service::storage_proof_size::HostFunctions);
+
+#[cfg(feature = "runtime-benchmarks")]
+type HostFunctions = (
+    sp_io::SubstrateHostFunctions,
+    cumulus_client_service::storage_proof_size::HostFunctions,
+    frame_benchmarking::benchmarking::HostFunctions,
+);
+
 impl sc_executor::NativeExecutionDispatch for ParachainNativeExecutor {
-    type ExtendHostFunctions = frame_benchmarking::benchmarking::HostFunctions;
+    type ExtendHostFunctions = HostFunctions;
 
     fn dispatch(method: &str, data: &[u8]) -> Option<Vec<u8>> {
         parachain_template_runtime::apis::api::dispatch(method, data)
