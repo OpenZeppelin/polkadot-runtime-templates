@@ -99,10 +99,10 @@ impl Into<Option<xcm::v3::Location>> for AssetType {
     }
 }
 
-impl Into<Option<Location>> for AssetType {
-    fn into(self) -> Option<Location> {
-        match self {
-            Self::Xcm(location) => xcm_builder::V4V3LocationConverter::convert_back(&location),
+impl From<AssetType> for Option<xcm::v3::Location> {
+    fn from(val: AssetType) -> Self {
+        match val {
+            AssetType::Xcm(location) => Some(location),
         }
     }
 }
@@ -116,7 +116,7 @@ impl From<AssetType> for AssetId {
                 let mut result: [u8; 16] = [0u8; 16];
                 let hash: H256 = id.using_encoded(<Runtime as frame_system::Config>::Hashing::hash);
                 result.copy_from_slice(&hash.as_fixed_bytes()[0..16]);
-                u128::from_le_bytes(result).try_into().unwrap()
+                u128::from_le_bytes(result)
             }
         }
     }
