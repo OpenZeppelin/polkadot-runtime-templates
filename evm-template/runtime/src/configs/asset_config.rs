@@ -5,7 +5,7 @@ use frame_system::{EnsureRoot, EnsureSigned};
 use parity_scale_codec::{Compact, Decode, Encode};
 use scale_info::TypeInfo;
 use sp_core::H256;
-use sp_runtime::traits::{Hash as THash, MaybeEquivalence};
+use sp_runtime::traits::Hash as THash;
 use sp_std::{
     convert::{From, Into},
     prelude::*,
