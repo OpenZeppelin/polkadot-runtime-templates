@@ -91,14 +91,6 @@ impl TryFrom<Location> for AssetType {
     }
 }
 
-impl Into<Option<xcm::v3::Location>> for AssetType {
-    fn into(self) -> Option<xcm::v3::Location> {
-        match self {
-            Self::Xcm(location) => Some(location),
-        }
-    }
-}
-
 impl From<AssetType> for Option<xcm::v3::Location> {
     fn from(val: AssetType) -> Self {
         match val {
