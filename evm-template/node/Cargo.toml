@@ -12,11 +12,13 @@ version = "0.1.2"
 [dependencies]
 clap = { workspace = true }
 futures = { workspace = true }
+hex = { workspace = true }
 hex-literal = { workspace = true }
 jsonrpsee = { workspace = true, features = [ "server" ] }
 log = { workspace = true }
 parity-scale-codec = { workspace = true }
 serde = { workspace = true, features = [ "derive" ] }
+serde_derive = { workspace = true }
 serde_json = { workspace = true }
 
 # Local
