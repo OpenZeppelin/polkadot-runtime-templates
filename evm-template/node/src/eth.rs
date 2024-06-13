@@ -12,7 +12,7 @@ use futures::{future, prelude::*};
 use parachain_template_runtime::opaque::Block;
 // Substrate
 use sc_client_api::BlockchainEvents;
-use sc_executor::{NativeElseWasmExecutor, NativeExecutionDispatch};
+use sc_executor::WasmExecutor;
 use sc_network_sync::SyncingService;
 use sc_service::{error::Error as ServiceError, Configuration, TaskManager};
 use sp_api::ConstructRuntimeApi;
@@ -21,7 +21,7 @@ use sp_api::ConstructRuntimeApi;
 pub type FullBackend = sc_service::TFullBackend<Block>;
 /// Full client.
 pub type FullClient<RuntimeApi, Executor> =
-    sc_service::TFullClient<Block, RuntimeApi, NativeElseWasmExecutor<Executor>>;
+    sc_service::TFullClient<Block, RuntimeApi, WasmExecutor<Executor>>;
 
 /// Frontier DB backend type.
 pub type FrontierBackend = fc_db::Backend<Block>;
@@ -124,9 +124,9 @@ impl<Api> EthCompatRuntimeApiCollection for Api where
 {
 }
 
-pub async fn spawn_frontier_tasks<RuntimeApi, Executor>(
+pub async fn spawn_frontier_tasks<RuntimeApi, Functions>(
     task_manager: &TaskManager,
-    client: Arc<FullClient<RuntimeApi, Executor>>,
+    client: Arc<FullClient<RuntimeApi, Functions>>,
     backend: Arc<FullBackend>,
     frontier_backend: FrontierBackend,
     filter_pool: Option<FilterPool>,
@@ -140,10 +140,10 @@ pub async fn spawn_frontier_tasks<RuntimeApi, Executor>(
         >,
     >,
 ) where
-    RuntimeApi: ConstructRuntimeApi<Block, FullClient<RuntimeApi, Executor>>,
+    RuntimeApi: ConstructRuntimeApi<Block, FullClient<RuntimeApi, Functions>>,
     RuntimeApi: Send + Sync + 'static,
     RuntimeApi::RuntimeApi: EthCompatRuntimeApiCollection,
-    Executor: NativeExecutionDispatch + 'static,
+    Functions: sc_executor::sp_wasm_interface::HostFunctions,
 {
     // Spawn main mapping sync worker background task.
     match frontier_backend {
