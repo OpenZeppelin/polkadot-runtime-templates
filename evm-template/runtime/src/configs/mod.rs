@@ -1,3 +1,5 @@
+pub mod asset_config;
+pub use asset_config::AssetType;
 pub mod governance;
 pub mod xcm_config;
 
@@ -11,15 +13,14 @@ use frame_support::{
     dispatch::DispatchClass,
     parameter_types,
     traits::{
-        AsEnsureOriginWithArg, ConstU32, ConstU64, Contains, EitherOfDiverse, FindAuthor,
-        InstanceFilter, TransformOrigin,
+        ConstU32, ConstU64, Contains, EitherOfDiverse, FindAuthor, InstanceFilter, TransformOrigin,
     },
     weights::{ConstantMultiplier, Weight},
     PalletId,
 };
 use frame_system::{
     limits::{BlockLength, BlockWeights},
-    EnsureRoot, EnsureSigned,
+    EnsureRoot,
 };
 pub use governance::origins::pallet_custom_origins;
 use governance::{origins::Treasurer, TreasurySpender};
@@ -53,7 +54,7 @@ use xcm_config::XcmOriginToTransactDispatchOrigin;
 
 use crate::{
     constants::{
-        currency::{deposit, CENTS, EXISTENTIAL_DEPOSIT, MICROCENTS, MILLICENTS},
+        currency::{deposit, EXISTENTIAL_DEPOSIT, MICROCENTS},
         AVERAGE_ON_INITIALIZE_RATIO, DAYS, HOURS, MAXIMUM_BLOCK_WEIGHT, MAX_BLOCK_LENGTH,
         MAX_POV_SIZE, NORMAL_DISPATCH_RATIO, SLOT_DURATION, VERSION, WEIGHT_PER_GAS,
     },
@@ -311,39 +312,6 @@ impl pallet_balances::Config for Runtime {
     type RuntimeFreezeReason = RuntimeFreezeReason;
     type RuntimeHoldReason = RuntimeHoldReason;
     type WeightInfo = pallet_balances::weights::SubstrateWeight<Runtime>;
-}
-
-parameter_types! {
-    pub const AssetDeposit: Balance = 10 * CENTS;
-    pub const AssetAccountDeposit: Balance = deposit(1, 16);
-    pub const ApprovalDeposit: Balance = MILLICENTS;
-    pub const StringLimit: u32 = 50;
-    pub const MetadataDepositBase: Balance = deposit(1, 68);
-    pub const MetadataDepositPerByte: Balance = deposit(0, 1);
-    pub const RemoveItemsLimit: u32 = 1000;
-}
-
-impl pallet_assets::Config for Runtime {
-    type ApprovalDeposit = ApprovalDeposit;
-    type AssetAccountDeposit = AssetAccountDeposit;
-    type AssetDeposit = AssetDeposit;
-    type AssetId = u32;
-    type AssetIdParameter = parity_scale_codec::Compact<u32>;
-    type Balance = Balance;
-    #[cfg(feature = "runtime-benchmarks")]
-    type BenchmarkHelper = ();
-    type CallbackHandle = ();
-    type CreateOrigin = AsEnsureOriginWithArg<EnsureSigned<AccountId>>;
-    type Currency = Balances;
-    type Extra = ();
-    type ForceOrigin = EnsureRoot<AccountId>;
-    type Freezer = ();
-    type MetadataDepositBase = MetadataDepositBase;
-    type MetadataDepositPerByte = MetadataDepositPerByte;
-    type RemoveItemsLimit = RemoveItemsLimit;
-    type RuntimeEvent = RuntimeEvent;
-    type StringLimit = StringLimit;
-    type WeightInfo = pallet_assets::weights::SubstrateWeight<Runtime>;
 }
 
 parameter_types! {

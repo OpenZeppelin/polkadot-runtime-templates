@@ -9,29 +9,30 @@ use polkadot_parachain_primitives::primitives::Sibling;
 use xcm::latest::prelude::*;
 use xcm_builder::{
     AccountKey20Aliases, AllowExplicitUnpaidExecutionFrom, AllowTopLevelPaidExecutionFrom,
-    DenyReserveTransferToRelayChain, DenyThenTry, EnsureXcmOrigin, FixedWeightBounds,
-    FrameTransactionalProcessor, FungibleAdapter, FungiblesAdapter, IsConcrete, NativeAsset,
-    NoChecking, ParentIsPreset, RelayChainAsNative, SiblingParachainAsNative,
+    ConvertedConcreteId, DenyReserveTransferToRelayChain, DenyThenTry, EnsureXcmOrigin,
+    FixedWeightBounds, FrameTransactionalProcessor, FungibleAdapter, FungiblesAdapter, IsConcrete,
+    NativeAsset, NoChecking, ParentIsPreset, RelayChainAsNative, SiblingParachainAsNative,
     SiblingParachainConvertsVia, SignedAccountKey20AsNative, SovereignSignedViaLocation,
     TakeWeightCredit, TrailingSetTopicAsId, UsingComponents, WithComputedOrigin, WithUniqueTopic,
 };
-use xcm_executor::XcmExecutor;
+use xcm_executor::{traits::JustTry, XcmExecutor};
+use xcm_primitives::AsAssetType;
 
 use crate::{
     configs::{
-        Balances, ParachainSystem, Runtime, RuntimeCall, RuntimeEvent, RuntimeOrigin, WeightToFee,
+        AssetType, ParachainSystem, Runtime, RuntimeCall, RuntimeEvent, RuntimeOrigin, WeightToFee,
         XcmpQueue,
     },
-    types::{AccountId, Balance},
-    AllPalletsWithSystem, Assets, ParachainInfo, PolkadotXcm,
+    types::{AccountId, AssetId, Balance, XcmFeesToAccount},
+    AllPalletsWithSystem, AssetManager, Assets, Balances, ParachainInfo, PolkadotXcm,
 };
 
 parameter_types! {
     pub const RelayLocation: Location = Location::parent();
     pub const RelayNetwork: Option<NetworkId> = None;
-    pub PlaceholderAccount: AccountId = PolkadotXcm::check_account();
     pub AssetsPalletLocation: Location =
         PalletInstance(<Assets as PalletInfoAccess>::index() as u8).into();
+    pub BalancesPalletLocation: Location = PalletInstance(<Balances as PalletInfoAccess>::index() as u8).into();
     pub RelayChainOrigin: RuntimeOrigin = cumulus_pallet_xcm::Origin::Relay.into();
     pub UniversalLocation: InteriorLocation = Parachain(ParachainInfo::parachain_id().into()).into();
 }
@@ -53,12 +54,12 @@ pub type LocationToAccountId = (
     AccountKey20Aliases<RelayNetwork, AccountId>,
 );
 
-/// Means for transacting assets on this chain.
+/// Means for transacting native currency on this chain.
 pub type LocalAssetTransactor = FungibleAdapter<
     // Use this currency:
     Balances,
     // Use this currency when it is a fungible asset matching the given location or name:
-    IsConcrete<RelayLocation>,
+    IsConcrete<BalancesPalletLocation>,
     // Do a simple punn to convert an AccountId20 Location into a native chain account ID:
     LocationToAccountId,
     // Our chain's account ID type (we can't get away without mentioning it explicitly):
@@ -72,16 +73,15 @@ pub type LocalFungiblesTransactor = FungiblesAdapter<
     // Use this fungibles implementation:
     Assets,
     // Use this currency when it is a fungible asset matching the given location or name:
-    TrustBackedAssetsConvertedConcreteId,
+    ConvertedConcreteId<AssetId, Balance, AsAssetType<AssetId, AssetType, AssetManager>, JustTry>,
     // Convert an XCM MultiLocation into a local account id:
     LocationToAccountId,
     // Our chain's account ID type (we can't get away without mentioning it explicitly):
     AccountId,
     // We don't track any teleports of `Assets`.
     NoChecking,
-    // We don't track any teleports of `Assets`, but a placeholder account is provided due to trait
-    // bounds.
-    PlaceholderAccount,
+    // We don't track any teleports.
+    (),
 >;
 
 /// Means for transacting assets on this chain.
@@ -166,7 +166,10 @@ impl xcm_executor::Config for XcmConfig {
     type RuntimeCall = RuntimeCall;
     type SafeCallFilter = Everything;
     type SubscriptionService = PolkadotXcm;
-    type Trader = UsingComponents<WeightToFee, RelayLocation, AccountId, Balances, ()>;
+    type Trader = (
+        UsingComponents<WeightToFee, BalancesPalletLocation, AccountId, Balances, ()>,
+        xcm_primitives::FirstAssetTrader<AssetType, AssetManager, XcmFeesToAccount>,
+    );
     type TransactionalProcessor = FrameTransactionalProcessor;
     type UniversalAliases = Nothing;
     // Teleporting is disabled.
