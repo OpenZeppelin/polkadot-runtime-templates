@@ -100,7 +100,6 @@ impl From<AssetType> for Option<xcm::v3::Location> {
 }
 
 // Implementation on how to retrieve the AssetId from an AssetType
-// We take it
 impl From<AssetType> for AssetId {
     fn from(asset: AssetType) -> AssetId {
         match asset {

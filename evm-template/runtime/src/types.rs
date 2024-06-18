@@ -7,14 +7,18 @@ use sp_runtime::{
     traits::{BlakeTwo256, IdentifyAccount, Verify},
     MultiAddress,
 };
+use xcm_builder::ConvertedConcreteId;
+use xcm_executor::traits::JustTry;
+use xcm_primitives::AsAssetType;
 
 pub use crate::{
-    configs::{xcm_config::RelayLocation, StakingAdminBodyId},
+    configs::{xcm_config::RelayLocation, AssetType, StakingAdminBodyId, TreasuryAccount},
     constants::{
         BLOCK_PROCESSING_VELOCITY, RELAY_CHAIN_SLOT_DURATION_MILLIS, UNINCLUDED_SEGMENT_CAPACITY,
     },
     AllPalletsWithSystem, Runtime, RuntimeCall,
 };
+use crate::{AssetManager, Assets};
 
 /// Unchecked extrinsic type as expected by this runtime.
 pub type UncheckedExtrinsic =
@@ -85,4 +89,21 @@ pub type ConsensusHook = cumulus_pallet_aura_ext::FixedVelocityConsensusHook<
 pub type CollatorSelectionUpdateOrigin = EitherOfDiverse<
     EnsureRoot<AccountId>,
     EnsureXcm<IsVoiceOfBody<RelayLocation, StakingAdminBodyId>>,
+>;
+
+/// This is the struct that will handle the revenue from xcm fees
+/// We do not burn anything because we want to mimic exactly what
+/// the sovereign account has
+pub type XcmFeesToAccount = xcm_primitives::XcmFeesToAccount<
+    Assets,
+    (
+        ConvertedConcreteId<
+            AssetId,
+            Balance,
+            AsAssetType<AssetId, AssetType, AssetManager>,
+            JustTry,
+        >,
+    ),
+    AccountId,
+    TreasuryAccount,
 >;

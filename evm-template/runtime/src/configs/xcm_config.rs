@@ -23,8 +23,8 @@ use crate::{
         AssetType, ParachainSystem, Runtime, RuntimeCall, RuntimeEvent, RuntimeOrigin, WeightToFee,
         XcmpQueue,
     },
-    types::{AccountId, AssetId, Balance},
-    AllPalletsWithSystem, AssetManager, Assets, Balances, ParachainInfo, PolkadotXcm, Treasury,
+    types::{AccountId, AssetId, Balance, XcmFeesToAccount},
+    AllPalletsWithSystem, AssetManager, Assets, Balances, ParachainInfo, PolkadotXcm,
 };
 
 parameter_types! {
@@ -108,28 +108,6 @@ pub type XcmOriginToTransactDispatchOrigin = (
     // Xcm origins can be represented natively under the Xcm pallet's Xcm origin.
     XcmPassthrough<RuntimeOrigin>,
 );
-
-parameter_types! {
-    /// Xcm fees will go to the treasury account
-    pub XcmFeesAccount: AccountId = Treasury::account_id();
-}
-
-/// This is the struct that will handle the revenue from xcm fees
-/// We do not burn anything because we want to mimic exactly what
-/// the sovereign account has
-pub type XcmFeesToAccount = xcm_primitives::XcmFeesToAccount<
-    crate::Assets,
-    (
-        ConvertedConcreteId<
-            AssetId,
-            Balance,
-            AsAssetType<AssetId, AssetType, AssetManager>,
-            JustTry,
-        >,
-    ),
-    AccountId,
-    XcmFeesAccount,
->;
 
 parameter_types! {
     // One XCM operation is 1_000_000_000 weight - almost certainly a conservative estimate.
