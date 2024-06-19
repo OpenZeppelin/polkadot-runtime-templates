@@ -15,7 +15,7 @@ use xcm::latest::Location;
 use crate::{
     constants::currency::{deposit, CENTS, MILLICENTS},
     types::{AccountId, AssetId, Balance},
-    AssetManager, Assets, Balances, Runtime, RuntimeCall, RuntimeEvent, RuntimeOrigin,
+    weights, AssetManager, Assets, Balances, Runtime, RuntimeCall, RuntimeEvent, RuntimeOrigin,
 };
 
 parameter_types! {
@@ -62,7 +62,7 @@ impl pallet_assets::Config for Runtime {
     type RemoveItemsLimit = RemoveItemsLimit;
     type RuntimeEvent = RuntimeEvent;
     type StringLimit = StringLimit;
-    type WeightInfo = pallet_assets::weights::SubstrateWeight<Runtime>; //FIXME: run & update
+    type WeightInfo = weights::pallet_assets::WeightInfo<Runtime>; //FIXME: run & update
 }
 
 // Our AssetType. For now we only handle Xcm Assets
@@ -180,5 +180,5 @@ impl pallet_asset_manager::Config for Runtime {
     type ForeignAssetModifierOrigin = EnsureRoot<AccountId>;
     type ForeignAssetType = AssetType;
     type RuntimeEvent = RuntimeEvent;
-    type WeightInfo = (); //FIXME: run & update
+    type WeightInfo = weights::pallet_asset_manager::WeightInfo<Runtime>;
 }

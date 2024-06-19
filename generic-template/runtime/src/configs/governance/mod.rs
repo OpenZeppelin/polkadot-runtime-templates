@@ -16,8 +16,8 @@ use crate::{
         DAYS,
     },
     types::{AccountId, Balance, BlockNumber},
-    Balances, Preimage, Referenda, Runtime, RuntimeCall, RuntimeEvent, RuntimeOrigin, Scheduler,
-    Treasury,
+    weights, Balances, Preimage, Referenda, Runtime, RuntimeCall, RuntimeEvent, RuntimeOrigin,
+    Scheduler, Treasury,
 };
 
 parameter_types! {
@@ -32,7 +32,7 @@ impl pallet_conviction_voting::Config for Runtime {
     type Polls = Referenda;
     type RuntimeEvent = RuntimeEvent;
     type VoteLockingPeriod = VoteLockingPeriod;
-    type WeightInfo = pallet_conviction_voting::weights::SubstrateWeight<Runtime>;
+    type WeightInfo = weights::pallet_conviction_voting::WeightInfo<Runtime>;
 }
 
 parameter_types! {
@@ -47,7 +47,7 @@ impl pallet_whitelist::Config for Runtime {
     type Preimages = Preimage;
     type RuntimeCall = RuntimeCall;
     type RuntimeEvent = RuntimeEvent;
-    type WeightInfo = pallet_whitelist::weights::SubstrateWeight<Runtime>;
+    type WeightInfo = weights::pallet_whitelist::WeightInfo<Runtime>;
     type WhitelistOrigin = EnsureRoot<Self::AccountId>;
 }
 
@@ -74,5 +74,5 @@ impl pallet_referenda::Config for Runtime {
     type Tracks = tracks::TracksInfo;
     type UndecidingTimeout = UndecidingTimeout;
     type Votes = pallet_conviction_voting::VotesOf<Runtime>;
-    type WeightInfo = pallet_referenda::weights::SubstrateWeight<Runtime>;
+    type WeightInfo = weights::pallet_referenda::WeightInfo<Runtime>;
 }
