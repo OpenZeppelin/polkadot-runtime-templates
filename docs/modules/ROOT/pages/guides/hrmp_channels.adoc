@@ -20,7 +20,51 @@ For step (2), parachain B calls `hrmp > hrmpAcceptOpenChannel(sender)` to accept
 
 In order to dispatch a call from its sovereign origin, a parachain may use governance to send the encoded call in a Transact instruction to the Relay Chain, but it may also execute this logic autonomously (e.g. on the notification that a channel was requested).
 
-== Configuring Channel Notification Handlers
+== Connecting to Ecosystem Parachains
+
+The examples in this section include steps to connect a parachain to existing parachains in the ecosystem.
+
+The `paraId` for the user's parachain is set to `43211234` for all examples below.
+
+=== Connect to Snowbridge to bridge to Ethereum
+
+
+TODO: examples
+
+=== Connect to HydraDX for Liquidity
+
+
+
+TODO: examples
+
+=== Connect to AssetHub for Cross-Chain Transfers
+
+AssetHub is a system parachain which is controlled by relay chain governance. This means opening channels with AssetHub can be done in 1 step instead of 2. It is sufficient to propose opening both channels at once through the relay chain's `GeneralAdmin` track.
+
+The aforementioned proposal should propose execution of `utility.batchAll` with input calls including 2 calls to `hrmp.forceOpenHrmpChannel` to open one channel in each direction between the user parachain and AssetHub.
+
+The first call to `hrmp.forceOpenHrmpChannel` proposes opening a unidirectional channel to send XCM from the user parachain to AssetHub. If AssetHub's paraId is set to `1000`, here are the inputs:
+```
+hrmp.forceOpenChannel(
+	sender = 43211234,
+	recipient = 1000,
+	max_capacity = 1000,
+	max_message_size = 102400,
+)
+```
+Here is the second call to open a unidirectional channel to send XCM from AssetHub to the user parachain:
+```
+hrmp.forceOpenChannel(
+	sender = 1000,
+	recipient = 43211234,
+	max_capacity = 1000,
+	max_message_size = 102400,
+)
+```
+
+link:https://polkadot.subsquare.io/referenda/438[Here] is a successful example of this proposal which passed to open 2 HRMP channels between Unique Network and AssetHub.
+
+== Channel Notification Handlers
 
 There are 3 handlers to configure for when a `HRMP` notification is received.
 * `HrmpChannelAcceptedHandler`
@@ -43,6 +87,4 @@ pub trait HandleHrmpChannelClosing {
 ```
 The default implementation `()` returns `Ok(())` without executing any effects.
 
-== More Documentation
-
-- link:https://wiki.polkadot.network/docs/build-hrmp-channels[Polkadot documentation].
+Read more in the link:https://wiki.polkadot.network/docs/build-hrmp-channels[Polkadot documentation].
