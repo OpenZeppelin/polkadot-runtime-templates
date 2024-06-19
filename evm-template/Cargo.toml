@@ -13,6 +13,7 @@ repository = "https://github.com/OpenZeppelin/polkadot-runtime-template"
 clap = { version = "4.5.3", features = [ "derive" ] }
 color-print = "0.3.4"
 futures = "0.3.28"
+hex = "0.4.3"
 hex-literal = "0.4.1"
 jsonrpsee = { version = "0.22", features = [ "server" ] }
 log = { version = "0.4.20", default-features = false }
@@ -22,6 +23,7 @@ parity-scale-codec = { version = "3.0.0", default-features = false, features = [
 ] }
 scale-info = { version = "2.10.0", default-features = false }
 serde = { version = "1.0.188", default-features = false }
+serde_derive = { version = "1.0.188", default-features = false }
 serde_json = "1.0.108"
 smallvec = "1.11.0"
 
@@ -122,6 +124,7 @@ cumulus-pallet-xcmp-queue = { git = "https://github.com/paritytech/polkadot-sdk"
 cumulus-primitives-aura = { git = "https://github.com/paritytech/polkadot-sdk", default-features = false, tag = "polkadot-v1.10.0" }
 cumulus-primitives-core = { git = "https://github.com/paritytech/polkadot-sdk", default-features = false, tag = "polkadot-v1.10.0" }
 cumulus-primitives-parachain-inherent = { git = "https://github.com/paritytech/polkadot-sdk", default-features = false, tag = "polkadot-v1.10.0" }
+cumulus-primitives-storage-weight-reclaim = { git = "https://github.com/paritytech/polkadot-sdk", default-features = false, tag = "polkadot-v1.10.0" }
 cumulus-primitives-utility = { git = "https://github.com/paritytech/polkadot-sdk", default-features = false, tag = "polkadot-v1.10.0" }
 cumulus-relay-chain-interface = { git = "https://github.com/paritytech/polkadot-sdk", default-features = false, tag = "polkadot-v1.10.0" }
 cumulus-test-relay-sproof-builder = { git = "https://github.com/paritytech/polkadot-sdk", default-features = false, tag = "polkadot-v1.10.0" }
@@ -155,6 +158,10 @@ pallet-evm-chain-id = { git = "https://github.com/OpenZeppelin/frontier", branch
 pallet-evm-precompile-modexp = { git = "https://github.com/OpenZeppelin/frontier", branch = "polkadot-v1.10.0", default-features = false }
 pallet-evm-precompile-sha3fips = { git = "https://github.com/OpenZeppelin/frontier", branch = "polkadot-v1.10.0", default-features = false }
 pallet-evm-precompile-simple = { git = "https://github.com/OpenZeppelin/frontier", branch = "polkadot-v1.10.0", default-features = false }
+
+# Moonbeam
+pallet-asset-manager = { git = "https://github.com/OpenZeppelin/moonbeam.git", branch = "polkadot-v1.10.0", default-features = false }
+xcm-primitives = { git = "https://github.com/OpenZeppelin/moonbeam.git", branch = "polkadot-v1.10.0", default-features = false }
 
 # Fuzzer
 substrate-runtime-fuzzer = { git = "https://github.com/srlabs/substrate-runtime-fuzzer.git", default-features = false }
