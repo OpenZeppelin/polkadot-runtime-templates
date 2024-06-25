@@ -89,9 +89,6 @@ pub const RELAY_CHAIN_SLOT_DURATION_MILLIS: u32 = 6000;
 /// Maximum length for a block.
 pub const MAX_BLOCK_LENGTH: u32 = 5 * 1024 * 1024;
 
-/// The maximum legal size of a POV block, in bytes.
-pub const MAX_POV_SIZE: u64 = 5 * 1024 * 1024;
-
 /// Current approximation of the gas/s consumption considering
 /// EVM execution over compiled WASM (on 4.4Ghz CPU).
 /// Given the 500ms Weight, from which 75% only are used for transactions,

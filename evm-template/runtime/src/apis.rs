@@ -339,7 +339,7 @@ impl_runtime_apis! {
             )
         }
 
-        /// Receives a `Vec<OpaqueExtrinsic>` and filters all the ethereum transactions.
+        /// Receives a `Vec<OpaqueExtrinsic>` and filters out all the non-ethereum transactions.
         fn extrinsic_filter(
             xts: Vec<<Block as BlockT>::Extrinsic>,
         ) -> Vec<EthereumTransaction> {

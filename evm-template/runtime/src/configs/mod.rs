@@ -59,7 +59,7 @@ use crate::{
     constants::{
         currency::{deposit, CENTS, EXISTENTIAL_DEPOSIT, MICROCENTS},
         AVERAGE_ON_INITIALIZE_RATIO, DAYS, HOURS, MAXIMUM_BLOCK_WEIGHT, MAX_BLOCK_LENGTH,
-        MAX_POV_SIZE, NORMAL_DISPATCH_RATIO, SLOT_DURATION, VERSION, WEIGHT_PER_GAS,
+        NORMAL_DISPATCH_RATIO, SLOT_DURATION, VERSION, WEIGHT_PER_GAS,
     },
     opaque,
     types::{
@@ -578,7 +578,7 @@ impl pallet_ethereum::Config for Runtime {
 
 parameter_types! {
     pub BlockGasLimit: U256 = U256::from(NORMAL_DISPATCH_RATIO * MAXIMUM_BLOCK_WEIGHT.ref_time() / WEIGHT_PER_GAS);
-    pub GasLimitPovSizeRatio: u64 = BlockGasLimit::get().as_u64().saturating_div(MAX_POV_SIZE);
+    pub GasLimitPovSizeRatio: u64 = BlockGasLimit::get().as_u64().saturating_div(cumulus_primitives_core::relay_chain::MAX_POV_SIZE as u64);
     pub PrecompilesValue: OpenZeppelinPrecompiles<Runtime> = OpenZeppelinPrecompiles::<_>::new();
     pub WeightPerGas: Weight = Weight::from_parts(WEIGHT_PER_GAS, 0);
     pub SuicideQuickClearLimit: u32 = 0;
