@@ -1,21 +1,29 @@
+use core::marker::PhantomData;
+
 use frame_support::{
     parameter_types,
     traits::{ConstU32, Contains, Everything, Nothing, PalletInfoAccess},
     weights::Weight,
+    PalletId,
 };
 use frame_system::EnsureRoot;
 use pallet_xcm::XcmPassthrough;
-use polkadot_parachain_primitives::primitives::Sibling;
-use xcm::latest::prelude::*;
+use polkadot_parachain_primitives::primitives::{self, Sibling};
+use sp_runtime::traits::AccountIdConversion;
+use xcm::latest::prelude::{Assets as XcmAssets, *};
 use xcm_builder::{
-    AccountKey20Aliases, AllowExplicitUnpaidExecutionFrom, AllowTopLevelPaidExecutionFrom,
-    ConvertedConcreteId, DenyReserveTransferToRelayChain, DenyThenTry, EnsureXcmOrigin,
-    FixedWeightBounds, FrameTransactionalProcessor, FungibleAdapter, FungiblesAdapter, IsConcrete,
-    NativeAsset, NoChecking, ParentIsPreset, RelayChainAsNative, SiblingParachainAsNative,
-    SiblingParachainConvertsVia, SignedAccountKey20AsNative, SovereignSignedViaLocation,
-    TakeWeightCredit, TrailingSetTopicAsId, UsingComponents, WithComputedOrigin, WithUniqueTopic,
+    deposit_or_burn_fee, AccountKey20Aliases, AllowExplicitUnpaidExecutionFrom,
+    AllowTopLevelPaidExecutionFrom, ConvertedConcreteId, DenyReserveTransferToRelayChain,
+    DenyThenTry, EnsureXcmOrigin, FixedWeightBounds, FrameTransactionalProcessor, FungibleAdapter,
+    FungiblesAdapter, HandleFee, IsChildSystemParachain, IsConcrete, NativeAsset, NoChecking,
+    ParentIsPreset, RelayChainAsNative, SiblingParachainAsNative, SiblingParachainConvertsVia,
+    SignedAccountKey20AsNative, SovereignSignedViaLocation, TakeWeightCredit, TrailingSetTopicAsId,
+    UsingComponents, WithComputedOrigin, WithUniqueTopic, XcmFeeManagerFromComponents,
 };
-use xcm_executor::{traits::JustTry, XcmExecutor};
+use xcm_executor::{
+    traits::{FeeReason, JustTry, TransactAsset},
+    XcmExecutor,
+};
 use xcm_primitives::AsAssetType;
 
 use crate::{
@@ -109,6 +117,18 @@ pub type XcmOriginToTransactDispatchOrigin = (
     XcmPassthrough<RuntimeOrigin>,
 );
 
+// This is a workaround. We have added Treasury in the master and it will be added in the next release.
+// We will collect fees on this pseudo treasury account until Treasury is rolled out.
+// When treasury will be introduced, it will use the same account for fee collection so transition should be smooth.
+pub struct TreasuryAccount;
+
+impl Get<AccountId> for TreasuryAccount {
+    fn get() -> AccountId {
+        const ID: PalletId = PalletId(*b"py/trsry");
+        AccountIdConversion::<AccountId>::into_account_truncating(&ID)
+    }
+}
+
 parameter_types! {
     // One XCM operation is 1_000_000_000 weight - almost certainly a conservative estimate.
     pub const UnitWeightCost: Weight = Weight::from_parts(1_000_000_000, 64 * 1024);
@@ -141,6 +161,29 @@ pub type Barrier = TrailingSetTopicAsId<
     >,
 >;
 
+/// A `HandleFee` implementation that simply deposits the fees into a specific on-chain
+/// `ReceiverAccount`.
+///
+/// It reuses the `AssetTransactor` configured on the XCM executor to deposit fee assets. If
+/// the `AssetTransactor` returns an error while calling `deposit_asset`, then a warning will be
+/// logged and the fee burned.
+pub struct XcmFeeToAccount<AssetTransactor, AccountId, ReceiverAccount>(
+    PhantomData<(AssetTransactor, AccountId, ReceiverAccount)>,
+);
+
+impl<
+        AssetTransactor: TransactAsset,
+        AccountId: Clone + Into<[u8; 20]>,
+        ReceiverAccount: Get<AccountId>,
+    > HandleFee for XcmFeeToAccount<AssetTransactor, AccountId, ReceiverAccount>
+{
+    fn handle_fee(fee: XcmAssets, context: Option<&XcmContext>, _reason: FeeReason) -> XcmAssets {
+        deposit_or_burn_fee::<AssetTransactor, _>(fee, context, ReceiverAccount::get());
+
+        XcmAssets::new()
+    }
+}
+
 pub struct XcmConfig;
 impl xcm_executor::Config for XcmConfig {
     type Aliasers = Nothing;
@@ -152,7 +195,10 @@ impl xcm_executor::Config for XcmConfig {
     type AssetTrap = PolkadotXcm;
     type Barrier = Barrier;
     type CallDispatcher = RuntimeCall;
-    type FeeManager = ();
+    type FeeManager = XcmFeeManagerFromComponents<
+        IsChildSystemParachain<primitives::Id>,
+        XcmFeeToAccount<Self::AssetTransactor, AccountId, TreasuryAccount>,
+    >;
     type HrmpChannelAcceptedHandler = ();
     type HrmpChannelClosingHandler = ();
     type HrmpNewChannelOpenRequestHandler = ();
