@@ -48,7 +48,7 @@ pub const MILLISECS_PER_BLOCK: u64 = 6000;
 pub const MILLISECS_PER_BLOCK: u64 = 12000;
 
 // NOTE: Currently it is not possible to change the slot duration after the
-// chain has started.       Attempting to do so will brick block production.
+// chain has started. Attempting to do so will brick block production.
 pub const SLOT_DURATION: u64 = MILLISECS_PER_BLOCK;
 
 // Time is measured by number of blocks.
@@ -89,6 +89,7 @@ pub const RELAY_CHAIN_SLOT_DURATION_MILLIS: u32 = 6000;
 /// Maximum length for a block.
 pub const MAX_BLOCK_LENGTH: u32 = 5 * 1024 * 1024;
 
+/// The maximum legal size of a POV block, in bytes.
 pub const MAX_POV_SIZE: u64 = 5 * 1024 * 1024;
 
 /// Current approximation of the gas/s consumption considering
