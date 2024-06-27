@@ -172,34 +172,41 @@ impl_runtime_apis! {
     }
 
     impl fp_rpc::EthereumRuntimeRPCApi<Block> for Runtime {
+        /// Returns runtime defined pallet_evm::ChainId.
         fn chain_id() -> u64 {
             <Runtime as pallet_evm::Config>::ChainId::get()
         }
 
+        /// Returns pallet_evm::Accounts by address.
         fn account_basic(address: H160) -> EVMAccount {
             let (account, _) = pallet_evm::Pallet::<Runtime>::account_basic(&address);
             account
         }
 
+        /// Returns FixedGasPrice::min_gas_price
         fn gas_price() -> U256 {
             let (gas_price, _) = <Runtime as pallet_evm::Config>::FeeCalculator::min_gas_price();
             gas_price
         }
 
+        /// For a given account address, returns pallet_evm::AccountCodes.
         fn account_code_at(address: H160) -> Vec<u8> {
             pallet_evm::AccountCodes::<Runtime>::get(address)
         }
 
+        /// Returns the converted FindAuthor::find_author authority id.
         fn author() -> H160 {
             <pallet_evm::Pallet<Runtime>>::find_author()
         }
 
+        /// For a given account address and index, returns pallet_evm::AccountStorages.
         fn storage_at(address: H160, index: U256) -> H256 {
             let mut tmp = [0u8; 32];
             index.to_big_endian(&mut tmp);
             pallet_evm::AccountStorages::<Runtime>::get(address, H256::from_slice(&tmp[..]))
         }
 
+        /// Returns a frame_ethereum::call response.
         fn call(
             from: H160,
             to: H160,
@@ -253,6 +260,7 @@ impl_runtime_apis! {
             ).map_err(|err| err.error.into())
         }
 
+        /// Returns a frame_ethereum::create response.
         fn create(
             from: H160,
             data: Vec<u8>,
@@ -303,18 +311,22 @@ impl_runtime_apis! {
             ).map_err(|err| err.error.into())
         }
 
+        /// Return the current transaction status.
         fn current_transaction_statuses() -> Option<Vec<TransactionStatus>> {
             pallet_ethereum::CurrentTransactionStatuses::<Runtime>::get()
         }
 
+        /// Return the current block.
         fn current_block() -> Option<pallet_ethereum::Block> {
             pallet_ethereum::CurrentBlock::<Runtime>::get()
         }
 
+        /// Return the current receipts.
         fn current_receipts() -> Option<Vec<pallet_ethereum::Receipt>> {
             pallet_ethereum::CurrentReceipts::<Runtime>::get()
         }
 
+        /// Return all the current data for a block in a single runtime call.
         fn current_all() -> (
             Option<pallet_ethereum::Block>,
             Option<Vec<pallet_ethereum::Receipt>>,
@@ -327,6 +339,7 @@ impl_runtime_apis! {
             )
         }
 
+        /// Receives a `Vec<OpaqueExtrinsic>` and filters out all the non-ethereum transactions.
         fn extrinsic_filter(
             xts: Vec<<Block as BlockT>::Extrinsic>,
         ) -> Vec<EthereumTransaction> {
@@ -336,12 +349,16 @@ impl_runtime_apis! {
             }).collect::<Vec<EthereumTransaction>>()
         }
 
+        /// Return the elasticity multiplier.
         fn elasticity() -> Option<Permill> {
             Some(pallet_base_fee::Elasticity::<Runtime>::get())
         }
 
+        /// Used to determine if gas limit multiplier for non-transactional calls (eth_call/estimateGas)
+        /// is supported.
         fn gas_limit_multiplier_support() {}
 
+        /// Return the pending block.
         fn pending_block(
             xts: Vec<<Block as BlockT>::Extrinsic>,
         ) -> (Option<pallet_ethereum::Block>, Option<Vec<TransactionStatus>>) {
@@ -359,6 +376,7 @@ impl_runtime_apis! {
     }
 
     impl fp_rpc::ConvertTransactionRuntimeApi<Block> for Runtime {
+        /// Converts an ethereum transaction into a transaction suitable for the runtime.
         fn convert_transaction(transaction: EthereumTransaction) -> <Block as BlockT>::Extrinsic {
             UncheckedExtrinsic::new_unsigned(
                 pallet_ethereum::Call::<Runtime>::transact { transaction }.into(),

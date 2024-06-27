@@ -12,11 +12,14 @@ use xcm_executor::traits::JustTry;
 use xcm_primitives::AsAssetType;
 
 pub use crate::{
-    configs::{xcm_config::RelayLocation, AssetType, StakingAdminBodyId, TreasuryAccount},
+    configs::{
+        xcm_config::RelayLocation, AssetType, FeeAssetId, StakingAdminBodyId,
+        ToSiblingBaseDeliveryFee, TransactionByteFee, TreasuryAccount,
+    },
     constants::{
         BLOCK_PROCESSING_VELOCITY, RELAY_CHAIN_SLOT_DURATION_MILLIS, UNINCLUDED_SEGMENT_CAPACITY,
     },
-    AllPalletsWithSystem, Runtime, RuntimeCall,
+    AllPalletsWithSystem, Runtime, RuntimeCall, XcmpQueue,
 };
 use crate::{AssetManager, Assets};
 
@@ -74,6 +77,14 @@ pub type Executive = frame_executive::Executive<
     frame_system::ChainContext<Runtime>,
     Runtime,
     AllPalletsWithSystem,
+>;
+
+/// Price For Sibling Parachain Delivery
+pub type PriceForSiblingParachainDelivery = polkadot_runtime_common::xcm_sender::ExponentialPrice<
+    FeeAssetId,
+    ToSiblingBaseDeliveryFee,
+    TransactionByteFee,
+    XcmpQueue,
 >;
 
 /// Configures the number of blocks that can be created without submission of validity proof to the relay chain

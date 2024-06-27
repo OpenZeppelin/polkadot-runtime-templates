@@ -48,7 +48,7 @@ pub const MILLISECS_PER_BLOCK: u64 = 6000;
 pub const MILLISECS_PER_BLOCK: u64 = 12000;
 
 // NOTE: Currently it is not possible to change the slot duration after the
-// chain has started.       Attempting to do so will brick block production.
+// chain has started. Attempting to do so will brick block production.
 pub const SLOT_DURATION: u64 = MILLISECS_PER_BLOCK;
 
 // Time is measured by number of blocks.
@@ -88,8 +88,6 @@ pub const BLOCK_PROCESSING_VELOCITY: u32 = 1;
 pub const RELAY_CHAIN_SLOT_DURATION_MILLIS: u32 = 6000;
 /// Maximum length for a block.
 pub const MAX_BLOCK_LENGTH: u32 = 5 * 1024 * 1024;
-
-pub const MAX_POV_SIZE: u64 = 5 * 1024 * 1024;
 
 /// Current approximation of the gas/s consumption considering
 /// EVM execution over compiled WASM (on 4.4Ghz CPU).

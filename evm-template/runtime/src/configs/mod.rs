@@ -30,7 +30,6 @@ use parachains_common::message_queue::{NarrowOriginToSibling, ParaIdToSibling};
 use parity_scale_codec::{Decode, Encode, MaxEncodedLen};
 use polkadot_runtime_common::{
     impls::{LocatableAssetConverter, VersionedLocatableAsset, VersionedLocationConverter},
-    xcm_sender::NoPriceForMessageDelivery,
     BlockHashCount, SlowAdjustingFeeUpdate,
 };
 use scale_info::TypeInfo;
@@ -44,24 +43,28 @@ use sp_std::marker::PhantomData;
 use sp_version::RuntimeVersion;
 // XCM Imports
 use xcm::{
-    latest::{prelude::BodyId, InteriorLocation, Junction::PalletInstance},
+    latest::{
+        prelude::{AssetId, BodyId},
+        InteriorLocation,
+        Junction::PalletInstance,
+    },
     VersionedLocation,
 };
 use xcm_builder::PayOverXcm;
 #[cfg(not(feature = "runtime-benchmarks"))]
 use xcm_builder::ProcessXcmMessage;
-use xcm_config::XcmOriginToTransactDispatchOrigin;
+use xcm_config::{RelayLocation, XcmOriginToTransactDispatchOrigin};
 
 use crate::{
     constants::{
-        currency::{deposit, EXISTENTIAL_DEPOSIT, MICROCENTS},
+        currency::{deposit, CENTS, EXISTENTIAL_DEPOSIT, MICROCENTS},
         AVERAGE_ON_INITIALIZE_RATIO, DAYS, HOURS, MAXIMUM_BLOCK_WEIGHT, MAX_BLOCK_LENGTH,
-        MAX_POV_SIZE, NORMAL_DISPATCH_RATIO, SLOT_DURATION, VERSION, WEIGHT_PER_GAS,
+        NORMAL_DISPATCH_RATIO, SLOT_DURATION, VERSION, WEIGHT_PER_GAS,
     },
     opaque,
     types::{
         AccountId, Balance, Block, BlockNumber, CollatorSelectionUpdateOrigin, ConsensusHook, Hash,
-        Nonce,
+        Nonce, PriceForSiblingParachainDelivery,
     },
     weights::{BlockExecutionWeight, ExtrinsicBaseWeight, RocksDbWeight},
     Aura, Balances, BaseFee, CollatorSelection, EVMChainId, MessageQueue, OpenZeppelinPrecompiles,
@@ -97,6 +100,7 @@ parameter_types! {
         })
         .avg_block_initialization(AVERAGE_ON_INITIALIZE_RATIO)
         .build_or_panic();
+        // generic substrate prefix. For more info, see: [Polkadot Accounts In-Depth](https://wiki.polkadot.network/docs/learn-account-advanced#:~:text=The%20address%20format%20used%20in,belonging%20to%20a%20specific%20network)
     pub const SS58Prefix: u16 = 42;
 }
 
@@ -105,10 +109,12 @@ impl Contains<RuntimeCall> for NormalFilter {
     fn contains(c: &RuntimeCall) -> bool {
         match c {
             // We filter anonymous proxy as they make "reserve" inconsistent
-            // See: https://github.com/paritytech/substrate/blob/37cca710eed3dadd4ed5364c7686608f5175cce1/frame/proxy/src/lib.rs#L270
+            // See: https://github.com/paritytech/polkadot-sdk/blob/v1.9.0-rc2/substrate/frame/proxy/src/lib.rs#L260
             RuntimeCall::Proxy(method) => !matches!(
                 method,
-                pallet_proxy::Call::create_pure { .. } | pallet_proxy::Call::kill_pure { .. }
+                pallet_proxy::Call::create_pure { .. }
+                    | pallet_proxy::Call::kill_pure { .. }
+                    | pallet_proxy::Call::remove_proxies { .. }
             ),
             _ => true,
         }
@@ -164,12 +170,11 @@ impl frame_system::Config for Runtime {
 parameter_types! {
     pub MaximumSchedulerWeight: frame_support::weights::Weight = Perbill::from_percent(80) *
         RuntimeBlockWeights::get().max_block;
-    pub const MaxScheduledPerBlock: u32 = 50;
-    pub const NoPreimagePostponement: Option<u32> = Some(10);
+    pub const MaxScheduledRuntimeCallsPerBlock: u32 = 50;
 }
 
 impl pallet_scheduler::Config for Runtime {
-    type MaxScheduledPerBlock = MaxScheduledPerBlock;
+    type MaxScheduledPerBlock = MaxScheduledRuntimeCallsPerBlock;
     type MaximumWeight = MaximumSchedulerWeight;
     type OriginPrivilegeCmp = frame_support::traits::EqualPrivilegeOnly;
     type PalletsOrigin = OriginCaller;
@@ -393,6 +398,10 @@ impl cumulus_pallet_aura_ext::Config for Runtime {}
 
 parameter_types! {
     pub const MaxInboundSuspended: u32 = 1000;
+    /// The asset ID for the asset that we use to pay for message delivery fees.
+    pub FeeAssetId: AssetId = AssetId(RelayLocation::get());
+    /// The base fee for the message delivery fees. Kusama is based for the reference.
+    pub const ToSiblingBaseDeliveryFee: u128 = CENTS.saturating_mul(3);
 }
 
 impl cumulus_pallet_xcmp_queue::Config for Runtime {
@@ -400,7 +409,7 @@ impl cumulus_pallet_xcmp_queue::Config for Runtime {
     type ControllerOrigin = EnsureRoot<AccountId>;
     type ControllerOriginConverter = XcmOriginToTransactDispatchOrigin;
     type MaxInboundSuspended = MaxInboundSuspended;
-    type PriceForSiblingDelivery = NoPriceForMessageDelivery<ParaId>;
+    type PriceForSiblingDelivery = PriceForSiblingParachainDelivery;
     type RuntimeEvent = RuntimeEvent;
     type VersionWrapper = ();
     type WeightInfo = cumulus_pallet_xcmp_queue::weights::SubstrateWeight<Runtime>;
@@ -427,6 +436,10 @@ impl pallet_multisig::Config for Runtime {
 }
 
 parameter_types! {
+    // pallet_session ends the session after a fixed period of blocks.
+    // The first session will have length of Offset,
+    // and the following sessions will have length of Period.
+    // This may prove nonsensical if Offset >= Period.
     pub const Period: u32 = 6 * HOURS;
     pub const Offset: u32 = 0;
 }
@@ -473,9 +486,6 @@ parameter_types! {
     pub const SessionLength: BlockNumber = 6 * HOURS;
     // StakingAdmin pluralistic body.
     pub const StakingAdminBodyId: BodyId = BodyId::Defense;
-}
-
-parameter_types! {
     pub const MaxCandidates: u32 = 100;
     pub const MaxInvulnerables: u32 = 20;
     pub const MinEligibleCollators: u32 = 4;
@@ -516,9 +526,6 @@ parameter_types! {
     // pallet instance (which sits at index 13).
     pub TreasuryInteriorLocation: InteriorLocation = PalletInstance(13).into();
     pub const MaxApprovals: u32 = 100;
-}
-
-parameter_types! {
     pub TreasuryAccount: AccountId = Treasury::account_id();
 }
 
@@ -571,7 +578,7 @@ impl pallet_ethereum::Config for Runtime {
 
 parameter_types! {
     pub BlockGasLimit: U256 = U256::from(NORMAL_DISPATCH_RATIO * MAXIMUM_BLOCK_WEIGHT.ref_time() / WEIGHT_PER_GAS);
-    pub GasLimitPovSizeRatio: u64 = BlockGasLimit::get().as_u64().saturating_div(MAX_POV_SIZE);
+    pub GasLimitPovSizeRatio: u64 = BlockGasLimit::get().as_u64().saturating_div(cumulus_primitives_core::relay_chain::MAX_POV_SIZE as u64);
     pub PrecompilesValue: OpenZeppelinPrecompiles<Runtime> = OpenZeppelinPrecompiles::<_>::new();
     pub WeightPerGas: Weight = Weight::from_parts(WEIGHT_PER_GAS, 0);
     pub SuicideQuickClearLimit: u32 = 0;

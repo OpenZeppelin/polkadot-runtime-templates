@@ -73,6 +73,7 @@ pub type Executive = frame_executive::Executive<
     AllPalletsWithSystem,
 >;
 
+/// Price For Sibling Parachain Delivery
 pub type PriceForSiblingParachainDelivery = polkadot_runtime_common::xcm_sender::ExponentialPrice<
     FeeAssetId,
     ToSiblingBaseDeliveryFee,
