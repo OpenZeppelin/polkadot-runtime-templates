@@ -321,7 +321,7 @@ impl_runtime_apis! {
             pallet_ethereum::CurrentBlock::<Runtime>::get()
         }
 
-        /// Return the current receipt.
+        /// Return the current receipts.
         fn current_receipts() -> Option<Vec<pallet_ethereum::Receipt>> {
             pallet_ethereum::CurrentReceipts::<Runtime>::get()
         }
