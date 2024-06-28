@@ -44,7 +44,7 @@ use sp_version::RuntimeVersion;
 // XCM Imports
 use xcm::{
     latest::{
-        prelude::{AssetId, BodyId},
+        prelude::BodyId,
         InteriorLocation,
         Junction::PalletInstance,
     },
