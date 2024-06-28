@@ -434,6 +434,8 @@ impl_runtime_apis! {
             use frame_system_benchmarking::Pallet as SystemBench;
             use cumulus_pallet_session_benchmarking::Pallet as SessionBench;
 
+            use pallet_xcm::benchmarking::Pallet as PalletXcmExtrinsicsBenchmark;
+
             use super::*;
 
             let mut list = Vec::<BenchmarkList>::new();
@@ -447,9 +449,11 @@ impl_runtime_apis! {
             config: frame_benchmarking::BenchmarkConfig
         ) -> Result<Vec<frame_benchmarking::BenchmarkBatch>, sp_runtime::RuntimeString> {
             use frame_benchmarking::{BenchmarkError, Benchmarking, BenchmarkBatch};
+            use frame_support::parameter_types;
+            use cumulus_primitives_core::ParaId;
             use frame_system_benchmarking::Pallet as SystemBench;
 
-            use super::*;
+            use super::{*, types::*, configs::*, constants::currency::CENTS};
 
             impl frame_system_benchmarking::Config for Runtime {
                 fn setup_set_code_requirements(code: &sp_std::vec::Vec<u8>) -> Result<(), BenchmarkError> {
@@ -459,6 +463,73 @@ impl_runtime_apis! {
 
                 fn verify_set_code() {
                     System::assert_last_event(cumulus_pallet_parachain_system::Event::<Runtime>::ValidationFunctionStored.into());
+                }
+            }
+
+            parameter_types! {
+                pub const RandomParaId: ParaId = ParaId::new(43211234);
+                pub ExistentialDepositAsset: Option<Asset> = Some((
+                    RelayLocation::get(),
+                    ExistentialDeposit::get()
+                ).into());
+                /// The base fee for the message delivery fees. Kusama is based for the reference.
+                pub const ToParentBaseDeliveryFee: u128 = CENTS.saturating_mul(3);
+            }
+            pub type PriceForParentDelivery = polkadot_runtime_common::xcm_sender::ExponentialPrice<
+                FeeAssetId,
+                ToParentBaseDeliveryFee,
+                TransactionByteFee,
+                ParachainSystem,
+            >;
+            use pallet_xcm::benchmarking::Pallet as PalletXcmExtrinsicsBenchmark;
+            use xcm::latest::prelude::{Asset, AssetId, Assets as AssetList, Fungible, Location, Parachain, Parent, ParentThen};
+            impl pallet_xcm::benchmarking::Config for Runtime {
+                type DeliveryHelper = cumulus_primitives_utility::ToParentDeliveryHelper<
+                    xcm_config::XcmConfig,
+                    ExistentialDepositAsset,
+                    PriceForParentDelivery,
+                >;
+
+                fn reachable_dest() -> Option<Location> {
+                    Some(Parent.into())
+                }
+
+                fn teleportable_asset_and_dest() -> Option<(Asset, Location)> {
+                    None
+                }
+
+                fn reserve_transferable_asset_and_dest() -> Option<(Asset, Location)> {
+                    Some((
+                        Asset {
+                            fun: Fungible(ExistentialDeposit::get()),
+                            id: AssetId(Parent.into())
+                        }.into(),
+                        ParentThen(Parachain(RandomParaId::get().into()).into()).into(),
+                    ))
+                }
+
+                fn set_up_complex_asset_transfer(
+                ) -> Option<(AssetList, u32, Location, Box<dyn FnOnce()>)> {
+                    None
+                }
+
+                fn get_asset() -> Asset {
+                    use xcm_primitives::AssetTypeGetter;
+                    let location = Location::parent();
+                    let asset_id = AssetId(location.clone());
+                    let asset = Asset {
+                        id: asset_id.clone(),
+                        fun: Fungible(ExistentialDeposit::get()),
+                    };
+                    let Some(location_v3) = xcm::v3::Location::try_from(location).ok() else {
+                        return asset;
+                    };
+                    let asset_type = AssetType::Xcm(location_v3);
+                    let local_asset_id: crate::types::AssetId = asset_type.clone().into();
+                    let manager_id = AssetManager::account_id();
+                    let _ = Assets::force_create(RuntimeOrigin::root(), local_asset_id.clone().into(), sp_runtime::MultiAddress::Id(manager_id), true, 1);
+                    AssetManager::set_asset_type_asset_id(asset_type.clone(), local_asset_id);
+                    asset
                 }
             }
 

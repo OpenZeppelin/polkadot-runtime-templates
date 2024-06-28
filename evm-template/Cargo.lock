@@ -3286,7 +3286,7 @@ dependencies = [
 [[package]]
 name = "fc-api"
 version = "1.0.0-dev"
-source = "git+https://github.com/OpenZeppelin/frontier?branch=polkadot-v1.10.0#17e7b6f09c5a1845ba65563a9f9859cf07c4c635"
+source = "git+https://github.com/OpenZeppelin/frontier?branch=polkadot-v1.10.0#0971e101f5a02fac87080876f7ce1f36905bfa31"
 dependencies = [
  "async-trait",
  "fp-storage",
@@ -3298,7 +3298,7 @@ dependencies = [
 [[package]]
 name = "fc-consensus"
 version = "2.0.0-dev"
-source = "git+https://github.com/OpenZeppelin/frontier?branch=polkadot-v1.10.0#17e7b6f09c5a1845ba65563a9f9859cf07c4c635"
+source = "git+https://github.com/OpenZeppelin/frontier?branch=polkadot-v1.10.0#0971e101f5a02fac87080876f7ce1f36905bfa31"
 dependencies = [
  "async-trait",
  "fp-consensus",
@@ -3314,7 +3314,7 @@ dependencies = [
 [[package]]
 name = "fc-db"
 version = "2.0.0-dev"
-source = "git+https://github.com/OpenZeppelin/frontier?branch=polkadot-v1.10.0#17e7b6f09c5a1845ba65563a9f9859cf07c4c635"
+source = "git+https://github.com/OpenZeppelin/frontier?branch=polkadot-v1.10.0#0971e101f5a02fac87080876f7ce1f36905bfa31"
 dependencies = [
  "async-trait",
  "ethereum",
@@ -3345,7 +3345,7 @@ dependencies = [
 [[package]]
 name = "fc-mapping-sync"
 version = "2.0.0-dev"
-source = "git+https://github.com/OpenZeppelin/frontier?branch=polkadot-v1.10.0#17e7b6f09c5a1845ba65563a9f9859cf07c4c635"
+source = "git+https://github.com/OpenZeppelin/frontier?branch=polkadot-v1.10.0#0971e101f5a02fac87080876f7ce1f36905bfa31"
 dependencies = [
  "fc-db",
  "fc-storage",
@@ -3368,7 +3368,7 @@ dependencies = [
 [[package]]
 name = "fc-rpc"
 version = "2.0.0-dev"
-source = "git+https://github.com/OpenZeppelin/frontier?branch=polkadot-v1.10.0#17e7b6f09c5a1845ba65563a9f9859cf07c4c635"
+source = "git+https://github.com/OpenZeppelin/frontier?branch=polkadot-v1.10.0#0971e101f5a02fac87080876f7ce1f36905bfa31"
 dependencies = [
  "ethereum",
  "ethereum-types",
@@ -3423,7 +3423,7 @@ dependencies = [
 [[package]]
 name = "fc-rpc-core"
 version = "1.1.0-dev"
-source = "git+https://github.com/OpenZeppelin/frontier?branch=polkadot-v1.10.0#17e7b6f09c5a1845ba65563a9f9859cf07c4c635"
+source = "git+https://github.com/OpenZeppelin/frontier?branch=polkadot-v1.10.0#0971e101f5a02fac87080876f7ce1f36905bfa31"
 dependencies = [
  "ethereum",
  "ethereum-types",
@@ -3438,7 +3438,7 @@ dependencies = [
 [[package]]
 name = "fc-storage"
 version = "1.0.0-dev"
-source = "git+https://github.com/OpenZeppelin/frontier?branch=polkadot-v1.10.0#17e7b6f09c5a1845ba65563a9f9859cf07c4c635"
+source = "git+https://github.com/OpenZeppelin/frontier?branch=polkadot-v1.10.0#0971e101f5a02fac87080876f7ce1f36905bfa31"
 dependencies = [
  "ethereum",
  "ethereum-types",
@@ -3620,7 +3620,7 @@ dependencies = [
 [[package]]
 name = "fp-account"
 version = "1.0.0-dev"
-source = "git+https://github.com/OpenZeppelin/frontier?branch=polkadot-v1.10.0#17e7b6f09c5a1845ba65563a9f9859cf07c4c635"
+source = "git+https://github.com/OpenZeppelin/frontier?branch=polkadot-v1.10.0#0971e101f5a02fac87080876f7ce1f36905bfa31"
 dependencies = [
  "hex",
  "impl-serde",
@@ -3639,7 +3639,7 @@ dependencies = [
 [[package]]
 name = "fp-consensus"
 version = "2.0.0-dev"
-source = "git+https://github.com/OpenZeppelin/frontier?branch=polkadot-v1.10.0#17e7b6f09c5a1845ba65563a9f9859cf07c4c635"
+source = "git+https://github.com/OpenZeppelin/frontier?branch=polkadot-v1.10.0#0971e101f5a02fac87080876f7ce1f36905bfa31"
 dependencies = [
  "ethereum",
  "parity-scale-codec",
@@ -3651,7 +3651,7 @@ dependencies = [
 [[package]]
 name = "fp-dynamic-fee"
 version = "1.0.0"
-source = "git+https://github.com/OpenZeppelin/frontier?branch=polkadot-v1.10.0#17e7b6f09c5a1845ba65563a9f9859cf07c4c635"
+source = "git+https://github.com/OpenZeppelin/frontier?branch=polkadot-v1.10.0#0971e101f5a02fac87080876f7ce1f36905bfa31"
 dependencies = [
  "async-trait",
  "sp-core",
@@ -3661,7 +3661,7 @@ dependencies = [
 [[package]]
 name = "fp-ethereum"
 version = "1.0.0-dev"
-source = "git+https://github.com/OpenZeppelin/frontier?branch=polkadot-v1.10.0#17e7b6f09c5a1845ba65563a9f9859cf07c4c635"
+source = "git+https://github.com/OpenZeppelin/frontier?branch=polkadot-v1.10.0#0971e101f5a02fac87080876f7ce1f36905bfa31"
 dependencies = [
  "ethereum",
  "ethereum-types",
@@ -3674,7 +3674,7 @@ dependencies = [
 [[package]]
 name = "fp-evm"
 version = "3.0.0-dev"
-source = "git+https://github.com/OpenZeppelin/frontier?branch=polkadot-v1.10.0#17e7b6f09c5a1845ba65563a9f9859cf07c4c635"
+source = "git+https://github.com/OpenZeppelin/frontier?branch=polkadot-v1.10.0#0971e101f5a02fac87080876f7ce1f36905bfa31"
 dependencies = [
  "evm",
  "frame-support",
@@ -3690,7 +3690,7 @@ dependencies = [
 [[package]]
 name = "fp-rpc"
 version = "3.0.0-dev"
-source = "git+https://github.com/OpenZeppelin/frontier?branch=polkadot-v1.10.0#17e7b6f09c5a1845ba65563a9f9859cf07c4c635"
+source = "git+https://github.com/OpenZeppelin/frontier?branch=polkadot-v1.10.0#0971e101f5a02fac87080876f7ce1f36905bfa31"
 dependencies = [
  "ethereum",
  "ethereum-types",
@@ -3707,7 +3707,7 @@ dependencies = [
 [[package]]
 name = "fp-self-contained"
 version = "1.0.0-dev"
-source = "git+https://github.com/OpenZeppelin/frontier?branch=polkadot-v1.10.0#17e7b6f09c5a1845ba65563a9f9859cf07c4c635"
+source = "git+https://github.com/OpenZeppelin/frontier?branch=polkadot-v1.10.0#0971e101f5a02fac87080876f7ce1f36905bfa31"
 dependencies = [
  "frame-support",
  "parity-scale-codec",
@@ -3719,7 +3719,7 @@ dependencies = [
 [[package]]
 name = "fp-storage"
 version = "2.0.0"
-source = "git+https://github.com/OpenZeppelin/frontier?branch=polkadot-v1.10.0#17e7b6f09c5a1845ba65563a9f9859cf07c4c635"
+source = "git+https://github.com/OpenZeppelin/frontier?branch=polkadot-v1.10.0#0971e101f5a02fac87080876f7ce1f36905bfa31"
 dependencies = [
  "parity-scale-codec",
  "serde",
@@ -6931,7 +6931,7 @@ dependencies = [
 [[package]]
 name = "pallet-base-fee"
 version = "1.0.0"
-source = "git+https://github.com/OpenZeppelin/frontier?branch=polkadot-v1.10.0#17e7b6f09c5a1845ba65563a9f9859cf07c4c635"
+source = "git+https://github.com/OpenZeppelin/frontier?branch=polkadot-v1.10.0#0971e101f5a02fac87080876f7ce1f36905bfa31"
 dependencies = [
  "fp-evm",
  "frame-support",
@@ -7171,7 +7171,7 @@ dependencies = [
 [[package]]
 name = "pallet-ethereum"
 version = "4.0.0-dev"
-source = "git+https://github.com/OpenZeppelin/frontier?branch=polkadot-v1.10.0#17e7b6f09c5a1845ba65563a9f9859cf07c4c635"
+source = "git+https://github.com/OpenZeppelin/frontier?branch=polkadot-v1.10.0#0971e101f5a02fac87080876f7ce1f36905bfa31"
 dependencies = [
  "ethereum",
  "ethereum-types",
@@ -7194,7 +7194,7 @@ dependencies = [
 [[package]]
 name = "pallet-evm"
 version = "6.0.0-dev"
-source = "git+https://github.com/OpenZeppelin/frontier?branch=polkadot-v1.10.0#17e7b6f09c5a1845ba65563a9f9859cf07c4c635"
+source = "git+https://github.com/OpenZeppelin/frontier?branch=polkadot-v1.10.0#0971e101f5a02fac87080876f7ce1f36905bfa31"
 dependencies = [
  "environmental",
  "evm",
@@ -7220,7 +7220,7 @@ dependencies = [
 [[package]]
 name = "pallet-evm-chain-id"
 version = "1.0.0-dev"
-source = "git+https://github.com/OpenZeppelin/frontier?branch=polkadot-v1.10.0#17e7b6f09c5a1845ba65563a9f9859cf07c4c635"
+source = "git+https://github.com/OpenZeppelin/frontier?branch=polkadot-v1.10.0#0971e101f5a02fac87080876f7ce1f36905bfa31"
 dependencies = [
  "frame-support",
  "frame-system",
@@ -7231,7 +7231,7 @@ dependencies = [
 [[package]]
 name = "pallet-evm-precompile-modexp"
 version = "2.0.0-dev"
-source = "git+https://github.com/OpenZeppelin/frontier?branch=polkadot-v1.10.0#17e7b6f09c5a1845ba65563a9f9859cf07c4c635"
+source = "git+https://github.com/OpenZeppelin/frontier?branch=polkadot-v1.10.0#0971e101f5a02fac87080876f7ce1f36905bfa31"
 dependencies = [
  "fp-evm",
  "num",
@@ -7240,7 +7240,7 @@ dependencies = [
 [[package]]
 name = "pallet-evm-precompile-sha3fips"
 version = "2.0.0-dev"
-source = "git+https://github.com/OpenZeppelin/frontier?branch=polkadot-v1.10.0#17e7b6f09c5a1845ba65563a9f9859cf07c4c635"
+source = "git+https://github.com/OpenZeppelin/frontier?branch=polkadot-v1.10.0#0971e101f5a02fac87080876f7ce1f36905bfa31"
 dependencies = [
  "fp-evm",
  "tiny-keccak",
@@ -7249,7 +7249,7 @@ dependencies = [
 [[package]]
 name = "pallet-evm-precompile-simple"
 version = "2.0.0-dev"
-source = "git+https://github.com/OpenZeppelin/frontier?branch=polkadot-v1.10.0#17e7b6f09c5a1845ba65563a9f9859cf07c4c635"
+source = "git+https://github.com/OpenZeppelin/frontier?branch=polkadot-v1.10.0#0971e101f5a02fac87080876f7ce1f36905bfa31"
 dependencies = [
  "fp-evm",
  "ripemd",
@@ -9958,7 +9958,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "19de2de2a00075bf566bee3bd4db014b11587e84184d3f7a791bc17f1a8e9e48"
 dependencies = [
  "anyhow",
- "itertools 0.12.1",
+ "itertools 0.11.0",
  "proc-macro2",
  "quote",
  "syn 2.0.59",
@@ -12833,7 +12833,7 @@ dependencies = [
 [[package]]
 name = "sp-crypto-ec-utils"
 version = "0.10.0"
-source = "git+https://github.com/paritytech/polkadot-sdk#988103d7578ad515b13c69578da1237b28fa9f36"
+source = "git+https://github.com/paritytech/polkadot-sdk#b4ae5b01da280f754ccc00b94314a30b658182a1"
 dependencies = [
  "ark-bls12-377",
  "ark-bls12-377-ext",
@@ -12895,7 +12895,7 @@ dependencies = [
 [[package]]
 name = "sp-debug-derive"
 version = "14.0.0"
-source = "git+https://github.com/paritytech/polkadot-sdk#988103d7578ad515b13c69578da1237b28fa9f36"
+source = "git+https://github.com/paritytech/polkadot-sdk#b4ae5b01da280f754ccc00b94314a30b658182a1"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -12915,7 +12915,7 @@ dependencies = [
 [[package]]
 name = "sp-externalities"
 version = "0.25.0"
-source = "git+https://github.com/paritytech/polkadot-sdk#988103d7578ad515b13c69578da1237b28fa9f36"
+source = "git+https://github.com/paritytech/polkadot-sdk#b4ae5b01da280f754ccc00b94314a30b658182a1"
 dependencies = [
  "environmental",
  "parity-scale-codec",
@@ -13128,7 +13128,7 @@ dependencies = [
 [[package]]
 name = "sp-runtime-interface"
 version = "24.0.0"
-source = "git+https://github.com/paritytech/polkadot-sdk#988103d7578ad515b13c69578da1237b28fa9f36"
+source = "git+https://github.com/paritytech/polkadot-sdk#b4ae5b01da280f754ccc00b94314a30b658182a1"
 dependencies = [
  "bytes",
  "impl-trait-for-tuples",
@@ -13160,7 +13160,7 @@ dependencies = [
 [[package]]
 name = "sp-runtime-interface-proc-macro"
 version = "17.0.0"
-source = "git+https://github.com/paritytech/polkadot-sdk#988103d7578ad515b13c69578da1237b28fa9f36"
+source = "git+https://github.com/paritytech/polkadot-sdk#b4ae5b01da280f754ccc00b94314a30b658182a1"
 dependencies = [
  "Inflector",
  "expander 2.1.0",
@@ -13249,7 +13249,7 @@ source = "git+https://github.com/paritytech/polkadot-sdk?tag=polkadot-v1.10.0#70
 [[package]]
 name = "sp-std"
 version = "14.0.0"
-source = "git+https://github.com/paritytech/polkadot-sdk#988103d7578ad515b13c69578da1237b28fa9f36"
+source = "git+https://github.com/paritytech/polkadot-sdk#b4ae5b01da280f754ccc00b94314a30b658182a1"
 
 [[package]]
 name = "sp-storage"
@@ -13266,7 +13266,7 @@ dependencies = [
 [[package]]
 name = "sp-storage"
 version = "19.0.0"
-source = "git+https://github.com/paritytech/polkadot-sdk#988103d7578ad515b13c69578da1237b28fa9f36"
+source = "git+https://github.com/paritytech/polkadot-sdk#b4ae5b01da280f754ccc00b94314a30b658182a1"
 dependencies = [
  "impl-serde",
  "parity-scale-codec",
@@ -13301,7 +13301,7 @@ dependencies = [
 [[package]]
 name = "sp-tracing"
 version = "16.0.0"
-source = "git+https://github.com/paritytech/polkadot-sdk#988103d7578ad515b13c69578da1237b28fa9f36"
+source = "git+https://github.com/paritytech/polkadot-sdk#b4ae5b01da280f754ccc00b94314a30b658182a1"
 dependencies = [
  "parity-scale-codec",
  "tracing",
@@ -13398,7 +13398,7 @@ dependencies = [
 [[package]]
 name = "sp-wasm-interface"
 version = "20.0.0"
-source = "git+https://github.com/paritytech/polkadot-sdk#988103d7578ad515b13c69578da1237b28fa9f36"
+source = "git+https://github.com/paritytech/polkadot-sdk#b4ae5b01da280f754ccc00b94314a30b658182a1"
 dependencies = [
  "impl-trait-for-tuples",
  "log",
