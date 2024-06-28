@@ -43,11 +43,7 @@ use sp_std::marker::PhantomData;
 use sp_version::RuntimeVersion;
 // XCM Imports
 use xcm::{
-    latest::{
-        prelude::BodyId,
-        InteriorLocation,
-        Junction::PalletInstance,
-    },
+    latest::{prelude::BodyId, InteriorLocation, Junction::PalletInstance},
     VersionedLocation,
 };
 use xcm_builder::PayOverXcm;
