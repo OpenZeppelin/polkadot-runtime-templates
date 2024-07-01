@@ -13,4 +13,10 @@ frame_benchmarking::define_benchmarks!(
     [pallet_utility, Utility]
     [pallet_multisig, Multisig]
     [pallet_xcm, PalletXcmExtrinsicsBenchmark::<Runtime>]
+    [pallet_referenda, Referenda]
+    [pallet_scheduler, Scheduler]
+    [pallet_preimage, Preimage]
+    [pallet_treasury, Treasury]
+    [pallet_conviction_voting, ConvictionVoting]
+    [pallet_whitelist, Whitelist]
 );
