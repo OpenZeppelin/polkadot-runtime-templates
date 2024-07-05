@@ -32,7 +32,7 @@ use crate::{
         XcmpQueue,
     },
     types::{AccountId, AssetId, Balance, XcmFeesToAccount},
-    AllPalletsWithSystem, AssetManager, Assets, Balances, ParachainInfo, PolkadotXcm,
+    weights, AllPalletsWithSystem, AssetManager, Assets, Balances, ParachainInfo, PolkadotXcm,
 };
 
 parameter_types! {
@@ -299,14 +299,14 @@ impl pallet_xcm::Config for Runtime {
     type TrustedLockers = ();
     type UniversalLocation = UniversalLocation;
     type Weigher = FixedWeightBounds<UnitWeightCost, RuntimeCall, MaxInstructions>;
-    type WeightInfo = pallet_xcm::TestWeightInfo;
+    type WeightInfo = weights::pallet_xcm::WeightInfo<Runtime>;
     type XcmExecuteFilter = Nothing;
     // ^ Disable dispatchable execute on the XCM pallet.
     // Needs to be `Everything` for local testing.
     type XcmExecutor = XcmExecutor<XcmConfig>;
     type XcmReserveTransferFilter = Nothing;
     type XcmRouter = XcmRouter;
-    type XcmTeleportFilter = Everything;
+    type XcmTeleportFilter = Nothing;
 
     const VERSION_DISCOVERY_QUEUE_SIZE: u32 = 100;
 }

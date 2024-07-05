@@ -5,8 +5,7 @@ use fp_evm::GenesisAccount;
 use hex_literal::hex;
 use log::error;
 use parachain_template_runtime::{
-    constants::currency::EXISTENTIAL_DEPOSIT, AccountId, AuraId,
-    OpenZeppelinPrecompiles as Precompiles, Runtime, Signature,
+    AccountId, AuraId, OpenZeppelinPrecompiles as Precompiles, Runtime, Signature,
 };
 use sc_chain_spec::{ChainSpecExtension, ChainSpecGroup};
 use sc_service::ChainType;
@@ -180,7 +179,8 @@ pub fn local_testnet_config(contracts_path: ContractsPath) -> ChainSpec {
 
 fn testnet_genesis(
     invulnerables: Vec<(AccountId, AuraId)>,
-    endowed_accounts: Vec<AccountId>,
+    #[cfg(not(feature = "runtime-benchmarks"))] endowed_accounts: Vec<AccountId>,
+    #[cfg(feature = "runtime-benchmarks")] mut endowed_accounts: Vec<AccountId>,
     root: AccountId,
     id: ParaId,
     contracts_path: ContractsPath,
@@ -218,6 +218,9 @@ fn testnet_genesis(
         })
         .chain(precompiles)
         .collect();
+    let candidacy_bond: u64 = 1_000_000_000 * 16;
+    #[cfg(feature = "runtime-benchmarks")]
+    endowed_accounts.push(AccountId::from(hex!("1000000000000000000000000000000000000001")));
     serde_json::json!({
         "balances": {
             "balances": endowed_accounts.iter().cloned().map(|k| (k, 1u64 << 60)).collect::<Vec<_>>(),
@@ -227,7 +230,7 @@ fn testnet_genesis(
         },
         "collatorSelection": {
             "invulnerables": invulnerables.iter().cloned().map(|(acc, _)| acc).collect::<Vec<_>>(),
-            "candidacyBond": EXISTENTIAL_DEPOSIT * 16,
+            "candidacyBond": candidacy_bond,
         },
         "session": {
             "keys": invulnerables

@@ -1,14 +1,12 @@
 use frame_support::{
     parameter_types,
-    traits::{ConstU32, Contains, Everything, Get, Nothing, PalletInfoAccess},
+    traits::{ConstU32, Contains, Everything, Nothing, PalletInfoAccess},
     weights::Weight,
-    PalletId,
 };
 use frame_system::EnsureRoot;
 use pallet_xcm::XcmPassthrough;
 use polkadot_parachain_primitives::primitives::{self, Sibling};
 use polkadot_runtime_common::impls::ToAuthor;
-use sp_runtime::traits::AccountIdConversion;
 use xcm::latest::prelude::*;
 use xcm_builder::{
     AccountId32Aliases, AllowExplicitUnpaidExecutionFrom, AllowTopLevelPaidExecutionFrom,
@@ -22,6 +20,7 @@ use xcm_builder::{
 };
 use xcm_executor::XcmExecutor;
 
+use super::TreasuryAccount;
 use crate::{
     configs::{
         weights, Balances, ParachainSystem, Runtime, RuntimeCall, RuntimeEvent, RuntimeOrigin,
@@ -113,18 +112,6 @@ pub type XcmOriginToTransactDispatchOrigin = (
     // Xcm origins can be represented natively under the Xcm pallet's Xcm origin.
     XcmPassthrough<RuntimeOrigin>,
 );
-
-// This is a workaround. We have added Treasury in the master and it will be added in the next release.
-// We will collect fees on this pseudo treasury account until Treasury is rolled out.
-// When treasury will be introduced, it will use the same account for fee collection so transition should be smooth.
-pub struct TreasuryAccount;
-
-impl Get<AccountId> for TreasuryAccount {
-    fn get() -> AccountId {
-        const ID: PalletId = PalletId(*b"py/trsry");
-        AccountIdConversion::<AccountId>::into_account_truncating(&ID)
-    }
-}
 
 parameter_types! {
     // One XCM operation is 1_000_000_000 weight - almost certainly a conservative estimate.
