@@ -12,11 +12,11 @@ use polkadot_parachain_primitives::primitives::{self, Sibling};
 use sp_runtime::traits::AccountIdConversion;
 use xcm::latest::prelude::{Assets as XcmAssets, *};
 use xcm_builder::{
-    deposit_or_burn_fee, AccountKey20Aliases, AllowExplicitUnpaidExecutionFrom,
-    AllowTopLevelPaidExecutionFrom, ConvertedConcreteId, DenyReserveTransferToRelayChain,
-    DenyThenTry, EnsureXcmOrigin, FixedWeightBounds, FrameTransactionalProcessor, FungibleAdapter,
-    FungiblesAdapter, HandleFee, IsChildSystemParachain, IsConcrete, NativeAsset, NoChecking,
-    ParentIsPreset, RelayChainAsNative, SiblingParachainAsNative, SiblingParachainConvertsVia,
+    AccountKey20Aliases, AllowExplicitUnpaidExecutionFrom, AllowTopLevelPaidExecutionFrom,
+    ConvertedConcreteId, DenyReserveTransferToRelayChain, DenyThenTry, EnsureXcmOrigin,
+    FixedWeightBounds, FrameTransactionalProcessor, FungibleAdapter, FungiblesAdapter, HandleFee,
+    IsChildSystemParachain, IsConcrete, NativeAsset, NoChecking, ParentIsPreset,
+    RelayChainAsNative, SiblingParachainAsNative, SiblingParachainConvertsVia,
     SignedAccountKey20AsNative, SovereignSignedViaLocation, TakeWeightCredit, TrailingSetTopicAsId,
     UsingComponents, WithComputedOrigin, WithUniqueTopic, XcmFeeManagerFromComponents,
 };
@@ -170,7 +170,6 @@ pub type Barrier = TrailingSetTopicAsId<
 pub struct XcmFeeToAccount<AssetTransactor, AccountId, ReceiverAccount>(
     PhantomData<(AssetTransactor, AccountId, ReceiverAccount)>,
 );
-
 impl<
         AssetTransactor: TransactAsset,
         AccountId: Clone + Into<[u8; 20]>,
@@ -181,6 +180,24 @@ impl<
         deposit_or_burn_fee::<AssetTransactor, _>(fee, context, ReceiverAccount::get());
 
         XcmAssets::new()
+    }
+}
+
+pub fn deposit_or_burn_fee<AssetTransactor: TransactAsset, AccountId: Clone + Into<[u8; 20]>>(
+    fee: XcmAssets,
+    context: Option<&XcmContext>,
+    receiver: AccountId,
+) {
+    let dest = AccountKey20 { network: None, key: receiver.into() }.into();
+    for asset in fee.into_inner() {
+        if let Err(e) = AssetTransactor::deposit_asset(&asset, &dest, context) {
+            log::trace!(
+                target: "xcm::fees",
+                "`AssetTransactor::deposit_asset` returned error: {:?}. Burning fee: {:?}. \
+                They might be burned.",
+                e, asset,
+            );
+        }
     }
 }
 
