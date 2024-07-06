@@ -605,5 +605,5 @@ impl pallet_treasury::Config for Runtime {
     type SpendFunds = ();
     type SpendOrigin = TreasurySpender;
     type SpendPeriod = SpendPeriod;
-    type WeightInfo = pallet_treasury::weights::SubstrateWeight<Runtime>;
+    type WeightInfo = weights::pallet_treasury::WeightInfo<Runtime>;
 }
