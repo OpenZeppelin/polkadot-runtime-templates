@@ -49,9 +49,13 @@ use xcm_builder::PayOverXcm;
 use xcm_builder::ProcessXcmMessage;
 use xcm_config::{RelayLocation, XcmOriginToTransactDispatchOrigin};
 
+
+#[cfg(feature = "runtime-benchmarks")]
+use crate::benchmark::{OpenHrmpChannel, PayWithEnsure};
+
 use crate::{
     constants::{
-        currency::{deposit, CENTS, EXISTENTIAL_DEPOSIT, MICROCENTS},
+        currency::{deposit, CENTS, EXISTENTIAL_DEPOSIT, GRAND, MICROCENTS},
         AVERAGE_ON_INITIALIZE_RATIO, DAYS, HOURS, MAXIMUM_BLOCK_WEIGHT, MAX_BLOCK_LENGTH,
         NORMAL_DISPATCH_RATIO, SLOT_DURATION, VERSION,
     },
@@ -59,8 +63,7 @@ use crate::{
         AccountId, Balance, Block, BlockNumber, CollatorSelectionUpdateOrigin, ConsensusHook, Hash,
         Nonce, PriceForSiblingParachainDelivery,
     },
-    weights,
-    weights::{BlockExecutionWeight, ExtrinsicBaseWeight, RocksDbWeight},
+    weights::{self, BlockExecutionWeight, ExtrinsicBaseWeight, RocksDbWeight},
     Aura, Balances, CollatorSelection, MessageQueue, OriginCaller, PalletInfo, ParachainSystem,
     Preimage, Runtime, RuntimeCall, RuntimeEvent, RuntimeFreezeReason, RuntimeHoldReason,
     RuntimeOrigin, RuntimeTask, Session, SessionKeys, System, Treasury, WeightToFee, XcmpQueue,
@@ -537,10 +540,16 @@ impl pallet_utility::Config for Runtime {
     type WeightInfo = weights::pallet_utility::WeightInfo<Runtime>;
 }
 
+#[cfg(feature = "runtime-benchmarks")]
+parameter_types! {
+    pub LocationParents: u8 = 1;
+    pub BenchmarkParaId: u8 = 0;
+}
+
 parameter_types! {
     pub const ProposalBond: Permill = Permill::from_percent(5);
-    pub const ProposalBondMinimum: Balance = 2000; // * CENTS
-    pub const ProposalBondMaximum: Balance = 1;// * GRAND;
+    pub const ProposalBondMinimum: Balance = 2000 * CENTS;
+    pub const ProposalBondMaximum: Balance = 1 * GRAND;
     pub const SpendPeriod: BlockNumber = 6 * DAYS;
     pub const Burn: Permill = Permill::from_perthousand(2);
     pub const TreasuryPalletId: PalletId = PalletId(*b"py/trsry");
@@ -552,13 +561,30 @@ parameter_types! {
     pub TreasuryAccount: AccountId = Treasury::account_id();
 }
 
+type Beneficiary = VersionedLocation;
+type AssetKind = VersionedLocatableAsset;
+
+pub type TreasuryPaymaster = PayOverXcm<
+    TreasuryInteriorLocation,
+    xcm_config::XcmRouter,
+    crate::PolkadotXcm,
+    ConstU32<{ 6 * HOURS }>,
+    Beneficiary,
+    AssetKind,
+    LocatableAssetConverter,
+    VersionedLocationConverter,
+>;
+
 impl pallet_treasury::Config for Runtime {
     type ApproveOrigin = EitherOfDiverse<EnsureRoot<AccountId>, Treasurer>;
-    type AssetKind = VersionedLocatableAsset;
+    type AssetKind = AssetKind;
     type BalanceConverter = frame_support::traits::tokens::UnityAssetBalanceConversion;
     #[cfg(feature = "runtime-benchmarks")]
-    type BenchmarkHelper = polkadot_runtime_common::impls::benchmarks::TreasuryArguments;
-    type Beneficiary = VersionedLocation;
+    type BenchmarkHelper = polkadot_runtime_common::impls::benchmarks::TreasuryArguments<
+        LocationParents,
+        BenchmarkParaId
+    >;
+    type Beneficiary = Beneficiary;
     type BeneficiaryLookup = IdentityLookup<Self::Beneficiary>;
     type Burn = ();
     type BurnDestination = ();
@@ -566,16 +592,10 @@ impl pallet_treasury::Config for Runtime {
     type MaxApprovals = MaxApprovals;
     type OnSlash = Treasury;
     type PalletId = TreasuryPalletId;
-    type Paymaster = PayOverXcm<
-        TreasuryInteriorLocation,
-        xcm_config::XcmRouter,
-        crate::PolkadotXcm,
-        ConstU32<{ 6 * HOURS }>,
-        Self::Beneficiary,
-        Self::AssetKind,
-        LocatableAssetConverter,
-        VersionedLocationConverter,
-    >;
+    #[cfg(feature = "runtime-benchmarks")]
+    type Paymaster = PayWithEnsure<TreasuryPaymaster, OpenHrmpChannel<BenchmarkParaId>>;
+    #[cfg(not(feature = "runtime-benchmarks"))]
+    type Paymaster = TreasuryPaymaster;
     type PayoutPeriod = PayoutSpendPeriod;
     type ProposalBond = ProposalBond;
     type ProposalBondMaximum = ProposalBondMaximum;

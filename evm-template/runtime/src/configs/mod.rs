@@ -55,7 +55,7 @@ use xcm_config::{RelayLocation, XcmOriginToTransactDispatchOrigin};
 use crate::benchmark::{OpenHrmpChannel, PayWithEnsure};
 use crate::{
     constants::{
-        currency::{deposit, CENTS, EXISTENTIAL_DEPOSIT, MICROCENTS},
+        currency::{deposit, CENTS, EXISTENTIAL_DEPOSIT, GRAND, MICROCENTS},
         AVERAGE_ON_INITIALIZE_RATIO, DAYS, HOURS, MAXIMUM_BLOCK_WEIGHT, MAX_BLOCK_LENGTH,
         NORMAL_DISPATCH_RATIO, SLOT_DURATION, VERSION, WEIGHT_PER_GAS,
     },
@@ -514,8 +514,8 @@ impl pallet_utility::Config for Runtime {
 
 parameter_types! {
     pub const ProposalBond: Permill = Permill::from_percent(5);
-    pub const ProposalBondMinimum: Balance = 2000; // * CENTS
-    pub const ProposalBondMaximum: Balance = 1;// * GRAND;
+    pub const ProposalBondMinimum: Balance = 2000 * CENTS;
+    pub const ProposalBondMaximum: Balance = 1 * GRAND;
     pub const SpendPeriod: BlockNumber = 6 * DAYS;
     pub const Burn: Permill = Permill::from_perthousand(2);
     pub const TreasuryPalletId: PalletId = PalletId(*b"py/trsry");
