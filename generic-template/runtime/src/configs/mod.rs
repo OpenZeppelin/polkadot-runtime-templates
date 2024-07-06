@@ -49,10 +49,8 @@ use xcm_builder::PayOverXcm;
 use xcm_builder::ProcessXcmMessage;
 use xcm_config::{RelayLocation, XcmOriginToTransactDispatchOrigin};
 
-
 #[cfg(feature = "runtime-benchmarks")]
 use crate::benchmark::{OpenHrmpChannel, PayWithEnsure};
-
 use crate::{
     constants::{
         currency::{deposit, CENTS, EXISTENTIAL_DEPOSIT, GRAND, MICROCENTS},
@@ -582,7 +580,7 @@ impl pallet_treasury::Config for Runtime {
     #[cfg(feature = "runtime-benchmarks")]
     type BenchmarkHelper = polkadot_runtime_common::impls::benchmarks::TreasuryArguments<
         LocationParents,
-        BenchmarkParaId
+        BenchmarkParaId,
     >;
     type Beneficiary = Beneficiary;
     type BeneficiaryLookup = IdentityLookup<Self::Beneficiary>;
