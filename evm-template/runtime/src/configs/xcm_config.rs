@@ -4,12 +4,10 @@ use frame_support::{
     parameter_types,
     traits::{ConstU32, Contains, Everything, Nothing, PalletInfoAccess},
     weights::Weight,
-    PalletId,
 };
 use frame_system::EnsureRoot;
 use pallet_xcm::XcmPassthrough;
 use polkadot_parachain_primitives::primitives::{self, Sibling};
-use sp_runtime::traits::AccountIdConversion;
 use xcm::latest::prelude::{Assets as XcmAssets, *};
 use xcm_builder::{
     AccountKey20Aliases, AllowExplicitUnpaidExecutionFrom, AllowTopLevelPaidExecutionFrom,
@@ -33,6 +31,7 @@ use crate::{
     },
     types::{AccountId, AssetId, Balance, XcmFeesToAccount},
     weights, AllPalletsWithSystem, AssetManager, Assets, Balances, ParachainInfo, PolkadotXcm,
+    Treasury,
 };
 
 parameter_types! {
@@ -117,18 +116,6 @@ pub type XcmOriginToTransactDispatchOrigin = (
     XcmPassthrough<RuntimeOrigin>,
 );
 
-// This is a workaround. We have added Treasury in the master and it will be added in the next release.
-// We will collect fees on this pseudo treasury account until Treasury is rolled out.
-// When treasury will be introduced, it will use the same account for fee collection so transition should be smooth.
-pub struct TreasuryAccount;
-
-impl Get<AccountId> for TreasuryAccount {
-    fn get() -> AccountId {
-        const ID: PalletId = PalletId(*b"py/trsry");
-        AccountIdConversion::<AccountId>::into_account_truncating(&ID)
-    }
-}
-
 parameter_types! {
     // One XCM operation is 1_000_000_000 weight - almost certainly a conservative estimate.
     pub const UnitWeightCost: Weight = Weight::from_parts(1_000_000_000, 64 * 1024);
@@ -199,6 +186,10 @@ pub fn deposit_or_burn_fee<AssetTransactor: TransactAsset, AccountId: Clone + In
             );
         }
     }
+}
+
+parameter_types! {
+    pub TreasuryAccount: AccountId = Treasury::account_id();
 }
 
 pub struct XcmConfig;
