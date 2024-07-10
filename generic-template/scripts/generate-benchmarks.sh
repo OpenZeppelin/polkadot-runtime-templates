@@ -1,5 +1,7 @@
 #!/bin/bash
 
+set -e
+
 while getopts f: flag
 do
     case "${flag}" in
@@ -7,9 +9,9 @@ do
     esac
 done
 
-mkdir benchmarking
-mkdir benchmarking/results
-mkdir benchmarking/new-benchmarks
+cargo build --release --features=runtime-benchmarks
+
+mkdir -p benchmarking/new-benchmarks
 
 while IFS= read -r line; do
     echo "Creating benchmark for: $line"

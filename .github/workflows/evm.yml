@@ -76,7 +76,7 @@ jobs:
         run: cargo test --release
 
       - name: Check benchmarking compilation
-        run: cargo check --release --features runtime-benchmarks
+        run: ./scripts/generate-benchmarks -f ./scripts/assets/pallets.txt
 
       - name: Run tests with async backing
         run: cargo test --release --features="async-backing"
