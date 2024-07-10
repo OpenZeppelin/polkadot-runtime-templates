@@ -4,9 +4,9 @@
 
 = RPC Differences
 
-The EVM in a Substrate node has almost the same RPC calls that are common for all of the nodes. But some of them are not applicable for the Frontier.
+The EVM in a Substrate node has almost the same RPC calls common to all nodes. But some of them are not applicable for Frontier.
 
-These are the calls that are not presented or behave differently from regular Ethereum nodes:
+These are the calls that behave differently than would be expected by regular Ethereum nodes:
 
 * `eth_sign` / `eth_signTransaction` -- these methods do not exist in the Frontier and this template because it, unlike Ethereum nodes, does not hold any keys.
 * `eth_syncing` -- it can have additional fields `warp_chunks_amount` and `warp_chunks_processed` that describe warp syncing process.
