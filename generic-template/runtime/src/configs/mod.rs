@@ -25,10 +25,7 @@ pub use governance::origins::pallet_custom_origins;
 use governance::{origins::Treasurer, TreasurySpender};
 use parachains_common::message_queue::{NarrowOriginToSibling, ParaIdToSibling};
 use parity_scale_codec::{Decode, Encode, MaxEncodedLen};
-use polkadot_runtime_common::{
-    impls::{LocatableAssetConverter, VersionedLocatableAsset, VersionedLocationConverter},
-    BlockHashCount, SlowAdjustingFeeUpdate,
-};
+use polkadot_runtime_common::{BlockHashCount, SlowAdjustingFeeUpdate};
 use scale_info::TypeInfo;
 use sp_consensus_aura::sr25519::AuthorityId as AuraId;
 use sp_runtime::{
@@ -36,15 +33,11 @@ use sp_runtime::{
     Perbill, Permill, RuntimeDebug,
 };
 use sp_version::RuntimeVersion;
-use xcm::{
-    latest::{
-        prelude::{AssetId, BodyId},
-        InteriorLocation,
-        Junction::PalletInstance,
-    },
-    VersionedLocation,
+use xcm::latest::{
+    prelude::{AssetId, BodyId},
+    InteriorLocation,
+    Junction::PalletInstance,
 };
-use xcm_builder::PayOverXcm;
 #[cfg(not(feature = "runtime-benchmarks"))]
 use xcm_builder::ProcessXcmMessage;
 use xcm_config::{RelayLocation, XcmOriginToTransactDispatchOrigin};
@@ -58,8 +51,9 @@ use crate::{
         NORMAL_DISPATCH_RATIO, SLOT_DURATION, VERSION,
     },
     types::{
-        AccountId, Balance, Block, BlockNumber, CollatorSelectionUpdateOrigin, ConsensusHook, Hash,
-        Nonce, PriceForSiblingParachainDelivery,
+        AccountId, AssetKind, Balance, Beneficiary, Block, BlockNumber,
+        CollatorSelectionUpdateOrigin, ConsensusHook, Hash, Nonce,
+        PriceForSiblingParachainDelivery, TreasuryPaymaster,
     },
     weights::{self, BlockExecutionWeight, ExtrinsicBaseWeight, RocksDbWeight},
     Aura, Balances, CollatorSelection, MessageQueue, OriginCaller, PalletInfo, ParachainSystem,
@@ -546,7 +540,7 @@ parameter_types! {
 
 parameter_types! {
     pub const ProposalBond: Permill = Permill::from_percent(5);
-    pub const ProposalBondMinimum: Balance = 2000 * CENTS;
+    pub const ProposalBondMinimum: Balance = 2 * GRAND;
     pub const ProposalBondMaximum: Balance = GRAND;
     pub const SpendPeriod: BlockNumber = 6 * DAYS;
     pub const Burn: Permill = Permill::from_perthousand(2);
@@ -558,20 +552,6 @@ parameter_types! {
     pub const MaxApprovals: u32 = 100;
     pub TreasuryAccount: AccountId = Treasury::account_id();
 }
-
-type Beneficiary = VersionedLocation;
-type AssetKind = VersionedLocatableAsset;
-
-pub type TreasuryPaymaster = PayOverXcm<
-    TreasuryInteriorLocation,
-    xcm_config::XcmRouter,
-    crate::PolkadotXcm,
-    ConstU32<{ 6 * HOURS }>,
-    Beneficiary,
-    AssetKind,
-    LocatableAssetConverter,
-    VersionedLocationConverter,
->;
 
 impl pallet_treasury::Config for Runtime {
     type ApproveOrigin = EitherOfDiverse<EnsureRoot<AccountId>, Treasurer>;
