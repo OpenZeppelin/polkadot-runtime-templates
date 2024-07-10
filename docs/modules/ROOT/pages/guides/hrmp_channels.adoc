@@ -33,9 +33,29 @@ For all of the examples:
 
 These extrinsics need to be called from the parachain’s sovereign account as origin, via a democracy proposal.
 
-1. Propose opening a channel to send XCM to the other parachain
-2. Accept request to open a channel to receive XCM from the other parachain
-
+1. On your parachain, propose opening a channel to send XCM to the other parachain (Snowbridge)
+```
+referenda.submit(
+	proposal_origin = Origin.Root,
+	proposal: hrmp.hrmpInitOpenChannel(
+		recipient = 1000,
+		proposed_max_capacity = 1000,
+		proposed_max_message_size = 102400,
+	),
+	enactment_moment = dispatchTime.after($CURRENT_BLOCK),
+)
+```
+Governance must pass the submitted proposal and it must be executed.
+2. Propose accepting the request to open a channel to receive XCM on the other parachain.
+```
+referenda.submit(
+	proposal_origin = Origin.Root,
+	proposal: hrmp.hrmpAcceptOpenChannel(
+		sender = 43211234,
+	),
+	enactment_moment = dispatchTime.after($CURRENT_BLOCK),
+)
+```
 These 2 steps imply 2 symmetric steps by the other parachain to:
 3. Accept request to receive XCM from your parachain
 4. Propose request to open a channel to send XCM from the other parachain to your parachain
