@@ -75,7 +75,7 @@ jobs:
       - name: Run tests
         run: cargo test --release
 
-      - name: Check benchmarking compilation
+      - name: Run benchmarks
         run: ./scripts/generate-benchmarks.sh -f ./scripts/assets/pallets.txt -s 10 -r 10
 
       - name: Run tests with async backing

@@ -94,7 +94,6 @@ substrate-build-script-utils = { workspace = true }
 default = []
 async-backing = []
 experimental = []
-txpool = []
 runtime-benchmarks = [
 	"frame-benchmarking-cli/runtime-benchmarks",
 	"frame-benchmarking/runtime-benchmarks",
@@ -109,6 +108,7 @@ try-runtime = [
 	"polkadot-cli/try-runtime",
 	"sp-runtime/try-runtime",
 ]
+txpool = []
 
 [lints]
 workspace = true
