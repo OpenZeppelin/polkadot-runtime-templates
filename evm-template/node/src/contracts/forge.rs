@@ -4,6 +4,7 @@ use super::{abi::AbiItem, deserialize_bytecode};
 
 #[derive(Deserialize)]
 pub struct ForgeContract {
+    #[allow(dead_code)]
     pub abi: Vec<AbiItem>,
     pub bytecode: ForgeBytecode,
 }

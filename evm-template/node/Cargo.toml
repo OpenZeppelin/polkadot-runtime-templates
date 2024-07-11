@@ -94,6 +94,7 @@ substrate-build-script-utils = { workspace = true }
 default = []
 async-backing = []
 experimental = []
+txpool = []
 runtime-benchmarks = [
 	"frame-benchmarking-cli/runtime-benchmarks",
 	"frame-benchmarking/runtime-benchmarks",
