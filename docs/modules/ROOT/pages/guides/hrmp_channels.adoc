@@ -28,53 +28,7 @@ For all of the examples:
 - `paraId` for the user's parachain is set to `43211234` for all examples below.
 - `proposedMaxCapacity` and `proposedMaxMessageSize` are set to the values of Polkadot `config.hrmpChannelMaxCapacity = 1000` and `config.hrmpChannelMaxMessageSize = 102400`, respectively.
 
-
-=== Connect to Snowbridge to bridge to Ethereum
-
-These extrinsics need to be called from the parachain’s sovereign account as origin, via a democracy proposal.
-
-1. On your parachain, propose opening a channel to send XCM to the other parachain (Snowbridge)
-```
-referenda.submit(
-	proposal_origin = Origin.Root,
-	proposal: hrmp.hrmpInitOpenChannel(
-		recipient = 1000,
-		proposed_max_capacity = 1000,
-		proposed_max_message_size = 102400,
-	),
-	enactment_moment = dispatchTime.after($CURRENT_BLOCK),
-)
-```
-Governance must pass the submitted proposal and it must be executed.
-2. Propose accepting the request to open a channel to receive XCM on the other parachain.
-```
-referenda.submit(
-	proposal_origin = Origin.Root,
-	proposal: hrmp.hrmpAcceptOpenChannel(
-		sender = 43211234,
-	),
-	enactment_moment = dispatchTime.after($CURRENT_BLOCK),
-)
-```
-These 2 steps imply 2 symmetric steps by the other parachain to:
-3. Accept request to receive XCM from your parachain
-4. Propose request to open a channel to send XCM from the other parachain to your parachain
-
-Steps 3 & 4 can be proposed on the other parachain by you or them. You do not have to wait for them to make the proposals to accept your request nor open a request.
-
-* TODO: steps 1 & 2 for our parachain
-* TODO: steps 3 & 4, calls to propose on Snowbridge
-
-=== Connect to HydraDX for Liquidity
-
-These extrinsics need to be called from the parachain’s sovereign account as origin, via a democracy proposal.
-
-* TODO: steps 1 & 2 for our parachain
-* TODO: steps 3 & 4, calls to propose on Snowbridge
-
-link:https://moonbeam.polkassembly.network/referendum/93[Here] is an example of a proposal on Moonbeam to Open/Accept HRMP channels with HydraDX.
-
-=== Connect to AssetHub for Cross-Chain Transfers
+=== Connect to AssetHub
 
 AssetHub is a common-good, system parachain and is therefore controlled by relay chain governance. This means it is sufficient to propose opening both channels at once through the relay chain's `GeneralAdmin` track. The proposal should set its call (proposed to be executed) to `utility.batchAll` with the input including 2 calls to `hrmp.forceOpenHrmpChannel` to open a channel in each direction between the user parachain and AssetHub.
 
@@ -98,6 +52,38 @@ hrmp.forceOpenChannel(
 ```
 
 link:https://polkadot.subsquare.io/referenda/438[Here] is a successful example of this proposal which passed to open 2 HRMP channels between Unique Network and AssetHub. link:https://polkadot.polkassembly.io/referenda/594[Here] is another example of a proposal executed to open HRMP Channels between AssetHub and Mythos.
+
+=== Connect to Snowbridge to bridge to Ethereum
+
+Snowbridge supports sending ERC20 tokens between Polkadot parachains and Ethereum in both directions.
+
+Snowbridge leverages AssetHub to mint ERC20 tokens received from Ethereum and send them to parachains. This implies that a prerequisite step for receiving ERC20 tokens via Snowbridge is opening HRMP channels with AssetHub by following the previous section.
+
+The standard way of interacting with Snowbridge is to make calls to the link:https://github.com/Snowfork/snowbridge/blob/main/contracts/src/interfaces/IGateway.sol[Gateway] contract deployed on Ethereum at link:https://etherscan.io/address/0x27ca963C279c93801941e1eB8799c23f407d68e7[this address].
+
+If an ERC20 token has already been bridged before, the user may send the following transaction to the Gateway to send ERC20 tokens to parachain `destinationChain` from Ethereum and deposit into account `destinationAddress` on that parachain.
+```
+function sendToken(address token, ParaID destinationChain, MultiAddress destinationAddress, uint128 destinationFee, uint128 amount)
+    external
+    payable;
+```
+
+If the ERC20 tokens has not been bridged before, there is a prerequisite step to register the ERC20 token on AssetHub via the `ForeignAssets` pallet. To register ERC20 tokens for the first time, the user may send the following transaction to the Gateway:
+```solidity, ignore
+function registerToken(address token) external payable;
+```
+The above function sends a message to the AssetHub parachain to register a new fungible asset in the `ForeignAssets` pallet. To account for delivery costs, the above function charges a fee in Ether which may be retrieved beforehand by calling `quoteRegisterFee`.
+
+For more information, see the link:https://docs.snowbridge.network[Snowbridge Docs]. For more information on the Snowbridge deployment to Polkadot, see the link:https://polkadot.polkassembly.io/referenda/680[governance proposal which initialized Snowbridge on BridgeHub and AssetHub].
+
+=== Connect to HydraDX for Liquidity
+
+These extrinsics need to be called from the parachain’s sovereign account as origin, via a democracy proposal.
+
+* TODO: steps 1 & 2 for our parachain
+* TODO: steps 3 & 4, calls to propose on Snowbridge
+
+link:https://moonbeam.polkassembly.network/referendum/93[Here] is an example of a proposal on Moonbeam to Open/Accept HRMP channels with HydraDX.
 
 == Channel Notification Handlers
 
