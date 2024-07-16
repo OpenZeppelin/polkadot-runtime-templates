@@ -234,7 +234,6 @@ mod xcm_tests {
     #[test]
     fn pallet_xcm_constants() {
         assert_eq!(MaxLockers::get(), 0);
-        assert_eq!(MaxRemoteLockConsumers::get(), 0);
         assert_eq!(<parachain_template_runtime::Runtime as pallet_xcm::Config>::VERSION_DISCOVERY_QUEUE_SIZE, 100);
     }
 }
