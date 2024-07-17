@@ -88,6 +88,8 @@ cargo build --release
     --rpc-port 9977 \
     --sync fast-unsafe
 ```
+** `<path to datadir>` is where the downloaded chain state will be stored. It can be any folder on your computer.
+** `<path to the Rococo chainspec>` is where your Rococo chainspec is stored. You can download this file from the link:https://github.com/paritytech/polkadot-sdk/blob/release-polkadot-v1.10.0/polkadot/node/service/chain-specs/rococo.jsonofficial[official Polkadot sdk repository].
 
 * Register a parathread:
 
