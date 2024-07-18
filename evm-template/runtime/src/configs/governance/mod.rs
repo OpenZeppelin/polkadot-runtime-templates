@@ -76,6 +76,6 @@ impl pallet_referenda::Config for Runtime {
     type Tracks = tracks::TracksInfo;
     type UndecidingTimeout = UndecidingTimeout;
     type Votes = pallet_conviction_voting::VotesOf<Runtime>;
-        /// Rerun benchmarks if you are making changes to runtime configuration.
+    /// Rerun benchmarks if you are making changes to runtime configuration.
     type WeightInfo = weights::pallet_referenda::WeightInfo<Runtime>;
 }
