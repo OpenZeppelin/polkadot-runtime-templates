@@ -176,6 +176,7 @@ impl pallet_scheduler::Config for Runtime {
     type RuntimeEvent = RuntimeEvent;
     type RuntimeOrigin = RuntimeOrigin;
     type ScheduleOrigin = EnsureRoot<AccountId>;
+    /// Rerun benchmarks if you are making changes to runtime configuration.
     type WeightInfo = weights::pallet_scheduler::WeightInfo<Runtime>;
 }
 
@@ -199,6 +200,7 @@ impl pallet_preimage::Config for Runtime {
     type Currency = Balances;
     type ManagerOrigin = EnsureRoot<AccountId>;
     type RuntimeEvent = RuntimeEvent;
+    /// Rerun benchmarks if you are making changes to runtime configuration.
     type WeightInfo = weights::pallet_preimage::WeightInfo<Runtime>;
 }
 
@@ -210,6 +212,7 @@ impl pallet_timestamp::Config for Runtime {
     /// A timestamp: milliseconds since the unix epoch.
     type Moment = u64;
     type OnTimestampSet = Aura;
+    /// Rerun benchmarks if you are making changes to runtime configuration.
     type WeightInfo = weights::pallet_timestamp::WeightInfo<Runtime>;
 }
 
@@ -284,6 +287,7 @@ impl pallet_proxy::Config for Runtime {
     type ProxyType = ProxyType;
     type RuntimeCall = RuntimeCall;
     type RuntimeEvent = RuntimeEvent;
+    /// Rerun benchmarks if you are making changes to runtime configuration.
     type WeightInfo = weights::pallet_proxy::WeightInfo<Runtime>;
 }
 
@@ -309,6 +313,7 @@ impl pallet_balances::Config for Runtime {
     type RuntimeEvent = RuntimeEvent;
     type RuntimeFreezeReason = RuntimeFreezeReason;
     type RuntimeHoldReason = RuntimeHoldReason;
+    /// Rerun benchmarks if you are making changes to runtime configuration.
     type WeightInfo = weights::pallet_balances::WeightInfo<Runtime>;
 }
 
@@ -342,6 +347,7 @@ impl pallet_assets::Config for Runtime {
     type RemoveItemsLimit = RemoveItemsLimit;
     type RuntimeEvent = RuntimeEvent;
     type StringLimit = StringLimit;
+    /// Rerun benchmarks if you are making changes to runtime configuration.
     type WeightInfo = weights::pallet_assets::WeightInfo<Runtime>;
 }
 
@@ -352,6 +358,10 @@ parameter_types! {
 }
 
 impl pallet_transaction_payment::Config for Runtime {
+    /// There are two possible mechanisms available: slow and fast adjusting.
+    /// With slow adjusting fees stay almost constant in short periods of time, changing only in long term.
+    /// It may lead to long inclusion times during spikes, therefore tipping is enabled.
+    /// With fast adjusting fees change rapidly, but fixed for all users at each block (no tipping)
     type FeeMultiplierUpdate = SlowAdjustingFeeUpdate<Self>;
     type LengthToFee = ConstantMultiplier<Balance, TransactionByteFee>;
     type OnChargeTransaction = pallet_transaction_payment::CurrencyAdapter<Balances, ()>;
@@ -363,6 +373,7 @@ impl pallet_transaction_payment::Config for Runtime {
 impl pallet_sudo::Config for Runtime {
     type RuntimeCall = RuntimeCall;
     type RuntimeEvent = RuntimeEvent;
+    /// Rerun benchmarks if you are making changes to runtime configuration.
     type WeightInfo = weights::pallet_sudo::WeightInfo<Runtime>;
 }
 
@@ -385,6 +396,7 @@ impl cumulus_pallet_parachain_system::Config for Runtime {
     type ReservedXcmpWeight = ReservedXcmpWeight;
     type RuntimeEvent = RuntimeEvent;
     type SelfParaId = parachain_info::Pallet<Runtime>;
+    /// Rerun benchmarks if you are making changes to runtime configuration.
     type WeightInfo = weights::cumulus_pallet_parachain_system::WeightInfo<Runtime>;
     type XcmpMessageHandler = XcmpQueue;
 }
@@ -417,6 +429,7 @@ impl pallet_message_queue::Config for Runtime {
     type RuntimeEvent = RuntimeEvent;
     type ServiceWeight = MessageQueueServiceWeight;
     type Size = u32;
+    /// Rerun benchmarks if you are making changes to runtime configuration.
     type WeightInfo = weights::pallet_message_queue::WeightInfo<Runtime>;
 }
 
@@ -435,9 +448,11 @@ impl cumulus_pallet_xcmp_queue::Config for Runtime {
     type ControllerOrigin = EnsureRoot<AccountId>;
     type ControllerOriginConverter = XcmOriginToTransactDispatchOrigin;
     type MaxInboundSuspended = MaxInboundSuspended;
+    /// Ensure that this value is not set to null (or NoPriceForMessageDelivery) to prevent spamming
     type PriceForSiblingDelivery = PriceForSiblingParachainDelivery;
     type RuntimeEvent = RuntimeEvent;
     type VersionWrapper = ();
+    /// Rerun benchmarks if you are making changes to runtime configuration.
     type WeightInfo = weights::cumulus_pallet_xcmp_queue::WeightInfo<Runtime>;
     // Enqueue XCMP messages from siblings for later processing.
     type XcmpQueue = TransformOrigin<MessageQueue, AggregateMessageOrigin, ParaId, ParaIdToSibling>;
@@ -458,6 +473,7 @@ impl pallet_multisig::Config for Runtime {
     type MaxSignatories = MaxSignatories;
     type RuntimeCall = RuntimeCall;
     type RuntimeEvent = RuntimeEvent;
+    /// Rerun benchmarks if you are making changes to runtime configuration.
     type WeightInfo = weights::pallet_multisig::WeightInfo<Runtime>;
 }
 
@@ -481,6 +497,7 @@ impl pallet_session::Config for Runtime {
     type ValidatorId = <Self as frame_system::Config>::AccountId;
     // we don't have stash and controller, thus we don't need the convert as well.
     type ValidatorIdOf = pallet_collator_selection::IdentityCollator;
+    /// Rerun benchmarks if you are making changes to runtime configuration.
     type WeightInfo = weights::pallet_session::WeightInfo<Runtime>;
 }
 
@@ -527,6 +544,7 @@ impl pallet_collator_selection::Config for Runtime {
     type ValidatorId = <Self as frame_system::Config>::AccountId;
     type ValidatorIdOf = pallet_collator_selection::IdentityCollator;
     type ValidatorRegistration = Session;
+    /// Rerun benchmarks if you are making changes to runtime configuration.
     type WeightInfo = weights::pallet_collator_selection::WeightInfo<Runtime>;
 }
 
@@ -534,6 +552,7 @@ impl pallet_utility::Config for Runtime {
     type PalletsOrigin = OriginCaller;
     type RuntimeCall = RuntimeCall;
     type RuntimeEvent = RuntimeEvent;
+    /// Rerun benchmarks if you are making changes to runtime configuration.
     type WeightInfo = weights::pallet_utility::WeightInfo<Runtime>;
 }
 
@@ -585,5 +604,6 @@ impl pallet_treasury::Config for Runtime {
     type SpendFunds = ();
     type SpendOrigin = TreasurySpender;
     type SpendPeriod = SpendPeriod;
+    /// Rerun benchmarks if you are making changes to runtime configuration.
     type WeightInfo = pallet_treasury::weights::SubstrateWeight<Runtime>;
 }
