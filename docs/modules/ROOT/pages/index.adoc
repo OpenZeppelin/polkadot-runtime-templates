@@ -53,7 +53,7 @@ cargo build --release
 ./target/release/parachain-template-node build-spec --chain plain-parachain-chainspec.json --disable-default-bootnode --raw > raw-parachain-chainspec.json
 ```
 
-* Run two nodes and wait till it syncs with the Rococo relay chain (it may take up to two days to sync it):
+* Run two nodes and wait until it syncs with the Rococo relay chain. This can take a fairly long time(up to 2 days), so we can use the `fast-unsafe` flag to make the process faster since we are on a testnet(~ 3 hours). `fast` downloads the blocks without executing the transactions, and `unsafe` skips downloading the state proofs(which we are ok with since it is Rococo).
 +
 ```bash
 ./target/release/parachain-template-node \
@@ -68,7 +68,8 @@ cargo build --release
     --execution wasm \
     --chain <path to the Rococo chainspec> \
     --port 30343 \
-    --rpc-port 9977
+    --rpc-port 9977 \
+    --sync fast-unsafe 
 ```
 +
 ```bash
@@ -84,8 +85,11 @@ cargo build --release
     --execution wasm \
     --chain <path to the Rococo chainspec> \
     --port 30343 \
-    --rpc-port 9977
+    --rpc-port 9977 \
+    --sync fast-unsafe
 ```
+** `<path to datadir>` is where the downloaded chain state will be stored. It can be any folder on your computer.
+** `<path to the Rococo chainspec>` is where your Rococo chainspec is stored. You can download this file from the link:https://github.com/paritytech/polkadot-sdk/blob/release-polkadot-v1.10.0/polkadot/node/service/chain-specs/rococo.jsonofficial[official Polkadot sdk repository].
 
 * Register a parathread:
 
