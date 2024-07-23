@@ -1,8 +1,8 @@
 [package]
-name = "parachain-template-node"
+name = "generic-template-node"
 authors = { workspace = true }
 build = "build.rs"
-description = "Node compatible with parachain runtime template."
+description = "Node compatible with generic runtime template."
 edition = { workspace = true }
 license = { workspace = true }
 publish = false
@@ -12,14 +12,14 @@ version = "1.0.0"
 [dependencies]
 clap = { workspace = true }
 futures = { workspace = true }
-jsonrpsee = { workspace = true, features = [ "server" ] }
+jsonrpsee = { workspace = true, features = ["server"] }
 log = { workspace = true }
 parity-scale-codec = { workspace = true }
-serde = { workspace = true, features = [ "derive" ] }
+serde = { workspace = true, features = ["derive"] }
 serde_json = { workspace = true }
 
 # Local
-parachain-template-runtime = { path = "../runtime" }
+generic-runtime-template = { path = "../runtime" }
 
 # Substrate
 frame-benchmarking = { workspace = true }
@@ -54,7 +54,7 @@ substrate-frame-rpc-system = { workspace = true }
 substrate-prometheus-endpoint = { workspace = true }
 
 # Polkadot
-polkadot-cli = { workspace = true, features = [ "rococo-native" ] }
+polkadot-cli = { workspace = true, features = ["rococo-native"] }
 polkadot-primitives = { workspace = true }
 xcm = { workspace = true }
 
@@ -80,14 +80,14 @@ experimental = []
 runtime-benchmarks = [
 	"frame-benchmarking-cli/runtime-benchmarks",
 	"frame-benchmarking/runtime-benchmarks",
-	"parachain-template-runtime/runtime-benchmarks",
+	"generic-runtime-template/runtime-benchmarks",
 	"polkadot-cli/runtime-benchmarks",
 	"polkadot-primitives/runtime-benchmarks",
 	"sc-service/runtime-benchmarks",
 	"sp-runtime/runtime-benchmarks",
 ]
 try-runtime = [
-	"parachain-template-runtime/try-runtime",
+	"generic-runtime-template/try-runtime",
 	"polkadot-cli/try-runtime",
 	"sp-runtime/try-runtime",
 ]

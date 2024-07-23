@@ -7,9 +7,9 @@ A collection of runtimes that describe parachains with different purposes.
 
 == Quick start
 
-* Begin by visiting our link:https://github.com/OpenZeppelin/polkadot-runtime-template[repository]. You can fork it, use it as a template, or simply clone it to your local directory.
+* Begin by visiting our link:https://github.com/OpenZeppelin/polkadot-runtime-templates[repository]. You can fork it, use it as a template, or simply clone it to your local directory.
 ```bash
-git clone git@github.com:OpenZeppelin/polkadot-runtime-template.git
+git clone git@github.com:OpenZeppelin/polkadot-runtime-templates.git
 ```
 
 * Move to the directory of the template you want to use. We will use the `generic runtime template` for this tutorial.
@@ -69,7 +69,7 @@ cargo build --release
     --chain <path to the Rococo chainspec> \
     --port 30343 \
     --rpc-port 9977 \
-    --sync fast-unsafe 
+    --sync fast-unsafe
 ```
 +
 ```bash
