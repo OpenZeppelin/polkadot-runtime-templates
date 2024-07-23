@@ -20,7 +20,8 @@ venv.bak/
 docs/node_modules
 docs/build
 
-# zombienet stuff
+# Zombienet & Moonwall
 **/zombienet-macos
 **/zombienet-linux-x64
 **/bin-*
+**/moonwall/node_modules/*

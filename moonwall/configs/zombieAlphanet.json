@@ -1,0 +1,69 @@
+{
+  "settings": {
+    "timeout": 1000,
+    "provider": "native"
+  },
+  "relaychain": {
+    "chain": "rococo-local",
+    "default_command": "tmp/polkadot",
+    "default_args": [
+      "--no-hardware-benchmarks",
+      "-lparachain=debug",
+      "--database=paritydb"
+    ],
+    "genesis": {
+      "runtimeGenesis": {
+        "patch": {
+          "configuration": {
+            "config": {
+              "scheduler_params": {
+                "scheduling_lookahead": 2
+              },
+              "async_backing_params": {
+                "max_candidate_depth": 3,
+                "allowed_ancestry_len": 2
+              }
+            }
+          }
+        }
+      }
+    },
+    "nodes": [
+      {
+        "name": "alice",
+        "ws_port": 33346,
+        "validator": true
+      },
+      {
+        "name": "bob",
+        "ws_port": 33347,
+        "validator": true
+      }
+    ]
+  },
+  "parachains": [
+    {
+      "id": 1000, // TODO: we usually used 2000, need to check whether changing this will cause a problem
+      "chain": "moonbase-local", // TODO: change to our chain name
+      "chain_spec_path": "tmp/moonbase-modified-raw-spec.json", // TODO: change to our chain spec path, and figure out what needs to be modified
+      "collator": {
+        "name": "alith",
+        "ws_port": 33345,
+        "command": "../target/release/moonbeam", // TODO: change to our node binary path
+        "args": [
+          "--no-hardware-benchmarks",
+          "--force-authoring",
+          "-lparachain=debug",
+          "--database=paritydb"
+        ]
+      }
+    }
+  ],
+  "types": {
+    "Header": {
+      "number": "u64",
+      "parent_hash": "Hash",
+      "post_state": "Hash"
+    }
+  }
+}

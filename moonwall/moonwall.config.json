@@ -1,0 +1,92 @@
+{
+  "$schema": "https://raw.githubusercontent.com/Moonsong-Labs/moonwall/main/packages/types/config_schema.json",
+  "label": "MasterConfig",
+  "defaultTestTimeout": 120000,
+  "scriptsDir": "scripts/",
+  "additionalRepos": [
+    {
+      "name": "polkadot-sdk",
+      "ghAuthor": "paritytech",
+      "ghRepo": "polkadot-sdk",
+      "binaries": [
+        {
+          "name": "polkadot",
+          "defaultArgs": []
+        },
+        {
+          "name": "polkadot-execute-worker",
+          "defaultArgs": []
+        },
+        {
+          "name": "polkadot-prepare-worker",
+          "defaultArgs": []
+        }
+      ]
+    }
+  ],
+  "environments": [
+    {
+      "name": "zombie_evm",
+      "testFileDir": [
+        "tests"
+      ],
+      "multiThreads": false,
+      "runScripts": [
+        "download-polkadot.sh"
+      ],
+      "foundation": {
+        "rtUpgradePath": "../evm-template/target/release/wbuild/parachain-template-runtime/parahcain_template_runtime.compact.compressed.wasm",
+        "type": "zombie",
+        "zombieSpec": {
+          "configPath": "./configs/zombieAlphanet.json"
+        }
+      }
+    },
+    {
+      "name": "zombie_evm_rpc",
+      "testFileDir": [
+        "tests"
+      ],
+      "runScripts": [
+        "download-polkadot.sh"
+      ],
+      "foundation": {
+        "rtUpgradePath": "../target/release/wbuild/moonbase-runtime/moonbase_runtime.compact.compressed.wasm",
+        "type": "zombie",
+        "zombieSpec": {
+          "configPath": "./configs/zombieAlphanetRpc.json"
+        }
+      },
+      "connections": [
+        {
+          "name": "ethers",
+          "type": "ethers",
+          "endpoints": [
+            "ws://127.0.0.1:33048"
+          ]
+        },
+        {
+          "name": "viem",
+          "type": "viem",
+          "endpoints": [
+            "ws://127.0.0.1:33048"
+          ]
+        },
+        {
+          "name": "parachain",
+          "type": "polkadotJs",
+          "endpoints": [
+            "ws://127.0.0.1:33048"
+          ]
+        },
+        {
+          "name": "relaychain",
+          "type": "polkadotJs",
+          "endpoints": [
+            "ws://127.0.0.1:33356"
+          ]
+        }
+      ]
+    }
+  ]
+}
