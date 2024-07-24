@@ -38,8 +38,6 @@ Metamask integration for example is way simpler for chains with the Ethereum acc
 
 * https://docs.rs/staging-parachain-info/latest/staging_parachain_info/index.html#[parachain_info] provides a way for parachains to report their parachain id and the relay chain block number.
 
-* https://docs.rs/pallet-multisig/latest/pallet_multisig/#[pallet_multisig] enables multi-signature operations in your runtime. This module allows multiple signed origins (accounts) to coordinate and dispatch a call. For the call to execute, the threshold number of accounts from the set (signatories) must approve it.
-
 * https://docs.rs/pallet-proxy/latest/pallet_proxy/#[pallet_proxy] enables delegation of rights to execute certain call types from one origin to another.
 
 * https://paritytech.github.io/polkadot-sdk/master/pallet_utility/index.html#[pallet_utility] contains two basic pieces of functionality:
@@ -49,6 +47,12 @@ Metamask integration for example is way simpler for chains with the Ethereum acc
 *** https://paritytech.github.io/polkadot-sdk/master/pallet_utility/pallet/struct.Pallet.html#method.batch[batch]: Sends a batch of dispatch calls. This will return `Ok` in all circumstances. To determine the success of the batch, an event is deposited. If a call failed and the batch was interrupted, then the `BatchInterrupted` event is deposited, along with the number of successful calls made and the error of the failed call. If all were successful, then the `BatchCompleted` event is deposited.
 *** https://paritytech.github.io/polkadot-sdk/master/pallet_utility/pallet/struct.Pallet.html#method.batch_all[batch_all]: Send a batch of dispatch calls and atomically execute them. The whole transaction will rollback and fail if any of the calls failed.
 ** Pseudonymal dispatch: A stateless operation, allowing a signed origin to execute a call from an alternative signed origin. Each account has 2 * 2**16 possible “pseudonyms” (alternative account IDs) and these can be stacked. This can be useful as a key management tool, where you need multiple distinct accounts (e.g. as controllers for many staking accounts), but where it’s perfectly fine to have each of them controlled by the same underlying keypair. Derivative accounts are, for the purposes of proxy filtering considered exactly the same as the origin and are thus hampered with the origin’s filters.
+
+* https://docs.rs/pallet-multisig/latest/pallet_multisig/#[pallet_multisig] enables multi-signature operations in your runtime. This module allows multiple signed origins (accounts) to coordinate and dispatch a call. For the call to execute, the threshold number of accounts from the set (signatories) must approve it.
+
+* https://docs.rs/pallet-scheduler/latest/pallet_scheduler/#[pallet_scheduler] schedules runtime calls.
+
+* https://docs.rs/pallet-preimage/latest/pallet_preimage/#[preimage] allows for the users and the runtime to store the preimage of a hash on chain. This can be used by other pallets for storing and managing large byte-blobs.
 
 ====
 
@@ -73,6 +77,12 @@ Metamask integration for example is way simpler for chains with the Ethereum acc
 ** *length fee*: A fee proportional to the encoded length of the transaction.
 ** *tip*: An optional tip. Tip increases the priority of the transaction, giving it a higher chance to be included by the transaction queue.
 
+* https://paritytech.github.io/polkadot-sdk/master/pallet_assets/index.html#[Assets] deals with sets of assets implementing fungible traits, via [fungibles] traits in a simple, secure manner. This pallet makes heavy use of concepts such as Holds and Freezes from the [frame_support::traits::fungible] traits, therefore you should read and understand those docs as a prerequisite to understanding this pallet.
+
+* https://docs.rs/pallet-treasury/latest/pallet_treasury/#[pallet_treasury] provides a “pot” of funds that can be managed by stakeholders in the system and a structure for making spending proposals from this pot.
+
+* https://github.com/moonbeam-foundation/moonbeam/blob/master/pallets/asset-manager/src/lib.rs[#AssetManager] allows to register new assets if certain conditions are met.
+
 ====
 
 === Governance
@@ -81,7 +91,15 @@ Metamask integration for example is way simpler for chains with the Ethereum acc
 ====
 
 * https://docs.rs/pallet-sudo/latest/pallet_sudo/#[pallet_sudo] provides a way to execute privileged runtime calls using a specified sudo (“superuser do”) account.
-* https://docs.rs/pallet-treasury/latest/pallet_treasury/#[pallet_treasury] provides a “pot” of funds that can be managed by stakeholders in the system and a structure for making spending proposals from this pot.
+
+* https://docs.rs/pallet-conviction-voting/latest/pallet_conviction_voting/#[ConvictionVoting] manages actual voting in polls
+
+* https://docs.rs/pallet-referenda/latest/pallet_referenda/#[Referanda] executes referenda. No voting logic is present here, and the Polling and PollStatus traits are used to allow the voting logic (likely in a pallet) to be utilized.
+
+* https://github.com/OpenZeppelin/polkadot-runtime-templates/blob/main/evm-template/runtime/src/configs/governance/origins.rs#[Origins] allows custom origins for governance. // TODO: double check this, is it really our own pallet, or just copy paste?
+
+* https://docs.rs/pallet-whitelist/latest/pallet_whitelist/index.html#[Whitelist] allows some configurable origin: `Config::WhitelistOrigin` to whitelist some hash of a call, and allows another configurable origin: `Config::DispatchWhitelistedOrigin` to dispatch them with the root origin.
+
 
 ====
 
@@ -122,6 +140,16 @@ Metamask integration for example is way simpler for chains with the Ethereum acc
 
 * https://paritytech.github.io/polkadot-sdk/master/cumulus_pallet_xcm/index.html#[cumulus_pallet_xcm] is responsible from detecting and ensuring whether XCM's are coming from *Relay* or *Sibling* chain.
 
-* https://paritytech.github.io/polkadot-sdk/master/cumulus_pallet_dmp_queue/index.html#[cumulus_pallet_dmp_queue] is **DEPRECATED**. This pallet used to implement a message queue for downward messages from the relay-chain.
+* https://docs.rs/pallet-message-queue/latest/pallet_message_queue/#[MessageQueue] provides generalized message queuing and processing capabilities on a per-queue basis for arbitrary use-cases.
 
 ====
+
+=== EVM
+
+* https://docs.rs/pallet-ethereum/latest/pallet_ethereum/#[Ethereum] works together with EVM pallet to provide full emulation for Ethereum block processing.
+
+* https://docs.rs/pallet-evm/5.0.0/pallet_evm/#[EVM] allows unmodified EVM code to be executed in a Substrate-based blockchain.
+
+* https://github.com/polkadot-evm/frontier/blob/master/frame/base-fee/src/lib.rs#[BaseFee] dynamically adjusts the `BaseFeePerGas` based on elasticity (zero elasticity means constant `BaseFeePerGas`).
+
+* https://github.com/polkadot-evm/frontier/blob/master/frame/evm-chain-id/src/lib.rs#[EvmChainId] stores the numeric Ethereum-style chain id in the runtime. This pallet can simplify setting up multiple networks with different chain ID by configuring the chain spec without requiring changes to the runtime config.
