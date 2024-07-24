@@ -1,0 +1,349 @@
+:source-highlighter: highlight.js
+:highlightjs-languages: rust
+:github-icon: pass:[<svg class="icon"><use href="#github-icon"/></svg>]
+
+= Testing Solidity Smart Contracts with Zombienet
+
+In this tutorial, we will demonstrate how to deploy your parachain using Zombienet, and test the functionalities of your parachain.
+
+Below are the main steps of this demo:
+1. Deploy our parachain against the locally simulated rococo testnet by Zombienet.
+2. Deploy a Solidity smart contract on our parachain.
+3. Successfully invoke the Solidity smart contract deployed on our parachain.
+
+== Step 1: Deploy our parachain against the locally simulated rococo testnet by Zombienet.
+
+1. git clone https://github.com/OpenZeppelin/polkadot-runtime-templates
+2. move to evm template directory
+
+    ```bash
+    cd evm-template
+    ```
+
+3. replace the content of `zombinet-config/devnet.toml` with:
+
+    ```rust
+    [relaychain]
+    chain = "rococo-local"
+    default_command = "./bin-v1.6.0/polkadot"
+
+    [[relaychain.nodes]]
+    name = "alice"
+    validator = true
+
+    [[relaychain.nodes]]
+    name = "bob"
+    validator = true
+
+    [relaychain.genesis.runtimeGenesis.patch.configuration.config]
+    scheduling_lookahead = 2
+
+    [relaychain.genesis.runtimeGenesis.patch.configuration.config.async_backing_params]
+    max_candidate_depth = 3
+    allowed_ancestry_len = 2
+    ```
+
+4. build the zombienet:
+
+    ```bash
+    ./scripts/zombienet.sh build
+    ```
+
+    // TODO: make the below expandable/toggle
+
+    - if you came across this error:
+
+        ```bash
+        error[E0635]: unknown feature `stdsimd`
+          --> /Users/ozgunozerk/.cargo/registry/src/index.crates.io-6f17d22bba15001f/ahash-0.7.6/src/lib.rs:33:42
+           |
+        33 | #![cfg_attr(feature = "stdsimd", feature(stdsimd))]
+        ```
+
+        run the below command for every version of the `ahash`:
+
+        ```bash
+        cargo update -p ahash
+        ```
+
+    // TODO: make the below expandable/toggle
+
+    - or if you came across this error:
+
+        ```rust
+        assertion failed [block != nullptr]: BasicBlock requested for unrecognized address
+        ```
+
+        just re-run 🙂
+
+5. run the zombinet:
+
+    ```bash
+    ./scripts/zombienet.sh devnet
+    ```
+
+6. build it with `async-backing` feature:
+
+    ```bash
+    cargo build --release --features="async-backing"
+    ```
+
+7. copy the `Direct Link` from `Alice's` tab:
+
+    // TODO: copy image from Notion
+
+8. open the link with Chrome. [`polkadot.js.org/apps`](http://polkadot.js.org/apps) As of 2024 July, it doesn’t work on Safari and Brave. And it might be buggy in Firefox. So, open it with Chrome :)
+9. Reserve a `ParaId` on Zombienet:
+    1. Go to `Network` > `Parachains`
+    2. Go to `Parathreads` tab
+    3. Click the `+ ParaId` button
+    4. Save a `parachain id` for the further usage.
+    5. Click `Submit` and `Sign and Submit` (you can use `Alice` as the account).
+10. Preparing necessary files to become a Parachain:
+    1. Generate a plain chainspec:
+
+        ```bash
+        ./target/release/parachain-template-node build-spec --disable-default-bootnode > plain-parachain-chainspec.json
+        ```
+
+        ```bash
+        ./parachain-template-node build-spec --disable-default-bootnode > plain-parachain-chainspec.json
+        ```
+
+    2. Edit the chainspec:
+        1. Update `name`, `id` and `protocolId` to unique values (optional).
+        2. Change `para_id` and `parachainInfo.parachainId` from `1000` to the previously saved parachain id (probably 2000 if that’s your first time ;) ).
+        3. Edit the `evmChainId.chainId` to the value of your choice. Try to select a value that has no existing EVM chain assigned to it (should be ok to leave as is for the most cases).
+    3. Generate a raw chainspec:
+
+        ```bash
+        ./target/release/parachain-template-node build-spec --chain plain-parachain-chainspec.json --disable-default-bootnode --raw > raw-parachain-chainspec.json
+        ```
+
+        ```bash
+        ./parachain-template-node build-spec --chain plain-parachain-chainspec.json --disable-default-bootnode --raw > raw-parachain-chainspec.json
+        ```
+
+    4. Generate the genesis state:
+
+        ```bash
+        ./target/release/parachain-template-node export-genesis-state --chain raw-parachain-chainspec.json > genesis-state
+        ```
+
+        ```bash
+        ./parachain-template-node export-genesis-state --chain raw-parachain-chainspec.json > genesis-state
+        ```
+
+    5. Generate the validation code:
+
+        ```bash
+        ./target/release/parachain-template-node export-genesis-wasm --chain raw-parachain-chainspec.json > genesis-wasm
+        ```
+
+        ```bash
+        ./parachain-template-node export-genesis-wasm --chain raw-parachain-chainspec.json > genesis-wasm
+        ```
+
+11. Registering the Parachain:
+    1. Go back to `polkadot.js.org/apps` (remember Chrome). Go to `Developer/Sudo`.
+    2. select `pasasSudoWrapper` and `sudoScheduleParaInitialize(id, genesis)`
+    3. enter the reserved id (2000) to `id` field
+    4. enable `file upload` for both `genesisHead` and `validationCode` → because we will upload files for these.
+    5. select `Yes` for `paraKind` → meaning when we register our parachain, it will be a parachain rather than a parathread.
+    6. drag&drop your `genesis-state` file generated in step `10.d` into `genesisHead` field (good luck with the aiming)
+    7. drag&drop your `genesis-wasm` file generated in `10.e` into `validationCode` field
+    8. It should look like below:
+
+        // TODO: add the image from Notion
+
+    9. `Submit Sudo`!
+12. copy the path to `chain-spec` from zombienet terminal from `Bob` (beware, this file is changing every time you spin up a new zombienet):
+
+    // TODO: add the image from Notion
+
+13. run the node, and provide the `chain-spec` you copied from the last step into `--chain` part:
+    - be sure to clear your storage if you were running a node before
+
+    ```rust
+    ./target/release/parachain-template-node \
+        --alice \
+        --collator \
+        --force-authoring \
+        --chain raw-parachain-chainspec.json \
+        --base-path storage/alice \
+        --port 40333 \
+        --rpc-port 8844 \
+        -- \
+        --execution wasm \
+        --chain /var/folders/...{redacted}.../rococo-local.json \
+        --port 30343 \
+        --rpc-port 9977
+    ```
+
+    ```rust
+    ./parachain-template-node \
+        --alice \
+        --collator \
+        --force-authoring \
+        --chain raw-parachain-chainspec.json \
+        --base-path storage/alice \
+        --port 40333 \
+        --rpc-port 8844 \
+        -- \
+        --execution wasm \
+        --chain /var/folders/kl/404s241d4_93gz8mh4cg4cz80000gn/T/zombie-a91587a2ece24961799f824da68f45a8_-9146-fqbCFiePyOHm/bob/cfg/rococo-local.json \
+        --port 30343 \
+        --rpc-port 9977
+    ```
+
+    ```rust
+    --chain /var/folders/kl/404s241d4_93gz8mh4cg4cz80000gn/T/zombie-a91587a2ece24961799f824da68f45a8_-9146-fqbCFiePyOHm/bob/cfg/rococo-local.json
+    ```
+
+14. your node should be running without any problem, and should see block production in your node terminal!
+
+    // TODO: add the image from Notion
+
+
+== Step 2: Deploy a Solidity smart contract on our parachain.
+
+1. Install Foundry with: `curl -L [https://foundry.paradigm.xyz](https://foundry.paradigm.xyz/) | bash`
+2. have a smart contract file ready, any smart contract of your choice! We will go with a cute `HelloWorld.sol` smart contract for this tutorial:
+
+    ```solidity
+    // SPDX-License-Identifier: MIT
+    pragma solidity ^0.8.0;
+
+    contract HelloWorld {
+        string public greeting = "Hello, World!";
+
+        function getGreeting() public view returns (string memory) {
+            return greeting;
+        }
+    }
+    ```
+
+3. Create a new javascript project with the below files:
+    1. `package.json`:
+
+        ```solidity
+        {
+          "name": "ts-wallet",
+          "version": "1.0.0",
+          "description": "",
+          "main": "index.js",
+          "type": "module",
+          "scripts": {
+            "exec": "node index.js",
+            "test": "echo \"Error: no test specified\" && exit 1"
+          },
+          "author": "",
+          "license": "ISC",
+          "dependencies": {
+            "web3": "^4.8.0"
+          }
+        }
+        ```
+
+    2. `sanity_check.js`:
+
+        ```solidity
+        import { Web3 } from "web3";
+
+        const web3 = new Web3("ws://127.0.0.1:8844");
+
+        console.log("Balance:");
+        web3.eth.getBalance("0xe04cc55ebee1cbce552f250e85c57b70b2e2625b").then(console.log);
+
+        let raw = await web3.eth.accounts.signTransaction({
+            gas: 21000,
+            gasPrice: 10000000000,
+            from: "0xe04cc55ebee1cbce552f250e85c57b70b2e2625b",
+            to: "0x7c98a1801f0B28dF559bCd828fc67Bd6ab558074",
+            value: '100000000000000000'
+        }, "0xcb6df9de1efca7a3998a8ead4e02159d5fa99c3e0d4fd6432667390bb4726854");
+
+        let res = await web3.eth.sendSignedTransaction(raw.rawTransaction);
+        console.log("Transaction details:");
+        console.log(res);
+        ```
+
+    3. `invoke_smart_contract.js`:
+
+        ```solidity
+        import { Web3 } from "web3";
+        import { MyAbi } from "./abi.js";
+
+        const web3 = new Web3("ws://127.0.0.1:8844");
+
+        let contract = new web3.eth.Contract(MyAbi, "0x4045F03B68919da2c440F023Fd7cE2982BfD3C03");
+        let s = await contract.methods.getGreeting().call();
+
+        console.log(s);
+        ```
+
+    4. `abi.js`:
+
+        ```solidity
+        export var MyAbi = [
+            {
+                "type": "function",
+                "name": "getGreeting",
+                "inputs": [],
+                "outputs": [
+                    {
+                        "name": "",
+                        "type": "string",
+                        "internalType": "string"
+                    }
+                ],
+                "stateMutability": "view"
+            },
+            {
+                "type": "function",
+                "name": "greeting",
+                "inputs": [],
+                "outputs": [
+                    {
+                        "name": "",
+                        "type": "string",
+                        "internalType": "string"
+                    }
+                ],
+                "stateMutability": "view"
+            }
+        ];
+        ```
+
+4. run the below command, and you should see the balance, and then the transaction details printed, proving everything works so far!
+
+    ```solidity
+    node sanity_check.js
+    ```
+
+5. open a terminal instance where the current directory has the `HelloWorld.sol` file, and run:
+
+    ```solidity
+    forge create --rpc-url http://localhost:8844 --private-key 0xcb6df9de1efca7a3998a8ead4e02159d5fa99c3e0d4fd6432667390bb4726854 HelloWorld.sol:HelloWorld
+    ```
+
+    - don’t forget to copy the address this contract deployed to!
+
+
+
+== Step 3: Successfully invoke the Solidity smart contract deployed on our parachain.
+
+1 replace the contract address in `invoke_smart_contract.js` with the address you copied!
+2. build the `abi` of the smart contract with:
+
+    ```solidity
+    forge build --silent && jq '.abi' ./out/HelloWorld.sol/HelloWorld.json
+    ```
+
+3. Surprise! We already give you the abi of this in `abi.js` file in step `3`. If you used another contract than `HelloWorld`, replace that `abi.js` file’s content with your contracts `abi`.
+
+4. run the below command, and you should see your smart contract in action:
+
+    ```solidity
+    node invoke_smart_contract.js
+    ```
