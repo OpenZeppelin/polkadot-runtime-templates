@@ -6,6 +6,7 @@
 ** xref:guides/predeployed_contracts.adoc[Predeployed Contracts]
 * Runtimes
 ** xref:runtimes/generic.adoc[Generic Runtime]
+** xref:runtimes/evm.adoc[EVM Runtime]
 * Runtime Descriptions
 ** xref:runtime/xcm_executor.adoc[XCM Executor]
 * Pallet Specifications

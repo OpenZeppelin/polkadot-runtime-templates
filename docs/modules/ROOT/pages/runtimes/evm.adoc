@@ -5,22 +5,23 @@
 
 == Purpose
 
-Generic Runtime Template is constructed with the purpose of providing the most generic template that is working out of the box.
+EVM Runtime Template is built on top of the link:generic.adoc[Generic Runtime Template].
+
+The purpose of this template is to provide EVM compatibilities embedded into the runtime.
+
+With this template, you can:
+* Deploy Solidity Smart Contracts to your runtime.
+* Interact with the deployed Smart Contracts.
+* Deploy and interact with ERC20 tokens.
+* Migrate your existing dAPP from Ethereum ecosystem to Polkadot ecosystem.
 
 The pallet list is constructed by the contributions of Parity, the community, and OpenZeppelin.
 
-Our motivation for crafting the pallet list was to be as minimalistic as possible,
-whilst preserving the most important pallets that are used in the Polkadot ecosystem.
+To maximize the compatibility with EVM, we decided to use `AccountId20` type instead of `AccountId32`.
+This choice allowed us to use the signature scheme compatible with Ethereum (ECDSA).
+Which, in turn result in better compatibility with tools across the Ethereum ecosystem including wallets, developer tooling, etc.
+Metamask integration for example is way simpler for chains with the Ethereum account and signature type.
 
-We designed this template to be generic, so that it can be used as a starting point for any other project/template,
-and we aim to base our future templates off of this one.
-
-To demystify the hard concepts, we provided a documentation, in which you can find:
-
-* Explanation of the pallets that are used in this template (purpose, terminology, configuration, dispatchables, etc.).
-* General guides regarding this template.
-* Runtime related guides.
-* And miscellaneous topics.
 
 == Configuration
 
