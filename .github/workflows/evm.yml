@@ -29,6 +29,9 @@ env:
   WASM_BUILD_CLEAN_TARGET: 1
   # stripping symbols and optimizing for binary size
   RUSTFLAGS: -C strip=symbols -C opt-level=s
+  # Enable sscache
+  RUSTC_WRAPPER: "sccache"
+  SCCACHE_GHA_ENABLED: "true"
 
 jobs:
   evm-clippy-fmt-test:
@@ -51,6 +54,23 @@ jobs:
     steps:
       - name: git checkout
         uses: actions/checkout@v4
+
+      - name: Cache cargo registry & git sources
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cargo/bin/
+            ~/.cargo/registry/
+            ~/.cargo/git/db/
+          # More specific key first(higher cache hit)
+          key: ${{ runner.os }}-cargo-evm-template-${{ hashFiles('**/Cargo.lock') }}
+          # Less specific keys after(lower cache hit)
+          restore-keys: |
+            ${{ runner.os }}-cargo-generic-template-${{ hashFiles('**/Cargo.lock') }}
+            ${{ runner.os }}-cargo-
+
+      - name: Run sccache
+        uses: mozilla-actions/sccache-action@v0.0.4
 
       - name: Install Protoc
         uses: arduino/setup-protoc@9b1ee5b22b0a3f1feb8c2ff99b32c89b3c3191e9 # v2.0.0
