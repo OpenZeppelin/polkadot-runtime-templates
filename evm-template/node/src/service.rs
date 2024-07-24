@@ -20,7 +20,7 @@ use cumulus_relay_chain_interface::{OverseerHandle, RelayChainInterface};
 // Substrate Imports
 use frame_benchmarking_cli::SUBSTRATE_REFERENCE_HARDWARE;
 // Local Runtime Types
-use parachain_template_runtime::{
+use evm_runtime_template::{
     apis::RuntimeApi,
     configs::TransactionConverter,
     opaque::{Block, Hash},

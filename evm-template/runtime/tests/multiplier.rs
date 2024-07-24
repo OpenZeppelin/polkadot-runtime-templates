@@ -3,7 +3,7 @@ mod common;
 use common::*;
 use frame_support::pallet_prelude::*;
 use pallet_transaction_payment::Multiplier;
-use parachain_template_runtime::{Runtime, RuntimeBlockWeights};
+use evm_runtime_template::{Runtime, RuntimeBlockWeights};
 use polkadot_runtime_common::MinimumMultiplier;
 use sp_runtime::{traits::Convert, Perquintill};
 
