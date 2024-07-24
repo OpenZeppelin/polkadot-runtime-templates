@@ -77,11 +77,11 @@ Metamask integration for example is way simpler for chains with the Ethereum acc
 ** *length fee*: A fee proportional to the encoded length of the transaction.
 ** *tip*: An optional tip. Tip increases the priority of the transaction, giving it a higher chance to be included by the transaction queue.
 
-* https://paritytech.github.io/polkadot-sdk/master/pallet_assets/index.html#[Assets] deals with sets of assets implementing fungible traits, via [fungibles] traits in a simple, secure manner. This pallet makes heavy use of concepts such as Holds and Freezes from the [frame_support::traits::fungible] traits, therefore you should read and understand those docs as a prerequisite to understanding this pallet.
+* https://paritytech.github.io/polkadot-sdk/master/pallet_assets/index.html#[pallet_assets] deals with sets of assets implementing fungible traits, via [fungibles] traits in a simple, secure manner. This pallet makes heavy use of concepts such as Holds and Freezes from the [frame_support::traits::fungible] traits, therefore you should read and understand those docs as a prerequisite to understanding this pallet.
 
 * https://docs.rs/pallet-treasury/latest/pallet_treasury/#[pallet_treasury] provides a “pot” of funds that can be managed by stakeholders in the system and a structure for making spending proposals from this pot.
 
-* https://github.com/moonbeam-foundation/moonbeam/blob/master/pallets/asset-manager/src/lib.rs[#AssetManager] allows to register new assets if certain conditions are met.
+* https://github.com/moonbeam-foundation/moonbeam/blob/master/pallets/asset-manager/src/lib.rs[#pallet_asset_manager] allows to register new assets if certain conditions are met.
 
 ====
 
@@ -92,13 +92,13 @@ Metamask integration for example is way simpler for chains with the Ethereum acc
 
 * https://docs.rs/pallet-sudo/latest/pallet_sudo/#[pallet_sudo] provides a way to execute privileged runtime calls using a specified sudo (“superuser do”) account.
 
-* https://docs.rs/pallet-conviction-voting/latest/pallet_conviction_voting/#[ConvictionVoting] manages actual voting in polls
+* https://docs.rs/pallet-conviction-voting/latest/pallet_conviction_voting/#[pallet_conviction_voting] manages actual voting in polls
 
-* https://docs.rs/pallet-referenda/latest/pallet_referenda/#[Referanda] executes referenda. No voting logic is present here, and the Polling and PollStatus traits are used to allow the voting logic (likely in a pallet) to be utilized.
+* https://docs.rs/pallet-referenda/latest/pallet_referenda/#[pallet_referenda] executes referenda. No voting logic is present here, and the Polling and PollStatus traits are used to allow the voting logic (likely in a pallet) to be utilized.
 
-* https://github.com/OpenZeppelin/polkadot-runtime-templates/blob/main/evm-template/runtime/src/configs/governance/origins.rs#[Origins] allows custom origins for governance. // TODO: double check this, is it really our own pallet, or just copy paste?
+* https://github.com/OpenZeppelin/polkadot-runtime-templates/blob/main/evm-template/runtime/src/configs/governance/origins.rs#[pallet_custom_origins] allows custom origins for governance. // TODO: double check this, is it really our own pallet, or just copy paste?
 
-* https://docs.rs/pallet-whitelist/latest/pallet_whitelist/index.html#[Whitelist] allows some configurable origin: `Config::WhitelistOrigin` to whitelist some hash of a call, and allows another configurable origin: `Config::DispatchWhitelistedOrigin` to dispatch them with the root origin.
+* https://docs.rs/pallet-whitelist/latest/pallet_whitelist/index.html#[pallet_whitelist] allows some configurable origin: `Config::WhitelistOrigin` to whitelist some hash of a call, and allows another configurable origin: `Config::DispatchWhitelistedOrigin` to dispatch them with the root origin.
 
 
 ====
