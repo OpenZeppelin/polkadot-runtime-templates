@@ -7,20 +7,20 @@
 In this tutorial, we will demonstrate how to deploy your parachain using Zombienet, and test the functionalities of your parachain.
 
 Below are the main steps of this demo:
-1. Deploy our parachain against the locally simulated rococo testnet by Zombienet.
-2. Deploy a Solidity smart contract on our parachain.
-3. Successfully invoke the Solidity smart contract deployed on our parachain.
+. Deploy our parachain against the locally simulated rococo testnet by Zombienet.
+. Deploy a Solidity smart contract on our parachain.
+. Successfully invoke the Solidity smart contract deployed on our parachain.
 
 == Step 1: Deploy our parachain against the locally simulated rococo testnet by Zombienet.
 
-1. git clone https://github.com/OpenZeppelin/polkadot-runtime-templates
-2. move to evm template directory
+. git clone https://github.com/OpenZeppelin/polkadot-runtime-templates
+. move to evm template directory
 
     ```bash
     cd evm-template
     ```
 
-3. replace the content of `zombinet-config/devnet.toml` with:
+. replace the content of `zombinet-config/devnet.toml` with:
 
     ```rust
     [relaychain]
@@ -43,15 +43,17 @@ Below are the main steps of this demo:
     allowed_ancestry_len = 2
     ```
 
-4. build the zombienet:
+. build the zombienet:
 
     ```bash
     ./scripts/zombienet.sh build
     ```
 
-    // TODO: make the below expandable/toggle
+    .if you came across this error:
+    [%collapsible]
+    ====
 
-    - if you came across this error:
+
 
         ```bash
         error[E0635]: unknown feature `stdsimd`
@@ -65,42 +67,46 @@ Below are the main steps of this demo:
         ```bash
         cargo update -p ahash
         ```
+    This content is only revealed when the user clicks the block title.
+    ====
 
-    // TODO: make the below expandable/toggle
 
-    - or if you came across this error:
+    .or if you came across this error:
+    [%collapsible]
+    ====
 
         ```rust
         assertion failed [block != nullptr]: BasicBlock requested for unrecognized address
         ```
 
         just re-run 🙂
+    ====
 
-5. run the zombinet:
+. run the zombinet:
 
     ```bash
     ./scripts/zombienet.sh devnet
     ```
 
-6. build it with `async-backing` feature:
+. build it with `async-backing` feature:
 
     ```bash
     cargo build --release --features="async-backing"
     ```
 
-7. copy the `Direct Link` from `Alice's` tab:
+. copy the `Direct Link` from `Alice's` tab from Zombienet TUI:
 
-    // TODO: copy image from Notion
+    image::alice-direct-link.png
 
-8. open the link with Chrome. [`polkadot.js.org/apps`](http://polkadot.js.org/apps) As of 2024 July, it doesn’t work on Safari and Brave. And it might be buggy in Firefox. So, open it with Chrome :)
-9. Reserve a `ParaId` on Zombienet:
-    1. Go to `Network` > `Parachains`
-    2. Go to `Parathreads` tab
-    3. Click the `+ ParaId` button
-    4. Save a `parachain id` for the further usage.
-    5. Click `Submit` and `Sign and Submit` (you can use `Alice` as the account).
-10. Preparing necessary files to become a Parachain:
-    1. Generate a plain chainspec:
+. open the link with Chrome. [`polkadot.js.org/apps`](http://polkadot.js.org/apps) As of 2024 July, it doesn’t work on Safari and Brave. And it might be buggy in Firefox. So, open it with Chrome :)
+. Reserve a `ParaId` on Zombienet:
+    .. Go to `Network` > `Parachains`
+    .. Go to `Parathreads` tab
+    .. Click the `+ ParaId` button
+    .. Save a `parachain id` for the further usage.
+    .. Click `Submit` and `Sign and Submit` (you can use `Alice` as the account).
+. Preparing necessary files to become a Parachain:
+    .. Generate a plain chainspec:
 
         ```bash
         ./target/release/parachain-template-node build-spec --disable-default-bootnode > plain-parachain-chainspec.json
@@ -110,11 +116,11 @@ Below are the main steps of this demo:
         ./parachain-template-node build-spec --disable-default-bootnode > plain-parachain-chainspec.json
         ```
 
-    2. Edit the chainspec:
+    .. Edit the chainspec:
         1. Update `name`, `id` and `protocolId` to unique values (optional).
         2. Change `para_id` and `parachainInfo.parachainId` from `1000` to the previously saved parachain id (probably 2000 if that’s your first time ;) ).
         3. Edit the `evmChainId.chainId` to the value of your choice. Try to select a value that has no existing EVM chain assigned to it (should be ok to leave as is for the most cases).
-    3. Generate a raw chainspec:
+    .. Generate a raw chainspec:
 
         ```bash
         ./target/release/parachain-template-node build-spec --chain plain-parachain-chainspec.json --disable-default-bootnode --raw > raw-parachain-chainspec.json
@@ -124,7 +130,7 @@ Below are the main steps of this demo:
         ./parachain-template-node build-spec --chain plain-parachain-chainspec.json --disable-default-bootnode --raw > raw-parachain-chainspec.json
         ```
 
-    4. Generate the genesis state:
+    .. Generate the genesis state:
 
         ```bash
         ./target/release/parachain-template-node export-genesis-state --chain raw-parachain-chainspec.json > genesis-state
@@ -134,7 +140,7 @@ Below are the main steps of this demo:
         ./parachain-template-node export-genesis-state --chain raw-parachain-chainspec.json > genesis-state
         ```
 
-    5. Generate the validation code:
+    .. Generate the validation code:
 
         ```bash
         ./target/release/parachain-template-node export-genesis-wasm --chain raw-parachain-chainspec.json > genesis-wasm
@@ -144,24 +150,24 @@ Below are the main steps of this demo:
         ./parachain-template-node export-genesis-wasm --chain raw-parachain-chainspec.json > genesis-wasm
         ```
 
-11. Registering the Parachain:
-    1. Go back to `polkadot.js.org/apps` (remember Chrome). Go to `Developer/Sudo`.
-    2. select `pasasSudoWrapper` and `sudoScheduleParaInitialize(id, genesis)`
-    3. enter the reserved id (2000) to `id` field
-    4. enable `file upload` for both `genesisHead` and `validationCode` → because we will upload files for these.
-    5. select `Yes` for `paraKind` → meaning when we register our parachain, it will be a parachain rather than a parathread.
-    6. drag&drop your `genesis-state` file generated in step `10.d` into `genesisHead` field (good luck with the aiming)
-    7. drag&drop your `genesis-wasm` file generated in `10.e` into `validationCode` field
-    8. It should look like below:
+. Registering the Parachain:
+    .. Go back to `polkadot.js.org/apps` (remember Chrome). Go to `Developer/Sudo`.
+    .. select `pasasSudoWrapper` and `sudoScheduleParaInitialize(id, genesis)`
+    .. enter the reserved id (2000) to `id` field
+    .. enable `file upload` for both `genesisHead` and `validationCode` → because we will upload files for these.
+    .. select `Yes` for `paraKind` → meaning when we register our parachain, it will be a parachain rather than a parathread.
+    .. drag&drop your `genesis-state` file generated in step `10.d` into `genesisHead` field (good luck with the aiming)
+    .. drag&drop your `genesis-wasm` file generated in `10.e` into `validationCode` field
+    .. It should look like below:
 
-        // TODO: add the image from Notion
+        image::register-parachain.png
 
-    9. `Submit Sudo`!
-12. copy the path to `chain-spec` from zombienet terminal from `Bob` (beware, this file is changing every time you spin up a new zombienet):
+    .. `Submit Sudo`!
+. copy the path to `chain-spec` from zombienet terminal from `Bob` (beware, this file is changing every time you spin up a new zombienet):
 
-    // TODO: add the image from Notion
+    image::zombie-chain-spec.png
 
-13. run the node, and provide the `chain-spec` you copied from the last step into `--chain` part:
+. run the node, and provide the `chain-spec` you copied from the last step into `--chain` part:
     - be sure to clear your storage if you were running a node before
 
     ```rust
@@ -200,15 +206,15 @@ Below are the main steps of this demo:
     --chain /var/folders/kl/404s241d4_93gz8mh4cg4cz80000gn/T/zombie-a91587a2ece24961799f824da68f45a8_-9146-fqbCFiePyOHm/bob/cfg/rococo-local.json
     ```
 
-14. your node should be running without any problem, and should see block production in your node terminal!
+. your node should be running without any problem, and should see block production in your node terminal!
 
-    // TODO: add the image from Notion
+    image::node-success.png
 
 
 == Step 2: Deploy a Solidity smart contract on our parachain.
 
-1. Install Foundry with: `curl -L [https://foundry.paradigm.xyz](https://foundry.paradigm.xyz/) | bash`
-2. have a smart contract file ready, any smart contract of your choice! We will go with a cute `HelloWorld.sol` smart contract for this tutorial:
+. Install Foundry with: `curl -L [https://foundry.paradigm.xyz](https://foundry.paradigm.xyz/) | bash`
+. have a smart contract file ready, any smart contract of your choice! We will go with a cute `HelloWorld.sol` smart contract for this tutorial:
 
     ```solidity
     // SPDX-License-Identifier: MIT
@@ -223,8 +229,8 @@ Below are the main steps of this demo:
     }
     ```
 
-3. Create a new javascript project with the below files:
-    1. `package.json`:
+. Create a new javascript project with the below files:
+    .. `package.json`:
 
         ```solidity
         {
@@ -245,7 +251,7 @@ Below are the main steps of this demo:
         }
         ```
 
-    2. `sanity_check.js`:
+    .. `sanity_check.js`:
 
         ```solidity
         import { Web3 } from "web3";
@@ -268,7 +274,7 @@ Below are the main steps of this demo:
         console.log(res);
         ```
 
-    3. `invoke_smart_contract.js`:
+    .. `invoke_smart_contract.js`:
 
         ```solidity
         import { Web3 } from "web3";
@@ -282,7 +288,7 @@ Below are the main steps of this demo:
         console.log(s);
         ```
 
-    4. `abi.js`:
+    .. `abi.js`:
 
         ```solidity
         export var MyAbi = [
@@ -315,13 +321,13 @@ Below are the main steps of this demo:
         ];
         ```
 
-4. run the below command, and you should see the balance, and then the transaction details printed, proving everything works so far!
+. run the below command, and you should see the balance, and then the transaction details printed, proving everything works so far!
 
     ```solidity
     node sanity_check.js
     ```
 
-5. open a terminal instance where the current directory has the `HelloWorld.sol` file, and run:
+. open a terminal instance where the current directory has the `HelloWorld.sol` file, and run:
 
     ```solidity
     forge create --rpc-url http://localhost:8844 --private-key 0xcb6df9de1efca7a3998a8ead4e02159d5fa99c3e0d4fd6432667390bb4726854 HelloWorld.sol:HelloWorld
@@ -333,16 +339,15 @@ Below are the main steps of this demo:
 
 == Step 3: Successfully invoke the Solidity smart contract deployed on our parachain.
 
-1 replace the contract address in `invoke_smart_contract.js` with the address you copied!
-2. build the `abi` of the smart contract with:
+. replace the contract address in `invoke_smart_contract.js` with the address you copied!
+. build the `abi` of the smart contract with:
 
     ```solidity
     forge build --silent && jq '.abi' ./out/HelloWorld.sol/HelloWorld.json
     ```
 
-3. Surprise! We already give you the abi of this in `abi.js` file in step `3`. If you used another contract than `HelloWorld`, replace that `abi.js` file’s content with your contracts `abi`.
-
-4. run the below command, and you should see your smart contract in action:
+. Surprise! We already give you the abi of this in `abi.js` file in step `3`. If you used another contract than `HelloWorld`, replace that `abi.js` file’s content with your contracts `abi`.
+. run the below command, and you should see your smart contract in action:
 
     ```solidity
     node invoke_smart_contract.js
