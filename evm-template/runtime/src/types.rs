@@ -2,15 +2,25 @@ use fp_account::EthereumSignature;
 use frame_support::traits::EitherOfDiverse;
 use frame_system::EnsureRoot;
 use pallet_xcm::{EnsureXcm, IsVoiceOfBody};
+use polkadot_runtime_common::impls::{
+    LocatableAssetConverter, VersionedLocatableAsset, VersionedLocationConverter,
+};
+use sp_core::ConstU32;
 use sp_runtime::{
     generic,
     traits::{BlakeTwo256, IdentifyAccount, Verify},
     MultiAddress,
 };
-use xcm_builder::ConvertedConcreteId;
+use xcm::VersionedLocation;
+use xcm_builder::{ConvertedConcreteId, PayOverXcm};
 use xcm_executor::traits::JustTry;
 use xcm_primitives::AsAssetType;
 
+use crate::{
+    configs::{xcm_config, TreasuryInteriorLocation},
+    constants::HOURS,
+    AssetManager, Assets,
+};
 pub use crate::{
     configs::{
         xcm_config::RelayLocation, AssetType, FeeAssetId, StakingAdminBodyId,
@@ -21,7 +31,6 @@ pub use crate::{
     },
     AllPalletsWithSystem, Runtime, RuntimeCall, XcmpQueue,
 };
-use crate::{AssetManager, Assets};
 
 /// Unchecked extrinsic type as expected by this runtime.
 pub type UncheckedExtrinsic =
@@ -117,4 +126,20 @@ pub type XcmFeesToAccount = xcm_primitives::XcmFeesToAccount<
     ),
     AccountId,
     TreasuryAccount,
+>;
+
+/// These aliases are describing the Beneficiary and AssetKind for the Treasury pallet
+pub type Beneficiary = VersionedLocation;
+pub type AssetKind = VersionedLocatableAsset;
+
+/// This is a type that describes how we should transfer bounties from treasury pallet
+pub type TreasuryPaymaster = PayOverXcm<
+    TreasuryInteriorLocation,
+    xcm_config::XcmRouter,
+    crate::PolkadotXcm,
+    ConstU32<{ 6 * HOURS }>,
+    Beneficiary,
+    AssetKind,
+    LocatableAssetConverter,
+    VersionedLocationConverter,
 >;
