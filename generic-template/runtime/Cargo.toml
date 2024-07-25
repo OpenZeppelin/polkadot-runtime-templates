@@ -8,13 +8,13 @@ repository = { workspace = true }
 version = "1.0.0"
 
 [package.metadata.docs.rs]
-targets = ["x86_64-unknown-linux-gnu"]
+targets = [ "x86_64-unknown-linux-gnu" ]
 
 [dependencies]
 hex-literal = { workspace = true, optional = true }
 log = { workspace = true }
-parity-scale-codec = { workspace = true, features = ["derive"] }
-scale-info = { workspace = true, features = ["derive"] }
+parity-scale-codec = { workspace = true, features = [ "derive" ] }
+scale-info = { workspace = true, features = [ "derive" ] }
 smallvec = { workspace = true }
 
 # Substrate
@@ -90,7 +90,7 @@ sp-io = { workspace = true }
 substrate-wasm-builder = { workspace = true }
 
 [features]
-default = ["std"]
+default = [ "std" ]
 std = [
 	"assets-common/std",
 	"cumulus-pallet-aura-ext/std",
@@ -225,8 +225,8 @@ try-runtime = [
 	"sp-runtime/try-runtime",
 ]
 
-experimental = ["pallet-aura/experimental"]
+experimental = [ "pallet-aura/experimental" ]
 # A feature that should be enabled when the runtime should be built for on-chain
 # deployment. This will disable stuff that shouldn't be part of the on-chain wasm
 # to make it smaller, like logging for example.
-on-chain-release-build = ["sp-api/disable-logging"]
+on-chain-release-build = [ "sp-api/disable-logging" ]
