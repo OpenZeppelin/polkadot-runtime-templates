@@ -43,7 +43,9 @@ impl Contract {
 
 #[derive(Debug)]
 pub enum ContractParsingError {
+    #[allow(dead_code)]
     MetadataReadError(io::Error),
+    #[allow(dead_code)]
     MetadataParseError(serde_json::Error),
 }
 
