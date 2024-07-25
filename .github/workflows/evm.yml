@@ -55,20 +55,6 @@ jobs:
       - name: git checkout
         uses: actions/checkout@v4
 
-      - name: Cache cargo registry & git sources
-        uses: actions/cache@v4
-        with:
-          path: |
-            ~/.cargo/bin/
-            ~/.cargo/registry/
-            ~/.cargo/git/db/
-          # More specific key first(higher cache hit)
-          key: ${{ runner.os }}-cargo-evm-template-${{ hashFiles('**/Cargo.lock') }}
-          # Less specific keys after(lower cache hit)
-          restore-keys: |
-            ${{ runner.os }}-cargo-generic-template-${{ hashFiles('**/Cargo.lock') }}
-            ${{ runner.os }}-cargo-
-
       - name: Run sccache
         uses: mozilla-actions/sccache-action@v0.0.4
 
@@ -79,27 +65,37 @@ jobs:
 
       - name: install rust toolchain
         uses: actions-rust-lang/setup-rust-toolchain@v1
+        with:
+          components: clippy
 
       - name: Install toml-sort
         run: cargo install --git https://github.com/4meta5/toml_sort
+
       - name: Add file permissions for toml-sort
         run: chmod +x ./scripts/toml-sort.sh
+
       - name: Add file permissions for check-toml-sorted
         run: chmod +x ./scripts/check-toml-sorted.sh
+
       - name: Check Cargo.toml files are formatted using toml_sort
         run: ./scripts/check-toml-sorted.sh
 
       - name: Check format
         run: cargo fmt --all -- --check
 
+      - name: "Install nextest"
+        uses: taiki-e/install-action@v2
+        with:
+          tool: cargo-nextest
+
       - name: Run tests
-        run: cargo test --release
+        run: cargo nextest run --release
 
       - name: Check benchmarking compilation
         run: cargo check --release --features runtime-benchmarks
 
       - name: Run tests with async backing
-        run: cargo test --release --features="async-backing"
+        run: cargo nextest run --release --features="async-backing"
 
       - name: Check clippy
         run: cargo clippy --release --locked --all-targets -- -D warnings
@@ -109,6 +105,7 @@ jobs:
         env:
           RUSTDOCFLAGS: "-D rustdoc::broken-intra-doc-links -D rustdoc::private_intra_doc_links"
 
+      # FIXME: Calculate coverage and define how to upload all template coverage reports
       - name: Upload coverage reports to Codecov
         uses: codecov/codecov-action@v3
         env:
