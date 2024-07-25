@@ -1,9 +1,11 @@
 * General Guides
+** xref:guides/quick_start.adoc[Quick Start]
 ** xref:guides/weights_fees.adoc[Weights & Fees]
 ** xref:guides/async_backing.adoc[Async Backing]
 * EVM Template Guides
 ** xref:guides/contract_migration.adoc[Contract Migration]
 ** xref:guides/predeployed_contracts.adoc[Predeployed Contracts]
+** xref:guides/testing_with_zombienet.adoc[Testing with Zombienet]
 * Runtimes
 ** xref:runtimes/generic.adoc[Generic Runtime]
 ** xref:runtimes/evm.adoc[EVM Runtime]
