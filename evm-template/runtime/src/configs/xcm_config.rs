@@ -211,7 +211,9 @@ impl xcm_executor::Config for XcmConfig {
     type HrmpChannelAcceptedHandler = ();
     type HrmpChannelClosingHandler = ();
     type HrmpNewChannelOpenRequestHandler = ();
-    /// Please, keep these two configs (`IsReserve` and `IsTeleporter`) mutually exclusive
+    /// Please, keep these two configs (`IsReserve` and `IsTeleporter`) mutually exclusive.
+    /// The IsReserve type must be set to specify which <MultiAsset, MultiLocation> pair we trust to deposit reserve assets on our chain. We can also use the unit type () to block ReserveAssetDeposited instructions.
+    /// The IsTeleporter type must be set to specify which <MultiAsset, MultiLocation> pair we trust to teleport assets to our chain. We can also use the unit type () to block ReceiveTeleportedAssets instruction.
     type IsReserve = NativeAsset;
     type IsTeleporter = ();
     type MaxAssetsIntoHolding = MaxAssetsIntoHolding;
