@@ -6,6 +6,7 @@
 ** xref:guides/contract_migration.adoc[Contract Migration]
 ** xref:guides/predeployed_contracts.adoc[Predeployed Contracts]
 ** xref:guides/testing_with_zombienet.adoc[Testing with Zombienet]
+** xref:guides/rpc_differences.adoc[RPC Differences]
 * Runtimes
 ** xref:runtimes/generic.adoc[Generic Runtime]
 ** xref:runtimes/evm.adoc[EVM Runtime]
