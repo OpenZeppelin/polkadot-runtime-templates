@@ -272,8 +272,7 @@ pub type XcmRouter = WithUniqueTopic<(
 )>;
 
 parameter_types! {
-    pub const MaxLockers: u32 = 8;
-    pub const MaxRemoteLockConsumers: u32 = 0;
+    pub const MaxLockers: u32 = 0;
 }
 
 impl pallet_xcm::Config for Runtime {
