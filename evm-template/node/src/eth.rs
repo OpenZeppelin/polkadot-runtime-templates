@@ -5,11 +5,11 @@ use std::{
     time::Duration,
 };
 
+// Local
+use evm_runtime_template::opaque::Block;
 use fc_rpc::{EthTask, OverrideHandle};
 pub use fc_rpc_core::types::{FeeHistoryCache, FeeHistoryCacheLimit, FilterPool};
 use futures::{future, prelude::*};
-// Local
-use parachain_template_runtime::opaque::Block;
 // Substrate
 use sc_client_api::BlockchainEvents;
 use sc_executor::WasmExecutor;

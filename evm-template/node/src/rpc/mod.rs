@@ -7,7 +7,7 @@
 mod eth;
 use std::sync::Arc;
 
-use parachain_template_runtime::{opaque::Block, AccountId, Balance, Nonce};
+use evm_runtime_template::{opaque::Block, AccountId, Balance, Nonce};
 use sc_client_api::{backend::Backend, AuxStore, BlockchainEvents, StorageProvider, UsageProvider};
 pub use sc_rpc::DenyUnsafe;
 use sc_rpc::SubscriptionTaskExecutor;

@@ -1,5 +1,5 @@
 [package]
-name = "parachain-template-runtime"
+name = "generic-runtime-template"
 authors = { workspace = true }
 description = "A generic parachain runtime template"
 edition = { workspace = true }
