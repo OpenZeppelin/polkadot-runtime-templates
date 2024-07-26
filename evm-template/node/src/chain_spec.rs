@@ -1,12 +1,12 @@
 use std::collections::BTreeMap;
 
 use cumulus_primitives_core::ParaId;
-use fp_evm::GenesisAccount;
-use hex_literal::hex;
-use log::error;
 use evm_runtime_template::{
     AccountId, AuraId, OpenZeppelinPrecompiles as Precompiles, Runtime, Signature,
 };
+use fp_evm::GenesisAccount;
+use hex_literal::hex;
+use log::error;
 use sc_chain_spec::{ChainSpecExtension, ChainSpecGroup};
 use sc_service::ChainType;
 use serde::{Deserialize, Serialize};
@@ -82,8 +82,7 @@ pub fn development_config(contracts_path: ContractsPath) -> ChainSpec {
     properties.insert("basedOn".into(), "OpenZeppelin EVM Template".into());
 
     ChainSpec::builder(
-        evm_runtime_template::WASM_BINARY
-            .expect("WASM binary was not built, please build it!"),
+        evm_runtime_template::WASM_BINARY.expect("WASM binary was not built, please build it!"),
         Extensions {
             relay_chain: "rococo-local".into(),
             // You MUST set this to the correct network!
@@ -134,8 +133,7 @@ pub fn local_testnet_config(contracts_path: ContractsPath) -> ChainSpec {
 
     #[allow(deprecated)]
     ChainSpec::builder(
-        evm_runtime_template::WASM_BINARY
-            .expect("WASM binary was not built, please build it!"),
+        evm_runtime_template::WASM_BINARY.expect("WASM binary was not built, please build it!"),
         Extensions {
             relay_chain: "rococo-local".into(),
             // You MUST set this to the correct network!

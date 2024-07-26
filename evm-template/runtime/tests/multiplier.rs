@@ -1,9 +1,9 @@
 // Integration transaction weight-fee tests
 mod common;
 use common::*;
+use evm_runtime_template::{Runtime, RuntimeBlockWeights};
 use frame_support::pallet_prelude::*;
 use pallet_transaction_payment::Multiplier;
-use evm_runtime_template::{Runtime, RuntimeBlockWeights};
 use polkadot_runtime_common::MinimumMultiplier;
 use sp_runtime::{traits::Convert, Perquintill};
 
