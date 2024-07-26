@@ -1,6 +1,6 @@
 // Storage indices integration checks
 use frame_support::traits::PalletInfo;
-use parachain_template_runtime::{
+use generic_runtime_template::{
     Aura, AuraExt, Authorship, Balances, CollatorSelection, CumulusXcm, MessageQueue, Multisig,
     ParachainInfo, ParachainSystem, PolkadotXcm, Proxy, Runtime, Session, Sudo, System, Timestamp,
     TransactionPayment, XcmpQueue,

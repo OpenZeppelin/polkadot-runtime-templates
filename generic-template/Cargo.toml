@@ -4,10 +4,10 @@ resolver = "2"
 
 [workspace.package]
 authors = [ "OpenZeppelin" ]
-description = "Runtime template(s) for Polkadot Para{chains, cores}"
+description = "Generic runtime template for Polkadot Para{chains, cores}"
 edition = "2021"
 license = "GPL-3.0-only"
-repository = "https://github.com/OpenZeppelin/polkadot-runtime-template"
+repository = "https://github.com/OpenZeppelin/polkadot-runtime-templates"
 
 [workspace.dependencies]
 clap = { version = "4.5.3", features = [ "derive" ] }
