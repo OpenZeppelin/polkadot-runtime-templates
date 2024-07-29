@@ -1,7 +1,7 @@
 [package]
-name = "parachain-template-runtime"
+name = "evm-runtime-template"
 authors = { workspace = true }
-description = "A generic parachain runtime template"
+description = "An EVM parachain runtime template"
 edition = { workspace = true }
 license = { workspace = true }
 repository = { workspace = true }

@@ -5,22 +5,23 @@
 
 == Purpose
 
-Generic Runtime Template is constructed with the purpose of providing the most generic template that is working out of the box.
+EVM Runtime Template is built on top of the link:generic.adoc[Generic Runtime Template].
+
+The purpose of this template is to provide EVM compatibilities embedded into the runtime.
+
+With this template, you can:
+* Deploy Solidity Smart Contracts to your runtime.
+* Interact with the deployed Smart Contracts.
+* Deploy and interact with ERC20 tokens.
+* Migrate your existing dAPP from Ethereum ecosystem to Polkadot ecosystem.
 
 The pallet list is constructed by the contributions of Parity, the community, and OpenZeppelin.
 
-Our motivation for crafting the pallet list was to be as minimalistic as possible,
-whilst preserving the most important pallets that are used in the Polkadot ecosystem.
+To maximize the compatibility with EVM, we decided to use `AccountId20` type instead of `AccountId32`.
+This choice allowed us to use the signature scheme compatible with Ethereum (ECDSA).
+Which, in turn result in better compatibility with tools across the Ethereum ecosystem including wallets, developer tooling, etc.
+Metamask integration for example is way simpler for chains with the Ethereum account and signature type.
 
-We designed this template to be generic, so that it can be used as a starting point for any other project/template,
-and we aim to base our future templates off of this one.
-
-To demystify the hard concepts, we provided a documentation, in which you can find:
-
-* Explanation of the pallets that are used in this template (purpose, terminology, configuration, dispatchables, etc.).
-* General guides regarding this template.
-* Runtime related guides.
-* And miscellaneous topics.
 
 == Configuration
 
@@ -79,6 +80,8 @@ To demystify the hard concepts, we provided a documentation, in which you can fi
 * https://paritytech.github.io/polkadot-sdk/master/pallet_assets/index.html#[pallet_assets] deals with sets of assets implementing fungible traits, via [fungibles] traits in a simple, secure manner. This pallet makes heavy use of concepts such as Holds and Freezes from the [frame_support::traits::fungible] traits, therefore you should read and understand those docs as a prerequisite to understanding this pallet.
 
 * https://docs.rs/pallet-treasury/latest/pallet_treasury/#[pallet_treasury] provides a “pot” of funds that can be managed by stakeholders in the system and a structure for making spending proposals from this pot.
+
+* https://github.com/moonbeam-foundation/moonbeam/blob/master/pallets/asset-manager/src/lib.rs[#pallet_asset_manager] allows to register new assets if certain conditions are met.
 
 ====
 
@@ -140,3 +143,13 @@ To demystify the hard concepts, we provided a documentation, in which you can fi
 * https://docs.rs/pallet-message-queue/latest/pallet_message_queue/#[MessageQueue] provides generalized message queuing and processing capabilities on a per-queue basis for arbitrary use-cases.
 
 ====
+
+=== EVM
+
+* https://docs.rs/pallet-ethereum/latest/pallet_ethereum/#[Ethereum] works together with EVM pallet to provide full emulation for Ethereum block processing.
+
+* https://docs.rs/pallet-evm/5.0.0/pallet_evm/#[EVM] allows unmodified EVM code to be executed in a Substrate-based blockchain.
+
+* https://github.com/polkadot-evm/frontier/blob/master/frame/base-fee/src/lib.rs#[BaseFee] dynamically adjusts the `BaseFeePerGas` based on elasticity (zero elasticity means constant `BaseFeePerGas`).
+
+* https://github.com/polkadot-evm/frontier/blob/master/frame/evm-chain-id/src/lib.rs#[EvmChainId] stores the numeric Ethereum-style chain id in the runtime. This pallet can simplify setting up multiple networks with different chain ID by configuring the chain spec without requiring changes to the runtime config.

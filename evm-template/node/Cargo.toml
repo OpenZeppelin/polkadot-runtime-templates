@@ -1,8 +1,8 @@
 [package]
-name = "parachain-template-node"
+name = "evm-template-node"
 authors = { workspace = true }
 build = "build.rs"
-description = "Node compatible with parachain runtime template."
+description = "Node compatible with evm runtime template."
 edition = { workspace = true }
 license = { workspace = true }
 publish = false
@@ -22,7 +22,7 @@ serde_derive = { workspace = true }
 serde_json = { workspace = true }
 
 # Local
-parachain-template-runtime = { path = "../runtime" }
+evm-runtime-template = { path = "../runtime" }
 
 # Substrate
 frame-benchmarking = { workspace = true }
@@ -95,16 +95,16 @@ default = []
 async-backing = []
 experimental = []
 runtime-benchmarks = [
+	"evm-runtime-template/runtime-benchmarks",
 	"frame-benchmarking-cli/runtime-benchmarks",
 	"frame-benchmarking/runtime-benchmarks",
-	"parachain-template-runtime/runtime-benchmarks",
 	"polkadot-cli/runtime-benchmarks",
 	"polkadot-primitives/runtime-benchmarks",
 	"sc-service/runtime-benchmarks",
 	"sp-runtime/runtime-benchmarks",
 ]
 try-runtime = [
-	"parachain-template-runtime/try-runtime",
+	"evm-runtime-template/try-runtime",
 	"polkadot-cli/try-runtime",
 	"sp-runtime/try-runtime",
 ]

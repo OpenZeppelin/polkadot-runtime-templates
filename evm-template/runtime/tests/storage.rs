@@ -1,10 +1,10 @@
 // Storage indices integration checks
-use frame_support::traits::PalletInfo;
-use parachain_template_runtime::{
+use evm_runtime_template::{
     Aura, AuraExt, Authorship, Balances, CollatorSelection, CumulusXcm, MessageQueue, Multisig,
     ParachainInfo, ParachainSystem, PolkadotXcm, Proxy, Runtime, Session, Sudo, System, Timestamp,
     TransactionPayment, XcmpQueue,
 };
+use frame_support::traits::PalletInfo;
 
 fn assert_pallet_prefix<P: 'static>(name: &str) {
     assert_eq!(<Runtime as frame_system::Config>::PalletInfo::name::<P>(), Some(name));

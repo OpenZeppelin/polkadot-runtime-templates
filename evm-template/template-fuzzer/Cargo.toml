@@ -18,7 +18,7 @@ workspace = true
 substrate-runtime-fuzzer = { workspace = true }
 ziggy = { workspace = true }
 
-parachain-template-runtime = { path = "../runtime" }
+evm-runtime-template = { path = "../runtime" }
 parachains-common = { workspace = true }
 
 parity-scale-codec = { workspace = true }
@@ -41,18 +41,18 @@ cumulus-test-relay-sproof-builder = { workspace = true }
 [features]
 default = [ "std", "try-runtime" ]
 std = [
+	"evm-runtime-template/std",
 	"frame-support/std",
 	"pallet-timestamp/std",
-	"parachain-template-runtime/std",
 	"parity-scale-codec/std",
 	"sp-consensus-aura/std",
 	"sp-runtime/std",
 ]
 try-runtime = [
+	"evm-runtime-template/try-runtime",
 	"frame-support/try-runtime",
 	"frame-system/try-runtime",
 	"pallet-timestamp/try-runtime",
-	"parachain-template-runtime/try-runtime",
 	"sp-runtime/try-runtime",
 ]
 
