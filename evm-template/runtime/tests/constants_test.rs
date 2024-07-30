@@ -234,7 +234,8 @@ mod xcm_tests {
 
     #[test]
     fn pallet_xcm_constants() {
-        assert_eq!(MaxLockers::get(), 0);
+        assert_eq!(MaxLockers::get(), 8);
+        assert_eq!(MaxRemoteLockConsumers::get(), 0);
         assert_eq!(
             <evm_runtime_template::Runtime as pallet_xcm::Config>::VERSION_DISCOVERY_QUEUE_SIZE,
             100
