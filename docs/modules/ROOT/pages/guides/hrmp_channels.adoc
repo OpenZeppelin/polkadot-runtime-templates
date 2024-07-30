@@ -28,8 +28,8 @@ The examples in this section include steps to connect to existing parachains in 
 3.  HydraDX supports DeFi functionality to provide liquidity to Polkadot.
 
 For all of the examples:
-* `paraId` for the user's parachain is set to `43211234` for all examples below.
-* `proposedMaxCapacity` and `proposedMaxMessageSize` are set to the values of Polkadot `config.hrmpChannelMaxCapacity = 1000` and `config.hrmpChannelMaxMessageSize = 102400`, respectively.
+. `paraId` for the user's parachain is set to `43211234` for all examples below.
+. `proposedMaxCapacity` and `proposedMaxMessageSize` are set to the values of Polkadot `config.hrmpChannelMaxCapacity = 1000` and `config.hrmpChannelMaxMessageSize = 102400`, respectively.
 
 === AssetHub
 
@@ -125,10 +125,10 @@ link:https://moonbeam.polkassembly.network/referendum/93[Here] is an example of 
 
 == Bonus: HRMP Channel Notification Handlers
 
-There are 3 handlers that may be configured as hooks to implement automated logic for when a `HRMP` notification is received.
-* `HrmpChannelAcceptedHandler`
-* `HrmpChannelClosingHandler`
-* `HrmpNewChannelOpenRequestHandler`
+There are 3 handlers that may be configured as hooks to implement automated logic for when a `HRMP` notification is received:
+. `HrmpChannelAcceptedHandler`
+. `HrmpChannelClosingHandler`
+. `HrmpNewChannelOpenRequestHandler`
 
 Each follows a similar interface:
 ```rust
