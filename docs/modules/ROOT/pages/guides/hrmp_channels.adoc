@@ -25,10 +25,10 @@ In order to dispatch a call from its sovereign origin, a parachain may use gover
 The examples in this section include steps to connect to existing parachains in the Polkadot ecosystem. Examples include the following Polkadot parachains:
 1. AssetHub supports managing asset balances as well as the execution of cross-chain transfers.
 2. Snowbridge supports sending ERC20 tokens between Polkadot parachains and Ethereum in both directions.
-3.  HydraDX supports DeFi functionality to provide liquidity to Polkadot.
+3. HydraDX supports DeFi functionality to provide liquidity to Polkadot.
 
-For all of the examples:
-. `paraId` for the user's parachain is set to `43211234` for all examples below.
+For all examples:
+. `paraId` for the user's parachain is set to `43211234`.
 . `proposedMaxCapacity` and `proposedMaxMessageSize` are set to the values of Polkadot `config.hrmpChannelMaxCapacity = 1000` and `config.hrmpChannelMaxMessageSize = 102400`, respectively.
 
 === AssetHub
