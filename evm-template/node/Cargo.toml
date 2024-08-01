@@ -108,7 +108,7 @@ try-runtime = [
 	"polkadot-cli/try-runtime",
 	"sp-runtime/try-runtime",
 ]
-txpool = ["fc-rpc/txpool"]
+txpool = [ "fc-rpc/txpool" ]
 
 [lints]
 workspace = true
