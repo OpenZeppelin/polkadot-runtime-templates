@@ -1,0 +1,17 @@
+[package]
+name = "generic-zombienet-integration-tests"
+authors = { workspace = true }
+description = "Zombienet integration tests for generic-template"
+edition = { workspace = true }
+license = { workspace = true }
+publish = false
+repository = { workspace = true }
+version = "0.1.0"
+
+[dependencies]
+zombienet-sdk = { workspace = true }
+tokio = { workspace = true }
+futures = { workspace = true }
+subxt = { workspace = true }
+serde_json = { workspace = true }
+anyhow = { workspace = true }

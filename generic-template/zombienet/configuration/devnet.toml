@@ -1,6 +1,11 @@
+[settings]
+timeout = 1000
+
 [relaychain]
 chain = "rococo-local"
-default_command = "./bin-v1.6.0/polkadot"
+default_command = "/Users/ozgunozerk/Developer/openzeppelin-template/generic-template/bin-v1.6.0/polkadot"
+settings = {}
+
 
 [[relaychain.nodes]]
 name = "alice"
@@ -18,14 +23,7 @@ chain = "dev"
 
 [[parachains.collators]]
 name = "collator01"
-command = "./target/release/parachain-template-node"
+command = "/Users/ozgunozerk/Developer/openzeppelin-template/generic-template/target/release/parachain-template-node"
 ws_port = 9933
 rpc_port = 8833
-args = ["--rpc-max-connections 10000"]
-
-[[parachains.collators]]
-name = "collator02"
-ws_port = 9822
-rpc_port = 8822
-command = "./target/release/parachain-template-node"
 args = ["--rpc-max-connections 10000"]

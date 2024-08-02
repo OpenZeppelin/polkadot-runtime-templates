@@ -1,20 +1,21 @@
 [workspace]
-members = [ "node", "runtime", "template-fuzzer" ]
+members = ["node", "runtime", "template-fuzzer", "zombienet/tests"]
 resolver = "2"
 
 [workspace.package]
-authors = [ "OpenZeppelin" ]
+authors = ["OpenZeppelin"]
 description = "Runtime template(s) for Polkadot Para{chains, cores}"
 edition = "2021"
 license = "GPL-3.0-only"
 repository = "https://github.com/OpenZeppelin/polkadot-runtime-template"
 
 [workspace.dependencies]
-clap = { version = "4.5.3", features = [ "derive" ] }
+anyhow = "1.0.86"
+clap = { version = "4.5.3", features = ["derive"] }
 color-print = "0.3.4"
 futures = "0.3.28"
 hex-literal = "0.4.1"
-jsonrpsee = { version = "0.22", features = [ "server" ] }
+jsonrpsee = { version = "0.22", features = ["server"] }
 log = { version = "0.4.20", default-features = false }
 parity-scale-codec = { version = "3.0.0", default-features = false, features = [
 	"derive",
@@ -133,6 +134,10 @@ parachains-common = { git = "https://github.com/paritytech/polkadot-sdk", defaul
 substrate-runtime-fuzzer = { git = "https://github.com/srlabs/substrate-runtime-fuzzer.git", default-features = false }
 ziggy = { version = "0.8", default-features = false }
 
+# Zombienet
+subxt = "0.37.0"
+tokio = { version = "1.0", features = ["full", "test-util"] }
+zombienet-sdk = "0.2.7"
 
 [workspace.lints.clippy]
 large_enum_variant = "allow"
