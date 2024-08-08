@@ -7,9 +7,9 @@ use frame_support::{
     traits::{IntegrityTest, TryState, TryStateSelect},
     weights::{constants::WEIGHT_REF_TIME_PER_SECOND, Weight},
 };
-use generic_runtime_template::{
+use parachain_template_runtime::{
     constants::SLOT_DURATION, AllPalletsWithSystem, Balance, Balances, BlockNumber, Executive,
-    Runtime, RuntimeCall, RuntimeOrigin, SudoConfig, UncheckedExtrinsic,
+    Runtime, RuntimeCall, RuntimeOrigin, SudoConfig, UncheckedExtrinsic, configs::MaxCandidates,
 };
 use parachains_common::AccountId;
 use sp_consensus_aura::AURA_ENGINE_ID;
@@ -25,7 +25,7 @@ fn main() {
     let endowed_accounts: Vec<AccountId> = (0..5).map(|i| [i; 32].into()).collect();
 
     let genesis_storage: Storage = {
-        use generic_runtime_template::{
+        use parachain_template_runtime::{
             BalancesConfig, CollatorSelectionConfig, RuntimeGenesisConfig, SessionConfig,
             SessionKeys,
         };
@@ -89,6 +89,7 @@ fn main() {
         let mut elapsed: Duration = Duration::ZERO;
 
         let start_block = |block: u32, lapse: u32| {
+            #[cfg(not(fuzzing))]
             println!("\ninitializing block {}", block + lapse);
 
             let next_block = block + lapse;
@@ -168,6 +169,10 @@ fn main() {
         for (maybe_lapse, origin, extrinsic) in extrinsics {
             // If the lapse is in the range [0, MAX_BLOCK_LAPSE] we finalize the block and initialize
             // a new one.
+            let origin_no = origin % endowed_accounts.len();
+            if !recursive_call_filter(&extrinsic, origin_no) {
+                continue;
+            }
             if let Some(lapse) = maybe_lapse {
                 // We update our state variables
                 current_weight = Weight::zero();
@@ -189,17 +194,20 @@ fn main() {
 
             current_weight = current_weight.saturating_add(call_weight);
             if current_weight.ref_time() >= max_weight.ref_time() {
+                #[cfg(not(fuzzing))]
                 println!("Skipping because of max weight {max_weight}");
                 continue;
             }
 
             externalities.execute_with(|| {
-                let origin_account = endowed_accounts[origin % endowed_accounts.len()].clone();
+                let origin_account = endowed_accounts[origin_no].clone();
+                #[cfg(not(fuzzing))]
                 {
                     println!("\n    origin:     {origin_account:?}");
                     println!("    call:       {extrinsic:?}");
                 }
                 let _res = extrinsic.clone().dispatch(RuntimeOrigin::signed(origin_account));
+                #[cfg(not(fuzzing))]
                 println!("    result:     {_res:?}");
 
                 // Uncomment to print events for debugging purposes
@@ -217,6 +225,7 @@ fn main() {
             elapsed += now.elapsed();
         }
 
+        #[cfg(not(fuzzing))]
         println!("\n  time spent: {elapsed:?}");
         assert!(elapsed.as_secs() <= MAX_TIME_FOR_BLOCK, "block execution took too much time");
 
@@ -225,6 +234,7 @@ fn main() {
             // Finilization
             Executive::finalize_block();
             // Invariants
+            #[cfg(not(fuzzing))]
             println!("\ntesting invariants for block {current_block}");
             <AllPalletsWithSystem as TryState<BlockNumber>>::try_state(
                 current_block,
@@ -274,9 +284,48 @@ fn main() {
                 "Inconsistent total issuance: {total_issuance} but counted {counted_issuance}"
             );
 
+            #[cfg(not(fuzzing))]
             println!("running integrity tests");
             // We run all developer-defined integrity tests
             <AllPalletsWithSystem as IntegrityTest>::integrity_test();
         });
     });
+}
+
+fn recursive_call_filter(call: &RuntimeCall, origin: usize) -> bool {
+    match call {
+        //recursion
+        RuntimeCall::Sudo(
+            pallet_sudo::Call::sudo{call}
+            | pallet_sudo::Call::sudo_unchecked_weight{call, weight: _}
+        ) if origin == 0 => 
+            recursive_call_filter(&call, origin),
+        RuntimeCall::Utility(
+            pallet_utility::Call::with_weight{call, weight: _}
+            | pallet_utility::Call::dispatch_as{as_origin: _, call}
+            | pallet_utility::Call::as_derivative { index: _, call }
+        ) => recursive_call_filter(&call, origin),
+        RuntimeCall::Utility(
+            pallet_utility::Call::force_batch{calls} 
+            | pallet_utility::Call::batch{calls}
+            | pallet_utility::Call::batch_all { calls }
+        ) => calls.iter().map(|call | recursive_call_filter(&call, origin)).fold(true, |acc, e| acc && e),
+        RuntimeCall::Scheduler(
+            pallet_scheduler::Call::schedule_named_after{id: _, after: _, maybe_periodic: _, priority: _, call}
+            | pallet_scheduler::Call::schedule {when: _,maybe_periodic: _,priority: _, call}
+            | pallet_scheduler::Call::schedule_named {when: _,id: _, maybe_periodic: _, priority: _, call}
+            | pallet_scheduler::Call::schedule_after {after: _, maybe_periodic: _, priority: _, call}) => recursive_call_filter(call, origin),
+        RuntimeCall::Multisig(
+            pallet_multisig::Call::as_multi_threshold_1 {other_signatories: _, call}
+            | pallet_multisig::Call::as_multi {threshold: _, other_signatories: _, maybe_timepoint: _, call, max_weight: _}) => recursive_call_filter(call, origin),
+        RuntimeCall::Whitelist(pallet_whitelist::Call::dispatch_whitelisted_call_with_preimage{call}) => recursive_call_filter(call, origin),
+
+        // restrictions
+        RuntimeCall::Sudo(_) if origin != 0 => false,
+        RuntimeCall::System(frame_system::Call::set_code{..} | frame_system::Call::kill_prefix{..}) => false,
+        RuntimeCall::CollatorSelection(pallet_collator_selection::Call::set_desired_candidates{ max }) => *max < MaxCandidates::get(),
+        RuntimeCall::Balances(pallet_balances::Call::force_adjust_total_issuance{ ..}) => false,
+
+        _ => true 
+    }
 }
