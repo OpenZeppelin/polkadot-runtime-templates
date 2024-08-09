@@ -1,0 +1,37 @@
+name: Generic Template Fuzzer (Weekly run)
+
+on:
+  schedule:
+    # Runs at 00:00 UTC every Sunday
+    - cron: '0 0 * * 0'
+
+jobs:
+  generic-template-fuzzer:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Set up Rust
+        uses: actions-rs/toolchain@v1
+        with:
+          profile: minimal
+          toolchain: stable
+      
+      - name: Add dependencies
+        run: cargo install ziggy cargo-afl honggfuzz grcov
+      
+      - name: Add target
+        run: rustup target add wasm32-unknown-unknown
+
+      - name: Run Ziggy Fuzzing
+        run: |
+          timeout 5h cargo ziggy fuzz -t 20 || true
+        working-directory: generic-template/template-fuzzer
+      
+      - name: Save Artifacts
+        uses: actions/upload-artifact@v2
+        with:
+          name: fuzzing-artifacts
+          path: |
+            generic-template/template-fuzzer/output
