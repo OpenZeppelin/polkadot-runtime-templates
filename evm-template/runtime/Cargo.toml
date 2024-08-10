@@ -1,11 +1,11 @@
 [package]
-name = "parachain-template-runtime"
+name = "evm-runtime-template"
 authors = { workspace = true }
-description = "A generic parachain runtime template"
+description = "An EVM parachain runtime template"
 edition = { workspace = true }
 license = { workspace = true }
 repository = { workspace = true }
-version = "0.1.2"
+version = "1.0.0"
 
 [package.metadata.docs.rs]
 targets = [ "x86_64-unknown-linux-gnu" ]

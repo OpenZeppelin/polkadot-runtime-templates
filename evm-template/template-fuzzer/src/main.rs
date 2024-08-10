@@ -1,16 +1,16 @@
 use std::time::{Duration, Instant};
 
 use cumulus_primitives_core::relay_chain::Slot;
+use evm_runtime_template::{
+    constants::SLOT_DURATION, AccountId, AllPalletsWithSystem, Balance, Balances, BlockNumber,
+    EVMChainIdConfig, Executive, Runtime, RuntimeCall, RuntimeOrigin, SudoConfig,
+    UncheckedExtrinsic,
+};
 use frame_support::{
     dispatch::GetDispatchInfo,
     pallet_prelude::Encode,
     traits::{IntegrityTest, TryState, TryStateSelect},
     weights::{constants::WEIGHT_REF_TIME_PER_SECOND, Weight},
-};
-use parachain_template_runtime::{
-    constants::SLOT_DURATION, AccountId, AllPalletsWithSystem, Balance, Balances, BlockNumber,
-    EVMChainIdConfig, Executive, Runtime, RuntimeCall, RuntimeOrigin, SudoConfig,
-    UncheckedExtrinsic,
 };
 use sp_consensus_aura::AURA_ENGINE_ID;
 use sp_runtime::{
@@ -25,7 +25,7 @@ fn main() {
     let endowed_accounts: Vec<AccountId> = (0..5).map(|i| [i; 32].into()).collect();
 
     let genesis_storage: Storage = {
-        use parachain_template_runtime::{
+        use evm_runtime_template::{
             BalancesConfig, CollatorSelectionConfig, RuntimeGenesisConfig, SessionConfig,
             SessionKeys,
         };

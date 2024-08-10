@@ -17,14 +17,14 @@ use cumulus_client_service::{
 use cumulus_primitives_core::relay_chain::ValidationCode;
 use cumulus_primitives_core::{relay_chain::CollatorPair, ParaId};
 use cumulus_relay_chain_interface::{OverseerHandle, RelayChainInterface};
-// Substrate Imports
-use frame_benchmarking_cli::SUBSTRATE_REFERENCE_HARDWARE;
 // Local Runtime Types
-use parachain_template_runtime::{
+use evm_runtime_template::{
     apis::RuntimeApi,
     configs::TransactionConverter,
     opaque::{Block, Hash},
 };
+// Substrate Imports
+use frame_benchmarking_cli::SUBSTRATE_REFERENCE_HARDWARE;
 use sc_client_api::Backend;
 use sc_consensus::ImportQueue;
 use sc_executor::WasmExecutor;

@@ -1,5 +1,5 @@
 mod constant_tests {
-    use parachain_template_runtime::constants::currency::*;
+    use evm_runtime_template::constants::currency::*;
 
     #[test]
     fn test_constants() {
@@ -19,12 +19,12 @@ mod constant_tests {
 }
 
 mod runtime_tests {
-    use frame_support::{pallet_prelude::Weight, traits::TypedGet, PalletId};
-    use parachain_template_runtime::{
+    use evm_runtime_template::{
         configs::{asset_config::*, *},
         constants::{currency::*, *},
         *,
     };
+    use frame_support::{pallet_prelude::Weight, traits::TypedGet, PalletId};
     use sp_runtime::create_runtime_str;
     use sp_version::RuntimeVersion;
     use xcm::latest::prelude::BodyId;
@@ -40,7 +40,7 @@ mod runtime_tests {
                 authoring_version: 1,
                 spec_version: 1,
                 impl_version: 0,
-                apis: parachain_template_runtime::apis::RUNTIME_API_VERSIONS,
+                apis: evm_runtime_template::apis::RUNTIME_API_VERSIONS,
                 transaction_version: 1,
                 state_version: 1,
             }
@@ -222,8 +222,8 @@ mod runtime_tests {
 }
 
 mod xcm_tests {
+    use evm_runtime_template::configs::xcm_config::*;
     use frame_support::weights::Weight;
-    use parachain_template_runtime::configs::xcm_config::*;
 
     #[test]
     fn xcm_executor_constants() {
@@ -234,7 +234,11 @@ mod xcm_tests {
 
     #[test]
     fn pallet_xcm_constants() {
-        assert_eq!(MaxLockers::get(), 0);
-        assert_eq!(<parachain_template_runtime::Runtime as pallet_xcm::Config>::VERSION_DISCOVERY_QUEUE_SIZE, 100);
+        assert_eq!(MaxLockers::get(), 8);
+        assert_eq!(MaxRemoteLockConsumers::get(), 0);
+        assert_eq!(
+            <evm_runtime_template::Runtime as pallet_xcm::Config>::VERSION_DISCOVERY_QUEUE_SIZE,
+            100
+        );
     }
 }

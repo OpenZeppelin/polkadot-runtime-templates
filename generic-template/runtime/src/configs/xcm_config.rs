@@ -156,6 +156,7 @@ impl xcm_executor::Config for XcmConfig {
     type AssetTrap = PolkadotXcm;
     type Barrier = Barrier;
     type CallDispatcher = RuntimeCall;
+    /// When changing this config, keep in mind, that you should collect fees.
     type FeeManager = XcmFeeManagerFromComponents<
         IsChildSystemParachain<primitives::Id>,
         XcmFeeToAccount<Self::AssetTransactor, AccountId, TreasuryAccount>,
@@ -163,6 +164,7 @@ impl xcm_executor::Config for XcmConfig {
     type HrmpChannelAcceptedHandler = ();
     type HrmpChannelClosingHandler = ();
     type HrmpNewChannelOpenRequestHandler = ();
+    /// Please, keep these two configs (`IsReserve` and `IsTeleporter`) mutually exclusive
     type IsReserve = NativeAsset;
     type IsTeleporter = ();
     type MaxAssetsIntoHolding = MaxAssetsIntoHolding;
@@ -196,7 +198,8 @@ pub type XcmRouter = WithUniqueTopic<(
 )>;
 
 parameter_types! {
-    pub const MaxLockers: u32 = 0;
+    pub const MaxLockers: u32 = 8;
+    pub const MaxRemoteLockConsumers: u32 = 0;
 }
 
 impl pallet_xcm::Config for Runtime {
@@ -207,7 +210,7 @@ impl pallet_xcm::Config for Runtime {
     type CurrencyMatcher = ();
     type ExecuteXcmOrigin = EnsureXcmOrigin<RuntimeOrigin, LocalOriginToLocation>;
     type MaxLockers = MaxLockers;
-    type MaxRemoteLockConsumers = MaxLockers;
+    type MaxRemoteLockConsumers = MaxRemoteLockConsumers;
     type RemoteLockConsumerIdentifier = ();
     type RuntimeCall = RuntimeCall;
     type RuntimeEvent = RuntimeEvent;
@@ -217,6 +220,7 @@ impl pallet_xcm::Config for Runtime {
     type TrustedLockers = ();
     type UniversalLocation = UniversalLocation;
     type Weigher = FixedWeightBounds<UnitWeightCost, RuntimeCall, MaxInstructions>;
+    /// Rerun benchmarks if you are making changes to runtime configuration.
     type WeightInfo = weights::pallet_xcm::WeightInfo<Runtime>;
     type XcmExecuteFilter = Nothing;
     // ^ Disable dispatchable execute on the XCM pallet.
