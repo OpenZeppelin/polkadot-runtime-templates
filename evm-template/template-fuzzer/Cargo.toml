@@ -32,6 +32,12 @@ sp-state-machine = { workspace = true }
 
 pallet-balances = { workspace = true }
 pallet-timestamp = { workspace = true }
+pallet-scheduler = { workspace = true }
+pallet-collator-selection = { workspace = true }
+pallet-whitelist = { workspace = true }
+pallet-multisig = { workspace = true }
+pallet-utility = { workspace = true }
+pallet-sudo = { workspace = true }
 
 cumulus-pallet-parachain-system = { workspace = true }
 cumulus-primitives-core = { workspace = true }
@@ -44,6 +50,12 @@ std = [
 	"evm-runtime-template/std",
 	"frame-support/std",
 	"pallet-timestamp/std",
+	"pallet-scheduler/std",
+	"pallet-collator-selection/std",
+	"pallet-whitelist/std",
+	"pallet-multisig/std",
+	"pallet-utility/std",
+	"pallet-sudo/std",
 	"parity-scale-codec/std",
 	"sp-consensus-aura/std",
 	"sp-runtime/std",
@@ -52,6 +64,12 @@ try-runtime = [
 	"evm-runtime-template/try-runtime",
 	"frame-support/try-runtime",
 	"frame-system/try-runtime",
+	"pallet-scheduler/try-runtime",
+	"pallet-collator-selection/try-runtime",
+	"pallet-whitelist/try-runtime",
+	"pallet-multisig/try-runtime",
+	"pallet-utility/try-runtime",
+	"pallet-sudo/try-runtime",
 	"pallet-timestamp/try-runtime",
 	"sp-runtime/try-runtime",
 ]

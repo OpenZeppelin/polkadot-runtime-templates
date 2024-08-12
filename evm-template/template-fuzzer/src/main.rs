@@ -2,9 +2,7 @@ use std::time::{Duration, Instant};
 
 use cumulus_primitives_core::relay_chain::Slot;
 use evm_runtime_template::{
-    constants::SLOT_DURATION, AccountId, AllPalletsWithSystem, Balance, Balances, BlockNumber,
-    EVMChainIdConfig, Executive, Runtime, RuntimeCall, RuntimeOrigin, SudoConfig,
-    UncheckedExtrinsic,
+    configs::MaxCandidates, constants::SLOT_DURATION, AccountId, AllPalletsWithSystem, Balance, Balances, BlockNumber, EVMChainIdConfig, Executive, Runtime, RuntimeCall, RuntimeOrigin, SudoConfig, UncheckedExtrinsic
 };
 use frame_support::{
     dispatch::GetDispatchInfo,

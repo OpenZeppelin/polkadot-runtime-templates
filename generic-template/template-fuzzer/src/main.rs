@@ -7,7 +7,7 @@ use frame_support::{
     traits::{IntegrityTest, TryState, TryStateSelect},
     weights::{constants::WEIGHT_REF_TIME_PER_SECOND, Weight},
 };
-use parachain_template_runtime::{
+use generic_runtime_template::{
     configs::MaxCandidates, constants::SLOT_DURATION, AllPalletsWithSystem, Balance, Balances,
     BlockNumber, Executive, Runtime, RuntimeCall, RuntimeOrigin, SudoConfig, UncheckedExtrinsic,
 };
@@ -25,7 +25,7 @@ fn main() {
     let endowed_accounts: Vec<AccountId> = (0..5).map(|i| [i; 32].into()).collect();
 
     let genesis_storage: Storage = {
-        use parachain_template_runtime::{
+        use generic_runtime_template::{
             BalancesConfig, CollatorSelectionConfig, RuntimeGenesisConfig, SessionConfig,
             SessionKeys,
         };
@@ -89,7 +89,6 @@ fn main() {
         let mut elapsed: Duration = Duration::ZERO;
 
         let start_block = |block: u32, lapse: u32| {
-            #[cfg(not(fuzzing))]
             println!("\ninitializing block {}", block + lapse);
 
             let next_block = block + lapse;
@@ -194,20 +193,17 @@ fn main() {
 
             current_weight = current_weight.saturating_add(call_weight);
             if current_weight.ref_time() >= max_weight.ref_time() {
-                #[cfg(not(fuzzing))]
                 println!("Skipping because of max weight {max_weight}");
                 continue;
             }
 
             externalities.execute_with(|| {
                 let origin_account = endowed_accounts[origin_no].clone();
-                #[cfg(not(fuzzing))]
                 {
                     println!("\n    origin:     {origin_account:?}");
                     println!("    call:       {extrinsic:?}");
                 }
                 let _res = extrinsic.clone().dispatch(RuntimeOrigin::signed(origin_account));
-                #[cfg(not(fuzzing))]
                 println!("    result:     {_res:?}");
 
                 // Uncomment to print events for debugging purposes
@@ -225,7 +221,6 @@ fn main() {
             elapsed += now.elapsed();
         }
 
-        #[cfg(not(fuzzing))]
         println!("\n  time spent: {elapsed:?}");
         assert!(elapsed.as_secs() <= MAX_TIME_FOR_BLOCK, "block execution took too much time");
 
@@ -234,7 +229,6 @@ fn main() {
             // Finilization
             Executive::finalize_block();
             // Invariants
-            #[cfg(not(fuzzing))]
             println!("\ntesting invariants for block {current_block}");
             <AllPalletsWithSystem as TryState<BlockNumber>>::try_state(
                 current_block,
@@ -284,7 +278,6 @@ fn main() {
                 "Inconsistent total issuance: {total_issuance} but counted {counted_issuance}"
             );
 
-            #[cfg(not(fuzzing))]
             println!("running integrity tests");
             // We run all developer-defined integrity tests
             <AllPalletsWithSystem as IntegrityTest>::integrity_test();
