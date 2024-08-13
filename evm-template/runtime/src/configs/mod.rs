@@ -50,7 +50,7 @@ use crate::{
     constants::{
         currency::{deposit, CENTS, EXISTENTIAL_DEPOSIT, GRAND, MICROCENTS},
         AVERAGE_ON_INITIALIZE_RATIO, DAYS, HOURS, MAXIMUM_BLOCK_WEIGHT, MAX_BLOCK_LENGTH,
-        NORMAL_DISPATCH_RATIO, SLOT_DURATION, VERSION, WEIGHT_PER_GAS,
+        NORMAL_DISPATCH_RATIO, VERSION, WEIGHT_PER_GAS,
     },
     opaque,
     types::{
@@ -204,10 +204,7 @@ impl pallet_preimage::Config for Runtime {
 }
 
 impl pallet_timestamp::Config for Runtime {
-    #[cfg(feature = "experimental")]
     type MinimumPeriod = ConstU64<0>;
-    #[cfg(not(feature = "experimental"))]
-    type MinimumPeriod = ConstU64<{ SLOT_DURATION / 2 }>;
     /// A timestamp: milliseconds since the unix epoch.
     type Moment = u64;
     type OnTimestampSet = Aura;

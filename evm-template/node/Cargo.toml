@@ -14,10 +14,10 @@ clap = { workspace = true }
 futures = { workspace = true }
 hex = { workspace = true }
 hex-literal = { workspace = true }
-jsonrpsee = { workspace = true, features = [ "server" ] }
+jsonrpsee = { workspace = true, features = ["server"] }
 log = { workspace = true }
 parity-scale-codec = { workspace = true }
-serde = { workspace = true, features = [ "derive" ] }
+serde = { workspace = true, features = ["derive"] }
 serde_derive = { workspace = true }
 serde_json = { workspace = true }
 
@@ -59,7 +59,7 @@ substrate-frame-rpc-system = { workspace = true }
 substrate-prometheus-endpoint = { workspace = true }
 
 # Polkadot
-polkadot-cli = { workspace = true, features = [ "rococo-native" ] }
+polkadot-cli = { workspace = true, features = ["rococo-native"] }
 polkadot-primitives = { workspace = true }
 xcm = { workspace = true }
 
@@ -78,12 +78,12 @@ cumulus-relay-chain-interface = { workspace = true }
 # Frontier
 fc-api = { workspace = true }
 fc-consensus = { workspace = true }
-fc-db = { workspace = true, features = [ "rocksdb" ] }
-fc-mapping-sync = { workspace = true, features = [ "sql" ] }
+fc-db = { workspace = true, features = ["rocksdb"] }
+fc-mapping-sync = { workspace = true, features = ["sql"] }
 fc-rpc = { workspace = true }
 fc-rpc-core = { workspace = true }
 fc-storage = { workspace = true }
-fp-dynamic-fee = { workspace = true, features = [ "std" ] }
+fp-dynamic-fee = { workspace = true, features = ["std"] }
 fp-evm = { workspace = true }
 fp-rpc = { workspace = true }
 
@@ -93,7 +93,6 @@ substrate-build-script-utils = { workspace = true }
 [features]
 default = []
 async-backing = []
-experimental = []
 runtime-benchmarks = [
 	"evm-runtime-template/runtime-benchmarks",
 	"frame-benchmarking-cli/runtime-benchmarks",
@@ -108,7 +107,7 @@ try-runtime = [
 	"polkadot-cli/try-runtime",
 	"sp-runtime/try-runtime",
 ]
-txpool = [ "fc-rpc/txpool" ]
+txpool = ["fc-rpc/txpool"]
 
 [lints]
 workspace = true
