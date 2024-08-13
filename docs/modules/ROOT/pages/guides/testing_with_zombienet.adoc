@@ -167,7 +167,6 @@ image::zombie-chain-spec.png[Zombie Chain Spec]
     --rpc-port 9977
 ```
 
-
 . your node should be running without any problem, and should see block production in your node terminal!
 +
 image::node-success.png[Node Success]
