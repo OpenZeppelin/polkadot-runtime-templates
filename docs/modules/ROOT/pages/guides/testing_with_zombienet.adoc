@@ -95,7 +95,7 @@ cargo build --release --features="async-backing"
 +
 image::alice-direct-link.png[Alice Direct Link]
 
-. open the link with Chrome: link:https://polkadot.js.org/apps[PolkadotJS]. As of 2024 July, it doesn’t work on Safari and Brave. And it might be buggy in Firefox.
+. Open the link with Chrome: link:https://polkadot.js.org/apps[PolkadotJS]. As of 2024 July, it doesn’t work on Safari and Brave, and it is buggy on Firefox.
 . Reserve a `ParaId` on Zombienet:
     .. Go to `Network` > `Parachains`
     .. Go to `Parathreads` tab
