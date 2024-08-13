@@ -1,23 +1,27 @@
 #![cfg_attr(not(feature = "std"), no_std)]
 
-use frame_support::{traits::Get, Parameter};
+use frame_support::{traits::Get, weights::constants::RocksDbWeight, Parameter};
 use frame_support_procedural::{derive_impl, inject_runtime_type, register_default_impl};
-pub use oz_config::Config;
+pub use oz_config::Config as OzConfig;
+use pallet_balances::AccountData;
 use parity_scale_codec::{Decode, Encode, EncodeLike, FullCodec, MaxEncodedLen};
 use scale_info::TypeInfo;
-use sp_runtime::traits::MaybeSerializeDeserialize;
+use sp_runtime::traits::{MaybeSerializeDeserialize, Member};
 
+#[derive(Clone, PartialEq, Eq)]
 pub struct OzSystem<Runtime>(core::marker::PhantomData<Runtime>);
 
-#[derive_impl(frame_system::config_preludes::ParaChainDefaultConfig)]
+#[derive_impl(frame_system::config_preludes::ParaChainDefaultConfig as frame_system::DefaultConfig)]
 #[register_default_impl(OzSystem)]
-impl<Runtime: Config> frame_system::Config for OzSystem<Runtime> {
+impl<Runtime: OzConfig> frame_system::Config for OzSystem<Runtime> {
     type AccountData = AccountData<Runtime::Balance>;
-    type AccountId = Runtime::AccountId;
+    type AccountId = <Runtime as OzConfig>::AccountId;
     // TODO: replace with other call filter used in runtime
     type BaseCallFilter = frame_support::traits::Everything;
     type BlockHashCount = frame_support::traits::ConstU32<256>;
+    // TODO: set to what is set in runtime
     type BlockLength = RuntimeBlockLength<Runtime>;
+    // TODO: set to runtime config
     type BlockWeights = RuntimeBlockWeights<Runtime>;
     type DbWeight = RocksDbWeight;
     type Hash = sp_core::hash::H256;
@@ -29,6 +33,7 @@ impl<Runtime: Config> frame_system::Config for OzSystem<Runtime> {
     type OnKilledAccount = ();
     type OnNewAccount = ();
     type OnSetCode = ();
+    // TODO: set to runtime config
     #[inject_runtime_type]
     type PalletInfo = ();
     type PostInherents = ();
@@ -45,8 +50,7 @@ impl<Runtime: Config> frame_system::Config for OzSystem<Runtime> {
     type SS58Prefix = u16;
     type SingleBlockMigrations = ();
     type SystemWeightInfo = ();
-    //Runtime::Ss58;?
-    type Version = Runtime::Version;
+    type Version = <Runtime as OzConfig>::Version;
 }
 
 #[frame_support::pallet]
@@ -61,8 +65,8 @@ pub mod oz_config {
     pub trait Config: frame_system::Config {
         /// The user account identifier type for the runtime.
         /// TODO: is there a way to keep the same trait bounds
-        type AccountId: Parameter;
-        type Balance: Parameter;
+        type AccountId: Parameter + Ord + Member + MaybeSerializeDeserialize;
+        type Balance: Parameter + MaxEncodedLen + Default + Member;
         // Parameter
         // + Member
         // + MaybeSerializeDeserialize
