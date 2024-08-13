@@ -2,7 +2,9 @@ use std::time::{Duration, Instant};
 
 use cumulus_primitives_core::relay_chain::Slot;
 use evm_runtime_template::{
-    configs::MaxCandidates, constants::SLOT_DURATION, AccountId, AllPalletsWithSystem, Balance, Balances, BlockNumber, EVMChainIdConfig, Executive, Runtime, RuntimeCall, RuntimeOrigin, SudoConfig, UncheckedExtrinsic
+    configs::MaxCandidates, constants::SLOT_DURATION, AccountId, AllPalletsWithSystem, Balance,
+    Balances, BlockNumber, EVMChainIdConfig, Executive, Runtime, RuntimeCall, RuntimeOrigin,
+    SudoConfig, UncheckedExtrinsic,
 };
 use frame_support::{
     dispatch::GetDispatchInfo,
@@ -296,20 +298,17 @@ fn recursive_call_filter(call: &RuntimeCall, origin: usize) -> bool {
         RuntimeCall::Sudo(
             pallet_sudo::Call::sudo { call }
             | pallet_sudo::Call::sudo_unchecked_weight { call, weight: _ },
-        ) if origin == 0 => recursive_call_filter(&call, origin),
+        ) if origin == 0 => recursive_call_filter(call, origin),
         RuntimeCall::Utility(
             pallet_utility::Call::with_weight { call, weight: _ }
             | pallet_utility::Call::dispatch_as { as_origin: _, call }
             | pallet_utility::Call::as_derivative { index: _, call },
-        ) => recursive_call_filter(&call, origin),
+        ) => recursive_call_filter(call, origin),
         RuntimeCall::Utility(
             pallet_utility::Call::force_batch { calls }
             | pallet_utility::Call::batch { calls }
             | pallet_utility::Call::batch_all { calls },
-        ) => calls
-            .iter()
-            .map(|call| recursive_call_filter(&call, origin))
-            .fold(true, |acc, e| acc && e),
+        ) => calls.iter().map(|call| recursive_call_filter(call, origin)).all(|e| e),
         RuntimeCall::Scheduler(
             pallet_scheduler::Call::schedule_named_after {
                 id: _,
