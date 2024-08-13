@@ -6233,6 +6233,20 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "b15813163c1d831bf4a13c3610c05c0d03b39feb07f7e09fa234dac9b15aaf39"
 
 [[package]]
+name = "oz-wrappers"
+version = "0.0.1"
+dependencies = [
+ "frame-support",
+ "frame-support-procedural",
+ "frame-system",
+ "parity-scale-codec",
+ "scale-info",
+ "sp-core",
+ "sp-runtime",
+ "sp-version",
+]
+
+[[package]]
 name = "pallet-asset-conversion"
 version = "10.0.0"
 source = "git+https://github.com/paritytech/polkadot-sdk?tag=polkadot-v1.10.0#7049c3c98836b3e9253f6aaa69b6bf3d622e3962"
@@ -7262,7 +7276,6 @@ dependencies = [
  "frame-support",
  "frame-system",
  "impl-trait-for-tuples",
- "log",
  "pallet-balances",
  "parity-scale-codec",
  "scale-info",
