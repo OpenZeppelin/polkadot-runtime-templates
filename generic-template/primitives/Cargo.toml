@@ -1,0 +1,17 @@
+[package]
+name = "primitives"
+authors = { workspace = true }
+# TODO: move to be shared between templates one directory up
+# => pin dependencies to crate (no workspace)
+description = "primitive types used in the runtime"
+edition = { workspace = true }
+license = { workspace = true }
+repository = { workspace = true }
+version = "0.0.1"
+readme = "README.md"
+
+[dependencies]
+
+[features]
+default = [ "std" ]
+std = []

@@ -6241,6 +6241,7 @@ dependencies = [
  "frame-system",
  "pallet-balances",
  "parity-scale-codec",
+ "primitives",
  "scale-info",
  "sp-core",
  "sp-runtime",
@@ -9003,6 +9004,10 @@ dependencies = [
  "scale-info",
  "uint",
 ]
+
+[[package]]
+name = "primitives"
+version = "0.0.1"
 
 [[package]]
 name = "prioritized-metered-channel"

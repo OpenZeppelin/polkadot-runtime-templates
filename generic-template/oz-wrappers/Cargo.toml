@@ -21,6 +21,8 @@ sp-core = { workspace = true }
 sp-runtime = { workspace = true }
 sp-version = { workspace = true }
 
+primitives = { path = "../primitives", default-features = false }
+
 [features]
 default = [ "std" ]
 std = [
@@ -33,4 +35,5 @@ std = [
     "sp-core/std",
     "sp-runtime/std",
     "sp-version/std",
+    "primitives/std",
 ]

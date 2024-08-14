@@ -5,6 +5,7 @@ use frame_support_procedural::{derive_impl, inject_runtime_type, register_defaul
 pub use oz_config::Config as OzConfig;
 use pallet_balances::AccountData;
 use parity_scale_codec::{Decode, Encode, EncodeLike, FullCodec, MaxEncodedLen};
+use primitives::Balance;
 use scale_info::TypeInfo;
 use sp_runtime::traits::{MaybeSerializeDeserialize, Member};
 
@@ -14,7 +15,7 @@ pub struct OzSystem<Runtime>(core::marker::PhantomData<Runtime>);
 #[derive_impl(frame_system::config_preludes::ParaChainDefaultConfig as frame_system::DefaultConfig)]
 #[register_default_impl(OzSystem)]
 impl<Runtime: OzConfig> frame_system::Config for OzSystem<Runtime> {
-    type AccountData = AccountData<Runtime::Balance>;
+    type AccountData = AccountData<Balance>;
     type AccountId = <Runtime as OzConfig>::AccountId;
     // TODO: replace with other call filter used in runtime
     type BaseCallFilter = frame_support::traits::Everything;
@@ -66,7 +67,6 @@ pub mod oz_config {
         /// The user account identifier type for the runtime.
         /// TODO: is there a way to keep the same trait bounds
         type AccountId: Parameter + Ord + Member + MaybeSerializeDeserialize;
-        type Balance: Parameter + MaxEncodedLen + Default + Member;
         // Parameter
         // + Member
         // + MaybeSerializeDeserialize
