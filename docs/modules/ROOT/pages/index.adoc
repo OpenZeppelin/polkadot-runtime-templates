@@ -6,7 +6,7 @@
 A collection of runtimes that describe parachains with different purposes.
 
 === Runtimes
-* xref:guides/runtimes/generic.adoc[Generic Runtime Template]
+* xref:runtimes/generic.adoc[Generic Runtime Template]
 * xref:runtimes/evm.adoc[EVM Runtime Template]
 
 
