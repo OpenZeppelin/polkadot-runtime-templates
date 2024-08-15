@@ -61,10 +61,10 @@ error[E0635]: unknown feature `stdsimd`
 33 | #![cfg_attr(feature = "stdsimd", feature(stdsimd))]
 ```
 
-run the below command for every version of the `ahash`:
+`Cd` into the `polkadot-sdk` directory (the path should be visible on the error message), and run the below command to update `ahash`:
 
 ```bash
-cargo update -p ahash
+cargo update -p ahash@0.7.6
 ```
 ====
 +
@@ -95,7 +95,7 @@ cargo build --release --features="async-backing"
 +
 image::alice-direct-link.png[Alice Direct Link]
 
-. open the link with Chrome. [`polkadot.js.org/apps`](http://polkadot.js.org/apps) As of 2024 July, it doesn’t work on Safari and Brave. And it might be buggy in Firefox. So, open it with Chrome.
+. Open the link with Chrome: link:https://polkadot.js.org/apps[PolkadotJS]. As of 2024 July, it doesn’t work on Safari and Brave, and it is buggy on Firefox.
 . Reserve a `ParaId` on Zombienet:
     .. Go to `Network` > `Parachains`
     .. Go to `Parathreads` tab
@@ -106,11 +106,7 @@ image::alice-direct-link.png[Alice Direct Link]
     .. Generate a plain chainspec:
 +
 ```bash
-./target/release/parachain-template-node build-spec --disable-default-bootnode > plain-parachain-chainspec.json
-```
-+
-```bash
-./parachain-template-node build-spec --disable-default-bootnode > plain-parachain-chainspec.json
+./target/release/evm-template-node build-spec --disable-default-bootnode > plain-parachain-chainspec.json
 ```
 
     .. Edit the chainspec:
@@ -120,31 +116,19 @@ image::alice-direct-link.png[Alice Direct Link]
     .. Generate a raw chainspec:
 +
 ```bash
-./target/release/parachain-template-node build-spec --chain plain-parachain-chainspec.json --disable-default-bootnode --raw > raw-parachain-chainspec.json
-```
-+
-```bash
-./parachain-template-node build-spec --chain plain-parachain-chainspec.json --disable-default-bootnode --raw > raw-parachain-chainspec.json
+./target/release/evm-template-node build-spec --chain plain-parachain-chainspec.json --disable-default-bootnode --raw > raw-parachain-chainspec.json
 ```
 
     .. Generate the genesis state:
 +
 ```bash
-./target/release/parachain-template-node export-genesis-state --chain raw-parachain-chainspec.json > genesis-state
-```
-+
-```bash
-./parachain-template-node export-genesis-state --chain raw-parachain-chainspec.json > genesis-state
+./target/release/evm-template-node export-genesis-state --chain raw-parachain-chainspec.json > genesis-state
 ```
 
 .. Generate the validation code:
 +
 ```bash
-./target/release/parachain-template-node export-genesis-wasm --chain raw-parachain-chainspec.json > genesis-wasm
-```
-+
-```bash
-./parachain-template-node export-genesis-wasm --chain raw-parachain-chainspec.json > genesis-wasm
+./target/release/evm-template-node export-genesis-wasm --chain raw-parachain-chainspec.json > genesis-wasm
 ```
 
 . Registering the Parachain:
@@ -168,7 +152,7 @@ image::zombie-chain-spec.png[Zombie Chain Spec]
     * be sure to clear your storage if you were running a node before
 +
 ```rust
-./target/release/parachain-template-node \
+./target/release/evm-template-node \
     --alice \
     --collator \
     --force-authoring \
@@ -182,26 +166,7 @@ image::zombie-chain-spec.png[Zombie Chain Spec]
     --port 30343 \
     --rpc-port 9977
 ```
-+
-```rust
-./parachain-template-node \
-    --alice \
-    --collator \
-    --force-authoring \
-    --chain raw-parachain-chainspec.json \
-    --base-path storage/alice \
-    --port 40333 \
-    --rpc-port 8844 \
-    -- \
-    --execution wasm \
-    --chain /var/folders/kl/404s241d4_93gz8mh4cg4cz80000gn/T/zombie-a91587a2ece24961799f824da68f45a8_-9146-fqbCFiePyOHm/bob/cfg/rococo-local.json \
-    --port 30343 \
-    --rpc-port 9977
-```
-+
-```rust
---chain /var/folders/kl/404s241d4_93gz8mh4cg4cz80000gn/T/zombie-a91587a2ece24961799f824da68f45a8_-9146-fqbCFiePyOHm/bob/cfg/rococo-local.json
-```
+
 
 . your node should be running without any problem, and should see block production in your node terminal!
 +
