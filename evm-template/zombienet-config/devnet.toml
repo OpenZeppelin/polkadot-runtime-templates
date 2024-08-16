@@ -15,6 +15,7 @@ id = 1000
 addToGenesis = true
 cumulus_based = true
 chain = "dev"
+force_decorator = "generic-evm"
 
 [[parachains.collators]]
 name = "collator01"
