@@ -20,7 +20,7 @@ use sp_consensus_aura::sr25519::AuthorityId as AuraId;
 use sp_inherents::CreateInherentDataProviders;
 use sp_runtime::traits::Block as BlockT;
 
-pub use self::eth::{overrides_handle, EthDeps};
+pub use self::eth::EthDeps;
 use crate::rpc::eth::create_eth;
 
 /// A type representing all RPC extensions.

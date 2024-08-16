@@ -39,7 +39,7 @@ use substrate_prometheus_endpoint::Registry;
 
 use crate::eth::{
     db_config_dir, new_frontier_partial, spawn_frontier_tasks, BackendType, EthConfiguration,
-    FrontierBackend, FrontierPartialComponents,
+    FrontierBackend, FrontierPartialComponents, FullClient, StorageOverrideHandler,
 };
 
 #[cfg(not(feature = "runtime-benchmarks"))]
@@ -72,8 +72,9 @@ pub type Service = PartialComponents<
         ParachainBlockImport,
         Option<Telemetry>,
         Option<TelemetryWorkerHandle>,
-        FrontierBackend,
-        Arc<fc_rpc::OverrideHandle<Block>>,
+        // TODO: I used `ParachainExecutor` in here, but in upstream frontier, they are using an `Executor` generic which depends on `NativeExecutionDispatch`.
+        FrontierBackend<FullClient<RuntimeApi, ParachainExecutor>>,
+        Arc<dyn fc_storage::StorageOverride<Block>>,
     ),
 >;
 
@@ -132,14 +133,14 @@ pub fn new_partial(
         &task_manager,
     )?;
 
-    let overrides = crate::rpc::overrides_handle(client.clone());
+    let storage_override = Arc::new(StorageOverrideHandler::new(client.clone()));
 
     let frontier_backend = match eth_config.frontier_backend_type {
-        BackendType::KeyValue => FrontierBackend::KeyValue(fc_db::kv::Backend::open(
+        BackendType::KeyValue => FrontierBackend::KeyValue(Arc::new(fc_db::kv::Backend::open(
             Arc::clone(&client),
             &config.database,
             &db_config_dir(config),
-        )?),
+        )?)),
         BackendType::Sql => {
             let db_path = db_config_dir(config).join("sql");
             std::fs::create_dir_all(&db_path).expect("failed creating sql db directory");
@@ -156,10 +157,10 @@ pub fn new_partial(
                 }),
                 eth_config.frontier_sql_backend_pool_size,
                 std::num::NonZeroU32::new(eth_config.frontier_sql_backend_num_ops_timeout),
-                overrides.clone(),
+                storage_override.clone(),
             ))
             .unwrap_or_else(|err| panic!("failed creating sql backend: {:?}", err));
-            FrontierBackend::Sql(backend)
+            FrontierBackend::Sql(Arc::new(backend))
         }
     };
 
@@ -171,7 +172,13 @@ pub fn new_partial(
         task_manager,
         transaction_pool,
         select_chain: (),
-        other: (block_import, telemetry, telemetry_worker_handle, frontier_backend, overrides),
+        other: (
+            block_import,
+            telemetry,
+            telemetry_worker_handle,
+            frontier_backend,
+            storage_override,
+        ),
     })
 }
 
@@ -306,9 +313,9 @@ async fn start_node_impl(
                 enable_dev_signer,
                 network: network.clone(),
                 sync: sync_service.clone(),
-                frontier_backend: match frontier_backend.clone() {
-                    fc_db::Backend::KeyValue(b) => Arc::new(b),
-                    fc_db::Backend::Sql(b) => Arc::new(b),
+                frontier_backend: match &*frontier_backend.clone() {
+                    fc_db::Backend::KeyValue(b) => b.clone(),
+                    fc_db::Backend::Sql(b) => b.clone(),
                 },
                 overrides: overrides.clone(),
                 block_data_cache: block_data_cache.clone(),
