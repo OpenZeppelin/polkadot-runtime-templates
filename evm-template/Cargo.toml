@@ -160,8 +160,8 @@ pallet-evm-precompile-sha3fips = { git = "https://github.com/OpenZeppelin/fronti
 pallet-evm-precompile-simple = { git = "https://github.com/OpenZeppelin/frontier", branch = "polkadot-v1.13.0", default-features = false }
 
 # Moonbeam
-pallet-asset-manager = { git = "https://github.com/OpenZeppelin/moonbeam.git", branch = "polkadot-v1.10.0", default-features = false }
-xcm-primitives = { git = "https://github.com/OpenZeppelin/moonbeam.git", branch = "polkadot-v1.10.0", default-features = false }
+pallet-asset-manager = { git = "https://github.com/OpenZeppelin/moonbeam.git", branch = "polkadot-v1.13.0", default-features = false }
+xcm-primitives = { git = "https://github.com/OpenZeppelin/moonbeam.git", branch = "polkadot-v1.13.0", default-features = false }
 
 # Fuzzer
 substrate-runtimes-fuzzers = { git = "https://github.com/srlabs/substrate-runtime-fuzzer.git", tag = "polkadot-v1.12.0", default-features = false }

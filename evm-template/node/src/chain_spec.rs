@@ -17,7 +17,7 @@ use crate::contracts::{parse_contracts, ContractsPath};
 
 /// Specialized `ChainSpec` for the normal parachain runtime.
 pub type ChainSpec =
-    sc_service::GenericChainSpec<evm_runtime_template::RuntimeGenesisConfig, Extensions>;
+    sc_service::GenericChainSpec<Extensions>;
 
 /// The default XCM version to set in genesis config.
 const SAFE_XCM_VERSION: u32 = xcm::prelude::XCM_VERSION;

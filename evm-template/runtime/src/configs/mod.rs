@@ -326,7 +326,7 @@ impl pallet_transaction_payment::Config for Runtime {
     /// With fast adjusting fees change rapidly, but fixed for all users at each block (no tipping)
     type FeeMultiplierUpdate = SlowAdjustingFeeUpdate<Self>;
     type LengthToFee = ConstantMultiplier<Balance, TransactionByteFee>;
-    type OnChargeTransaction = pallet_transaction_payment::CurrencyAdapter<Balances, ()>;
+    type OnChargeTransaction = pallet_transaction_payment::FungibleAdapter<Balances, ()>;
     type OperationalFeeMultiplier = OperationalFeeMultiplier;
     type RuntimeEvent = RuntimeEvent;
     type WeightToFee = WeightToFee;
@@ -409,7 +409,9 @@ impl cumulus_pallet_xcmp_queue::Config for Runtime {
     type ChannelInfo = ParachainSystem;
     type ControllerOrigin = EnsureRoot<AccountId>;
     type ControllerOriginConverter = XcmOriginToTransactDispatchOrigin;
+    type MaxActiveOutboundChannels = ConstU32<128>;
     type MaxInboundSuspended = MaxInboundSuspended;
+    type MaxPageSize = ConstU32<{ 1 << 16 }>;
     /// Ensure that this value is not set to null (or NoPriceForMessageDelivery) to prevent spamming
     type PriceForSiblingDelivery = PriceForSiblingParachainDelivery;
     type RuntimeEvent = RuntimeEvent;
