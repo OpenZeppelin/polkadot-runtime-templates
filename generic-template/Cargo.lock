@@ -9008,6 +9008,10 @@ dependencies = [
 [[package]]
 name = "primitives"
 version = "0.0.1"
+dependencies = [
+ "sp-core",
+ "sp-runtime",
+]
 
 [[package]]
 name = "prioritized-metered-channel"

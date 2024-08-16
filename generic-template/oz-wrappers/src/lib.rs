@@ -5,7 +5,7 @@ use frame_support_procedural::{derive_impl, inject_runtime_type, register_defaul
 pub use oz_config::OzSystemConfig;
 use pallet_balances::AccountData;
 use parity_scale_codec::{Decode, Encode, EncodeLike, FullCodec, MaxEncodedLen};
-use primitives::{Balance, Moment};
+use primitives::{generic::*, Balance, BlockNumber, Hash, Moment};
 use scale_info::{prelude::fmt::Debug, TypeInfo};
 use sp_runtime::traits::{MaybeDisplay, MaybeSerializeDeserialize, Member};
 
@@ -15,27 +15,30 @@ pub struct OzSystem<Runtime>(core::marker::PhantomData<Runtime>);
 #[derive_impl(frame_system::config_preludes::ParaChainDefaultConfig as frame_system::DefaultConfig)]
 #[register_default_impl(OzSystem)]
 impl<Runtime: OzSystemConfig> frame_system::Config for OzSystem<Runtime> {
+    // configured by OzSystemConfig
     type AccountData = AccountData<Balance>;
     type AccountId = <Runtime as OzSystemConfig>::AccountId;
+    // TODO: replace with NormalFilter
     type BaseCallFilter = frame_support::traits::Everything;
+    /// The block type.
+    type Block = Block<Self::RuntimeCall>;
+    // TODO: replace with polkadot_runtime_common::BlockHashCount
     type BlockHashCount = frame_support::traits::ConstU32<256>;
-    type BlockLength = ();
-    type BlockWeights = ();
+    // TODO: add these back
+    // type BlockLength = ();
+    // type BlockWeights = ();
     type DbWeight = RocksDbWeight;
-    type Hash = sp_core::hash::H256;
+    type Hash = Hash;
     type Hashing = sp_runtime::traits::BlakeTwo256;
     type Lookup = sp_runtime::traits::AccountIdLookup<Self::AccountId, ()>;
-    type MaxConsumers = frame_support::traits::ConstU32<128>;
-    type MultiBlockMigrator = ();
+    type MaxConsumers = frame_support::traits::ConstU32<16>;
     type Nonce = u32;
-    type OnKilledAccount = ();
-    type OnNewAccount = ();
-    type OnSetCode = ();
+    // The action to take on a Runtime Upgrade
+    // type OnSetCode = cumulus_pallet_parachain_system::ParachainSetCode<Self>;
+
+    // injected
     #[inject_runtime_type]
     type PalletInfo = ();
-    type PostInherents = ();
-    type PostTransactions = ();
-    type PreInherents = ();
     #[inject_runtime_type]
     type RuntimeCall = ();
     #[inject_runtime_type]
@@ -44,9 +47,7 @@ impl<Runtime: OzSystemConfig> frame_system::Config for OzSystem<Runtime> {
     type RuntimeOrigin = ();
     #[inject_runtime_type]
     type RuntimeTask = ();
-    type SS58Prefix = u16;
-    type SingleBlockMigrations = ();
-    type SystemWeightInfo = ();
+    type SS58Prefix = <Runtime as OzSystemConfig>::SS58Prefix;
     type Version = <Runtime as OzSystemConfig>::Version;
 }
 
@@ -58,7 +59,7 @@ pub mod oz_config {
 
     /// Configurations exposed to the user
     /// OzSystem provides default config of frame_system::Config using this Config
-    pub trait OzSystemConfig {
+    pub trait OzSystemConfig: 'static + Eq + Clone {
         type AccountId: Parameter
             + Member
             + MaybeSerializeDeserialize
@@ -66,9 +67,9 @@ pub mod oz_config {
             + MaybeDisplay
             + Ord
             + MaxEncodedLen;
-        type Ss58: Get<u16>;
+        type SS58Prefix: Get<u16>;
         type Version: Get<sp_version::RuntimeVersion>;
-        type MinimumBalance: Get<Balance>;
+        //type MinimumBalance: Get<Balance>;
     }
 
     #[pallet::config]
