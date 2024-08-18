@@ -13,7 +13,7 @@ pub use fc_storage::{StorageOverride, StorageOverrideHandler};
 use futures::{future, prelude::*};
 // Substrate
 use sc_client_api::BlockchainEvents;
-use sc_executor::{NativeExecutionDispatch, WasmExecutor};
+use sc_executor::{HostFunctions, WasmExecutor};
 use sc_network_sync::SyncingService;
 use sc_service::{error::Error as ServiceError, Configuration, TaskManager};
 use sp_api::ConstructRuntimeApi;
@@ -112,16 +112,16 @@ pub fn new_frontier_partial(
 
 /// A set of APIs that ethereum-compatible runtimes must implement.
 pub trait EthCompatRuntimeApiCollection:
-    sp_api::ApiExt<Block>
-    + fp_rpc::ConvertTransactionRuntimeApi<Block>
-    + fp_rpc::EthereumRuntimeRPCApi<Block>
+	sp_api::ApiExt<Block>
+	+ fp_rpc::ConvertTransactionRuntimeApi<Block>
+	+ fp_rpc::EthereumRuntimeRPCApi<Block>
 {
 }
 
 impl<Api> EthCompatRuntimeApiCollection for Api where
-    Api: sp_api::ApiExt<Block>
-        + fp_rpc::ConvertTransactionRuntimeApi<Block>
-        + fp_rpc::EthereumRuntimeRPCApi<Block>
+	Api: sp_api::ApiExt<Block>
+		+ fp_rpc::ConvertTransactionRuntimeApi<Block>
+		+ fp_rpc::EthereumRuntimeRPCApi<Block>
 {
 }
 
@@ -144,50 +144,50 @@ pub async fn spawn_frontier_tasks<RuntimeApi, Executor>(
     RuntimeApi: ConstructRuntimeApi<Block, FullClient<RuntimeApi, Executor>>,
     RuntimeApi: Send + Sync + 'static,
     RuntimeApi::RuntimeApi: EthCompatRuntimeApiCollection,
-    Executor: NativeExecutionDispatch + 'static,
+    Executor: HostFunctions + 'static,
 {
     // Spawn main mapping sync worker background task.
     match &*frontier_backend {
-        fc_db::Backend::KeyValue(b) => {
-            task_manager.spawn_essential_handle().spawn(
-                "frontier-mapping-sync-worker",
-                Some("frontier"),
-                fc_mapping_sync::kv::MappingSyncWorker::new(
-                    client.import_notification_stream(),
-                    Duration::new(6, 0),
-                    client.clone(),
-                    backend,
-                    storage_override.clone(),
-                    b.clone(),
-                    3,
-                    0,
-                    fc_mapping_sync::SyncStrategy::Normal,
-                    sync,
-                    pubsub_notification_sinks,
-                )
-                .for_each(|()| future::ready(())),
-            );
-        }
-        fc_db::Backend::Sql(b) => {
-            task_manager.spawn_essential_handle().spawn_blocking(
-                "frontier-mapping-sync-worker",
-                Some("frontier"),
-                fc_mapping_sync::sql::SyncWorker::run(
-                    client.clone(),
-                    backend,
-                    b.clone(),
-                    client.import_notification_stream(),
-                    fc_mapping_sync::sql::SyncWorkerConfig {
-                        read_notification_timeout: Duration::from_secs(30),
-                        check_indexed_blocks_interval: Duration::from_secs(60),
-                    },
-                    fc_mapping_sync::SyncStrategy::Parachain,
-                    sync,
-                    pubsub_notification_sinks,
-                ),
-            );
-        }
-    }
+		fc_db::Backend::KeyValue(b) => {
+			task_manager.spawn_essential_handle().spawn(
+				"frontier-mapping-sync-worker",
+				Some("frontier"),
+				fc_mapping_sync::kv::MappingSyncWorker::new(
+					client.import_notification_stream(),
+					Duration::new(6, 0),
+					client.clone(),
+					backend,
+					storage_override.clone(),
+					b.clone(),
+					3,
+					0u32.into(),
+					fc_mapping_sync::SyncStrategy::Normal,
+					sync,
+					pubsub_notification_sinks,
+				)
+				.for_each(|()| future::ready(())),
+			);
+		}
+		fc_db::Backend::Sql(b) => {
+			task_manager.spawn_essential_handle().spawn_blocking(
+				"frontier-mapping-sync-worker",
+				Some("frontier"),
+				fc_mapping_sync::sql::SyncWorker::run(
+					client.clone(),
+					backend,
+					b.clone(),
+					client.import_notification_stream(),
+					fc_mapping_sync::sql::SyncWorkerConfig {
+						read_notification_timeout: Duration::from_secs(30),
+						check_indexed_blocks_interval: Duration::from_secs(60),
+					},
+					fc_mapping_sync::SyncStrategy::Parachain,
+					sync,
+					pubsub_notification_sinks,
+				),
+			);
+		}
+	}
 
     // Spawn Frontier EthFilterApi maintenance task.
     if let Some(filter_pool) = filter_pool {

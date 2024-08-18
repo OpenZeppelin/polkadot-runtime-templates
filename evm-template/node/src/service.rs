@@ -10,7 +10,7 @@ use cumulus_client_collator::service::CollatorService;
 use cumulus_client_consensus_common::ParachainBlockImport as TParachainBlockImport;
 use cumulus_client_consensus_proposer::Proposer;
 use cumulus_client_service::{
-    build_network, build_relay_chain_interface, prepare_node_config, start_relay_chain_tasks,
+    build_relay_chain_interface, prepare_node_config, start_relay_chain_tasks, build_network,
     BuildNetworkParams, CollatorSybilResistance, DARecoveryProfile, StartRelayChainTasksParams,
 };
 #[cfg(feature = "async-backing")]
@@ -28,26 +28,25 @@ use frame_benchmarking_cli::SUBSTRATE_REFERENCE_HARDWARE;
 use sc_client_api::Backend;
 use sc_consensus::ImportQueue;
 use sc_executor::WasmExecutor;
-use sc_network::NetworkBlock;
+use sc_network::{config::FullNetworkConfiguration, NetworkBlock};
 use sc_network_sync::SyncingService;
 use sc_service::{Configuration, PartialComponents, TFullBackend, TFullClient, TaskManager};
 use sc_telemetry::{Telemetry, TelemetryHandle, TelemetryWorker, TelemetryWorkerHandle};
 use sc_transaction_pool_api::OffchainTransactionPoolFactory;
-use sp_core::U256;
+use sp_core::{H256, U256};
 use sp_keystore::KeystorePtr;
 use substrate_prometheus_endpoint::Registry;
 
 use crate::eth::{
-    db_config_dir, new_frontier_partial, spawn_frontier_tasks, BackendType, EthConfiguration,
-    FrontierBackend, FrontierPartialComponents, FullClient, StorageOverrideHandler,
+    db_config_dir, new_frontier_partial, spawn_frontier_tasks, BackendType, EthConfiguration, FrontierBackend, FrontierPartialComponents, StorageOverrideHandler
 };
 
 #[cfg(not(feature = "runtime-benchmarks"))]
-type HostFunctions =
+pub type HostFunctions =
     (sp_io::SubstrateHostFunctions, cumulus_client_service::storage_proof_size::HostFunctions);
 
 #[cfg(feature = "runtime-benchmarks")]
-type HostFunctions = (
+pub type HostFunctions = (
     sp_io::SubstrateHostFunctions,
     cumulus_client_service::storage_proof_size::HostFunctions,
     frame_benchmarking::benchmarking::HostFunctions,
@@ -73,7 +72,7 @@ pub type Service = PartialComponents<
         Option<Telemetry>,
         Option<TelemetryWorkerHandle>,
         // TODO: I used `ParachainExecutor` in here, but in upstream frontier, they are using an `Executor` generic which depends on `NativeExecutionDispatch`.
-        FrontierBackend<FullClient<RuntimeApi, ParachainExecutor>>,
+        FrontierBackend<ParachainClient>,
         Arc<dyn fc_storage::StorageOverride<Block>>,
     ),
 >;
@@ -85,7 +84,8 @@ pub type Service = PartialComponents<
 pub fn new_partial(
     config: &Configuration,
     eth_config: &EthConfiguration,
-) -> Result<Service, sc_service::Error> {
+) -> Result<Service, sc_service::Error>
+{
     let telemetry = config
         .telemetry_endpoints
         .clone()
@@ -205,7 +205,9 @@ async fn start_node_impl(
 
     let (block_import, mut telemetry, telemetry_worker_handle, frontier_backend, overrides) =
         params.other;
-    let net_config = sc_network::config::FullNetworkConfiguration::new(&parachain_config.network);
+
+    let frontier_backend = Arc::new(frontier_backend);
+    let net_config: FullNetworkConfiguration<Block, H256, sc_network::NetworkWorker<_, _>> = sc_network::config::FullNetworkConfiguration::new(&parachain_config.network);
 
     let client = params.client.clone();
     let backend = params.backend.clone();
@@ -255,7 +257,7 @@ async fn start_node_impl(
                 transaction_pool: Some(OffchainTransactionPoolFactory::new(
                     transaction_pool.clone(),
                 )),
-                network_provider: network.clone(),
+                network_provider: Arc::new(network.clone()),
                 is_validator: parachain_config.role.is_authority(),
                 enable_http_requests: false,
                 custom_extensions: move |_| vec![],
