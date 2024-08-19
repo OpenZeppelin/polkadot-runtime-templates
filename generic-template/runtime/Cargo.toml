@@ -69,9 +69,7 @@ xcm-executor = { workspace = true }
 # Cumulus
 assets-common = { workspace = true }
 cumulus-pallet-aura-ext = { workspace = true }
-cumulus-pallet-parachain-system = { workspace = true, features = [
-	"parameterized-consensus-hook",
-] }
+cumulus-pallet-parachain-system = { workspace = true }
 cumulus-pallet-session-benchmarking = { workspace = true }
 cumulus-pallet-xcm = { workspace = true }
 cumulus-pallet-xcmp-queue = { workspace = true }
@@ -82,6 +80,8 @@ cumulus-primitives-utility = { workspace = true }
 pallet-collator-selection = { workspace = true }
 parachain-info = { workspace = true }
 parachains-common = { workspace = true }
+pallet-cc-authorities-noting = { workspace = true }
+pallet-author-inherent = { workspace = true }
 
 [dev-dependencies]
 sp-io = { workspace = true }
@@ -110,6 +110,8 @@ std = [
 	"frame-try-runtime?/std",
 	"log/std",
 	"pallet-assets/std",
+	"pallet-author-inherent/std",
+	"pallet-cc-authorities-noting/std",
 	"pallet-aura/std",
 	"pallet-authorship/std",
 	"pallet-balances/std",
@@ -188,6 +190,7 @@ runtime-benchmarks = [
 	"sp-runtime/runtime-benchmarks",
 	"xcm-builder/runtime-benchmarks",
 	"xcm-executor/runtime-benchmarks",
+	"pallet-author-inherent/runtime-benchmarks",
 ]
 
 try-runtime = [
@@ -223,9 +226,10 @@ try-runtime = [
 	"parachain-info/try-runtime",
 	"polkadot-runtime-common/try-runtime",
 	"sp-runtime/try-runtime",
+	"pallet-cc-authorities-noting/try-runtime",
 ]
 
-experimental = [ "pallet-aura/experimental" ]
+experimental = [  ]
 # A feature that should be enabled when the runtime should be built for on-chain
 # deployment. This will disable stuff that shouldn't be part of the on-chain wasm
 # to make it smaller, like logging for example.

@@ -136,24 +136,22 @@ construct_runtime!(
         Origins: pallet_custom_origins::{Origin} = 18,
         Whitelist: pallet_whitelist::{Pallet, Call, Storage, Event<T>} = 19,
 
-        // Collator Support. The order of these 4 are important and shall not change.
-        Authorship: pallet_authorship = 20,
-        CollatorSelection: pallet_collator_selection = 21,
-        Session: pallet_session = 22,
-        Aura: pallet_aura = 23,
-        AuraExt: cumulus_pallet_aura_ext = 24,
-
         // XCM Helpers
         XcmpQueue: cumulus_pallet_xcmp_queue = 30,
         PolkadotXcm: pallet_xcm = 31,
         CumulusXcm: cumulus_pallet_xcm = 32,
         MessageQueue: pallet_message_queue = 33,
+
+        // Tanssi appchain
+        AuthoritiesNoting: pallet_cc_authorities_noting = 50,
+        AuthorInherent: pallet_author_inherent = 51,
     }
 );
 
 cumulus_pallet_parachain_system::register_validate_block! {
     Runtime = Runtime,
-    BlockExecutor = cumulus_pallet_aura_ext::BlockExecutor::<Runtime, Executive>,
+    BlockExecutor = pallet_author_inherent::BlockExecutor::<Runtime, Executive>
+    CheckInherents = CheckInherents,
 }
 
 #[cfg(feature = "runtime-benchmarks")]

@@ -211,11 +211,6 @@ impl pallet_timestamp::Config for Runtime {
     type WeightInfo = weights::pallet_timestamp::WeightInfo<Runtime>;
 }
 
-impl pallet_authorship::Config for Runtime {
-    type EventHandler = (CollatorSelection,);
-    type FindAuthor = pallet_session::FindAccountFromAuthorIndex<Self, Aura>;
-}
-
 parameter_types! {
     pub const MaxProxies: u32 = 32;
     pub const MaxPending: u32 = 32;
@@ -428,8 +423,6 @@ impl pallet_message_queue::Config for Runtime {
     type WeightInfo = weights::pallet_message_queue::WeightInfo<Runtime>;
 }
 
-impl cumulus_pallet_aura_ext::Config for Runtime {}
-
 parameter_types! {
     pub const MaxInboundSuspended: u32 = 1000;
     /// The asset ID for the asset that we use to pay for message delivery fees.
@@ -470,77 +463,6 @@ impl pallet_multisig::Config for Runtime {
     type RuntimeEvent = RuntimeEvent;
     /// Rerun benchmarks if you are making changes to runtime configuration.
     type WeightInfo = weights::pallet_multisig::WeightInfo<Runtime>;
-}
-
-parameter_types! {
-    // pallet_session ends the session after a fixed period of blocks.
-    // The first session will have length of Offset,
-    // and the following sessions will have length of Period.
-    // This may prove nonsensical if Offset >= Period.
-    pub const Period: u32 = 6 * HOURS;
-    pub const Offset: u32 = 0;
-}
-
-impl pallet_session::Config for Runtime {
-    type Keys = SessionKeys;
-    type NextSessionRotation = pallet_session::PeriodicSessions<Period, Offset>;
-    type RuntimeEvent = RuntimeEvent;
-    // Essentially just Aura, but let's be pedantic.
-    type SessionHandler = <SessionKeys as sp_runtime::traits::OpaqueKeys>::KeyTypeIdProviders;
-    type SessionManager = CollatorSelection;
-    type ShouldEndSession = pallet_session::PeriodicSessions<Period, Offset>;
-    type ValidatorId = <Self as frame_system::Config>::AccountId;
-    // we don't have stash and controller, thus we don't need the convert as well.
-    type ValidatorIdOf = pallet_collator_selection::IdentityCollator;
-    /// Rerun benchmarks if you are making changes to runtime configuration.
-    type WeightInfo = weights::pallet_session::WeightInfo<Runtime>;
-}
-
-#[cfg(not(feature = "async-backing"))]
-parameter_types! {
-    pub const AllowMultipleBlocksPerSlot: bool = false;
-    pub const MaxAuthorities: u32 = 100_000;
-}
-
-#[cfg(feature = "async-backing")]
-parameter_types! {
-    pub const AllowMultipleBlocksPerSlot: bool = true;
-    pub const MaxAuthorities: u32 = 100_000;
-}
-
-impl pallet_aura::Config for Runtime {
-    type AllowMultipleBlocksPerSlot = AllowMultipleBlocksPerSlot;
-    type AuthorityId = AuraId;
-    type DisabledValidators = ();
-    type MaxAuthorities = MaxAuthorities;
-    type SlotDuration = pallet_aura::MinimumPeriodTimesTwo<Self>;
-}
-
-parameter_types! {
-    pub const PotId: PalletId = PalletId(*b"PotStake");
-    pub const SessionLength: BlockNumber = 6 * HOURS;
-    // StakingAdmin pluralistic body.
-    pub const StakingAdminBodyId: BodyId = BodyId::Defense;
-    pub const MaxCandidates: u32 = 100;
-    pub const MaxInvulnerables: u32 = 20;
-    pub const MinEligibleCollators: u32 = 4;
-}
-
-impl pallet_collator_selection::Config for Runtime {
-    type Currency = Balances;
-    // should be a multiple of session or things will get inconsistent
-    type KickThreshold = Period;
-    type MaxCandidates = MaxCandidates;
-    type MaxInvulnerables = MaxInvulnerables;
-    type MinEligibleCollators = MinEligibleCollators;
-    type PotId = PotId;
-    type RuntimeEvent = RuntimeEvent;
-    type UpdateOrigin = CollatorSelectionUpdateOrigin;
-    type ValidatorId = <Self as frame_system::Config>::AccountId;
-    type ValidatorIdOf = pallet_collator_selection::IdentityCollator;
-    type ValidatorRegistration = Session;
-    /// Rerun benchmarks if you are making changes to runtime configuration.
-    type WeightInfo = weights::pallet_collator_selection::WeightInfo<Runtime>;
 }
 
 impl pallet_utility::Config for Runtime {
@@ -604,4 +526,24 @@ impl pallet_treasury::Config for Runtime {
     type SpendPeriod = SpendPeriod;
     /// Rerun benchmarks if you are making changes to runtime configuration.
     type WeightInfo = weights::pallet_treasury::WeightInfo<Runtime>;
+}
+
+
+impl pallet_author_inherent::Config for Runtime {
+    type AuthorId = NimbusId;
+    type AccountLookup = tp_consensus::NimbusLookUp;
+    type CanAuthor = pallet_cc_authorities_noting::CanAuthor<Runtime>;
+    type SlotBeacon = tp_consensus::AuraDigestSlotBeacon<Runtime>;
+    type WeightInfo = 
+        pallet_author_inherent::weights::SubstrateWeight<Runtime>;
+}
+
+impl pallet_cc_authorities_noting::Config for Runtime {
+    type RuntimeEvent = RuntimeEvent;
+    type SelfParaId = parachain_info::Pallet<Runtime>;
+    type RelayChainStateProvider = 
+        cumulus_pallet_parachain_system::RelaychainDataProvider<Self>;
+    type AuthorityId = NimbusId;
+    type WeightInfo = 
+        pallet_cc_authorities_noting::weights::SubstrateWeight<Runtime>;
 }

@@ -98,6 +98,7 @@ pub type CollatorSelectionUpdateOrigin = EitherOfDiverse<
     EnsureXcm<IsVoiceOfBody<RelayLocation, StakingAdminBodyId>>,
 >;
 
+// TODO: fix this, migrate to tanssi
 /// Configures the number of blocks that can be created without submission of validity proof to the relay chain
 pub type ConsensusHook = cumulus_pallet_aura_ext::FixedVelocityConsensusHook<
     Runtime,
