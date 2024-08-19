@@ -1,25 +1,30 @@
 use std::time::{Duration, Instant};
 
+use parity_scale_codec::{DecodeLimit, Encode};
 use cumulus_primitives_core::relay_chain::Slot;
 use frame_support::{
     dispatch::GetDispatchInfo,
-    pallet_prelude::Encode,
     traits::{IntegrityTest, TryState, TryStateSelect},
     weights::{constants::WEIGHT_REF_TIME_PER_SECOND, Weight},
 };
-use generic_runtime_template::{
-    constants::SLOT_DURATION, AllPalletsWithSystem, Balance, Balances, BlockNumber, Executive,
-    Runtime, RuntimeCall, RuntimeOrigin, SudoConfig, UncheckedExtrinsic,
-};
+use frame_system::Account;
+use pallet_balances::{Holds, TotalIssuance};
 use parachains_common::AccountId;
 use sp_consensus_aura::AURA_ENGINE_ID;
 use sp_runtime::{
+    testing::H256,
     traits::{Dispatchable, Header},
     Digest, DigestItem, Storage,
 };
-use substrate_runtime_fuzzer::{Data, INITIAL_TIMESTAMP, MAX_TIME_FOR_BLOCK};
+use sp_state_machine::BasicExternalities;
+use std::iter;
 
-pub type Externalities = sp_state_machine::BasicExternalities;
+// Local Imports
+use generic_runtime_template::{
+    constants::SLOT_DURATION, AllPalletsWithSystem, Balance, Balances, Executive,
+    Runtime, RuntimeCall, RuntimeOrigin, SudoConfig, UncheckedExtrinsic,
+};
+
 
 fn generate_genesis(accounts: &[AccountId]) -> Storage {
     use generic_runtime_template::{
@@ -36,7 +41,19 @@ fn generate_genesis(accounts: &[AccountId]) -> Storage {
     RuntimeGenesisConfig {
         system: Default::default(),
         balances: BalancesConfig { balances },
-        aura: AuraConfig { authorities },
+        aura: Default::default(),
+        session: SessionConfig {
+            keys: authorities
+                .iter()
+                .map(|x| (x.0.clone(), x.0.clone(), SessionKeys { aura: x.1.clone() }))
+                .collect::<Vec<_>>(),
+        },
+        collator_selection: CollatorSelectionConfig {
+            invulnerables: authorities.iter().map(|x| (x.0.clone())).collect(),
+            candidacy_bond: 1 << 57,
+            desired_candidates: 1,
+        },
+        aura_ext: Default::default(),
         parachain_info: Default::default(),
         parachain_system: Default::default(),
         polkadot_xcm: Default::default(),
@@ -49,7 +66,7 @@ fn generate_genesis(accounts: &[AccountId]) -> Storage {
     .unwrap()
 }
 
-fn process_input(accounts: &[AccountId], geneis: &Storage, data: &[u8]) {
+fn process_input(accounts: &[AccountId], genesis: &Storage, data: &[u8]) {
     let mut data = data;
     // We build the list of extrinsics we will execute
     let extrinsics: Vec<(/* lapse */ u8, /* origin */ u8, RuntimeCall)> =
@@ -82,16 +99,13 @@ fn process_input(accounts: &[AccountId], geneis: &Storage, data: &[u8]) {
 
             weight.saturating_accrue(extrinsic.get_dispatch_info().weight);
             if weight.ref_time() >= 2 * WEIGHT_REF_TIME_PER_SECOND {
-                #[cfg(not(feature = "fuzzing"))]
                 println!("Extrinsic would exhaust block weight, skipping");
                 continue;
             }
 
             let origin = accounts[origin as usize % accounts.len()].clone();
 
-            #[cfg(not(feature = "fuzzing"))]
             println!("\n    origin:     {origin:?}");
-            #[cfg(not(feature = "fuzzing"))]
             println!("    call:       {extrinsic:?}");
 
             let now = Instant::now(); // We get the current time for timing purposes.
@@ -99,7 +113,6 @@ fn process_input(accounts: &[AccountId], geneis: &Storage, data: &[u8]) {
             let res = extrinsic.dispatch(RuntimeOrigin::signed(origin));
             elapsed += now.elapsed();
 
-            #[cfg(not(feature = "fuzzing"))]
             println!("    result:     {res:?}");
         }
 
@@ -112,14 +125,7 @@ fn process_input(accounts: &[AccountId], geneis: &Storage, data: &[u8]) {
 fn initialize_block(block: u32) {
     println!("\ninitializing block {}", block);
 
-    let current_timestamp = INITIAL_TIMESTAMP + u64::from(block) * SLOT_DURATION;
-
-    let pre_digest = match current_timestamp {
-        INITIAL_TIMESTAMP => Default::default(),
-        _ => Digest {
-            logs: vec![DigestItem::PreRuntime(AURA_ENGINE_ID, Slot::from(block as u64).encode())],
-        },
-    };
+    let current_timestamp = u64::from(block) * SLOT_DURATION;
 
     let prev_header = match block {
         1 => None,
@@ -131,7 +137,12 @@ fn initialize_block(block: u32) {
         H256::default(),
         H256::default(),
         prev_header.clone().map(|x| x.hash()).unwrap_or_default(),
-        pre_digest,
+        Digest {
+            logs: vec![DigestItem::PreRuntime(
+                AURA_ENGINE_ID,
+                Slot::from(u64::from(block)).encode(),
+            )],
+        },
     );
 
     Executive::initialize_block(parent_header);
@@ -181,9 +192,9 @@ fn initialize_block(block: u32) {
     // Calls that need to be called before each block starts (init_calls) go here
 }
 
-fn end_block(elapsed: Duration) {
+fn finalize_block(elapsed: Duration) {
     println!("\n  time spent: {elapsed:?}");
-    assert!(elapsed.as_secs() <= MAX_TIME_FOR_BLOCK, "block execution took too much time");
+    assert!(elapsed.as_secs() <= 2, "block execution took too much time");
 
     println!("  finalizing block");
     Executive::finalize_block();
