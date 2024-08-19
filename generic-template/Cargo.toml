@@ -1,5 +1,5 @@
 [workspace]
-members = [ "node", "oz-wrappers", "primitives", "runtime", "template-fuzzer" ]
+members = [ "node", "oz-wrappers", "runtime", "template-fuzzer" ]
 resolver = "2"
 
 [workspace.package]

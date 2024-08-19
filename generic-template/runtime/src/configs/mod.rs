@@ -52,8 +52,8 @@ use crate::{
     },
     types::{
         AccountId, AssetKind, Balance, Beneficiary, Block, BlockNumber,
-        CollatorSelectionUpdateOrigin, ConsensusHook,
-        PriceForSiblingParachainDelivery, TreasuryPaymaster,
+        CollatorSelectionUpdateOrigin, ConsensusHook, PriceForSiblingParachainDelivery,
+        TreasuryPaymaster,
     },
     weights::{self, BlockExecutionWeight, ExtrinsicBaseWeight},
     Aura, Balances, CollatorSelection, MessageQueue, OriginCaller, PalletInfo, ParachainSystem,

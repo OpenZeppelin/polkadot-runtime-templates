@@ -22,7 +22,6 @@ sp-runtime = { workspace = true }
 sp-version = { workspace = true }
 
 polkadot-runtime-common = { workspace = true }
-primitives = { path = "../primitives", default-features = false }
 
 [features]
 default = [ "std" ]
@@ -33,7 +32,6 @@ std = [
 	"pallet-balances/std",
 	"parity-scale-codec/std",
 	"polkadot-runtime-common/std",
-	"primitives/std",
 	"scale-info/std",
 	"sp-core/std",
 	"sp-runtime/std",

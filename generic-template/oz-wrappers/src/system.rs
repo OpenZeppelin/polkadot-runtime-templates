@@ -1,17 +1,22 @@
 //! OZ-System Wrapper
 
-use frame_support::{traits::{ConstU32, Everything, Get}, weights::constants::RocksDbWeight, Parameter};
+use frame_support::{
+    traits::{ConstU32, Everything, Get},
+    weights::constants::RocksDbWeight,
+    Parameter,
+};
 use frame_support_procedural::{inject_runtime_type, register_default_impl};
 use frame_system::limits::{BlockLength, BlockWeights};
 use pallet_balances::AccountData;
 use parity_scale_codec::MaxEncodedLen;
 use polkadot_runtime_common::BlockHashCount;
-use primitives::{Balance, Hash, Nonce};
 use scale_info::prelude::fmt::Debug;
 use sp_runtime::{
     traits::{AccountIdLookup, BlakeTwo256, MaybeDisplay, MaybeSerializeDeserialize, Member},
     Perbill,
 };
+
+use crate::types::*;
 
 /// Configurations exposed to the user
 /// OzSystem provides default config of frame_system::Config using this Config
@@ -27,6 +32,7 @@ pub trait OzSystemConfig {
     type Version: Get<sp_version::RuntimeVersion>;
     // TODO: remove and hardcode
     type BlockWeight: Get<frame_support::pallet_prelude::Weight>;
+    // TODO: remove and hardcode
     type BlockLength: Get<u32>;
 }
 

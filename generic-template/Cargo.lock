@@ -6243,7 +6243,6 @@ dependencies = [
  "pallet-balances",
  "parity-scale-codec",
  "polkadot-runtime-common",
- "primitives",
  "scale-info",
  "sp-core",
  "sp-runtime",
@@ -9005,14 +9004,6 @@ dependencies = [
  "impl-serde",
  "scale-info",
  "uint",
-]
-
-[[package]]
-name = "primitives"
-version = "0.0.1"
-dependencies = [
- "sp-core",
- "sp-runtime",
 ]
 
 [[package]]
