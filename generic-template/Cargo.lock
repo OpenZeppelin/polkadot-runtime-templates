@@ -3790,6 +3790,7 @@ dependencies = [
  "frame-try-runtime",
  "hex-literal",
  "log",
+ "oz-wrappers",
  "pallet-assets",
  "pallet-aura",
  "pallet-authorship",

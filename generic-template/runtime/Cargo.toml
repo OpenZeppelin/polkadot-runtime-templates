@@ -17,6 +17,9 @@ parity-scale-codec = { workspace = true, features = [ "derive" ] }
 scale-info = { workspace = true, features = [ "derive" ] }
 smallvec = { workspace = true }
 
+# OpenZeppelin
+oz-wrappers = { path = "../oz-wrappers", default-features = false }
+
 # Substrate
 frame-benchmarking = { workspace = true, optional = true }
 frame-executive = { workspace = true }
@@ -109,6 +112,7 @@ std = [
 	"frame-system/std",
 	"frame-try-runtime?/std",
 	"log/std",
+	"oz-wrappers/std",
 	"pallet-assets/std",
 	"pallet-aura/std",
 	"pallet-authorship/std",

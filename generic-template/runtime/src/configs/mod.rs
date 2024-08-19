@@ -109,15 +109,35 @@ impl Contains<RuntimeCall> for NormalFilter {
     }
 }
 
-/// The default types are being injected by [`derive_impl`](`frame_support::derive_impl`) from
-/// [`ParaChainDefaultConfig`](`struct@frame_system::config_preludes::ParaChainDefaultConfig`),
+use frame_support::weights::constants::WEIGHT_REF_TIME_PER_MILLIS;
+parameter_types! {
+    pub const BlockWeight: Weight = Weight::from_parts(
+        6000 / 2 * WEIGHT_REF_TIME_PER_MILLIS,
+        0
+    );
+}
+
+pub struct Configuration;
+impl oz_wrappers::OzSystemConfig for Configuration {
+    type AccountId = AccountId;
+    type BlockLength = ConstU32<{ 5 * 1024 * 1024 }>;
+    type BlockWeight = BlockWeight;
+    type SS58Prefix = SS58Prefix;
+    type Version = Version;
+}
+
+use oz_wrappers::OzSystem;
+
+/// The default types are being injected by [`derive_impl`](`frame_support::derive_impl`) from OzSystem
 /// but overridden as needed.
 #[derive_impl(frame_system::config_preludes::ParaChainDefaultConfig as frame_system::DefaultConfig)]
 impl frame_system::Config for Runtime {
+    // coming from a macro:
     /// The data to be stored in an account.
-    type AccountData = pallet_balances::AccountData<Balance>;
+    type AccountData = <OzSystem<Configuration> as frame_system::DefaultConfig>::AccountData;
     /// The identifier used to distinguish between accounts.
-    type AccountId = AccountId;
+    type AccountId = <OzSystem<Configuration> as frame_system::DefaultConfig>::AccountId;
+    // todo remaining
     /// The basic call filter to use in dispatchable.
     type BaseCallFilter = NormalFilter;
     /// The block type.
@@ -141,18 +161,16 @@ impl frame_system::Config for Runtime {
     type Nonce = Nonce;
     /// The action to take on a Runtime Upgrade
     type OnSetCode = cumulus_pallet_parachain_system::ParachainSetCode<Self>;
-    /// Converts a module to an index of this module in the runtime.
     type PalletInfo = PalletInfo;
-    /// The aggregated dispatch type that is available for extrinsics.
     type RuntimeCall = RuntimeCall;
-    /// The ubiquitous event type.
+    // inject types.
     type RuntimeEvent = RuntimeEvent;
-    /// The ubiquitous origin type.
     type RuntimeOrigin = RuntimeOrigin;
+    type RuntimeTask = RuntimeTask;
     /// This is used as an identifier of the chain. 42 is the generic substrate prefix.
-    type SS58Prefix = SS58Prefix;
+    type SS58Prefix = <OzSystem<Configuration> as frame_system::DefaultConfig>::SS58Prefix;
     /// Runtime version.
-    type Version = Version;
+    type Version = <OzSystem<Configuration> as frame_system::DefaultConfig>::Version;
 }
 
 parameter_types! {

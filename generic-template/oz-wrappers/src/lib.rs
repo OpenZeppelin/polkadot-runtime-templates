@@ -13,7 +13,6 @@ use sp_runtime::{
     Perbill,
 };
 
-#[derive(Clone, PartialEq, Eq)]
 pub struct OzSystem<Runtime>(core::marker::PhantomData<Runtime>);
 
 pub struct RuntimeBlockWeights<Runtime: OzSystemConfig>(core::marker::PhantomData<Runtime>);
@@ -80,7 +79,7 @@ pub mod oz_config {
 
     /// Configurations exposed to the user
     /// OzSystem provides default config of frame_system::Config using this Config
-    pub trait OzSystemConfig: 'static + Eq + Clone {
+    pub trait OzSystemConfig {
         type AccountId: Parameter
             + Member
             + MaybeSerializeDeserialize
