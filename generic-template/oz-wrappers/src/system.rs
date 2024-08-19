@@ -1,7 +1,7 @@
 //! OZ-System Wrapper
 
 use frame_support::{
-    traits::{ConstU32, Everything, Get},
+    traits::{ConstU32, ConstU64, Get},
     weights::constants::RocksDbWeight,
     Parameter,
 };
@@ -16,10 +16,9 @@ use sp_runtime::{
     Perbill,
 };
 
-use crate::types::*;
+use crate::{constants::*, types::*};
 
-/// Configurations exposed to the user
-/// OzSystem provides default config of frame_system::Config using this Config
+/// Configuration exposed to the user
 pub trait OzSystemConfig {
     type AccountId: Parameter
         + Member
@@ -70,11 +69,9 @@ impl<Runtime: OzSystemConfig> frame_system::DefaultConfig for OzSystem<Runtime> 
     type Nonce = Nonce;
     type MaxConsumers = ConstU32<16>;
 
-    // Overwritten in Runtime:
-    type OnSetCode = ();
-    type BaseCallFilter = Everything;
-
     // Injected by Runtime:
+    type OnSetCode = ();
+    type BaseCallFilter = ();
     #[inject_runtime_type]
     type PalletInfo = ();
     #[inject_runtime_type]
@@ -84,9 +81,9 @@ impl<Runtime: OzSystemConfig> frame_system::DefaultConfig for OzSystem<Runtime> 
     #[inject_runtime_type]
     type RuntimeOrigin = ();
     #[inject_runtime_type]
-
-    // NOT assigned:
     type RuntimeTask = ();
+    
+    // Not assigned
     type PostInherents = ();
     type PostTransactions = ();
     type PreInherents = ();
@@ -95,4 +92,18 @@ impl<Runtime: OzSystemConfig> frame_system::DefaultConfig for OzSystem<Runtime> 
     type MultiBlockMigrator = ();
     type OnKilledAccount = ();
     type OnNewAccount = ();
+}
+
+#[rustfmt::skip]
+impl<Runtime: OzSystemConfig> pallet_timestamp::DefaultConfig for OzSystem<Runtime> {
+    // Used in Runtime
+    #[cfg(feature = "experimental")]
+    type MinimumPeriod = ConstU64<0>;
+    #[cfg(not(feature = "experimental"))]
+    type MinimumPeriod = ConstU64<{ SLOT_DURATION / 2 }>;
+    type Moment = Moment;
+
+    // Injected by Runtime
+    type OnTimestampSet = ();
+    type WeightInfo = ();
 }

@@ -8,3 +8,6 @@ pub type Balance = u128;
 
 /// Index of a transaction in the chain.
 pub type Nonce = u32;
+
+/// Unit for timestamps: milliseconds since the unix epoch.
+pub type Moment = u64;
