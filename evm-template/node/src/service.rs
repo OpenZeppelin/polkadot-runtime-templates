@@ -10,7 +10,7 @@ use cumulus_client_collator::service::CollatorService;
 use cumulus_client_consensus_common::ParachainBlockImport as TParachainBlockImport;
 use cumulus_client_consensus_proposer::Proposer;
 use cumulus_client_service::{
-    build_relay_chain_interface, prepare_node_config, start_relay_chain_tasks, build_network,
+    build_network, build_relay_chain_interface, prepare_node_config, start_relay_chain_tasks,
     BuildNetworkParams, CollatorSybilResistance, DARecoveryProfile, StartRelayChainTasksParams,
 };
 #[cfg(feature = "async-backing")]
@@ -38,7 +38,8 @@ use sp_keystore::KeystorePtr;
 use substrate_prometheus_endpoint::Registry;
 
 use crate::eth::{
-    db_config_dir, new_frontier_partial, spawn_frontier_tasks, BackendType, EthConfiguration, FrontierBackend, FrontierPartialComponents, StorageOverrideHandler
+    db_config_dir, new_frontier_partial, spawn_frontier_tasks, BackendType, EthConfiguration,
+    FrontierBackend, FrontierPartialComponents, StorageOverrideHandler,
 };
 
 #[cfg(not(feature = "runtime-benchmarks"))]
@@ -84,8 +85,7 @@ pub type Service = PartialComponents<
 pub fn new_partial(
     config: &Configuration,
     eth_config: &EthConfiguration,
-) -> Result<Service, sc_service::Error>
-{
+) -> Result<Service, sc_service::Error> {
     let telemetry = config
         .telemetry_endpoints
         .clone()
@@ -207,7 +207,8 @@ async fn start_node_impl(
         params.other;
 
     let frontier_backend = Arc::new(frontier_backend);
-    let net_config: FullNetworkConfiguration<Block, H256, sc_network::NetworkWorker<_, _>> = sc_network::config::FullNetworkConfiguration::new(&parachain_config.network);
+    let net_config: FullNetworkConfiguration<Block, H256, sc_network::NetworkWorker<_, _>> =
+        sc_network::config::FullNetworkConfiguration::new(&parachain_config.network);
 
     let client = params.client.clone();
     let backend = params.backend.clone();
