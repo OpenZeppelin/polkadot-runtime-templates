@@ -6242,6 +6242,7 @@ dependencies = [
  "frame-system",
  "pallet-balances",
  "parity-scale-codec",
+ "polkadot-runtime-common",
  "primitives",
  "scale-info",
  "sp-core",

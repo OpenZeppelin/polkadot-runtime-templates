@@ -1,12 +1,13 @@
 #![cfg_attr(not(feature = "std"), no_std)]
 
-use frame_support::{traits::Get, weights::constants::RocksDbWeight, Parameter};
+use frame_support::{traits::{ConstU32, Get}, weights::constants::RocksDbWeight, Parameter};
 use frame_support_procedural::{derive_impl, inject_runtime_type, register_default_impl};
 use frame_system::limits::{BlockLength, BlockWeights};
 pub use oz_config::OzSystemConfig;
 use pallet_balances::AccountData;
 use parity_scale_codec::{Decode, Encode, EncodeLike, FullCodec, MaxEncodedLen};
-use primitives::{generic::*, Balance, BlockNumber, Hash, Moment};
+use polkadot_runtime_common::BlockHashCount;
+use primitives::{generic::*, Balance, BlockNumber, Hash, Moment, Nonce};
 use scale_info::{prelude::fmt::Debug, TypeInfo};
 use sp_runtime::{
     traits::{MaybeDisplay, MaybeSerializeDeserialize, Member},
@@ -35,8 +36,7 @@ impl<Runtime: OzSystemConfig> frame_system::DefaultConfig for OzSystem<Runtime> 
     type AccountId = <Runtime as OzSystemConfig>::AccountId;
     // TODO: replace with NormalFilter
     type BaseCallFilter = frame_support::traits::Everything;
-    // TODO: replace with polkadot_runtime_common::BlockHashCount
-    type BlockHashCount = frame_support::traits::ConstU32<256>;
+    type BlockHashCount = BlockHashCount;
     type BlockLength = RuntimeBlockLength<Runtime>;
     type BlockWeights = RuntimeBlockWeights<Runtime>;
     type DbWeight = RocksDbWeight;
@@ -45,10 +45,9 @@ impl<Runtime: OzSystemConfig> frame_system::DefaultConfig for OzSystem<Runtime> 
     type Lookup = sp_runtime::traits::AccountIdLookup<Self::AccountId, ()>;
     type MaxConsumers = frame_support::traits::ConstU32<16>;
     type MultiBlockMigrator = ();
-    type Nonce = u32;
+    type Nonce = Nonce;
     type OnKilledAccount = ();
     type OnNewAccount = ();
-    // TODO: set to cumulus_pallet_parachain_system::ParachainSetCode<Self>;
     type OnSetCode = ();
     #[inject_runtime_type]
     type PalletInfo = ();
@@ -65,7 +64,6 @@ impl<Runtime: OzSystemConfig> frame_system::DefaultConfig for OzSystem<Runtime> 
     type RuntimeTask = ();
     type SS58Prefix = <Runtime as OzSystemConfig>::SS58Prefix;
     type SingleBlockMigrations = ();
-    // TODO: set
     type SystemWeightInfo = ();
     type Version = <Runtime as OzSystemConfig>::Version;
 }
