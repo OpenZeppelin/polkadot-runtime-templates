@@ -160,7 +160,7 @@ pub async fn spawn_frontier_tasks<RuntimeApi, Executor>(
                     storage_override.clone(),
                     b.clone(),
                     3,
-                    0u32.into(),
+                    0u32,
                     fc_mapping_sync::SyncStrategy::Normal,
                     sync,
                     pubsub_notification_sinks,
