@@ -544,7 +544,6 @@ parameter_types! {
 }
 
 impl pallet_treasury::Config for Runtime {
-    type ApproveOrigin = EitherOfDiverse<EnsureRoot<AccountId>, Treasurer>;
     type AssetKind = AssetKind;
     type BalanceConverter = frame_support::traits::tokens::UnityAssetBalanceConversion;
     #[cfg(feature = "runtime-benchmarks")]
@@ -558,16 +557,12 @@ impl pallet_treasury::Config for Runtime {
     type BurnDestination = ();
     type Currency = Balances;
     type MaxApprovals = MaxApprovals;
-    type OnSlash = Treasury;
     type PalletId = TreasuryPalletId;
     #[cfg(feature = "runtime-benchmarks")]
     type Paymaster = PayWithEnsure<TreasuryPaymaster, OpenHrmpChannel<BenchmarkParaId>>;
     #[cfg(not(feature = "runtime-benchmarks"))]
     type Paymaster = TreasuryPaymaster;
     type PayoutPeriod = PayoutSpendPeriod;
-    type ProposalBond = ProposalBond;
-    type ProposalBondMaximum = ProposalBondMaximum;
-    type ProposalBondMinimum = ProposalBondMinimum;
     type RejectOrigin = EitherOfDiverse<EnsureRoot<AccountId>, Treasurer>;
     type RuntimeEvent = RuntimeEvent;
     type SpendFunds = ();
