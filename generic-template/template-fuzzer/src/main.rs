@@ -25,12 +25,12 @@ use sp_runtime::{
 };
 use sp_state_machine::BasicExternalities;
 
-// fn generate_genesis(accounts: &[AccountId]) -> Storage {
-//     use generic_runtime_template::{
-//         BalancesConfig, CollatorSelectionConfig, RuntimeGenesisConfig, SessionConfig, SessionKeys,
-//     };
-//     use sp_consensus_aura::sr25519::AuthorityId as AuraId;
-//     use sp_runtime::{app_crypto::ByteArray, BuildStorage};
+fn generate_genesis(accounts: &[AccountId]) -> Storage {
+    use generic_runtime_template::{
+        BalancesConfig, CollatorSelectionConfig, RuntimeGenesisConfig, SessionConfig, SessionKeys,
+    };
+    use sp_consensus_aura::sr25519::AuthorityId as AuraId;
+    use sp_runtime::{app_crypto::ByteArray, BuildStorage};
 
     // Configure endowed accounts with initial balance of 1 << 60.
     let balances = accounts.iter().cloned().map(|k| (k, 1 << 60)).collect();
@@ -65,25 +65,25 @@ use sp_state_machine::BasicExternalities;
     .unwrap()
 }
 
-// fn process_input(accounts: &[AccountId], genesis: &Storage, data: &[u8]) {
-//     let mut data = data;
-//     // We build the list of extrinsics we will execute
-//     let extrinsics: Vec<(/* lapse */ u8, /* origin */ u8, RuntimeCall)> =
-//         iter::from_fn(|| DecodeLimit::decode_with_depth_limit(64, &mut data).ok())
-//             .filter(|(_, _, x)| !matches!(x, RuntimeCall::System(_)))
-//             .collect();
-//     if extrinsics.is_empty() {
-//         return;
-//     }
+fn process_input(accounts: &[AccountId], genesis: &Storage, data: &[u8]) {
+    let mut data = data;
+    // We build the list of extrinsics we will execute
+    let extrinsics: Vec<(/* lapse */ u8, /* origin */ u8, RuntimeCall)> =
+        iter::from_fn(|| DecodeLimit::decode_with_depth_limit(64, &mut data).ok())
+            .filter(|(_, _, x)| !matches!(x, RuntimeCall::System(_)))
+            .collect();
+    if extrinsics.is_empty() {
+        return;
+    }
 
-//     let mut block: u32 = 1;
-//     let mut weight: Weight = 0.into();
-//     let mut elapsed: Duration = Duration::ZERO;
+    let mut block: u32 = 1;
+    let mut weight: Weight = 0.into();
+    let mut elapsed: Duration = Duration::ZERO;
 
-//     BasicExternalities::execute_with_storage(&mut genesis.clone(), || {
-//         let initial_total_issuance = TotalIssuance::<Runtime>::get();
+    BasicExternalities::execute_with_storage(&mut genesis.clone(), || {
+        let initial_total_issuance = TotalIssuance::<Runtime>::get();
 
-//         initialize_block(block);
+        initialize_block(block);
 
         for (lapse, origin, extrinsic) in extrinsics {
             // If the lapse is in the range [0, MAX_BLOCK_LAPSE] we finalize the block and initialize
@@ -96,115 +96,115 @@ use sp_state_machine::BasicExternalities;
             if lapse > 0 {
                 finalize_block(elapsed);
 
-//                 block += u32::from(lapse) * 393; // 393 * 256 = 100608 which nearly corresponds to a week
-//                 weight = 0.into();
-//                 elapsed = Duration::ZERO;
+                block += u32::from(lapse) * 393; // 393 * 256 = 100608 which nearly corresponds to a week
+                weight = 0.into();
+                elapsed = Duration::ZERO;
 
-//                 initialize_block(block);
-//             }
+                initialize_block(block);
+            }
 
-//             weight.saturating_accrue(extrinsic.get_dispatch_info().weight);
-//             if weight.ref_time() >= 2 * WEIGHT_REF_TIME_PER_SECOND {
-//                 println!("Extrinsic would exhaust block weight, skipping");
-//                 continue;
-//             }
+            weight.saturating_accrue(extrinsic.get_dispatch_info().weight);
+            if weight.ref_time() >= 2 * WEIGHT_REF_TIME_PER_SECOND {
+                println!("Extrinsic would exhaust block weight, skipping");
+                continue;
+            }
 
             let origin = accounts[origin_no].clone();
 
-//             println!("\n    origin:     {origin:?}");
-//             println!("    call:       {extrinsic:?}");
+            println!("\n    origin:     {origin:?}");
+            println!("    call:       {extrinsic:?}");
 
-//             let now = Instant::now(); // We get the current time for timing purposes.
-//             #[allow(unused_variables)]
-//             let res = extrinsic.dispatch(RuntimeOrigin::signed(origin));
-//             elapsed += now.elapsed();
+            let now = Instant::now(); // We get the current time for timing purposes.
+            #[allow(unused_variables)]
+            let res = extrinsic.dispatch(RuntimeOrigin::signed(origin));
+            elapsed += now.elapsed();
 
-//             println!("    result:     {res:?}");
-//         }
+            println!("    result:     {res:?}");
+        }
 
-//         finalize_block(elapsed);
+        finalize_block(elapsed);
 
-//         check_invariants(block, initial_total_issuance);
-//     });
-// }
+        check_invariants(block, initial_total_issuance);
+    });
+}
 
-// fn initialize_block(block: u32) {
-//     println!("\ninitializing block {}", block);
+fn initialize_block(block: u32) {
+    println!("\ninitializing block {}", block);
 
-//     let current_timestamp = u64::from(block) * SLOT_DURATION;
+    let current_timestamp = u64::from(block) * SLOT_DURATION;
 
-//     let prev_header = match block {
-//         1 => None,
-//         _ => Some(Executive::finalize_block()),
-//     };
+    let prev_header = match block {
+        1 => None,
+        _ => Some(Executive::finalize_block()),
+    };
 
-//     let parent_header = &Header::new(
-//         block,
-//         H256::default(),
-//         H256::default(),
-//         prev_header.clone().map(|x| x.hash()).unwrap_or_default(),
-//         Digest {
-//             logs: vec![DigestItem::PreRuntime(
-//                 AURA_ENGINE_ID,
-//                 Slot::from(u64::from(block)).encode(),
-//             )],
-//         },
-//     );
+    let parent_header = &Header::new(
+        block,
+        H256::default(),
+        H256::default(),
+        prev_header.clone().map(|x| x.hash()).unwrap_or_default(),
+        Digest {
+            logs: vec![DigestItem::PreRuntime(
+                AURA_ENGINE_ID,
+                Slot::from(u64::from(block)).encode(),
+            )],
+        },
+    );
 
-//     Executive::initialize_block(parent_header);
+    Executive::initialize_block(parent_header);
 
-//     // We apply the timestamp extrinsic for the current block.
-//     Executive::apply_extrinsic(UncheckedExtrinsic::new_unsigned(RuntimeCall::Timestamp(
-//         pallet_timestamp::Call::set { now: current_timestamp },
-//     )))
-//     .unwrap()
-//     .unwrap();
+    // We apply the timestamp extrinsic for the current block.
+    Executive::apply_extrinsic(UncheckedExtrinsic::new_unsigned(RuntimeCall::Timestamp(
+        pallet_timestamp::Call::set { now: current_timestamp },
+    )))
+    .unwrap()
+    .unwrap();
 
-//     let parachain_validation_data = {
-//         use cumulus_primitives_core::{relay_chain::HeadData, PersistedValidationData};
-//         use cumulus_primitives_parachain_inherent::ParachainInherentData;
-//         use cumulus_test_relay_sproof_builder::RelayStateSproofBuilder;
+    let parachain_validation_data = {
+        use cumulus_primitives_core::{relay_chain::HeadData, PersistedValidationData};
+        use cumulus_primitives_parachain_inherent::ParachainInherentData;
+        use cumulus_test_relay_sproof_builder::RelayStateSproofBuilder;
 
-//         let parent_head = HeadData(prev_header.clone().unwrap_or(parent_header.clone()).encode());
-//         let sproof_builder = RelayStateSproofBuilder {
-//             para_id: 100.into(),
-//             current_slot: Slot::from(2 * current_timestamp / SLOT_DURATION),
-//             included_para_head: Some(parent_head.clone()),
-//             ..Default::default()
-//         };
+        let parent_head = HeadData(prev_header.clone().unwrap_or(parent_header.clone()).encode());
+        let sproof_builder = RelayStateSproofBuilder {
+            para_id: 100.into(),
+            current_slot: Slot::from(2 * current_timestamp / SLOT_DURATION),
+            included_para_head: Some(parent_head.clone()),
+            ..Default::default()
+        };
 
-//         let (relay_parent_storage_root, relay_chain_state) =
-//             sproof_builder.into_state_root_and_proof();
-//         let data = ParachainInherentData {
-//             validation_data: PersistedValidationData {
-//                 parent_head,
-//                 relay_parent_number: block,
-//                 relay_parent_storage_root,
-//                 max_pov_size: 1000,
-//             },
-//             relay_chain_state,
-//             downward_messages: Default::default(),
-//             horizontal_messages: Default::default(),
-//         };
-//         cumulus_pallet_parachain_system::Call::set_validation_data { data }
-//     };
+        let (relay_parent_storage_root, relay_chain_state) =
+            sproof_builder.into_state_root_and_proof();
+        let data = ParachainInherentData {
+            validation_data: PersistedValidationData {
+                parent_head,
+                relay_parent_number: block,
+                relay_parent_storage_root,
+                max_pov_size: 1000,
+            },
+            relay_chain_state,
+            downward_messages: Default::default(),
+            horizontal_messages: Default::default(),
+        };
+        cumulus_pallet_parachain_system::Call::set_validation_data { data }
+    };
 
-//     Executive::apply_extrinsic(UncheckedExtrinsic::new_unsigned(RuntimeCall::ParachainSystem(
-//         parachain_validation_data,
-//     )))
-//     .unwrap()
-//     .unwrap();
+    Executive::apply_extrinsic(UncheckedExtrinsic::new_unsigned(RuntimeCall::ParachainSystem(
+        parachain_validation_data,
+    )))
+    .unwrap()
+    .unwrap();
 
-//     // Calls that need to be called before each block starts (init_calls) go here
-// }
+    // Calls that need to be called before each block starts (init_calls) go here
+}
 
-// fn finalize_block(elapsed: Duration) {
-//     println!("\n  time spent: {elapsed:?}");
-//     assert!(elapsed.as_secs() <= 2, "block execution took too much time");
+fn finalize_block(elapsed: Duration) {
+    println!("\n  time spent: {elapsed:?}");
+    assert!(elapsed.as_secs() <= 2, "block execution took too much time");
 
-//     println!("  finalizing block");
-//     Executive::finalize_block();
-// }
+    println!("  finalizing block");
+    Executive::finalize_block();
+}
 
 fn check_invariants(block: u32, initial_total_issuance: Balance) {
     let mut counted_free = 0;
@@ -303,10 +303,10 @@ fn recursive_call_filter(call: &RuntimeCall, origin: usize) -> bool {
 }
 
 fn main() {
-//     let accounts: Vec<AccountId> = (0..5).map(|i| [i; 32].into()).collect();
-//     let genesis = generate_genesis(&accounts);
+    let accounts: Vec<AccountId> = (0..5).map(|i| [i; 32].into()).collect();
+    let genesis = generate_genesis(&accounts);
 
-//     ziggy::fuzz!(|data: &[u8]| {
-//         process_input(&accounts, &genesis, data);
-//     });
+    ziggy::fuzz!(|data: &[u8]| {
+        process_input(&accounts, &genesis, data);
+    });
 }
