@@ -66,6 +66,17 @@ pub trait OzSystemConfig {
     // Pallet Preimage
     type PreimageConsideration;
 
+    // Cumulus Pallet Parachain System
+    type CheckAssociatedRelayNumber;
+    type ConsensusHook;
+    type DmpQueue;
+    type OnSystemEvent;
+    type OutboundXcmpMessageSource;
+    type ReservedDmpWeight;
+    type ReservedXcmpWeight;
+    type SelfParaId;
+    type XcmpMessageHandler;
+
     // Remove and hardcode:
     type BlockWeight: Get<Weight>;
     type BlockLength: Get<u32>;
