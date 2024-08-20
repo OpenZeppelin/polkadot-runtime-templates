@@ -1,7 +1,9 @@
-use std::time::{Duration, Instant};
+use std::{
+    iter,
+    time::{Duration, Instant}
+};
 
 use parity_scale_codec::{DecodeLimit, Encode};
-use cumulus_primitives_core::relay_chain::Slot;
 use frame_support::{
     dispatch::GetDispatchInfo,
     traits::{IntegrityTest, TryState, TryStateSelect},
@@ -10,14 +12,13 @@ use frame_support::{
 use frame_system::Account;
 use pallet_balances::{Holds, TotalIssuance};
 use parachains_common::AccountId;
-use sp_consensus_aura::AURA_ENGINE_ID;
+use sp_consensus_aura::{Slot, AURA_ENGINE_ID};
 use sp_runtime::{
     testing::H256,
     traits::{Dispatchable, Header},
     Digest, DigestItem, Storage,
 };
 use sp_state_machine::BasicExternalities;
-use std::iter;
 
 // Local Imports
 use generic_runtime_template::{
@@ -35,7 +36,8 @@ fn generate_genesis(accounts: &[AccountId]) -> Storage {
 
     // Configure endowed accounts with initial balance of 1 << 60.
     let balances = accounts.iter().cloned().map(|k| (k, 1 << 60)).collect();
-    let authorities = vec![AuraId::from_slice(&[0; 32]).unwrap()];
+    let invulnerables: Vec<AccountId> = vec![[0; 32].into()];
+    let session_keys = vec![([0; 32].into(), [0; 32].into(), SessionKeys { aura: AuraId::from_slice(&[0; 32]).unwrap() })];
     let root: AccountId = [0; 32].into();
 
     RuntimeGenesisConfig {
@@ -43,13 +45,10 @@ fn generate_genesis(accounts: &[AccountId]) -> Storage {
         balances: BalancesConfig { balances },
         aura: Default::default(),
         session: SessionConfig {
-            keys: authorities
-                .iter()
-                .map(|x| (x.0.clone(), x.0.clone(), SessionKeys { aura: x.1.clone() }))
-                .collect::<Vec<_>>(),
+            keys: session_keys,
         },
         collator_selection: CollatorSelectionConfig {
-            invulnerables: authorities.iter().map(|x| (x.0.clone())).collect(),
+            invulnerables,
             candidacy_bond: 1 << 57,
             desired_candidates: 1,
         },

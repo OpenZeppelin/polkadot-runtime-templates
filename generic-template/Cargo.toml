@@ -130,8 +130,7 @@ parachain-info = { package = "staging-parachain-info", git = "https://github.com
 parachains-common = { git = "https://github.com/paritytech/polkadot-sdk", default-features = false, tag = "polkadot-v1.13.0" }
 
 # Fuzzer
-substrate-runtimes-fuzzers = { git = "https://github.com/srlabs/substrate-runtime-fuzzer.git", tag = "polkadot-v1.12.0", default-features = false }
-ziggy = { version = "0.8", default-features = false }
+ziggy = { version = "1.0.2", default-features = false }
 
 
 [workspace.lints.clippy]
