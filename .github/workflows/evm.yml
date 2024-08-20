@@ -5,12 +5,12 @@ on:
     branches:
       - main
     paths-ignore:
-      - "generic-template/**"
+      - "evm-template/**"
       - "**.md"
       - "**.adoc"
   pull_request:
     paths-ignore:
-      - "generic-template/**"
+      - "evm-template/**"
       - "**.md"
       - "**.adoc"
   workflow_dispatch:
