@@ -13849,11 +13849,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "substrate-runtimes-fuzzers"
-version = "0.1.0"
-source = "git+https://github.com/srlabs/substrate-runtime-fuzzer.git?tag=polkadot-v1.12.0#951708204d34cb8367a4f31ea8b0afb723e4c6a8"
-
-[[package]]
 name = "substrate-state-trie-migration-rpc"
 version = "37.0.0"
 source = "git+https://github.com/paritytech/polkadot-sdk?tag=polkadot-stable2407-1#16b0fd09d9e9281c20ee0c1d8b87d011e3e3454e"
@@ -14016,7 +14011,6 @@ dependencies = [
  "sp-consensus-aura",
  "sp-runtime",
  "sp-state-machine",
- "substrate-runtimes-fuzzers",
  "ziggy",
 ]
 
