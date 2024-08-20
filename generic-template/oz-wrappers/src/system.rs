@@ -1,7 +1,8 @@
 //! OZ-System Wrapper
 
 use frame_support::{
-    traits::{ConstU32, ConstU64, Get},
+    pallet_prelude::Weight,
+    traits::{ConstU32, ConstU64, EnsureOrigin, Get},
     weights::constants::RocksDbWeight,
     Parameter,
 };
@@ -21,6 +22,7 @@ use crate::{constants::*, types::*};
 /// Configuration exposed to the user
 #[rustfmt::skip]
 pub trait OzSystemConfig {
+    // Always set by the user:
     type AccountId: Parameter
         + Member
         + MaybeSerializeDeserialize
@@ -31,19 +33,31 @@ pub trait OzSystemConfig {
     type SS58Prefix: Get<u16>;
     type Version: Get<sp_version::RuntimeVersion>;
 
-    // Remove and hardcode:
-    type BlockWeight: Get<frame_support::pallet_prelude::Weight>;
-    type BlockLength: Get<u32>;
+    // Origins:
+    type RuntimeOrigin;
+    // type PalletOrigin: From<system::RawOrigin<Self::AccountId>>
+    //     + CallerTrait<Self::AccountId>
+    //     + MaxEncodedLen;
+    type ScheduleOrigin: EnsureOrigin<Self::RuntimeOrigin>;
 
     // Pallet Proxy Constants
     // - Required because pallet_proxy::DefaultConfig DNE && pallet_proxy::Config: frame_system::Config
-    // - Could split into separate trait && impl
+    // - Could split into separate trait && require for this trait
 	type MaxProxies: Get<u32>;
 	type MaxPending: Get<u32>;
     type ProxyDepositBase: Get<Balance>;
     type ProxyDepositFactor: Get<Balance>;
 	type AnnouncementDepositBase: Get<Balance>;
 	type AnnouncementDepositFactor: Get<Balance>;
+
+    // Pallet Scheduler Constants
+    // - same justification as Pallet Proxy Constants
+    type MaxScheduledPerBlock: Get<u32>;
+    type MaximumWeight: Get<Weight>;
+
+    // Remove and hardcode:
+    type BlockWeight: Get<Weight>;
+    type BlockLength: Get<u32>;
 }
 
 pub struct OzSystem<Runtime>(core::marker::PhantomData<Runtime>);
