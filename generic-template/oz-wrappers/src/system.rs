@@ -2,6 +2,7 @@
 
 use frame_support::{
     pallet_prelude::Weight,
+    parameter_types,
     traits::{ConstU32, ConstU64, EnsureOrigin, Get},
     weights::constants::RocksDbWeight,
     Parameter,
@@ -17,7 +18,10 @@ use sp_runtime::{
     Perbill,
 };
 
-use crate::{constants::*, types::*};
+use crate::{
+    constants::{currency::*, *},
+    types::*,
+};
 
 /// Configuration exposed to the user
 // TODO: rename all pallet specific types to be prefixed by pallet name
@@ -137,5 +141,36 @@ impl<Runtime: OzSystemConfig> pallet_timestamp::DefaultConfig for OzSystem<Runti
 
     // Not assigned
     type OnTimestampSet = ();
+    type WeightInfo = ();
+}
+
+parameter_types! {
+    pub const ExistentialDeposit: Balance = EXISTENTIAL_DEPOSIT;
+    pub const MaxFreezes: u32 = 0;
+    pub const MaxLocks: u32 = 50;
+    pub const MaxReserves: u32 = 50;
+}
+
+#[rustfmt::skip]
+impl<Runtime: OzSystemConfig> pallet_balances::DefaultConfig for OzSystem<Runtime> {
+    // Used in Runtime
+    type Balance = Balance;
+    type ExistentialDeposit = ExistentialDeposit;
+    type MaxFreezes = MaxFreezes;
+    type MaxLocks = MaxLocks;
+    type MaxReserves = MaxReserves;
+    type ReserveIdentifier = [u8; 8];
+    type FreezeIdentifier = ();
+    type DustRemoval = ();
+
+    // Injected by Runtime:
+    #[inject_runtime_type]
+    type RuntimeEvent = ();
+    #[inject_runtime_type]
+    type RuntimeHoldReason = ();
+    #[inject_runtime_type]
+    type RuntimeFreezeReason = ();
+
+    // Not assigned
     type WeightInfo = ();
 }
