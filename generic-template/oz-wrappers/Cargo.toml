@@ -15,6 +15,7 @@ frame-support = { workspace = true }
 frame-support-procedural = { workspace = true }
 frame-system = { workspace = true }
 pallet-balances = { workspace = true }
+pallet-proxy = { workspace = true }
 pallet-timestamp = { workspace = true }
 parity-scale-codec = { workspace = true, features = [ "derive" ] }
 scale-info = { workspace = true, features = [ "derive" ] }
@@ -31,6 +32,7 @@ std = [
 	"frame-support/std",
 	"frame-system/std",
 	"pallet-balances/std",
+	"pallet-proxy/std",
 	"pallet-timestamp/std",
 	"parity-scale-codec/std",
 	"polkadot-runtime-common/std",

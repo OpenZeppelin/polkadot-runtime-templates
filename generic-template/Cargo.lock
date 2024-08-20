@@ -6241,6 +6241,7 @@ dependencies = [
  "frame-support-procedural",
  "frame-system",
  "pallet-balances",
+ "pallet-proxy",
  "pallet-timestamp",
  "parity-scale-codec",
  "polkadot-runtime-common",

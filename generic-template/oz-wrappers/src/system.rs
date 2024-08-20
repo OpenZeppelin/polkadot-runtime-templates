@@ -19,6 +19,7 @@ use sp_runtime::{
 use crate::{constants::*, types::*};
 
 /// Configuration exposed to the user
+#[rustfmt::skip]
 pub trait OzSystemConfig {
     type AccountId: Parameter
         + Member
@@ -29,10 +30,20 @@ pub trait OzSystemConfig {
         + MaxEncodedLen;
     type SS58Prefix: Get<u16>;
     type Version: Get<sp_version::RuntimeVersion>;
-    // TODO: remove and hardcode
+
+    // Remove and hardcode:
     type BlockWeight: Get<frame_support::pallet_prelude::Weight>;
-    // TODO: remove and hardcode
     type BlockLength: Get<u32>;
+
+    // Pallet Proxy Constants
+    // - Required because pallet_proxy::DefaultConfig DNE && pallet_proxy::Config: frame_system::Config
+    // - Could split into separate trait && impl
+	type MaxProxies: Get<u32>;
+	type MaxPending: Get<u32>;
+    type ProxyDepositBase: Get<Balance>;
+    type ProxyDepositFactor: Get<Balance>;
+	type AnnouncementDepositBase: Get<Balance>;
+	type AnnouncementDepositFactor: Get<Balance>;
 }
 
 pub struct OzSystem<Runtime>(core::marker::PhantomData<Runtime>);
@@ -103,7 +114,7 @@ impl<Runtime: OzSystemConfig> pallet_timestamp::DefaultConfig for OzSystem<Runti
     type MinimumPeriod = ConstU64<{ SLOT_DURATION / 2 }>;
     type Moment = Moment;
 
-    // Injected by Runtime
+    // Not assigned
     type OnTimestampSet = ();
     type WeightInfo = ();
 }
