@@ -1,19 +1,40 @@
 #!/bin/bash
 
-ZOMBIENET_V=v1.3.91
+ZOMBIENET_V=v1.3.106
 POLKADOT_V=v1.6.0
 
+# Detect the operating system
 case "$(uname -s)" in
     Linux*)     MACHINE=Linux;;
     Darwin*)    MACHINE=Mac;;
     *)          exit 1
 esac
 
+# Detect the architecture
+ARCH=$(uname -m)
+
+# Set the executable name based on the OS and architecture
 if [ $MACHINE = "Linux" ]; then
-  ZOMBIENET_BIN=zombienet-linux-x64
+  if [ $ARCH = "x86_64" ]; then
+    ZOMBIENET_BIN=zombienet-linux-x64
+  elif [ $ARCH = "arm64" ] || [ $ARCH = "aarch64" ]; then
+    ZOMBIENET_BIN=zombienet-linux-arm64
+  else
+    echo "Unsupported Linux architecture: $ARCH"
+    exit 1
+  fi
 elif [ $MACHINE = "Mac" ]; then
-  ZOMBIENET_BIN=zombienet-macos
+  if [ $ARCH = "x86_64" ]; then
+    ZOMBIENET_BIN=zombienet-macos-x86
+  elif [ $ARCH = "arm64" ]; then
+    ZOMBIENET_BIN=zombienet-macos-arm64
+  else
+    echo "Unsupported macOS architecture: $ARCH"
+    exit 1
+  fi
 fi
+
+echo "Using binary: $ZOMBIENET_BIN"
 
 BIN_DIR=bin-$POLKADOT_V
 
