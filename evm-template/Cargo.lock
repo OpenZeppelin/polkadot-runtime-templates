@@ -14117,11 +14117,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "substrate-runtimes-fuzzers"
-version = "0.1.0"
-source = "git+https://github.com/srlabs/substrate-runtime-fuzzer.git?tag=polkadot-v1.12.0#951708204d34cb8367a4f31ea8b0afb723e4c6a8"
-
-[[package]]
 name = "substrate-state-trie-migration-rpc"
 version = "27.0.0"
 source = "git+https://github.com/paritytech/polkadot-sdk?tag=polkadot-v1.13.0#d5160c1d567cc73c7df6c816d41e21aa3adb188d"
@@ -14278,13 +14273,18 @@ dependencies = [
  "frame-support",
  "frame-system",
  "pallet-balances",
+ "pallet-collator-selection",
+ "pallet-multisig",
+ "pallet-scheduler",
+ "pallet-sudo",
  "pallet-timestamp",
+ "pallet-utility",
+ "pallet-whitelist",
  "parachains-common",
  "parity-scale-codec",
  "sp-consensus-aura",
  "sp-runtime",
  "sp-state-machine",
- "substrate-runtimes-fuzzers",
  "ziggy",
 ]
 

@@ -1,17 +1,22 @@
 use std::{
     iter,
-    time::{Duration, Instant}
+    time::{Duration, Instant},
 };
 
-use parity_scale_codec::{DecodeLimit, Encode};
 use frame_support::{
     dispatch::GetDispatchInfo,
     traits::{IntegrityTest, TryState, TryStateSelect},
     weights::{constants::WEIGHT_REF_TIME_PER_SECOND, Weight},
 };
 use frame_system::Account;
+// Local Imports
+use generic_runtime_template::{
+    configs::MaxCandidates, constants::SLOT_DURATION, AllPalletsWithSystem, Balance, Balances,
+    Executive, Runtime, RuntimeCall, RuntimeOrigin, SudoConfig, UncheckedExtrinsic,
+};
 use pallet_balances::{Holds, TotalIssuance};
 use parachains_common::AccountId;
+use parity_scale_codec::{DecodeLimit, Encode};
 use sp_consensus_aura::{Slot, AURA_ENGINE_ID};
 use sp_runtime::{
     testing::H256,
@@ -19,13 +24,6 @@ use sp_runtime::{
     Digest, DigestItem, Storage,
 };
 use sp_state_machine::BasicExternalities;
-
-// Local Imports
-use generic_runtime_template::{
-    constants::SLOT_DURATION, AllPalletsWithSystem, Balance, Balances, Executive,
-    Runtime, RuntimeCall, RuntimeOrigin, SudoConfig, UncheckedExtrinsic,
-};
-
 
 fn generate_genesis(accounts: &[AccountId]) -> Storage {
     use generic_runtime_template::{
@@ -37,16 +35,18 @@ fn generate_genesis(accounts: &[AccountId]) -> Storage {
     // Configure endowed accounts with initial balance of 1 << 60.
     let balances = accounts.iter().cloned().map(|k| (k, 1 << 60)).collect();
     let invulnerables: Vec<AccountId> = vec![[0; 32].into()];
-    let session_keys = vec![([0; 32].into(), [0; 32].into(), SessionKeys { aura: AuraId::from_slice(&[0; 32]).unwrap() })];
+    let session_keys = vec![(
+        [0; 32].into(),
+        [0; 32].into(),
+        SessionKeys { aura: AuraId::from_slice(&[0; 32]).unwrap() },
+    )];
     let root: AccountId = [0; 32].into();
 
     RuntimeGenesisConfig {
         system: Default::default(),
         balances: BalancesConfig { balances },
         aura: Default::default(),
-        session: SessionConfig {
-            keys: session_keys,
-        },
+        session: SessionConfig { keys: session_keys },
         collator_selection: CollatorSelectionConfig {
             invulnerables,
             candidacy_bond: 1 << 57,
@@ -86,6 +86,13 @@ fn process_input(accounts: &[AccountId], genesis: &Storage, data: &[u8]) {
         initialize_block(block);
 
         for (lapse, origin, extrinsic) in extrinsics {
+            // If the lapse is in the range [0, MAX_BLOCK_LAPSE] we finalize the block and initialize
+            // a new one.
+            let origin_no = origin as usize % accounts.len();
+            if !recursive_call_filter(&extrinsic, origin_no) {
+                continue;
+            }
+
             if lapse > 0 {
                 finalize_block(elapsed);
 
@@ -102,7 +109,7 @@ fn process_input(accounts: &[AccountId], genesis: &Storage, data: &[u8]) {
                 continue;
             }
 
-            let origin = accounts[origin as usize % accounts.len()].clone();
+            let origin = accounts[origin_no].clone();
 
             println!("\n    origin:     {origin:?}");
             println!("    call:       {extrinsic:?}");
@@ -208,19 +215,10 @@ fn check_invariants(block: u32, initial_total_issuance: Balance) {
         assert!(!(consumers > 0 && providers == 0), "Invalid c/p state");
         counted_free += info.data.free;
         counted_reserved += info.data.reserved;
-        let max_lock: Balance = Balances::locks(&account)
-            .iter()
-            .map(|l| l.amount)
-            .max()
-            .unwrap_or_default();
-        assert_eq!(
-            max_lock, info.data.frozen,
-            "Max lock should be equal to frozen balance"
-        );
-        let sum_holds: Balance = Holds::<Runtime>::get(&account)
-            .iter()
-            .map(|l| l.amount)
-            .sum();
+        let max_lock: Balance =
+            Balances::locks(&account).iter().map(|l| l.amount).max().unwrap_or_default();
+        assert_eq!(max_lock, info.data.frozen, "Max lock should be equal to frozen balance");
+        let sum_holds: Balance = Holds::<Runtime>::get(&account).iter().map(|l| l.amount).sum();
         assert!(
             sum_holds <= info.data.reserved,
             "Sum of all holds ({sum_holds}) should be less than or equal to reserved balance {}",
@@ -234,6 +232,74 @@ fn check_invariants(block: u32, initial_total_issuance: Balance) {
     // We run all developer-defined integrity tests
     AllPalletsWithSystem::integrity_test();
     AllPalletsWithSystem::try_state(block, TryStateSelect::All).unwrap();
+}
+
+fn recursive_call_filter(call: &RuntimeCall, origin: usize) -> bool {
+    match call {
+        //recursion
+        RuntimeCall::Sudo(
+            pallet_sudo::Call::sudo { call }
+            | pallet_sudo::Call::sudo_unchecked_weight { call, weight: _ },
+        ) if origin == 0 => recursive_call_filter(call, origin),
+        RuntimeCall::Utility(
+            pallet_utility::Call::with_weight { call, weight: _ }
+            | pallet_utility::Call::dispatch_as { as_origin: _, call }
+            | pallet_utility::Call::as_derivative { index: _, call },
+        ) => recursive_call_filter(call, origin),
+        RuntimeCall::Utility(
+            pallet_utility::Call::force_batch { calls }
+            | pallet_utility::Call::batch { calls }
+            | pallet_utility::Call::batch_all { calls },
+        ) => calls.iter().map(|call| recursive_call_filter(call, origin)).all(|e| e),
+        RuntimeCall::Scheduler(
+            pallet_scheduler::Call::schedule_named_after {
+                id: _,
+                after: _,
+                maybe_periodic: _,
+                priority: _,
+                call,
+            }
+            | pallet_scheduler::Call::schedule { when: _, maybe_periodic: _, priority: _, call }
+            | pallet_scheduler::Call::schedule_named {
+                when: _,
+                id: _,
+                maybe_periodic: _,
+                priority: _,
+                call,
+            }
+            | pallet_scheduler::Call::schedule_after {
+                after: _,
+                maybe_periodic: _,
+                priority: _,
+                call,
+            },
+        ) => recursive_call_filter(call, origin),
+        RuntimeCall::Multisig(
+            pallet_multisig::Call::as_multi_threshold_1 { other_signatories: _, call }
+            | pallet_multisig::Call::as_multi {
+                threshold: _,
+                other_signatories: _,
+                maybe_timepoint: _,
+                call,
+                max_weight: _,
+            },
+        ) => recursive_call_filter(call, origin),
+        RuntimeCall::Whitelist(
+            pallet_whitelist::Call::dispatch_whitelisted_call_with_preimage { call },
+        ) => recursive_call_filter(call, origin),
+
+        // restrictions
+        RuntimeCall::Sudo(_) if origin != 0 => false,
+        RuntimeCall::System(
+            frame_system::Call::set_code { .. } | frame_system::Call::kill_prefix { .. },
+        ) => false,
+        RuntimeCall::CollatorSelection(
+            pallet_collator_selection::Call::set_desired_candidates { max },
+        ) => *max < MaxCandidates::get(),
+        RuntimeCall::Balances(pallet_balances::Call::force_adjust_total_issuance { .. }) => false,
+
+        _ => true,
+    }
 }
 
 fn main() {
