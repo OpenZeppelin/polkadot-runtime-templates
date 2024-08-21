@@ -15,7 +15,6 @@ workspace = true
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-substrate-runtimes-fuzzers = { workspace = true }
 ziggy = { workspace = true }
 
 evm-runtime-template = { path = "../runtime" }
@@ -41,17 +40,17 @@ cumulus-test-relay-sproof-builder = { workspace = true }
 [features]
 default = ["std", "try-runtime"]
 std = [
-	"evm-runtime-template/std",
 	"frame-support/std",
+	"evm-runtime-template/std",
 	"pallet-timestamp/std",
 	"parity-scale-codec/std",
 	"sp-consensus-aura/std",
 	"sp-runtime/std",
 ]
 try-runtime = [
-	"evm-runtime-template/try-runtime",
 	"frame-support/try-runtime",
 	"frame-system/try-runtime",
+	"evm-runtime-template/try-runtime",
 	"pallet-timestamp/try-runtime",
 	"sp-runtime/try-runtime",
 ]
