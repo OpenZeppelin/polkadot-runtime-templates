@@ -414,15 +414,13 @@ fn start_consensus(
     };
 
     #[cfg(not(feature = "async-backing"))]
-    let fut =
-        basic_aura::run::<Block, sp_consensus_aura::sr25519::AuthorityPair, _, _, _, _, _, _>(
-            params,
-        );
+    let fut = basic_aura::run::<Block, sp_consensus_aura::sr25519::AuthorityPair, _, _, _, _, _, _>(
+        params,
+    );
     #[cfg(feature = "async-backing")]
-    let fut =
-        aura::run::<Block, sp_consensus_aura::sr25519::AuthorityPair, _, _, _, _, _, _, _, _>(
-            params,
-        );
+    let fut = aura::run::<Block, sp_consensus_aura::sr25519::AuthorityPair, _, _, _, _, _, _, _, _>(
+        params,
+    );
     task_manager.spawn_essential_handle().spawn("aura", None, fut);
 
     Ok(())
