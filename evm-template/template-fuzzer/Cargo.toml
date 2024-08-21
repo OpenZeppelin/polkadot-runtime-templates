@@ -46,6 +46,7 @@ cumulus-test-relay-sproof-builder = { workspace = true }
 [features]
 default = ["std", "try-runtime"]
 std = [
+	"evm-runtime-template/std",
 	"frame-support/std",
 	"pallet-collator-selection/std",
 	"pallet-multisig/std",
@@ -59,6 +60,7 @@ std = [
 	"sp-runtime/std",
 ]
 try-runtime = [
+	"evm-runtime-template/try-runtime",
 	"frame-support/try-runtime",
 	"frame-system/try-runtime",
 	"pallet-collator-selection/try-runtime",
