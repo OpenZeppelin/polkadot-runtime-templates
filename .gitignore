@@ -21,6 +21,8 @@ docs/node_modules
 docs/build
 
 # zombienet stuff
-**/zombienet-macos
+**/zombienet-macos-arm64
+**/zombienet-macos-x64
+**/zombienet-linux-arm64
 **/zombienet-linux-x64
 **/bin-*
