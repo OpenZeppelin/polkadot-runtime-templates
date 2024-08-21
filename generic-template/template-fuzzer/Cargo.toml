@@ -38,7 +38,7 @@ cumulus-primitives-parachain-inherent = { workspace = true }
 cumulus-test-relay-sproof-builder = { workspace = true }
 
 [features]
-default = ["std", "try-runtime"]
+default = [ "std", "try-runtime" ]
 std = [
 	"frame-support/std",
 	"generic-runtime-template/std",

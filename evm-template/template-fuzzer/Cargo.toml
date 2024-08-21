@@ -38,19 +38,19 @@ cumulus-primitives-parachain-inherent = { workspace = true }
 cumulus-test-relay-sproof-builder = { workspace = true }
 
 [features]
-default = ["std", "try-runtime"]
+default = [ "std", "try-runtime" ]
 std = [
-	"frame-support/std",
 	"evm-runtime-template/std",
+	"frame-support/std",
 	"pallet-timestamp/std",
 	"parity-scale-codec/std",
 	"sp-consensus-aura/std",
 	"sp-runtime/std",
 ]
 try-runtime = [
+	"evm-runtime-template/try-runtime",
 	"frame-support/try-runtime",
 	"frame-system/try-runtime",
-	"evm-runtime-template/try-runtime",
 	"pallet-timestamp/try-runtime",
 	"sp-runtime/try-runtime",
 ]

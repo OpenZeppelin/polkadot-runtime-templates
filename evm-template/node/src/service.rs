@@ -72,7 +72,6 @@ pub type Service = PartialComponents<
         ParachainBlockImport,
         Option<Telemetry>,
         Option<TelemetryWorkerHandle>,
-        // TODO: I used `ParachainExecutor` in here, but in upstream frontier, they are using an `Executor` generic which depends on `NativeExecutionDispatch`.
         FrontierBackend<ParachainClient>,
         Arc<dyn fc_storage::StorageOverride<Block>>,
     ),
