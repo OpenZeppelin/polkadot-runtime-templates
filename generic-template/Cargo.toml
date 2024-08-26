@@ -25,6 +25,8 @@ serde = { version = "1.0.188", default-features = false }
 serde_json = "1.0.108"
 smallvec = "1.11.0"
 
+polkadot-runtime-wrappers = { path = "../../polkadot-runtime-wrappers", default-features = false }
+
 # Substrate
 frame-benchmarking = { git = "https://github.com/paritytech/polkadot-sdk", default-features = false, tag = "polkadot-v1.10.0" }
 frame-benchmarking-cli = { git = "https://github.com/paritytech/polkadot-sdk", default-features = false, tag = "polkadot-v1.10.0" }

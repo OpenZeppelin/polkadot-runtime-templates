@@ -3815,6 +3815,7 @@ dependencies = [
  "parity-scale-codec",
  "polkadot-parachain-primitives",
  "polkadot-runtime-common",
+ "polkadot-runtime-wrappers",
  "scale-info",
  "smallvec",
  "sp-api",
@@ -7262,7 +7263,6 @@ dependencies = [
  "frame-support",
  "frame-system",
  "impl-trait-for-tuples",
- "log",
  "pallet-balances",
  "parity-scale-codec",
  "scale-info",
@@ -8617,6 +8617,21 @@ dependencies = [
  "staging-xcm",
  "staging-xcm-executor",
  "static_assertions",
+]
+
+[[package]]
+name = "polkadot-runtime-wrappers"
+version = "0.0.1"
+dependencies = [
+ "cumulus-pallet-parachain-system",
+ "frame-support",
+ "frame-support-procedural",
+ "frame-system",
+ "pallet-balances",
+ "pallet-proxy",
+ "pallet-timestamp",
+ "parity-scale-codec",
+ "scale-info",
 ]
 
 [[package]]
