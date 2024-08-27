@@ -26,7 +26,7 @@ use governance::{origins::Treasurer, TreasurySpender};
 use parachains_common::message_queue::{NarrowOriginToSibling, ParaIdToSibling};
 use parity_scale_codec::{Decode, Encode, MaxEncodedLen};
 use polkadot_runtime_common::{BlockHashCount, SlowAdjustingFeeUpdate};
-use polkadot_runtime_wrappers::{impl_oz_system, RuntimeConstructs, SystemConstructs};
+use polkadot_runtime_wrappers::impl_oz_system;
 use scale_info::TypeInfo;
 use sp_consensus_aura::sr25519::AuthorityId as AuraId;
 use sp_runtime::{
@@ -100,11 +100,11 @@ parameter_types! {
     pub const SS58Prefix: u16 = 42;
 }
 impl SystemConstructs for Configuration {
+    type AccountId = AccountId;
     type RuntimeBlockLength = RuntimeBlockLength;
     type RuntimeBlockWeights = RuntimeBlockWeights;
     type SS58Prefix = SS58Prefix;
     type Version = RuntimeVersion;
-    type AccountId = AccountId;
 }
 
 impl_oz_system!(Configuration);
