@@ -26,7 +26,7 @@ use governance::{origins::Treasurer, TreasurySpender};
 use parachains_common::message_queue::{NarrowOriginToSibling, ParaIdToSibling};
 use parity_scale_codec::{Decode, Encode, MaxEncodedLen};
 use polkadot_runtime_common::{BlockHashCount, SlowAdjustingFeeUpdate};
-use polkadot_runtime_wrappers::{impl_oz_system, RuntimeConstructs, SystemConfig, SystemConstructs};
+use polkadot_runtime_wrappers::{impl_oz_system, RuntimeConstructs, SystemConstructs};
 use scale_info::TypeInfo;
 use sp_consensus_aura::sr25519::AuthorityId as AuraId;
 use sp_runtime::{
@@ -107,7 +107,7 @@ impl SystemConstructs for Configuration {
     type AccountId = AccountId;
 }
 
-impl_oz_system!(SystemConfig<Configuration>);
+impl_oz_system!(Configuration);
 
 parameter_types! {
     pub MaximumSchedulerWeight: frame_support::weights::Weight = Perbill::from_percent(80) *
