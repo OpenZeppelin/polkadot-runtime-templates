@@ -74,8 +74,35 @@ impl SystemConfig for Configuration {
     type SS58Prefix = SS58Prefix;
     type Version = Version;
 }
-
 impl_oz_system!(Configuration);
+
+// TODO: move to some sensible default section, still exposed here
+parameter_types! {
+    // This part is copied from Substrate's `bin/node/runtime/src/lib.rs`.
+    //  The `RuntimeBlockLength` and `RuntimeBlockWeights` exist here because the
+    // `DeletionWeightLimit` and `DeletionQueueDepth` depend on those to parameterize
+    // the lazy contract deletion.
+    pub RuntimeBlockLength: BlockLength =
+    BlockLength::max_with_normal_ratio(MAX_BLOCK_LENGTH, NORMAL_DISPATCH_RATIO);
+    pub RuntimeBlockWeights: BlockWeights = BlockWeights::builder()
+        .base_block(BlockExecutionWeight::get())
+        .for_class(DispatchClass::all(), |weights| {
+            weights.base_extrinsic = ExtrinsicBaseWeight::get();
+        })
+        .for_class(DispatchClass::Normal, |weights| {
+            weights.max_total = Some(NORMAL_DISPATCH_RATIO * MAXIMUM_BLOCK_WEIGHT);
+        })
+        .for_class(DispatchClass::Operational, |weights| {
+            weights.max_total = Some(MAXIMUM_BLOCK_WEIGHT);
+            // Operational transactions have some extra reserved space, so that they
+            // are included even if block reached `MAXIMUM_BLOCK_WEIGHT`.
+            weights.reserved = Some(
+                MAXIMUM_BLOCK_WEIGHT - NORMAL_DISPATCH_RATIO * MAXIMUM_BLOCK_WEIGHT
+            );
+        })
+        .avg_block_initialization(AVERAGE_ON_INITIALIZE_RATIO)
+        .build_or_panic();
+}
 
 parameter_types! {
     pub MaximumSchedulerWeight: frame_support::weights::Weight = Perbill::from_percent(80) *
@@ -119,18 +146,6 @@ impl pallet_preimage::Config for Runtime {
     type RuntimeEvent = RuntimeEvent;
     /// Rerun benchmarks if you are making changes to runtime configuration.
     type WeightInfo = weights::pallet_preimage::WeightInfo<Runtime>;
-}
-
-impl pallet_timestamp::Config for Runtime {
-    #[cfg(feature = "experimental")]
-    type MinimumPeriod = ConstU64<0>;
-    #[cfg(not(feature = "experimental"))]
-    type MinimumPeriod = ConstU64<{ SLOT_DURATION / 2 }>;
-    /// A timestamp: milliseconds since the unix epoch.
-    type Moment = u64;
-    type OnTimestampSet = Aura;
-    /// Rerun benchmarks if you are making changes to runtime configuration.
-    type WeightInfo = weights::pallet_timestamp::WeightInfo<Runtime>;
 }
 
 impl pallet_authorship::Config for Runtime {
