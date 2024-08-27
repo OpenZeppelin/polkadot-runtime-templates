@@ -71,12 +71,13 @@ parameter_types! {
 pub struct Configuration;
 impl SystemConfig for Configuration {
     type AccountId = AccountId;
+    type PreimageOrigin = EnsureRoot<AccountId>;
     type SS58Prefix = SS58Prefix;
+    type ScheduleOrigin = EnsureRoot<AccountId>;
     type Version = Version;
 }
 impl_oz_system!(Configuration);
 
-// TODO: move to some sensible default section, still exposed here
 parameter_types! {
     // This part is copied from Substrate's `bin/node/runtime/src/lib.rs`.
     //  The `RuntimeBlockLength` and `RuntimeBlockWeights` exist here because the
@@ -102,50 +103,6 @@ parameter_types! {
         })
         .avg_block_initialization(AVERAGE_ON_INITIALIZE_RATIO)
         .build_or_panic();
-}
-
-parameter_types! {
-    pub MaximumSchedulerWeight: frame_support::weights::Weight = Perbill::from_percent(80) *
-        RuntimeBlockWeights::get().max_block;
-    pub const MaxScheduledRuntimeCallsPerBlock: u32 = 50;
-}
-
-impl pallet_scheduler::Config for Runtime {
-    type MaxScheduledPerBlock = MaxScheduledRuntimeCallsPerBlock;
-    type MaximumWeight = MaximumSchedulerWeight;
-    type OriginPrivilegeCmp = frame_support::traits::EqualPrivilegeOnly;
-    type PalletsOrigin = OriginCaller;
-    type Preimages = Preimage;
-    type RuntimeCall = RuntimeCall;
-    type RuntimeEvent = RuntimeEvent;
-    type RuntimeOrigin = RuntimeOrigin;
-    type ScheduleOrigin = EnsureRoot<AccountId>;
-    /// Rerun benchmarks if you are making changes to runtime configuration.
-    type WeightInfo = weights::pallet_scheduler::WeightInfo<Runtime>;
-}
-
-parameter_types! {
-    pub const PreimageBaseDeposit: Balance = deposit(2, 64);
-    pub const PreimageByteDeposit: Balance = deposit(0, 1);
-    pub const PreimageHoldReason: RuntimeHoldReason = RuntimeHoldReason::Preimage(pallet_preimage::HoldReason::Preimage);
-}
-
-impl pallet_preimage::Config for Runtime {
-    type Consideration = frame_support::traits::fungible::HoldConsideration<
-        AccountId,
-        Balances,
-        PreimageHoldReason,
-        frame_support::traits::LinearStoragePrice<
-            PreimageBaseDeposit,
-            PreimageByteDeposit,
-            Balance,
-        >,
-    >;
-    type Currency = Balances;
-    type ManagerOrigin = EnsureRoot<AccountId>;
-    type RuntimeEvent = RuntimeEvent;
-    /// Rerun benchmarks if you are making changes to runtime configuration.
-    type WeightInfo = weights::pallet_preimage::WeightInfo<Runtime>;
 }
 
 impl pallet_authorship::Config for Runtime {

@@ -8623,17 +8623,8 @@ dependencies = [
 name = "polkadot-runtime-wrappers"
 version = "0.0.1"
 dependencies = [
- "cumulus-pallet-parachain-system",
  "frame-support",
- "frame-support-procedural",
- "frame-system",
- "pallet-balances",
- "pallet-proxy",
- "pallet-timestamp",
- "parity-scale-codec",
- "scale-info",
  "sp-version",
- "staging-parachain-info",
 ]
 
 [[package]]
