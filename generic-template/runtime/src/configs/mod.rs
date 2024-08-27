@@ -333,8 +333,6 @@ impl cumulus_pallet_parachain_system::Config for Runtime {
     type XcmpMessageHandler = XcmpQueue;
 }
 
-impl parachain_info::Config for Runtime {}
-
 parameter_types! {
     pub MessageQueueServiceWeight: Weight = Perbill::from_percent(35) * RuntimeBlockWeights::get().max_block;
     pub const HeapSize: u32 = 64 * 1024;
