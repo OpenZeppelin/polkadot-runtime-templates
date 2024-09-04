@@ -1,7 +1,7 @@
 name: 🏗️ Core Implementation
 description: Create a report to help us improve
 title: "🏗️ [Core Feature]: "
-labels: ["core"]
+labels: ["core", "needs triage"]
 body:
   - type: checkboxes
     id: templates
