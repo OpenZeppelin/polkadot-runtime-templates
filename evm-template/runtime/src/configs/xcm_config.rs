@@ -2,7 +2,7 @@ use core::marker::PhantomData;
 
 use frame_support::{
     parameter_types,
-    traits::{ConstU32, Contains, Everything, Nothing, PalletInfoAccess},
+    traits::{ConstU32, ContainsPair, Contains, Everything, Nothing, PalletInfoAccess},
     weights::Weight,
 };
 use frame_system::EnsureRoot;
@@ -13,11 +13,12 @@ use xcm_builder::{
     AccountKey20Aliases, AllowExplicitUnpaidExecutionFrom, AllowTopLevelPaidExecutionFrom,
     ConvertedConcreteId, DenyReserveTransferToRelayChain, DenyThenTry, EnsureXcmOrigin,
     FixedWeightBounds, FrameTransactionalProcessor, FungibleAdapter, FungiblesAdapter, HandleFee,
-    IsChildSystemParachain, IsConcrete, NativeAsset, NoChecking, ParentIsPreset,
+    IsChildSystemParachain, IsConcrete, NoChecking, ParentIsPreset,
     RelayChainAsNative, SiblingParachainAsNative, SiblingParachainConvertsVia,
     SignedAccountKey20AsNative, SovereignSignedViaLocation, TakeWeightCredit, TrailingSetTopicAsId,
     UsingComponents, WithComputedOrigin, WithUniqueTopic, XcmFeeManagerFromComponents,
 };
+use orml_traits::location::{Reserve, RelativeReserveProvider};
 use xcm_executor::{
     traits::{FeeReason, JustTry, TransactAsset},
     XcmExecutor,
@@ -192,6 +193,56 @@ parameter_types! {
     pub TreasuryAccount: AccountId = Treasury::account_id();
 }
 
+/// A `FilterAssetLocation` implementation. Filters multi native assets whose
+/// reserve is same with `origin`.
+pub struct MultiNativeAsset<ReserveProvider>(PhantomData<ReserveProvider>);
+impl<ReserveProvider> ContainsPair<Asset, Location> for MultiNativeAsset<ReserveProvider>
+where
+	ReserveProvider: Reserve,
+{
+	fn contains(asset: &Asset, origin: &Location) -> bool {
+		if let Some(ref reserve) = ReserveProvider::reserve(asset) {
+			if reserve == origin {
+				return true;
+			}
+		}
+		false
+	}
+}
+
+/// Asset filter that allows all assets from a certain location matching asset id.
+pub struct AssetPrefixFrom<Prefix, Origin>(PhantomData<(Prefix, Origin)>);
+impl<Prefix, Origin> ContainsPair<Asset, Location> for AssetPrefixFrom<Prefix, Origin>
+where
+    Prefix: Get<Location>,
+    Origin: Get<Location>,
+{
+    fn contains(asset: &Asset, origin: &Location) -> bool {
+        let loc = Origin::get();
+        &loc == origin
+            && matches!(asset, Asset { id: AssetId(asset_loc), fun: Fungible(_a) }
+			if asset_loc.starts_with(&Prefix::get()))
+    }
+}
+
+/// Asset filter that allows native/relay asset if coming from a certain location.
+pub struct NativeAssetFrom<T>(PhantomData<T>);
+impl<T: Get<Location>> ContainsPair<Asset, Location> for NativeAssetFrom<T> {
+    fn contains(asset: &Asset, origin: &Location) -> bool {
+        let loc = T::get();
+        &loc == origin
+            && matches!(asset, Asset { id: AssetId(asset_loc), fun: Fungible(_a) }
+			if *asset_loc == Location::from(Parent))
+    }
+}
+
+parameter_types! {
+  /// Location of Asset Hub
+  pub AssetHubLocation: Location = (Parent, Parachain(1000)).into();
+    pub EthereumLocation: Location = Location::new(2, [GlobalConsensus(Ethereum { chain_id: 1 })]);
+}
+
+
 pub struct XcmConfig;
 impl xcm_executor::Config for XcmConfig {
     type Aliasers = Nothing;
@@ -214,7 +265,11 @@ impl xcm_executor::Config for XcmConfig {
     /// Please, keep these two configs (`IsReserve` and `IsTeleporter`) mutually exclusive.
     /// The IsReserve type must be set to specify which <MultiAsset, MultiLocation> pair we trust to deposit reserve assets on our chain. We can also use the unit type () to block ReserveAssetDeposited instructions.
     /// The IsTeleporter type must be set to specify which <MultiAsset, MultiLocation> pair we trust to teleport assets to our chain. We can also use the unit type () to block ReceiveTeleportedAssets instruction.
-    type IsReserve = NativeAsset;
+    type IsReserve = (
+		NativeAssetFrom<AssetHubLocation>,
+		AssetPrefixFrom<EthereumLocation, AssetHubLocation>,
+		MultiNativeAsset<RelativeReserveProvider>,
+	);
     type IsTeleporter = ();
     type MaxAssetsIntoHolding = MaxAssetsIntoHolding;
     type MessageExporter = ();
