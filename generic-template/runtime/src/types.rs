@@ -31,7 +31,7 @@ use crate::{
 };
 pub use crate::{
     configs::{
-        xcm_config::RelayLocation, FeeAssetId, StakingAdminBodyId, ToSiblingBaseDeliveryFee,
+        xcm_config::RelayLocation, FeeAssetId, ToSiblingBaseDeliveryFee,
         TransactionByteFee,
     },
     constants::{
@@ -107,20 +107,13 @@ pub type PriceForSiblingParachainDelivery = polkadot_runtime_common::xcm_sender:
     XcmpQueue,
 >;
 
-/// We allow root and the StakingAdmin to execute privileged collator selection
-/// operations.
-pub type CollatorSelectionUpdateOrigin = EitherOfDiverse<
-    EnsureRoot<AccountId>,
-    EnsureXcm<IsVoiceOfBody<RelayLocation, StakingAdminBodyId>>,
->;
-
 /// Configures the number of blocks that can be created without submission of validity proof to the relay chain
-pub type ConsensusHook = cumulus_pallet_aura_ext::FixedVelocityConsensusHook<
-    Runtime,
-    RELAY_CHAIN_SLOT_DURATION_MILLIS,
-    BLOCK_PROCESSING_VELOCITY,
-    UNINCLUDED_SEGMENT_CAPACITY,
->;
+// pub type ConsensusHook = cumulus_pallet_aura_ext::FixedVelocityConsensusHook<
+//     Runtime,
+//     RELAY_CHAIN_SLOT_DURATION_MILLIS,
+//     BLOCK_PROCESSING_VELOCITY,
+//     UNINCLUDED_SEGMENT_CAPACITY,
+// >;
 
 /// These aliases are describing the Beneficiary and AssetKind for the Treasury pallet
 pub type Beneficiary = VersionedLocation;

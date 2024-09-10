@@ -70,6 +70,9 @@ cumulus-primitives-core = { workspace = true }
 cumulus-primitives-parachain-inherent = { workspace = true }
 cumulus-relay-chain-interface = { workspace = true }
 
+# Tanssi
+nimbus-consensus = { workspace = true }
+
 [build-dependencies]
 substrate-build-script-utils = { workspace = true }
 

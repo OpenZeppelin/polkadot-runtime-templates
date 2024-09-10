@@ -166,3 +166,19 @@ impl_openzeppelin_consensus!(OpenZeppelinRuntime);
 impl_openzeppelin_governance!(OpenZeppelinRuntime);
 impl_openzeppelin_xcm!(OpenZeppelinRuntime);
 impl_openzeppelin_assets!(OpenZeppelinRuntime);
+
+impl pallet_author_inherent::Config for Runtime {
+    type AccountLookup = dp_consensus::NimbusLookUp;
+    type AuthorId = NimbusId;
+    type CanAuthor = pallet_cc_authorities_noting::CanAuthor<Runtime>;
+    type SlotBeacon = dp_consensus::AuraDigestSlotBeacon<Runtime>;
+    type WeightInfo = pallet_author_inherent::weights::SubstrateWeight<Runtime>;
+}
+
+impl pallet_cc_authorities_noting::Config for Runtime {
+    type AuthorityId = NimbusId;
+    type RelayChainStateProvider = cumulus_pallet_parachain_system::RelaychainDataProvider<Self>;
+    type RuntimeEvent = RuntimeEvent;
+    type SelfParaId = parachain_info::Pallet<Runtime>;
+    type WeightInfo = pallet_cc_authorities_noting::weights::SubstrateWeight<Runtime>;
+}

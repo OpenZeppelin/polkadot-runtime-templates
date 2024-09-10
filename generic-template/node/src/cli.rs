@@ -1,10 +1,12 @@
 use std::path::PathBuf;
 
+use sc_cli::{CliConfiguration, NodeKeyParams, SharedParams};
+
 /// Sub-commands supported by the collator.
 #[derive(Debug, clap::Subcommand)]
 pub enum Subcommand {
     /// Build a chain specification.
-    BuildSpec(sc_cli::BuildSpecCmd),
+    BuildSpec(BuildSpecCmd),
 
     /// Validate blocks.
     CheckBlock(sc_cli::CheckBlockCmd),
@@ -43,6 +45,31 @@ pub enum Subcommand {
     /// deprecation notice. It will be removed entirely some time after January
     /// 2024.
     TryRuntime,
+}
+
+#[derive(Debug, Clone, clap::Parser)]
+pub struct BuildSpecCmd {
+    #[clap(flatten)]
+    pub base: sc_cli::BuildSpecCmd,
+
+    /// Id of the parachain this spec is for. Note that this overrides the `--chain` param.
+    #[arg(long, conflicts_with = "chain")]
+    #[arg(long)]
+    pub parachain_id: Option<u32>,
+
+    /// List of bootnodes to add to chain spec
+    #[arg(long)]
+    pub add_bootnode: Vec<String>,
+}
+
+impl CliConfiguration for BuildSpecCmd {
+    fn shared_params(&self) -> &SharedParams {
+        &self.base.shared_params
+    }
+
+    fn node_key_params(&self) -> Option<&NodeKeyParams> {
+        Some(&self.base.node_key_params)
+    }
 }
 
 const AFTER_HELP_EXAMPLE: &str = color_print::cstr!(

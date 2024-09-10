@@ -26,33 +26,18 @@ use sp_runtime::{
 use sp_state_machine::BasicExternalities;
 
 fn generate_genesis(accounts: &[AccountId]) -> Storage {
-    use generic_runtime_template::{
-        BalancesConfig, CollatorSelectionConfig, RuntimeGenesisConfig, SessionConfig, SessionKeys,
-    };
+    use generic_runtime_template::{BalancesConfig, RuntimeGenesisConfig};
     use sp_consensus_aura::sr25519::AuthorityId as AuraId;
     use sp_runtime::{app_crypto::ByteArray, BuildStorage};
 
     // Configure endowed accounts with initial balance of 1 << 60.
     let balances = accounts.iter().cloned().map(|k| (k, 1 << 60)).collect();
     let invulnerables: Vec<AccountId> = vec![[0; 32].into()];
-    let session_keys = vec![(
-        [0; 32].into(),
-        [0; 32].into(),
-        SessionKeys { aura: AuraId::from_slice(&[0; 32]).unwrap() },
-    )];
     let root: AccountId = [0; 32].into();
 
     RuntimeGenesisConfig {
         system: Default::default(),
         balances: BalancesConfig { balances },
-        aura: Default::default(),
-        session: SessionConfig { keys: session_keys },
-        collator_selection: CollatorSelectionConfig {
-            invulnerables,
-            candidacy_bond: 1 << 57,
-            desired_candidates: 1,
-        },
-        aura_ext: Default::default(),
         parachain_info: Default::default(),
         parachain_system: Default::default(),
         polkadot_xcm: Default::default(),
@@ -60,6 +45,7 @@ fn generate_genesis(accounts: &[AccountId]) -> Storage {
         transaction_payment: Default::default(),
         sudo: SudoConfig { key: Some(root) },
         treasury: Default::default(),
+        authorities_noting: Default::default(),
         ..Default::default()
     }
     .build_storage()

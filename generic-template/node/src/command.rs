@@ -20,9 +20,9 @@ use crate::{
 
 fn load_spec(id: &str) -> std::result::Result<Box<dyn ChainSpec>, String> {
     Ok(match id {
-        "dev" => Box::new(chain_spec::development_config()),
-        "template-paseo" => Box::new(chain_spec::local_testnet_config()),
-        "" | "local" => Box::new(chain_spec::local_testnet_config()),
+        "dev" => Box::new(chain_spec::development_config(id, vec![])),
+        "template-paseo" => Box::new(chain_spec::local_testnet_config(id, vec![])),
+        "" | "local" => Box::new(chain_spec::local_testnet_config(id, vec![])),
         path => Box::new(chain_spec::ChainSpec::from_json_file(std::path::PathBuf::from(path))?),
     })
 }
@@ -115,7 +115,24 @@ pub fn run() -> Result<()> {
     match &cli.subcommand {
 		Some(Subcommand::BuildSpec(cmd)) => {
 			let runner = cli.create_runner(cmd)?;
-			runner.sync_run(|config| cmd.run(config.chain_spec, config.network))
+			runner.sync_run(|config| {
+                let chain_spec = if let Some(para_id) = cmd.parachain_id {
+                    if cmd.base.shared_params.dev {
+                        Box::new(chain_spec::development_config(
+                            para_id.into(),
+                            cmd.add_bootnode.clone(),
+                        ))
+                    } else {
+                        Box::new(chain_spec::local_testnet_config(
+                            para_id.into(),
+                            cmd.add_bootnode.clone(),
+                        ))
+                    }
+                } else {
+                    config.chain_spec
+                };
+                cmd.base.run(chain_spec, config.network)
+            })
 		},
 		Some(Subcommand::CheckBlock(cmd)) => {
 			construct_async_run!(|components, cli, cmd, config| {

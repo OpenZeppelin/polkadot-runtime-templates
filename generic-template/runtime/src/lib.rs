@@ -91,9 +91,7 @@ pub mod opaque {
 }
 
 impl_opaque_keys! {
-    pub struct SessionKeys {
-        pub aura: Aura,
-    }
+    pub struct SessionKeys {  }
 }
 
 /// The version information used to identify this runtime when compiled

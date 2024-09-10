@@ -450,7 +450,7 @@ checksum = "9b34d609dfbaf33d6889b2b7106d3ca345eacad44200913df5ba02bfd31d2ba9"
 [[package]]
 name = "assets-common"
 version = "0.17.0"
-source = "git+https://github.com/paritytech/polkadot-sdk?tag=polkadot-stable2407-1#16b0fd09d9e9281c20ee0c1d8b87d011e3e3454e"
+source = "git+https://github.com/moondance-labs/polkadot-sdk?branch=tanssi-polkadot-stable2407#4a003906b0987b16a473dd83bdb7ffc57395635a"
 dependencies = [
  "cumulus-primitives-core",
  "frame-support",
@@ -467,6 +467,15 @@ dependencies = [
  "staging-xcm-builder",
  "staging-xcm-executor",
  "substrate-wasm-builder",
+]
+
+[[package]]
+name = "async-backing-primitives"
+version = "0.9.0"
+source = "git+https://github.com/moondance-labs/moonkit?branch=tanssi-polkadot-stable2407#e0f62468002be72f8b0112847b42787a063b9d99"
+dependencies = [
+ "sp-api",
+ "sp-consensus-slots",
 ]
 
 [[package]]
@@ -744,7 +753,7 @@ dependencies = [
 [[package]]
 name = "binary-merkle-tree"
 version = "15.0.0"
-source = "git+https://github.com/paritytech/polkadot-sdk?tag=polkadot-stable2407-1#16b0fd09d9e9281c20ee0c1d8b87d011e3e3454e"
+source = "git+https://github.com/moondance-labs/polkadot-sdk?branch=tanssi-polkadot-stable2407#4a003906b0987b16a473dd83bdb7ffc57395635a"
 dependencies = [
  "hash-db",
  "log",
@@ -957,7 +966,7 @@ dependencies = [
 [[package]]
 name = "bp-xcm-bridge-hub-router"
 version = "0.14.0"
-source = "git+https://github.com/paritytech/polkadot-sdk?tag=polkadot-stable2407-1#16b0fd09d9e9281c20ee0c1d8b87d011e3e3454e"
+source = "git+https://github.com/moondance-labs/polkadot-sdk?branch=tanssi-polkadot-stable2407#4a003906b0987b16a473dd83bdb7ffc57395635a"
 dependencies = [
  "parity-scale-codec",
  "scale-info",
@@ -1087,6 +1096,34 @@ dependencies = [
  "jobserver",
  "libc",
  "shlex",
+]
+
+[[package]]
+name = "ccp-authorities-noting-inherent"
+version = "0.1.0"
+source = "git+https://github.com/moondance-labs/dancekit?branch=tanssi-polkadot-stable2407#83c5af140bffb06af6111f5cac7f3075315fa453"
+dependencies = [
+ "async-trait",
+ "cumulus-primitives-core",
+ "cumulus-primitives-parachain-inherent",
+ "cumulus-relay-chain-interface",
+ "dc-orchestrator-chain-interface",
+ "dp-collator-assignment",
+ "dp-core",
+ "nimbus-primitives",
+ "parity-scale-codec",
+ "scale-info",
+ "sp-consensus-aura",
+ "sp-core",
+ "sp-inherents",
+ "sp-io",
+ "sp-runtime",
+ "sp-state-machine",
+ "sp-std",
+ "sp-trie",
+ "sp-version",
+ "test-relay-sproof-builder",
+ "tracing",
 ]
 
 [[package]]
@@ -1688,7 +1725,7 @@ dependencies = [
 [[package]]
 name = "cumulus-client-cli"
 version = "0.17.0"
-source = "git+https://github.com/paritytech/polkadot-sdk?tag=polkadot-stable2407-1#16b0fd09d9e9281c20ee0c1d8b87d011e3e3454e"
+source = "git+https://github.com/moondance-labs/polkadot-sdk?branch=tanssi-polkadot-stable2407#4a003906b0987b16a473dd83bdb7ffc57395635a"
 dependencies = [
  "clap",
  "parity-scale-codec",
@@ -1705,12 +1742,12 @@ dependencies = [
 [[package]]
 name = "cumulus-client-collator"
 version = "0.17.0"
-source = "git+https://github.com/paritytech/polkadot-sdk?tag=polkadot-stable2407-1#16b0fd09d9e9281c20ee0c1d8b87d011e3e3454e"
+source = "git+https://github.com/moondance-labs/polkadot-sdk?branch=tanssi-polkadot-stable2407#4a003906b0987b16a473dd83bdb7ffc57395635a"
 dependencies = [
  "cumulus-client-consensus-common",
  "cumulus-client-network",
  "cumulus-primitives-core",
- "futures",
+ "futures 0.3.30",
  "parity-scale-codec",
  "parking_lot 0.12.3",
  "polkadot-node-primitives",
@@ -1728,7 +1765,7 @@ dependencies = [
 [[package]]
 name = "cumulus-client-consensus-aura"
 version = "0.17.0"
-source = "git+https://github.com/paritytech/polkadot-sdk?tag=polkadot-stable2407-1#16b0fd09d9e9281c20ee0c1d8b87d011e3e3454e"
+source = "git+https://github.com/moondance-labs/polkadot-sdk?branch=tanssi-polkadot-stable2407#4a003906b0987b16a473dd83bdb7ffc57395635a"
 dependencies = [
  "async-trait",
  "cumulus-client-collator",
@@ -1738,7 +1775,7 @@ dependencies = [
  "cumulus-primitives-aura",
  "cumulus-primitives-core",
  "cumulus-relay-chain-interface",
- "futures",
+ "futures 0.3.30",
  "parity-scale-codec",
  "parking_lot 0.12.3",
  "polkadot-node-primitives",
@@ -1773,14 +1810,14 @@ dependencies = [
 [[package]]
 name = "cumulus-client-consensus-common"
 version = "0.17.0"
-source = "git+https://github.com/paritytech/polkadot-sdk?tag=polkadot-stable2407-1#16b0fd09d9e9281c20ee0c1d8b87d011e3e3454e"
+source = "git+https://github.com/moondance-labs/polkadot-sdk?branch=tanssi-polkadot-stable2407#4a003906b0987b16a473dd83bdb7ffc57395635a"
 dependencies = [
  "async-trait",
  "cumulus-client-pov-recovery",
  "cumulus-primitives-core",
  "cumulus-relay-chain-interface",
  "dyn-clone",
- "futures",
+ "futures 0.3.30",
  "log",
  "parity-scale-codec",
  "polkadot-primitives",
@@ -1803,7 +1840,7 @@ dependencies = [
 [[package]]
 name = "cumulus-client-consensus-proposer"
 version = "0.15.0"
-source = "git+https://github.com/paritytech/polkadot-sdk?tag=polkadot-stable2407-1#16b0fd09d9e9281c20ee0c1d8b87d011e3e3454e"
+source = "git+https://github.com/moondance-labs/polkadot-sdk?branch=tanssi-polkadot-stable2407#4a003906b0987b16a473dd83bdb7ffc57395635a"
 dependencies = [
  "anyhow",
  "async-trait",
@@ -1818,11 +1855,11 @@ dependencies = [
 [[package]]
 name = "cumulus-client-network"
 version = "0.17.0"
-source = "git+https://github.com/paritytech/polkadot-sdk?tag=polkadot-stable2407-1#16b0fd09d9e9281c20ee0c1d8b87d011e3e3454e"
+source = "git+https://github.com/moondance-labs/polkadot-sdk?branch=tanssi-polkadot-stable2407#4a003906b0987b16a473dd83bdb7ffc57395635a"
 dependencies = [
  "async-trait",
  "cumulus-relay-chain-interface",
- "futures",
+ "futures 0.3.30",
  "futures-timer",
  "parity-scale-codec",
  "parking_lot 0.12.3",
@@ -1844,7 +1881,7 @@ dependencies = [
 [[package]]
 name = "cumulus-client-parachain-inherent"
 version = "0.11.0"
-source = "git+https://github.com/paritytech/polkadot-sdk?tag=polkadot-stable2407-1#16b0fd09d9e9281c20ee0c1d8b87d011e3e3454e"
+source = "git+https://github.com/moondance-labs/polkadot-sdk?branch=tanssi-polkadot-stable2407#4a003906b0987b16a473dd83bdb7ffc57395635a"
 dependencies = [
  "async-trait",
  "cumulus-primitives-core",
@@ -1866,12 +1903,12 @@ dependencies = [
 [[package]]
 name = "cumulus-client-pov-recovery"
 version = "0.17.0"
-source = "git+https://github.com/paritytech/polkadot-sdk?tag=polkadot-stable2407-1#16b0fd09d9e9281c20ee0c1d8b87d011e3e3454e"
+source = "git+https://github.com/moondance-labs/polkadot-sdk?branch=tanssi-polkadot-stable2407#4a003906b0987b16a473dd83bdb7ffc57395635a"
 dependencies = [
  "async-trait",
  "cumulus-primitives-core",
  "cumulus-relay-chain-interface",
- "futures",
+ "futures 0.3.30",
  "futures-timer",
  "parity-scale-codec",
  "polkadot-node-primitives",
@@ -1892,7 +1929,7 @@ dependencies = [
 [[package]]
 name = "cumulus-client-service"
 version = "0.17.0"
-source = "git+https://github.com/paritytech/polkadot-sdk?tag=polkadot-stable2407-1#16b0fd09d9e9281c20ee0c1d8b87d011e3e3454e"
+source = "git+https://github.com/moondance-labs/polkadot-sdk?branch=tanssi-polkadot-stable2407#4a003906b0987b16a473dd83bdb7ffc57395635a"
 dependencies = [
  "cumulus-client-cli",
  "cumulus-client-collator",
@@ -1904,7 +1941,7 @@ dependencies = [
  "cumulus-relay-chain-inprocess-interface",
  "cumulus-relay-chain-interface",
  "cumulus-relay-chain-minimal-node",
- "futures",
+ "futures 0.3.30",
  "polkadot-primitives",
  "sc-client-api",
  "sc-consensus",
@@ -1927,26 +1964,9 @@ dependencies = [
 ]
 
 [[package]]
-name = "cumulus-pallet-aura-ext"
-version = "0.16.0"
-source = "git+https://github.com/paritytech/polkadot-sdk?tag=polkadot-stable2407-1#16b0fd09d9e9281c20ee0c1d8b87d011e3e3454e"
-dependencies = [
- "cumulus-pallet-parachain-system",
- "frame-support",
- "frame-system",
- "pallet-aura",
- "pallet-timestamp",
- "parity-scale-codec",
- "scale-info",
- "sp-application-crypto",
- "sp-consensus-aura",
- "sp-runtime",
-]
-
-[[package]]
 name = "cumulus-pallet-parachain-system"
 version = "0.16.0"
-source = "git+https://github.com/paritytech/polkadot-sdk?tag=polkadot-stable2407-1#16b0fd09d9e9281c20ee0c1d8b87d011e3e3454e"
+source = "git+https://github.com/moondance-labs/polkadot-sdk?branch=tanssi-polkadot-stable2407#4a003906b0987b16a473dd83bdb7ffc57395635a"
 dependencies = [
  "bytes",
  "cumulus-pallet-parachain-system-proc-macro",
@@ -1982,7 +2002,7 @@ dependencies = [
 [[package]]
 name = "cumulus-pallet-parachain-system-proc-macro"
 version = "0.6.0"
-source = "git+https://github.com/paritytech/polkadot-sdk?tag=polkadot-stable2407-1#16b0fd09d9e9281c20ee0c1d8b87d011e3e3454e"
+source = "git+https://github.com/moondance-labs/polkadot-sdk?branch=tanssi-polkadot-stable2407#4a003906b0987b16a473dd83bdb7ffc57395635a"
 dependencies = [
  "proc-macro-crate 3.1.0",
  "proc-macro2",
@@ -1993,7 +2013,7 @@ dependencies = [
 [[package]]
 name = "cumulus-pallet-session-benchmarking"
 version = "18.0.0"
-source = "git+https://github.com/paritytech/polkadot-sdk?tag=polkadot-stable2407-1#16b0fd09d9e9281c20ee0c1d8b87d011e3e3454e"
+source = "git+https://github.com/moondance-labs/polkadot-sdk?branch=tanssi-polkadot-stable2407#4a003906b0987b16a473dd83bdb7ffc57395635a"
 dependencies = [
  "frame-benchmarking",
  "frame-support",
@@ -2006,7 +2026,7 @@ dependencies = [
 [[package]]
 name = "cumulus-pallet-xcm"
 version = "0.16.0"
-source = "git+https://github.com/paritytech/polkadot-sdk?tag=polkadot-stable2407-1#16b0fd09d9e9281c20ee0c1d8b87d011e3e3454e"
+source = "git+https://github.com/moondance-labs/polkadot-sdk?branch=tanssi-polkadot-stable2407#4a003906b0987b16a473dd83bdb7ffc57395635a"
 dependencies = [
  "cumulus-primitives-core",
  "frame-support",
@@ -2021,7 +2041,7 @@ dependencies = [
 [[package]]
 name = "cumulus-pallet-xcmp-queue"
 version = "0.16.0"
-source = "git+https://github.com/paritytech/polkadot-sdk?tag=polkadot-stable2407-1#16b0fd09d9e9281c20ee0c1d8b87d011e3e3454e"
+source = "git+https://github.com/moondance-labs/polkadot-sdk?branch=tanssi-polkadot-stable2407#4a003906b0987b16a473dd83bdb7ffc57395635a"
 dependencies = [
  "bounded-collections",
  "bp-xcm-bridge-hub-router",
@@ -2046,7 +2066,7 @@ dependencies = [
 [[package]]
 name = "cumulus-primitives-aura"
 version = "0.15.0"
-source = "git+https://github.com/paritytech/polkadot-sdk?tag=polkadot-stable2407-1#16b0fd09d9e9281c20ee0c1d8b87d011e3e3454e"
+source = "git+https://github.com/moondance-labs/polkadot-sdk?branch=tanssi-polkadot-stable2407#4a003906b0987b16a473dd83bdb7ffc57395635a"
 dependencies = [
  "parity-scale-codec",
  "polkadot-core-primitives",
@@ -2059,7 +2079,7 @@ dependencies = [
 [[package]]
 name = "cumulus-primitives-core"
 version = "0.15.0"
-source = "git+https://github.com/paritytech/polkadot-sdk?tag=polkadot-stable2407-1#16b0fd09d9e9281c20ee0c1d8b87d011e3e3454e"
+source = "git+https://github.com/moondance-labs/polkadot-sdk?branch=tanssi-polkadot-stable2407#4a003906b0987b16a473dd83bdb7ffc57395635a"
 dependencies = [
  "parity-scale-codec",
  "polkadot-core-primitives",
@@ -2075,7 +2095,7 @@ dependencies = [
 [[package]]
 name = "cumulus-primitives-parachain-inherent"
 version = "0.15.0"
-source = "git+https://github.com/paritytech/polkadot-sdk?tag=polkadot-stable2407-1#16b0fd09d9e9281c20ee0c1d8b87d011e3e3454e"
+source = "git+https://github.com/moondance-labs/polkadot-sdk?branch=tanssi-polkadot-stable2407#4a003906b0987b16a473dd83bdb7ffc57395635a"
 dependencies = [
  "async-trait",
  "cumulus-primitives-core",
@@ -2091,7 +2111,7 @@ dependencies = [
 [[package]]
 name = "cumulus-primitives-proof-size-hostfunction"
 version = "0.10.0"
-source = "git+https://github.com/paritytech/polkadot-sdk?tag=polkadot-stable2407-1#16b0fd09d9e9281c20ee0c1d8b87d011e3e3454e"
+source = "git+https://github.com/moondance-labs/polkadot-sdk?branch=tanssi-polkadot-stable2407#4a003906b0987b16a473dd83bdb7ffc57395635a"
 dependencies = [
  "sp-externalities",
  "sp-runtime-interface",
@@ -2100,8 +2120,8 @@ dependencies = [
 
 [[package]]
 name = "cumulus-primitives-storage-weight-reclaim"
-version = "7.0.1"
-source = "git+https://github.com/paritytech/polkadot-sdk?tag=polkadot-stable2407-1#16b0fd09d9e9281c20ee0c1d8b87d011e3e3454e"
+version = "7.0.0"
+source = "git+https://github.com/moondance-labs/polkadot-sdk?branch=tanssi-polkadot-stable2407#4a003906b0987b16a473dd83bdb7ffc57395635a"
 dependencies = [
  "cumulus-primitives-core",
  "cumulus-primitives-proof-size-hostfunction",
@@ -2115,9 +2135,21 @@ dependencies = [
 ]
 
 [[package]]
+name = "cumulus-primitives-timestamp"
+version = "0.15.0"
+source = "git+https://github.com/moondance-labs/polkadot-sdk?branch=tanssi-polkadot-stable2407#4a003906b0987b16a473dd83bdb7ffc57395635a"
+dependencies = [
+ "cumulus-primitives-core",
+ "futures 0.3.30",
+ "parity-scale-codec",
+ "sp-inherents",
+ "sp-timestamp",
+]
+
+[[package]]
 name = "cumulus-primitives-utility"
 version = "0.16.0"
-source = "git+https://github.com/paritytech/polkadot-sdk?tag=polkadot-stable2407-1#16b0fd09d9e9281c20ee0c1d8b87d011e3e3454e"
+source = "git+https://github.com/moondance-labs/polkadot-sdk?branch=tanssi-polkadot-stable2407#4a003906b0987b16a473dd83bdb7ffc57395635a"
 dependencies = [
  "cumulus-primitives-core",
  "frame-support",
@@ -2136,12 +2168,12 @@ dependencies = [
 [[package]]
 name = "cumulus-relay-chain-inprocess-interface"
 version = "0.17.0"
-source = "git+https://github.com/paritytech/polkadot-sdk?tag=polkadot-stable2407-1#16b0fd09d9e9281c20ee0c1d8b87d011e3e3454e"
+source = "git+https://github.com/moondance-labs/polkadot-sdk?branch=tanssi-polkadot-stable2407#4a003906b0987b16a473dd83bdb7ffc57395635a"
 dependencies = [
  "async-trait",
  "cumulus-primitives-core",
  "cumulus-relay-chain-interface",
- "futures",
+ "futures 0.3.30",
  "futures-timer",
  "polkadot-cli",
  "polkadot-service",
@@ -2160,11 +2192,11 @@ dependencies = [
 [[package]]
 name = "cumulus-relay-chain-interface"
 version = "0.17.0"
-source = "git+https://github.com/paritytech/polkadot-sdk?tag=polkadot-stable2407-1#16b0fd09d9e9281c20ee0c1d8b87d011e3e3454e"
+source = "git+https://github.com/moondance-labs/polkadot-sdk?branch=tanssi-polkadot-stable2407#4a003906b0987b16a473dd83bdb7ffc57395635a"
 dependencies = [
  "async-trait",
  "cumulus-primitives-core",
- "futures",
+ "futures 0.3.30",
  "jsonrpsee-core",
  "parity-scale-codec",
  "polkadot-overseer",
@@ -2179,14 +2211,14 @@ dependencies = [
 [[package]]
 name = "cumulus-relay-chain-minimal-node"
 version = "0.17.0"
-source = "git+https://github.com/paritytech/polkadot-sdk?tag=polkadot-stable2407-1#16b0fd09d9e9281c20ee0c1d8b87d011e3e3454e"
+source = "git+https://github.com/moondance-labs/polkadot-sdk?branch=tanssi-polkadot-stable2407#4a003906b0987b16a473dd83bdb7ffc57395635a"
 dependencies = [
  "array-bytes",
  "async-trait",
  "cumulus-primitives-core",
  "cumulus-relay-chain-interface",
  "cumulus-relay-chain-rpc-interface",
- "futures",
+ "futures 0.3.30",
  "polkadot-core-primitives",
  "polkadot-network-bridge",
  "polkadot-node-network-protocol",
@@ -2214,13 +2246,13 @@ dependencies = [
 [[package]]
 name = "cumulus-relay-chain-rpc-interface"
 version = "0.17.0"
-source = "git+https://github.com/paritytech/polkadot-sdk?tag=polkadot-stable2407-1#16b0fd09d9e9281c20ee0c1d8b87d011e3e3454e"
+source = "git+https://github.com/moondance-labs/polkadot-sdk?branch=tanssi-polkadot-stable2407#4a003906b0987b16a473dd83bdb7ffc57395635a"
 dependencies = [
  "async-trait",
  "cumulus-primitives-core",
  "cumulus-relay-chain-interface",
  "either",
- "futures",
+ "futures 0.3.30",
  "futures-timer",
  "jsonrpsee",
  "parity-scale-codec",
@@ -2253,7 +2285,7 @@ dependencies = [
 [[package]]
 name = "cumulus-test-relay-sproof-builder"
 version = "0.15.0"
-source = "git+https://github.com/paritytech/polkadot-sdk?tag=polkadot-stable2407-1#16b0fd09d9e9281c20ee0c1d8b87d011e3e3454e"
+source = "git+https://github.com/moondance-labs/polkadot-sdk?branch=tanssi-polkadot-stable2407#4a003906b0987b16a473dd83bdb7ffc57395635a"
 dependencies = [
  "cumulus-primitives-core",
  "parity-scale-codec",
@@ -2419,6 +2451,26 @@ checksum = "332d754c0af53bc87c108fed664d121ecf59207ec4196041f04d6ab9002ad33f"
 dependencies = [
  "data-encoding",
  "syn 1.0.109",
+]
+
+[[package]]
+name = "dc-orchestrator-chain-interface"
+version = "0.1.0"
+source = "git+https://github.com/moondance-labs/dancekit?branch=tanssi-polkadot-stable2407#83c5af140bffb06af6111f5cac7f3075315fa453"
+dependencies = [
+ "async-trait",
+ "cumulus-primitives-core",
+ "dp-container-chain-genesis-data",
+ "dp-core",
+ "futures 0.3.30",
+ "jsonrpsee",
+ "parity-scale-codec",
+ "polkadot-overseer",
+ "sc-client-api",
+ "sp-api",
+ "sp-blockchain",
+ "sp-state-machine",
+ "thiserror",
 ]
 
 [[package]]
@@ -2630,6 +2682,85 @@ name = "downcast-rs"
 version = "1.2.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "75b325c5dbd37f80359721ad39aca5a29fb04c89279657cffdda8736d0c0b9d2"
+
+[[package]]
+name = "dp-chain-state-snapshot"
+version = "0.1.0"
+source = "git+https://github.com/moondance-labs/dancekit?branch=tanssi-polkadot-stable2407#83c5af140bffb06af6111f5cac7f3075315fa453"
+dependencies = [
+ "cumulus-primitives-core",
+ "parity-scale-codec",
+ "sp-runtime",
+ "sp-state-machine",
+ "sp-trie",
+]
+
+[[package]]
+name = "dp-collator-assignment"
+version = "0.1.0"
+source = "git+https://github.com/moondance-labs/dancekit?branch=tanssi-polkadot-stable2407#83c5af140bffb06af6111f5cac7f3075315fa453"
+dependencies = [
+ "cumulus-primitives-core",
+ "frame-support",
+ "hex-literal 0.3.4",
+ "log",
+ "parity-scale-codec",
+ "polkadot-primitives",
+ "scale-info",
+ "serde",
+ "sp-core",
+ "sp-runtime",
+ "sp-state-machine",
+ "sp-std",
+ "sp-trie",
+]
+
+[[package]]
+name = "dp-consensus"
+version = "0.1.0"
+source = "git+https://github.com/moondance-labs/dancekit?branch=tanssi-polkadot-stable2407#83c5af140bffb06af6111f5cac7f3075315fa453"
+dependencies = [
+ "cumulus-primitives-core",
+ "frame-support",
+ "frame-system",
+ "nimbus-primitives",
+ "parity-scale-codec",
+ "scale-info",
+ "sp-api",
+ "sp-consensus-aura",
+ "sp-runtime",
+ "sp-std",
+]
+
+[[package]]
+name = "dp-container-chain-genesis-data"
+version = "0.1.0"
+source = "git+https://github.com/moondance-labs/dancekit?branch=tanssi-polkadot-stable2407#83c5af140bffb06af6111f5cac7f3075315fa453"
+dependencies = [
+ "frame-support",
+ "hex-literal 0.3.4",
+ "log",
+ "parity-scale-codec",
+ "scale-info",
+ "serde",
+ "sp-core",
+ "sp-std",
+]
+
+[[package]]
+name = "dp-core"
+version = "0.1.0"
+source = "git+https://github.com/moondance-labs/dancekit?branch=tanssi-polkadot-stable2407#83c5af140bffb06af6111f5cac7f3075315fa453"
+dependencies = [
+ "cumulus-primitives-core",
+ "frame-support",
+ "hex-literal 0.3.4",
+ "parity-scale-codec",
+ "sp-core",
+ "sp-io",
+ "sp-runtime",
+ "sp-std",
+]
 
 [[package]]
 name = "dtoa"
@@ -2931,7 +3062,7 @@ version = "0.2.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "e43f2f1833d64e33f15592464d6fdd70f349dda7b1a53088eb83cd94014008c5"
 dependencies = [
- "futures",
+ "futures 0.3.30",
 ]
 
 [[package]]
@@ -3065,7 +3196,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "36530797b9bf31cd4ff126dcfee8170f86b00cfdcea3269d73133cc0415945c3"
 dependencies = [
  "either",
- "futures",
+ "futures 0.3.30",
  "futures-timer",
  "log",
  "num-traits",
@@ -3125,7 +3256,7 @@ checksum = "00b0228411908ca8685dba7fc2cdd70ec9990a6e753e89b6ac91a84c40fbaf4b"
 [[package]]
 name = "fork-tree"
 version = "13.0.0"
-source = "git+https://github.com/paritytech/polkadot-sdk?tag=polkadot-stable2407-1#16b0fd09d9e9281c20ee0c1d8b87d011e3e3454e"
+source = "git+https://github.com/moondance-labs/polkadot-sdk?branch=tanssi-polkadot-stable2407#4a003906b0987b16a473dd83bdb7ffc57395635a"
 dependencies = [
  "parity-scale-codec",
 ]
@@ -3158,7 +3289,7 @@ checksum = "6c2141d6d6c8512188a7891b4b01590a45f6dac67afb4f255c4124dbb86d4eaa"
 [[package]]
 name = "frame-benchmarking"
 version = "37.0.0"
-source = "git+https://github.com/paritytech/polkadot-sdk?tag=polkadot-stable2407-1#16b0fd09d9e9281c20ee0c1d8b87d011e3e3454e"
+source = "git+https://github.com/moondance-labs/polkadot-sdk?branch=tanssi-polkadot-stable2407#4a003906b0987b16a473dd83bdb7ffc57395635a"
 dependencies = [
  "frame-support",
  "frame-support-procedural",
@@ -3182,7 +3313,7 @@ dependencies = [
 [[package]]
 name = "frame-benchmarking-cli"
 version = "42.0.0"
-source = "git+https://github.com/paritytech/polkadot-sdk?tag=polkadot-stable2407-1#16b0fd09d9e9281c20ee0c1d8b87d011e3e3454e"
+source = "git+https://github.com/moondance-labs/polkadot-sdk?branch=tanssi-polkadot-stable2407#4a003906b0987b16a473dd83bdb7ffc57395635a"
 dependencies = [
  "Inflector",
  "array-bytes",
@@ -3232,7 +3363,7 @@ dependencies = [
 [[package]]
 name = "frame-election-provider-solution-type"
 version = "14.0.1"
-source = "git+https://github.com/paritytech/polkadot-sdk?tag=polkadot-stable2407-1#16b0fd09d9e9281c20ee0c1d8b87d011e3e3454e"
+source = "git+https://github.com/moondance-labs/polkadot-sdk?branch=tanssi-polkadot-stable2407#4a003906b0987b16a473dd83bdb7ffc57395635a"
 dependencies = [
  "proc-macro-crate 3.1.0",
  "proc-macro2",
@@ -3243,7 +3374,7 @@ dependencies = [
 [[package]]
 name = "frame-election-provider-support"
 version = "37.0.0"
-source = "git+https://github.com/paritytech/polkadot-sdk?tag=polkadot-stable2407-1#16b0fd09d9e9281c20ee0c1d8b87d011e3e3454e"
+source = "git+https://github.com/moondance-labs/polkadot-sdk?branch=tanssi-polkadot-stable2407#4a003906b0987b16a473dd83bdb7ffc57395635a"
 dependencies = [
  "frame-election-provider-solution-type",
  "frame-support",
@@ -3259,7 +3390,7 @@ dependencies = [
 [[package]]
 name = "frame-executive"
 version = "37.0.0"
-source = "git+https://github.com/paritytech/polkadot-sdk?tag=polkadot-stable2407-1#16b0fd09d9e9281c20ee0c1d8b87d011e3e3454e"
+source = "git+https://github.com/moondance-labs/polkadot-sdk?branch=tanssi-polkadot-stable2407#4a003906b0987b16a473dd83bdb7ffc57395635a"
 dependencies = [
  "aquamarine",
  "frame-support",
@@ -3289,7 +3420,7 @@ dependencies = [
 [[package]]
 name = "frame-metadata-hash-extension"
 version = "0.5.0"
-source = "git+https://github.com/paritytech/polkadot-sdk?tag=polkadot-stable2407-1#16b0fd09d9e9281c20ee0c1d8b87d011e3e3454e"
+source = "git+https://github.com/moondance-labs/polkadot-sdk?branch=tanssi-polkadot-stable2407#4a003906b0987b16a473dd83bdb7ffc57395635a"
 dependencies = [
  "array-bytes",
  "docify",
@@ -3304,7 +3435,7 @@ dependencies = [
 [[package]]
 name = "frame-support"
 version = "37.0.0"
-source = "git+https://github.com/paritytech/polkadot-sdk?tag=polkadot-stable2407-1#16b0fd09d9e9281c20ee0c1d8b87d011e3e3454e"
+source = "git+https://github.com/moondance-labs/polkadot-sdk?branch=tanssi-polkadot-stable2407#4a003906b0987b16a473dd83bdb7ffc57395635a"
 dependencies = [
  "aquamarine",
  "array-bytes",
@@ -3345,7 +3476,7 @@ dependencies = [
 [[package]]
 name = "frame-support-procedural"
 version = "30.0.2"
-source = "git+https://github.com/paritytech/polkadot-sdk?tag=polkadot-stable2407-1#16b0fd09d9e9281c20ee0c1d8b87d011e3e3454e"
+source = "git+https://github.com/moondance-labs/polkadot-sdk?branch=tanssi-polkadot-stable2407#4a003906b0987b16a473dd83bdb7ffc57395635a"
 dependencies = [
  "Inflector",
  "cfg-expr",
@@ -3364,7 +3495,7 @@ dependencies = [
 [[package]]
 name = "frame-support-procedural-tools"
 version = "13.0.0"
-source = "git+https://github.com/paritytech/polkadot-sdk?tag=polkadot-stable2407-1#16b0fd09d9e9281c20ee0c1d8b87d011e3e3454e"
+source = "git+https://github.com/moondance-labs/polkadot-sdk?branch=tanssi-polkadot-stable2407#4a003906b0987b16a473dd83bdb7ffc57395635a"
 dependencies = [
  "frame-support-procedural-tools-derive",
  "proc-macro-crate 3.1.0",
@@ -3376,7 +3507,7 @@ dependencies = [
 [[package]]
 name = "frame-support-procedural-tools-derive"
 version = "12.0.0"
-source = "git+https://github.com/paritytech/polkadot-sdk?tag=polkadot-stable2407-1#16b0fd09d9e9281c20ee0c1d8b87d011e3e3454e"
+source = "git+https://github.com/moondance-labs/polkadot-sdk?branch=tanssi-polkadot-stable2407#4a003906b0987b16a473dd83bdb7ffc57395635a"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -3385,8 +3516,8 @@ dependencies = [
 
 [[package]]
 name = "frame-system"
-version = "37.1.0"
-source = "git+https://github.com/paritytech/polkadot-sdk?tag=polkadot-stable2407-1#16b0fd09d9e9281c20ee0c1d8b87d011e3e3454e"
+version = "37.0.0"
+source = "git+https://github.com/moondance-labs/polkadot-sdk?branch=tanssi-polkadot-stable2407#4a003906b0987b16a473dd83bdb7ffc57395635a"
 dependencies = [
  "cfg-if",
  "docify",
@@ -3406,7 +3537,7 @@ dependencies = [
 [[package]]
 name = "frame-system-benchmarking"
 version = "37.0.0"
-source = "git+https://github.com/paritytech/polkadot-sdk?tag=polkadot-stable2407-1#16b0fd09d9e9281c20ee0c1d8b87d011e3e3454e"
+source = "git+https://github.com/moondance-labs/polkadot-sdk?branch=tanssi-polkadot-stable2407#4a003906b0987b16a473dd83bdb7ffc57395635a"
 dependencies = [
  "frame-benchmarking",
  "frame-support",
@@ -3420,7 +3551,7 @@ dependencies = [
 [[package]]
 name = "frame-system-rpc-runtime-api"
 version = "34.0.0"
-source = "git+https://github.com/paritytech/polkadot-sdk?tag=polkadot-stable2407-1#16b0fd09d9e9281c20ee0c1d8b87d011e3e3454e"
+source = "git+https://github.com/moondance-labs/polkadot-sdk?branch=tanssi-polkadot-stable2407#4a003906b0987b16a473dd83bdb7ffc57395635a"
 dependencies = [
  "docify",
  "parity-scale-codec",
@@ -3430,7 +3561,7 @@ dependencies = [
 [[package]]
 name = "frame-try-runtime"
 version = "0.43.0"
-source = "git+https://github.com/paritytech/polkadot-sdk?tag=polkadot-stable2407-1#16b0fd09d9e9281c20ee0c1d8b87d011e3e3454e"
+source = "git+https://github.com/moondance-labs/polkadot-sdk?branch=tanssi-polkadot-stable2407#4a003906b0987b16a473dd83bdb7ffc57395635a"
 dependencies = [
  "frame-support",
  "parity-scale-codec",
@@ -3472,6 +3603,12 @@ name = "funty"
 version = "2.0.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "e6d5a32815ae3f33302d95fdcb2ce17862f8c65363dcfd29360480ba1001fc9c"
+
+[[package]]
+name = "futures"
+version = "0.1.31"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "3a471a38ef8ed83cd6e40aa59c1ffe17db6855c18e3604d9c4ed8c08ebc28678"
 
 [[package]]
 name = "futures"
@@ -3605,6 +3742,7 @@ version = "0.3.30"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "3d6401deb83407ab3da39eba7e33987a73c3df0c82b4bb5813ee871c19c41d48"
 dependencies = [
+ "futures 0.1.31",
  "futures-channel",
  "futures-core",
  "futures-io",
@@ -3651,7 +3789,6 @@ name = "generic-runtime-template"
 version = "2.0.0"
 dependencies = [
  "assets-common",
- "cumulus-pallet-aura-ext",
  "cumulus-pallet-parachain-system",
  "cumulus-pallet-session-benchmarking",
  "cumulus-pallet-xcm",
@@ -3659,7 +3796,9 @@ dependencies = [
  "cumulus-primitives-aura",
  "cumulus-primitives-core",
  "cumulus-primitives-storage-weight-reclaim",
+ "cumulus-primitives-timestamp",
  "cumulus-primitives-utility",
+ "dp-consensus",
  "frame-benchmarking",
  "frame-executive",
  "frame-metadata-hash-extension",
@@ -3668,7 +3807,7 @@ dependencies = [
  "frame-system-benchmarking",
  "frame-system-rpc-runtime-api",
  "frame-try-runtime",
- "hex-literal",
+ "hex-literal 0.4.1",
  "log",
  "openzeppelin-polkadot-wrappers",
  "openzeppelin-polkadot-wrappers-proc",
@@ -3677,10 +3816,9 @@ dependencies = [
  "orml-xtokens",
  "pallet-asset-manager",
  "pallet-assets",
- "pallet-aura",
- "pallet-authorship",
+ "pallet-author-inherent",
  "pallet-balances",
- "pallet-collator-selection",
+ "pallet-cc-authorities-noting",
  "pallet-conviction-voting",
  "pallet-message-queue",
  "pallet-multisig",
@@ -3688,7 +3826,6 @@ dependencies = [
  "pallet-proxy",
  "pallet-referenda",
  "pallet-scheduler",
- "pallet-session",
  "pallet-sudo",
  "pallet-timestamp",
  "pallet-transaction-payment",
@@ -3744,10 +3881,11 @@ dependencies = [
  "cumulus-relay-chain-interface",
  "frame-benchmarking",
  "frame-benchmarking-cli",
- "futures",
+ "futures 0.3.30",
  "generic-runtime-template",
  "jsonrpsee",
  "log",
+ "nimbus-consensus",
  "pallet-transaction-payment-rpc",
  "parity-scale-codec",
  "polkadot-cli",
@@ -3867,7 +4005,7 @@ checksum = "68a7f542ee6b35af73b06abc0dad1c1bae89964e4e253bc4b587b91c9637867b"
 dependencies = [
  "cfg-if",
  "dashmap",
- "futures",
+ "futures 0.3.30",
  "futures-timer",
  "no-std-compat",
  "nonzero_ext",
@@ -4027,6 +4165,12 @@ name = "hex-conservative"
 version = "0.1.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "212ab92002354b4819390025006c897e8140934349e8635c9b077f47b4dcbd20"
+
+[[package]]
+name = "hex-literal"
+version = "0.3.4"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "7ebdb29d2ea9ed0083cd8cece49bbd968021bd99b0849edb4a9a7ee0fdf6a4e0"
 
 [[package]]
 name = "hex-literal"
@@ -4323,7 +4467,7 @@ dependencies = [
  "async-io 2.3.4",
  "core-foundation",
  "fnv",
- "futures",
+ "futures 0.3.30",
  "if-addrs",
  "ipnet",
  "log",
@@ -4342,7 +4486,7 @@ dependencies = [
  "async-trait",
  "attohttpc",
  "bytes",
- "futures",
+ "futures 0.3.30",
  "http 0.2.12",
  "hyper 0.14.30",
  "log",
@@ -4849,7 +4993,7 @@ checksum = "e94495eb319a85b70a68b85e2389a95bb3555c71c49025b78c691a854a7e6464"
 dependencies = [
  "bytes",
  "either",
- "futures",
+ "futures 0.3.30",
  "futures-timer",
  "getrandom",
  "instant",
@@ -4910,7 +5054,7 @@ checksum = "dd44289ab25e4c9230d9246c475a22241e301b23e8f4061d3bdef304a1a99713"
 dependencies = [
  "either",
  "fnv",
- "futures",
+ "futures 0.3.30",
  "futures-timer",
  "instant",
  "libp2p-identity",
@@ -4937,7 +5081,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "e6a18db73084b4da2871438f6239fef35190b05023de7656e877c18a00541a3b"
 dependencies = [
  "async-trait",
- "futures",
+ "futures 0.3.30",
  "libp2p-core",
  "libp2p-identity",
  "log",
@@ -4954,7 +5098,7 @@ checksum = "45a96638a0a176bec0a4bcaebc1afa8cf909b114477209d7456ade52c61cd9cd"
 dependencies = [
  "asynchronous-codec",
  "either",
- "futures",
+ "futures 0.3.30",
  "futures-bounded",
  "futures-timer",
  "libp2p-core",
@@ -4998,7 +5142,7 @@ dependencies = [
  "bytes",
  "either",
  "fnv",
- "futures",
+ "futures 0.3.30",
  "futures-timer",
  "instant",
  "libp2p-core",
@@ -5023,7 +5167,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "42a2567c305232f5ef54185e9604579a894fd0674819402bb0ac0246da82f52a"
 dependencies = [
  "data-encoding",
- "futures",
+ "futures 0.3.30",
  "if-watch",
  "libp2p-core",
  "libp2p-identity",
@@ -5062,7 +5206,7 @@ checksum = "d2eeec39ad3ad0677551907dd304b2f13f17208ccebe333bef194076cd2e8921"
 dependencies = [
  "bytes",
  "curve25519-dalek",
- "futures",
+ "futures 0.3.30",
  "libp2p-core",
  "libp2p-identity",
  "log",
@@ -5086,7 +5230,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "e702d75cd0827dfa15f8fd92d15b9932abe38d10d21f47c50438c71dd1b5dae3"
 dependencies = [
  "either",
- "futures",
+ "futures 0.3.30",
  "futures-timer",
  "instant",
  "libp2p-core",
@@ -5104,7 +5248,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "130d451d83f21b81eb7b35b360bc7972aeafb15177784adc56528db082e6b927"
 dependencies = [
  "bytes",
- "futures",
+ "futures 0.3.30",
  "futures-timer",
  "if-watch",
  "libp2p-core",
@@ -5128,7 +5272,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "d8e3b4d67870478db72bac87bfc260ee6641d0734e0e3e275798f089c3fecfd4"
 dependencies = [
  "async-trait",
- "futures",
+ "futures 0.3.30",
  "instant",
  "libp2p-core",
  "libp2p-identity",
@@ -5147,7 +5291,7 @@ checksum = "580189e0074af847df90e75ef54f3f30059aedda37ea5a1659e8b9fca05c0141"
 dependencies = [
  "either",
  "fnv",
- "futures",
+ "futures 0.3.30",
  "futures-timer",
  "instant",
  "libp2p-core",
@@ -5181,7 +5325,7 @@ version = "0.40.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "b558dd40d1bcd1aaaed9de898e9ec6a436019ecc2420dd0016e712fbb61c5508"
 dependencies = [
- "futures",
+ "futures 0.3.30",
  "futures-timer",
  "if-watch",
  "libc",
@@ -5198,7 +5342,7 @@ version = "0.2.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "8218d1d5482b122ccae396bbf38abdcb283ecc96fa54760e1dfd251f0546ac61"
 dependencies = [
- "futures",
+ "futures 0.3.30",
  "futures-rustls",
  "libp2p-core",
  "libp2p-identity",
@@ -5217,7 +5361,7 @@ version = "0.1.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "82775a47b34f10f787ad3e2a22e2c1541e6ebef4fe9f28f3ac553921554c94c1"
 dependencies = [
- "futures",
+ "futures 0.3.30",
  "futures-timer",
  "igd-next",
  "libp2p-core",
@@ -5233,7 +5377,7 @@ version = "0.40.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "1e5d8e3a9e07da0ef5b55a9f26c009c8fb3c725d492d8bb4b431715786eea79c"
 dependencies = [
- "futures",
+ "futures 0.3.30",
  "js-sys",
  "libp2p-core",
  "send_wrapper",
@@ -5248,7 +5392,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "004ee9c4a4631435169aee6aad2f62e3984dc031c43b6d29731e8e82a016c538"
 dependencies = [
  "either",
- "futures",
+ "futures 0.3.30",
  "futures-rustls",
  "libp2p-core",
  "libp2p-identity",
@@ -5268,7 +5412,7 @@ version = "0.44.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "8eedcb62824c4300efb9cfd4e2a6edaf3ca097b9e68b36dabe45a44469fd6a85"
 dependencies = [
- "futures",
+ "futures 0.3.30",
  "libp2p-core",
  "log",
  "thiserror",
@@ -5434,9 +5578,9 @@ dependencies = [
  "bytes",
  "cid 0.10.1",
  "ed25519-dalek",
- "futures",
+ "futures 0.3.30",
  "futures-timer",
- "hex-literal",
+ "hex-literal 0.4.1",
  "indexmap 2.4.0",
  "libc",
  "mockall 0.12.1",
@@ -5709,7 +5853,7 @@ version = "0.1.8"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "69672161530e8aeca1d1400fbf3f1a1747ff60ea604265a4e906c2442df20532"
 dependencies = [
- "futures",
+ "futures 0.3.30",
  "rand",
  "thrift",
 ]
@@ -5769,9 +5913,9 @@ dependencies = [
 [[package]]
 name = "mmr-gadget"
 version = "39.0.0"
-source = "git+https://github.com/paritytech/polkadot-sdk?tag=polkadot-stable2407-1#16b0fd09d9e9281c20ee0c1d8b87d011e3e3454e"
+source = "git+https://github.com/moondance-labs/polkadot-sdk?branch=tanssi-polkadot-stable2407#4a003906b0987b16a473dd83bdb7ffc57395635a"
 dependencies = [
- "futures",
+ "futures 0.3.30",
  "log",
  "parity-scale-codec",
  "sc-client-api",
@@ -5788,7 +5932,7 @@ dependencies = [
 [[package]]
 name = "mmr-rpc"
 version = "37.0.0"
-source = "git+https://github.com/paritytech/polkadot-sdk?tag=polkadot-stable2407-1#16b0fd09d9e9281c20ee0c1d8b87d011e3e3454e"
+source = "git+https://github.com/moondance-labs/polkadot-sdk?branch=tanssi-polkadot-stable2407#4a003906b0987b16a473dd83bdb7ffc57395635a"
 dependencies = [
  "jsonrpsee",
  "parity-scale-codec",
@@ -5980,7 +6124,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "ea0df8e5eec2298a62b326ee4f0d7fe1a6b90a09dfcf9df37b38f947a8c42f19"
 dependencies = [
  "bytes",
- "futures",
+ "futures 0.3.30",
  "log",
  "pin-project",
  "smallvec",
@@ -6074,7 +6218,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "65b4b14489ab424703c092062176d52ba55485a89c076b4f9db05092b7223aa6"
 dependencies = [
  "bytes",
- "futures",
+ "futures 0.3.30",
  "log",
  "netlink-packet-core",
  "netlink-sys",
@@ -6089,7 +6233,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "416060d346fbaf1f23f9512963e3e878f1a78e707cb699ba9215761754244307"
 dependencies = [
  "bytes",
- "futures",
+ "futures 0.3.30",
  "libc",
  "log",
  "tokio",
@@ -6105,6 +6249,64 @@ dependencies = [
  "libc",
  "thiserror",
  "winapi",
+]
+
+[[package]]
+name = "nimbus-consensus"
+version = "0.9.0"
+source = "git+https://github.com/moondance-labs/moonkit?branch=tanssi-polkadot-stable2407#e0f62468002be72f8b0112847b42787a063b9d99"
+dependencies = [
+ "async-backing-primitives",
+ "async-trait",
+ "cumulus-client-collator",
+ "cumulus-client-consensus-common",
+ "cumulus-client-consensus-proposer",
+ "cumulus-client-parachain-inherent",
+ "cumulus-primitives-core",
+ "cumulus-primitives-parachain-inherent",
+ "cumulus-relay-chain-interface",
+ "futures 0.3.30",
+ "log",
+ "nimbus-primitives",
+ "parity-scale-codec",
+ "parking_lot 0.12.3",
+ "polkadot-node-primitives",
+ "polkadot-node-subsystem",
+ "polkadot-primitives",
+ "sc-client-api",
+ "sc-consensus",
+ "sc-consensus-manual-seal",
+ "sp-api",
+ "sp-application-crypto",
+ "sp-block-builder",
+ "sp-blockchain",
+ "sp-consensus",
+ "sp-consensus-slots",
+ "sp-core",
+ "sp-inherents",
+ "sp-keystore",
+ "sp-runtime",
+ "sp-version",
+ "substrate-prometheus-endpoint",
+ "tracing",
+]
+
+[[package]]
+name = "nimbus-primitives"
+version = "0.9.0"
+source = "git+https://github.com/moondance-labs/moonkit?branch=tanssi-polkadot-stable2407#e0f62468002be72f8b0112847b42787a063b9d99"
+dependencies = [
+ "async-trait",
+ "frame-benchmarking",
+ "frame-support",
+ "frame-system",
+ "parity-scale-codec",
+ "scale-info",
+ "sp-api",
+ "sp-application-crypto",
+ "sp-inherents",
+ "sp-runtime",
+ "sp-std",
 ]
 
 [[package]]
@@ -6425,7 +6627,7 @@ checksum = "41f6bbacc8c189a3f2e45e0fd0436e5d97f194db888e721bdbc3973e7dbed4c2"
 dependencies = [
  "async-trait",
  "dyn-clonable",
- "futures",
+ "futures 0.3.30",
  "futures-timer",
  "orchestra-proc-macro",
  "pin-project",
@@ -6538,7 +6740,7 @@ checksum = "b15813163c1d831bf4a13c3610c05c0d03b39feb07f7e09fa234dac9b15aaf39"
 [[package]]
 name = "pallet-asset-conversion"
 version = "19.0.0"
-source = "git+https://github.com/paritytech/polkadot-sdk?tag=polkadot-stable2407-1#16b0fd09d9e9281c20ee0c1d8b87d011e3e3454e"
+source = "git+https://github.com/moondance-labs/polkadot-sdk?branch=tanssi-polkadot-stable2407#4a003906b0987b16a473dd83bdb7ffc57395635a"
 dependencies = [
  "frame-benchmarking",
  "frame-support",
@@ -6575,7 +6777,7 @@ dependencies = [
 [[package]]
 name = "pallet-asset-rate"
 version = "16.0.0"
-source = "git+https://github.com/paritytech/polkadot-sdk?tag=polkadot-stable2407-1#16b0fd09d9e9281c20ee0c1d8b87d011e3e3454e"
+source = "git+https://github.com/moondance-labs/polkadot-sdk?branch=tanssi-polkadot-stable2407#4a003906b0987b16a473dd83bdb7ffc57395635a"
 dependencies = [
  "frame-benchmarking",
  "frame-support",
@@ -6589,7 +6791,7 @@ dependencies = [
 [[package]]
 name = "pallet-asset-tx-payment"
 version = "37.0.0"
-source = "git+https://github.com/paritytech/polkadot-sdk?tag=polkadot-stable2407-1#16b0fd09d9e9281c20ee0c1d8b87d011e3e3454e"
+source = "git+https://github.com/moondance-labs/polkadot-sdk?branch=tanssi-polkadot-stable2407#4a003906b0987b16a473dd83bdb7ffc57395635a"
 dependencies = [
  "frame-benchmarking",
  "frame-support",
@@ -6606,7 +6808,7 @@ dependencies = [
 [[package]]
 name = "pallet-assets"
 version = "39.0.0"
-source = "git+https://github.com/paritytech/polkadot-sdk?tag=polkadot-stable2407-1#16b0fd09d9e9281c20ee0c1d8b87d011e3e3454e"
+source = "git+https://github.com/moondance-labs/polkadot-sdk?branch=tanssi-polkadot-stable2407#4a003906b0987b16a473dd83bdb7ffc57395635a"
 dependencies = [
  "frame-benchmarking",
  "frame-support",
@@ -6620,25 +6822,28 @@ dependencies = [
 ]
 
 [[package]]
-name = "pallet-aura"
-version = "36.0.0"
-source = "git+https://github.com/paritytech/polkadot-sdk?tag=polkadot-stable2407-1#16b0fd09d9e9281c20ee0c1d8b87d011e3e3454e"
+name = "pallet-author-inherent"
+version = "0.9.0"
+source = "git+https://github.com/moondance-labs/moonkit?branch=tanssi-polkadot-stable2407#e0f62468002be72f8b0112847b42787a063b9d99"
 dependencies = [
+ "frame-benchmarking",
  "frame-support",
  "frame-system",
  "log",
- "pallet-timestamp",
+ "nimbus-primitives",
  "parity-scale-codec",
  "scale-info",
+ "sp-api",
  "sp-application-crypto",
- "sp-consensus-aura",
+ "sp-inherents",
  "sp-runtime",
+ "sp-std",
 ]
 
 [[package]]
 name = "pallet-authority-discovery"
 version = "37.0.0"
-source = "git+https://github.com/paritytech/polkadot-sdk?tag=polkadot-stable2407-1#16b0fd09d9e9281c20ee0c1d8b87d011e3e3454e"
+source = "git+https://github.com/moondance-labs/polkadot-sdk?branch=tanssi-polkadot-stable2407#4a003906b0987b16a473dd83bdb7ffc57395635a"
 dependencies = [
  "frame-support",
  "frame-system",
@@ -6653,7 +6858,7 @@ dependencies = [
 [[package]]
 name = "pallet-authorship"
 version = "37.0.0"
-source = "git+https://github.com/paritytech/polkadot-sdk?tag=polkadot-stable2407-1#16b0fd09d9e9281c20ee0c1d8b87d011e3e3454e"
+source = "git+https://github.com/moondance-labs/polkadot-sdk?branch=tanssi-polkadot-stable2407#4a003906b0987b16a473dd83bdb7ffc57395635a"
 dependencies = [
  "frame-support",
  "frame-system",
@@ -6666,7 +6871,7 @@ dependencies = [
 [[package]]
 name = "pallet-babe"
 version = "37.0.0"
-source = "git+https://github.com/paritytech/polkadot-sdk?tag=polkadot-stable2407-1#16b0fd09d9e9281c20ee0c1d8b87d011e3e3454e"
+source = "git+https://github.com/moondance-labs/polkadot-sdk?branch=tanssi-polkadot-stable2407#4a003906b0987b16a473dd83bdb7ffc57395635a"
 dependencies = [
  "frame-benchmarking",
  "frame-support",
@@ -6689,7 +6894,7 @@ dependencies = [
 [[package]]
 name = "pallet-bags-list"
 version = "36.0.0"
-source = "git+https://github.com/paritytech/polkadot-sdk?tag=polkadot-stable2407-1#16b0fd09d9e9281c20ee0c1d8b87d011e3e3454e"
+source = "git+https://github.com/moondance-labs/polkadot-sdk?branch=tanssi-polkadot-stable2407#4a003906b0987b16a473dd83bdb7ffc57395635a"
 dependencies = [
  "aquamarine",
  "docify",
@@ -6710,7 +6915,7 @@ dependencies = [
 [[package]]
 name = "pallet-balances"
 version = "38.0.0"
-source = "git+https://github.com/paritytech/polkadot-sdk?tag=polkadot-stable2407-1#16b0fd09d9e9281c20ee0c1d8b87d011e3e3454e"
+source = "git+https://github.com/moondance-labs/polkadot-sdk?branch=tanssi-polkadot-stable2407#4a003906b0987b16a473dd83bdb7ffc57395635a"
 dependencies = [
  "docify",
  "frame-benchmarking",
@@ -6725,7 +6930,7 @@ dependencies = [
 [[package]]
 name = "pallet-beefy"
 version = "38.0.0"
-source = "git+https://github.com/paritytech/polkadot-sdk?tag=polkadot-stable2407-1#16b0fd09d9e9281c20ee0c1d8b87d011e3e3454e"
+source = "git+https://github.com/moondance-labs/polkadot-sdk?branch=tanssi-polkadot-stable2407#4a003906b0987b16a473dd83bdb7ffc57395635a"
 dependencies = [
  "frame-support",
  "frame-system",
@@ -6744,7 +6949,7 @@ dependencies = [
 [[package]]
 name = "pallet-beefy-mmr"
 version = "38.0.0"
-source = "git+https://github.com/paritytech/polkadot-sdk?tag=polkadot-stable2407-1#16b0fd09d9e9281c20ee0c1d8b87d011e3e3454e"
+source = "git+https://github.com/moondance-labs/polkadot-sdk?branch=tanssi-polkadot-stable2407#4a003906b0987b16a473dd83bdb7ffc57395635a"
 dependencies = [
  "array-bytes",
  "binary-merkle-tree",
@@ -6768,7 +6973,7 @@ dependencies = [
 [[package]]
 name = "pallet-bounties"
 version = "36.0.0"
-source = "git+https://github.com/paritytech/polkadot-sdk?tag=polkadot-stable2407-1#16b0fd09d9e9281c20ee0c1d8b87d011e3e3454e"
+source = "git+https://github.com/moondance-labs/polkadot-sdk?branch=tanssi-polkadot-stable2407#4a003906b0987b16a473dd83bdb7ffc57395635a"
 dependencies = [
  "frame-benchmarking",
  "frame-support",
@@ -6785,7 +6990,7 @@ dependencies = [
 [[package]]
 name = "pallet-broker"
 version = "0.16.0"
-source = "git+https://github.com/paritytech/polkadot-sdk?tag=polkadot-stable2407-1#16b0fd09d9e9281c20ee0c1d8b87d011e3e3454e"
+source = "git+https://github.com/moondance-labs/polkadot-sdk?branch=tanssi-polkadot-stable2407#4a003906b0987b16a473dd83bdb7ffc57395635a"
 dependencies = [
  "bitvec",
  "frame-benchmarking",
@@ -6801,9 +7006,38 @@ dependencies = [
 ]
 
 [[package]]
+name = "pallet-cc-authorities-noting"
+version = "0.1.0"
+source = "git+https://github.com/moondance-labs/dancekit?branch=tanssi-polkadot-stable2407#83c5af140bffb06af6111f5cac7f3075315fa453"
+dependencies = [
+ "ccp-authorities-noting-inherent",
+ "cumulus-pallet-parachain-system",
+ "cumulus-primitives-core",
+ "dp-chain-state-snapshot",
+ "dp-collator-assignment",
+ "dp-core",
+ "frame-benchmarking",
+ "frame-support",
+ "frame-system",
+ "hex",
+ "log",
+ "nimbus-primitives",
+ "parity-scale-codec",
+ "scale-info",
+ "serde",
+ "sp-consensus-aura",
+ "sp-core",
+ "sp-inherents",
+ "sp-runtime",
+ "sp-state-machine",
+ "sp-std",
+ "sp-trie",
+]
+
+[[package]]
 name = "pallet-child-bounties"
 version = "36.0.0"
-source = "git+https://github.com/paritytech/polkadot-sdk?tag=polkadot-stable2407-1#16b0fd09d9e9281c20ee0c1d8b87d011e3e3454e"
+source = "git+https://github.com/moondance-labs/polkadot-sdk?branch=tanssi-polkadot-stable2407#4a003906b0987b16a473dd83bdb7ffc57395635a"
 dependencies = [
  "frame-benchmarking",
  "frame-support",
@@ -6821,7 +7055,7 @@ dependencies = [
 [[package]]
 name = "pallet-collator-selection"
 version = "18.0.0"
-source = "git+https://github.com/paritytech/polkadot-sdk?tag=polkadot-stable2407-1#16b0fd09d9e9281c20ee0c1d8b87d011e3e3454e"
+source = "git+https://github.com/moondance-labs/polkadot-sdk?branch=tanssi-polkadot-stable2407#4a003906b0987b16a473dd83bdb7ffc57395635a"
 dependencies = [
  "frame-benchmarking",
  "frame-support",
@@ -6840,7 +7074,7 @@ dependencies = [
 [[package]]
 name = "pallet-collective"
 version = "37.0.0"
-source = "git+https://github.com/paritytech/polkadot-sdk?tag=polkadot-stable2407-1#16b0fd09d9e9281c20ee0c1d8b87d011e3e3454e"
+source = "git+https://github.com/moondance-labs/polkadot-sdk?branch=tanssi-polkadot-stable2407#4a003906b0987b16a473dd83bdb7ffc57395635a"
 dependencies = [
  "frame-benchmarking",
  "frame-support",
@@ -6856,7 +7090,7 @@ dependencies = [
 [[package]]
 name = "pallet-conviction-voting"
 version = "37.0.0"
-source = "git+https://github.com/paritytech/polkadot-sdk?tag=polkadot-stable2407-1#16b0fd09d9e9281c20ee0c1d8b87d011e3e3454e"
+source = "git+https://github.com/moondance-labs/polkadot-sdk?branch=tanssi-polkadot-stable2407#4a003906b0987b16a473dd83bdb7ffc57395635a"
 dependencies = [
  "assert_matches",
  "frame-benchmarking",
@@ -6872,7 +7106,7 @@ dependencies = [
 [[package]]
 name = "pallet-delegated-staking"
 version = "4.0.0"
-source = "git+https://github.com/paritytech/polkadot-sdk?tag=polkadot-stable2407-1#16b0fd09d9e9281c20ee0c1d8b87d011e3e3454e"
+source = "git+https://github.com/moondance-labs/polkadot-sdk?branch=tanssi-polkadot-stable2407#4a003906b0987b16a473dd83bdb7ffc57395635a"
 dependencies = [
  "frame-support",
  "frame-system",
@@ -6885,7 +7119,7 @@ dependencies = [
 [[package]]
 name = "pallet-democracy"
 version = "37.0.0"
-source = "git+https://github.com/paritytech/polkadot-sdk?tag=polkadot-stable2407-1#16b0fd09d9e9281c20ee0c1d8b87d011e3e3454e"
+source = "git+https://github.com/moondance-labs/polkadot-sdk?branch=tanssi-polkadot-stable2407#4a003906b0987b16a473dd83bdb7ffc57395635a"
 dependencies = [
  "frame-benchmarking",
  "frame-support",
@@ -6902,7 +7136,7 @@ dependencies = [
 [[package]]
 name = "pallet-election-provider-multi-phase"
 version = "36.0.0"
-source = "git+https://github.com/paritytech/polkadot-sdk?tag=polkadot-stable2407-1#16b0fd09d9e9281c20ee0c1d8b87d011e3e3454e"
+source = "git+https://github.com/moondance-labs/polkadot-sdk?branch=tanssi-polkadot-stable2407#4a003906b0987b16a473dd83bdb7ffc57395635a"
 dependencies = [
  "frame-benchmarking",
  "frame-election-provider-support",
@@ -6924,7 +7158,7 @@ dependencies = [
 [[package]]
 name = "pallet-election-provider-support-benchmarking"
 version = "36.0.0"
-source = "git+https://github.com/paritytech/polkadot-sdk?tag=polkadot-stable2407-1#16b0fd09d9e9281c20ee0c1d8b87d011e3e3454e"
+source = "git+https://github.com/moondance-labs/polkadot-sdk?branch=tanssi-polkadot-stable2407#4a003906b0987b16a473dd83bdb7ffc57395635a"
 dependencies = [
  "frame-benchmarking",
  "frame-election-provider-support",
@@ -6937,7 +7171,7 @@ dependencies = [
 [[package]]
 name = "pallet-elections-phragmen"
 version = "38.0.0"
-source = "git+https://github.com/paritytech/polkadot-sdk?tag=polkadot-stable2407-1#16b0fd09d9e9281c20ee0c1d8b87d011e3e3454e"
+source = "git+https://github.com/moondance-labs/polkadot-sdk?branch=tanssi-polkadot-stable2407#4a003906b0987b16a473dd83bdb7ffc57395635a"
 dependencies = [
  "frame-benchmarking",
  "frame-support",
@@ -6955,7 +7189,7 @@ dependencies = [
 [[package]]
 name = "pallet-fast-unstake"
 version = "36.0.0"
-source = "git+https://github.com/paritytech/polkadot-sdk?tag=polkadot-stable2407-1#16b0fd09d9e9281c20ee0c1d8b87d011e3e3454e"
+source = "git+https://github.com/moondance-labs/polkadot-sdk?branch=tanssi-polkadot-stable2407#4a003906b0987b16a473dd83bdb7ffc57395635a"
 dependencies = [
  "docify",
  "frame-benchmarking",
@@ -6973,7 +7207,7 @@ dependencies = [
 [[package]]
 name = "pallet-grandpa"
 version = "37.0.0"
-source = "git+https://github.com/paritytech/polkadot-sdk?tag=polkadot-stable2407-1#16b0fd09d9e9281c20ee0c1d8b87d011e3e3454e"
+source = "git+https://github.com/moondance-labs/polkadot-sdk?branch=tanssi-polkadot-stable2407#4a003906b0987b16a473dd83bdb7ffc57395635a"
 dependencies = [
  "frame-benchmarking",
  "frame-support",
@@ -6995,7 +7229,7 @@ dependencies = [
 [[package]]
 name = "pallet-identity"
 version = "37.0.0"
-source = "git+https://github.com/paritytech/polkadot-sdk?tag=polkadot-stable2407-1#16b0fd09d9e9281c20ee0c1d8b87d011e3e3454e"
+source = "git+https://github.com/moondance-labs/polkadot-sdk?branch=tanssi-polkadot-stable2407#4a003906b0987b16a473dd83bdb7ffc57395635a"
 dependencies = [
  "enumflags2",
  "frame-benchmarking",
@@ -7011,7 +7245,7 @@ dependencies = [
 [[package]]
 name = "pallet-im-online"
 version = "36.0.0"
-source = "git+https://github.com/paritytech/polkadot-sdk?tag=polkadot-stable2407-1#16b0fd09d9e9281c20ee0c1d8b87d011e3e3454e"
+source = "git+https://github.com/moondance-labs/polkadot-sdk?branch=tanssi-polkadot-stable2407#4a003906b0987b16a473dd83bdb7ffc57395635a"
 dependencies = [
  "frame-benchmarking",
  "frame-support",
@@ -7030,7 +7264,7 @@ dependencies = [
 [[package]]
 name = "pallet-indices"
 version = "37.0.0"
-source = "git+https://github.com/paritytech/polkadot-sdk?tag=polkadot-stable2407-1#16b0fd09d9e9281c20ee0c1d8b87d011e3e3454e"
+source = "git+https://github.com/moondance-labs/polkadot-sdk?branch=tanssi-polkadot-stable2407#4a003906b0987b16a473dd83bdb7ffc57395635a"
 dependencies = [
  "frame-benchmarking",
  "frame-support",
@@ -7046,7 +7280,7 @@ dependencies = [
 [[package]]
 name = "pallet-membership"
 version = "37.0.0"
-source = "git+https://github.com/paritytech/polkadot-sdk?tag=polkadot-stable2407-1#16b0fd09d9e9281c20ee0c1d8b87d011e3e3454e"
+source = "git+https://github.com/moondance-labs/polkadot-sdk?branch=tanssi-polkadot-stable2407#4a003906b0987b16a473dd83bdb7ffc57395635a"
 dependencies = [
  "frame-benchmarking",
  "frame-support",
@@ -7062,7 +7296,7 @@ dependencies = [
 [[package]]
 name = "pallet-message-queue"
 version = "40.0.0"
-source = "git+https://github.com/paritytech/polkadot-sdk?tag=polkadot-stable2407-1#16b0fd09d9e9281c20ee0c1d8b87d011e3e3454e"
+source = "git+https://github.com/moondance-labs/polkadot-sdk?branch=tanssi-polkadot-stable2407#4a003906b0987b16a473dd83bdb7ffc57395635a"
 dependencies = [
  "environmental",
  "frame-benchmarking",
@@ -7081,7 +7315,7 @@ dependencies = [
 [[package]]
 name = "pallet-mmr"
 version = "37.0.0"
-source = "git+https://github.com/paritytech/polkadot-sdk?tag=polkadot-stable2407-1#16b0fd09d9e9281c20ee0c1d8b87d011e3e3454e"
+source = "git+https://github.com/moondance-labs/polkadot-sdk?branch=tanssi-polkadot-stable2407#4a003906b0987b16a473dd83bdb7ffc57395635a"
 dependencies = [
  "frame-benchmarking",
  "frame-support",
@@ -7098,7 +7332,7 @@ dependencies = [
 [[package]]
 name = "pallet-multisig"
 version = "37.0.0"
-source = "git+https://github.com/paritytech/polkadot-sdk?tag=polkadot-stable2407-1#16b0fd09d9e9281c20ee0c1d8b87d011e3e3454e"
+source = "git+https://github.com/moondance-labs/polkadot-sdk?branch=tanssi-polkadot-stable2407#4a003906b0987b16a473dd83bdb7ffc57395635a"
 dependencies = [
  "frame-benchmarking",
  "frame-support",
@@ -7113,7 +7347,7 @@ dependencies = [
 [[package]]
 name = "pallet-nis"
 version = "37.0.0"
-source = "git+https://github.com/paritytech/polkadot-sdk?tag=polkadot-stable2407-1#16b0fd09d9e9281c20ee0c1d8b87d011e3e3454e"
+source = "git+https://github.com/moondance-labs/polkadot-sdk?branch=tanssi-polkadot-stable2407#4a003906b0987b16a473dd83bdb7ffc57395635a"
 dependencies = [
  "frame-benchmarking",
  "frame-support",
@@ -7128,7 +7362,7 @@ dependencies = [
 [[package]]
 name = "pallet-nomination-pools"
 version = "34.0.0"
-source = "git+https://github.com/paritytech/polkadot-sdk?tag=polkadot-stable2407-1#16b0fd09d9e9281c20ee0c1d8b87d011e3e3454e"
+source = "git+https://github.com/moondance-labs/polkadot-sdk?branch=tanssi-polkadot-stable2407#4a003906b0987b16a473dd83bdb7ffc57395635a"
 dependencies = [
  "frame-support",
  "frame-system",
@@ -7146,7 +7380,7 @@ dependencies = [
 [[package]]
 name = "pallet-nomination-pools-benchmarking"
 version = "35.0.0"
-source = "git+https://github.com/paritytech/polkadot-sdk?tag=polkadot-stable2407-1#16b0fd09d9e9281c20ee0c1d8b87d011e3e3454e"
+source = "git+https://github.com/moondance-labs/polkadot-sdk?branch=tanssi-polkadot-stable2407#4a003906b0987b16a473dd83bdb7ffc57395635a"
 dependencies = [
  "frame-benchmarking",
  "frame-election-provider-support",
@@ -7166,7 +7400,7 @@ dependencies = [
 [[package]]
 name = "pallet-nomination-pools-runtime-api"
 version = "32.0.0"
-source = "git+https://github.com/paritytech/polkadot-sdk?tag=polkadot-stable2407-1#16b0fd09d9e9281c20ee0c1d8b87d011e3e3454e"
+source = "git+https://github.com/moondance-labs/polkadot-sdk?branch=tanssi-polkadot-stable2407#4a003906b0987b16a473dd83bdb7ffc57395635a"
 dependencies = [
  "pallet-nomination-pools",
  "parity-scale-codec",
@@ -7176,7 +7410,7 @@ dependencies = [
 [[package]]
 name = "pallet-offences"
 version = "36.0.0"
-source = "git+https://github.com/paritytech/polkadot-sdk?tag=polkadot-stable2407-1#16b0fd09d9e9281c20ee0c1d8b87d011e3e3454e"
+source = "git+https://github.com/moondance-labs/polkadot-sdk?branch=tanssi-polkadot-stable2407#4a003906b0987b16a473dd83bdb7ffc57395635a"
 dependencies = [
  "frame-support",
  "frame-system",
@@ -7192,7 +7426,7 @@ dependencies = [
 [[package]]
 name = "pallet-offences-benchmarking"
 version = "37.0.0"
-source = "git+https://github.com/paritytech/polkadot-sdk?tag=polkadot-stable2407-1#16b0fd09d9e9281c20ee0c1d8b87d011e3e3454e"
+source = "git+https://github.com/moondance-labs/polkadot-sdk?branch=tanssi-polkadot-stable2407#4a003906b0987b16a473dd83bdb7ffc57395635a"
 dependencies = [
  "frame-benchmarking",
  "frame-election-provider-support",
@@ -7215,7 +7449,7 @@ dependencies = [
 [[package]]
 name = "pallet-parameters"
 version = "0.8.0"
-source = "git+https://github.com/paritytech/polkadot-sdk?tag=polkadot-stable2407-1#16b0fd09d9e9281c20ee0c1d8b87d011e3e3454e"
+source = "git+https://github.com/moondance-labs/polkadot-sdk?branch=tanssi-polkadot-stable2407#4a003906b0987b16a473dd83bdb7ffc57395635a"
 dependencies = [
  "docify",
  "frame-benchmarking",
@@ -7232,7 +7466,7 @@ dependencies = [
 [[package]]
 name = "pallet-preimage"
 version = "37.0.0"
-source = "git+https://github.com/paritytech/polkadot-sdk?tag=polkadot-stable2407-1#16b0fd09d9e9281c20ee0c1d8b87d011e3e3454e"
+source = "git+https://github.com/moondance-labs/polkadot-sdk?branch=tanssi-polkadot-stable2407#4a003906b0987b16a473dd83bdb7ffc57395635a"
 dependencies = [
  "frame-benchmarking",
  "frame-support",
@@ -7248,7 +7482,7 @@ dependencies = [
 [[package]]
 name = "pallet-proxy"
 version = "37.0.0"
-source = "git+https://github.com/paritytech/polkadot-sdk?tag=polkadot-stable2407-1#16b0fd09d9e9281c20ee0c1d8b87d011e3e3454e"
+source = "git+https://github.com/moondance-labs/polkadot-sdk?branch=tanssi-polkadot-stable2407#4a003906b0987b16a473dd83bdb7ffc57395635a"
 dependencies = [
  "frame-benchmarking",
  "frame-support",
@@ -7262,7 +7496,7 @@ dependencies = [
 [[package]]
 name = "pallet-ranked-collective"
 version = "37.0.0"
-source = "git+https://github.com/paritytech/polkadot-sdk?tag=polkadot-stable2407-1#16b0fd09d9e9281c20ee0c1d8b87d011e3e3454e"
+source = "git+https://github.com/moondance-labs/polkadot-sdk?branch=tanssi-polkadot-stable2407#4a003906b0987b16a473dd83bdb7ffc57395635a"
 dependencies = [
  "frame-benchmarking",
  "frame-support",
@@ -7280,7 +7514,7 @@ dependencies = [
 [[package]]
 name = "pallet-recovery"
 version = "37.0.0"
-source = "git+https://github.com/paritytech/polkadot-sdk?tag=polkadot-stable2407-1#16b0fd09d9e9281c20ee0c1d8b87d011e3e3454e"
+source = "git+https://github.com/moondance-labs/polkadot-sdk?branch=tanssi-polkadot-stable2407#4a003906b0987b16a473dd83bdb7ffc57395635a"
 dependencies = [
  "frame-benchmarking",
  "frame-support",
@@ -7294,7 +7528,7 @@ dependencies = [
 [[package]]
 name = "pallet-referenda"
 version = "37.0.0"
-source = "git+https://github.com/paritytech/polkadot-sdk?tag=polkadot-stable2407-1#16b0fd09d9e9281c20ee0c1d8b87d011e3e3454e"
+source = "git+https://github.com/moondance-labs/polkadot-sdk?branch=tanssi-polkadot-stable2407#4a003906b0987b16a473dd83bdb7ffc57395635a"
 dependencies = [
  "assert_matches",
  "frame-benchmarking",
@@ -7312,7 +7546,7 @@ dependencies = [
 [[package]]
 name = "pallet-root-testing"
 version = "13.0.0"
-source = "git+https://github.com/paritytech/polkadot-sdk?tag=polkadot-stable2407-1#16b0fd09d9e9281c20ee0c1d8b87d011e3e3454e"
+source = "git+https://github.com/moondance-labs/polkadot-sdk?branch=tanssi-polkadot-stable2407#4a003906b0987b16a473dd83bdb7ffc57395635a"
 dependencies = [
  "frame-support",
  "frame-system",
@@ -7326,7 +7560,7 @@ dependencies = [
 [[package]]
 name = "pallet-scheduler"
 version = "38.0.0"
-source = "git+https://github.com/paritytech/polkadot-sdk?tag=polkadot-stable2407-1#16b0fd09d9e9281c20ee0c1d8b87d011e3e3454e"
+source = "git+https://github.com/moondance-labs/polkadot-sdk?branch=tanssi-polkadot-stable2407#4a003906b0987b16a473dd83bdb7ffc57395635a"
 dependencies = [
  "docify",
  "frame-benchmarking",
@@ -7343,7 +7577,7 @@ dependencies = [
 [[package]]
 name = "pallet-session"
 version = "37.0.0"
-source = "git+https://github.com/paritytech/polkadot-sdk?tag=polkadot-stable2407-1#16b0fd09d9e9281c20ee0c1d8b87d011e3e3454e"
+source = "git+https://github.com/moondance-labs/polkadot-sdk?branch=tanssi-polkadot-stable2407#4a003906b0987b16a473dd83bdb7ffc57395635a"
 dependencies = [
  "frame-support",
  "frame-system",
@@ -7364,7 +7598,7 @@ dependencies = [
 [[package]]
 name = "pallet-session-benchmarking"
 version = "37.0.0"
-source = "git+https://github.com/paritytech/polkadot-sdk?tag=polkadot-stable2407-1#16b0fd09d9e9281c20ee0c1d8b87d011e3e3454e"
+source = "git+https://github.com/moondance-labs/polkadot-sdk?branch=tanssi-polkadot-stable2407#4a003906b0987b16a473dd83bdb7ffc57395635a"
 dependencies = [
  "frame-benchmarking",
  "frame-support",
@@ -7380,7 +7614,7 @@ dependencies = [
 [[package]]
 name = "pallet-society"
 version = "37.0.0"
-source = "git+https://github.com/paritytech/polkadot-sdk?tag=polkadot-stable2407-1#16b0fd09d9e9281c20ee0c1d8b87d011e3e3454e"
+source = "git+https://github.com/moondance-labs/polkadot-sdk?branch=tanssi-polkadot-stable2407#4a003906b0987b16a473dd83bdb7ffc57395635a"
 dependencies = [
  "frame-benchmarking",
  "frame-support",
@@ -7397,7 +7631,7 @@ dependencies = [
 [[package]]
 name = "pallet-staking"
 version = "37.0.0"
-source = "git+https://github.com/paritytech/polkadot-sdk?tag=polkadot-stable2407-1#16b0fd09d9e9281c20ee0c1d8b87d011e3e3454e"
+source = "git+https://github.com/moondance-labs/polkadot-sdk?branch=tanssi-polkadot-stable2407#4a003906b0987b16a473dd83bdb7ffc57395635a"
 dependencies = [
  "frame-benchmarking",
  "frame-election-provider-support",
@@ -7419,7 +7653,7 @@ dependencies = [
 [[package]]
 name = "pallet-staking-reward-curve"
 version = "12.0.0"
-source = "git+https://github.com/paritytech/polkadot-sdk?tag=polkadot-stable2407-1#16b0fd09d9e9281c20ee0c1d8b87d011e3e3454e"
+source = "git+https://github.com/moondance-labs/polkadot-sdk?branch=tanssi-polkadot-stable2407#4a003906b0987b16a473dd83bdb7ffc57395635a"
 dependencies = [
  "proc-macro-crate 3.1.0",
  "proc-macro2",
@@ -7430,7 +7664,7 @@ dependencies = [
 [[package]]
 name = "pallet-staking-reward-fn"
 version = "22.0.0"
-source = "git+https://github.com/paritytech/polkadot-sdk?tag=polkadot-stable2407-1#16b0fd09d9e9281c20ee0c1d8b87d011e3e3454e"
+source = "git+https://github.com/moondance-labs/polkadot-sdk?branch=tanssi-polkadot-stable2407#4a003906b0987b16a473dd83bdb7ffc57395635a"
 dependencies = [
  "log",
  "sp-arithmetic",
@@ -7439,7 +7673,7 @@ dependencies = [
 [[package]]
 name = "pallet-staking-runtime-api"
 version = "22.0.0"
-source = "git+https://github.com/paritytech/polkadot-sdk?tag=polkadot-stable2407-1#16b0fd09d9e9281c20ee0c1d8b87d011e3e3454e"
+source = "git+https://github.com/moondance-labs/polkadot-sdk?branch=tanssi-polkadot-stable2407#4a003906b0987b16a473dd83bdb7ffc57395635a"
 dependencies = [
  "parity-scale-codec",
  "sp-api",
@@ -7449,7 +7683,7 @@ dependencies = [
 [[package]]
 name = "pallet-state-trie-migration"
 version = "39.0.0"
-source = "git+https://github.com/paritytech/polkadot-sdk?tag=polkadot-stable2407-1#16b0fd09d9e9281c20ee0c1d8b87d011e3e3454e"
+source = "git+https://github.com/moondance-labs/polkadot-sdk?branch=tanssi-polkadot-stable2407#4a003906b0987b16a473dd83bdb7ffc57395635a"
 dependencies = [
  "frame-benchmarking",
  "frame-support",
@@ -7465,7 +7699,7 @@ dependencies = [
 [[package]]
 name = "pallet-sudo"
 version = "37.0.0"
-source = "git+https://github.com/paritytech/polkadot-sdk?tag=polkadot-stable2407-1#16b0fd09d9e9281c20ee0c1d8b87d011e3e3454e"
+source = "git+https://github.com/moondance-labs/polkadot-sdk?branch=tanssi-polkadot-stable2407#4a003906b0987b16a473dd83bdb7ffc57395635a"
 dependencies = [
  "docify",
  "frame-benchmarking",
@@ -7480,7 +7714,7 @@ dependencies = [
 [[package]]
 name = "pallet-timestamp"
 version = "36.0.0"
-source = "git+https://github.com/paritytech/polkadot-sdk?tag=polkadot-stable2407-1#16b0fd09d9e9281c20ee0c1d8b87d011e3e3454e"
+source = "git+https://github.com/moondance-labs/polkadot-sdk?branch=tanssi-polkadot-stable2407#4a003906b0987b16a473dd83bdb7ffc57395635a"
 dependencies = [
  "docify",
  "frame-benchmarking",
@@ -7499,7 +7733,7 @@ dependencies = [
 [[package]]
 name = "pallet-tips"
 version = "36.0.0"
-source = "git+https://github.com/paritytech/polkadot-sdk?tag=polkadot-stable2407-1#16b0fd09d9e9281c20ee0c1d8b87d011e3e3454e"
+source = "git+https://github.com/moondance-labs/polkadot-sdk?branch=tanssi-polkadot-stable2407#4a003906b0987b16a473dd83bdb7ffc57395635a"
 dependencies = [
  "frame-benchmarking",
  "frame-support",
@@ -7517,7 +7751,7 @@ dependencies = [
 [[package]]
 name = "pallet-transaction-payment"
 version = "37.0.0"
-source = "git+https://github.com/paritytech/polkadot-sdk?tag=polkadot-stable2407-1#16b0fd09d9e9281c20ee0c1d8b87d011e3e3454e"
+source = "git+https://github.com/moondance-labs/polkadot-sdk?branch=tanssi-polkadot-stable2407#4a003906b0987b16a473dd83bdb7ffc57395635a"
 dependencies = [
  "frame-support",
  "frame-system",
@@ -7532,7 +7766,7 @@ dependencies = [
 [[package]]
 name = "pallet-transaction-payment-rpc"
 version = "40.0.0"
-source = "git+https://github.com/paritytech/polkadot-sdk?tag=polkadot-stable2407-1#16b0fd09d9e9281c20ee0c1d8b87d011e3e3454e"
+source = "git+https://github.com/moondance-labs/polkadot-sdk?branch=tanssi-polkadot-stable2407#4a003906b0987b16a473dd83bdb7ffc57395635a"
 dependencies = [
  "jsonrpsee",
  "pallet-transaction-payment-rpc-runtime-api",
@@ -7548,7 +7782,7 @@ dependencies = [
 [[package]]
 name = "pallet-transaction-payment-rpc-runtime-api"
 version = "37.0.0"
-source = "git+https://github.com/paritytech/polkadot-sdk?tag=polkadot-stable2407-1#16b0fd09d9e9281c20ee0c1d8b87d011e3e3454e"
+source = "git+https://github.com/moondance-labs/polkadot-sdk?branch=tanssi-polkadot-stable2407#4a003906b0987b16a473dd83bdb7ffc57395635a"
 dependencies = [
  "pallet-transaction-payment",
  "parity-scale-codec",
@@ -7560,7 +7794,7 @@ dependencies = [
 [[package]]
 name = "pallet-treasury"
 version = "36.0.0"
-source = "git+https://github.com/paritytech/polkadot-sdk?tag=polkadot-stable2407-1#16b0fd09d9e9281c20ee0c1d8b87d011e3e3454e"
+source = "git+https://github.com/moondance-labs/polkadot-sdk?branch=tanssi-polkadot-stable2407#4a003906b0987b16a473dd83bdb7ffc57395635a"
 dependencies = [
  "docify",
  "frame-benchmarking",
@@ -7578,7 +7812,7 @@ dependencies = [
 [[package]]
 name = "pallet-utility"
 version = "37.0.0"
-source = "git+https://github.com/paritytech/polkadot-sdk?tag=polkadot-stable2407-1#16b0fd09d9e9281c20ee0c1d8b87d011e3e3454e"
+source = "git+https://github.com/moondance-labs/polkadot-sdk?branch=tanssi-polkadot-stable2407#4a003906b0987b16a473dd83bdb7ffc57395635a"
 dependencies = [
  "frame-benchmarking",
  "frame-support",
@@ -7593,7 +7827,7 @@ dependencies = [
 [[package]]
 name = "pallet-vesting"
 version = "37.0.0"
-source = "git+https://github.com/paritytech/polkadot-sdk?tag=polkadot-stable2407-1#16b0fd09d9e9281c20ee0c1d8b87d011e3e3454e"
+source = "git+https://github.com/moondance-labs/polkadot-sdk?branch=tanssi-polkadot-stable2407#4a003906b0987b16a473dd83bdb7ffc57395635a"
 dependencies = [
  "frame-benchmarking",
  "frame-support",
@@ -7607,7 +7841,7 @@ dependencies = [
 [[package]]
 name = "pallet-whitelist"
 version = "36.0.0"
-source = "git+https://github.com/paritytech/polkadot-sdk?tag=polkadot-stable2407-1#16b0fd09d9e9281c20ee0c1d8b87d011e3e3454e"
+source = "git+https://github.com/moondance-labs/polkadot-sdk?branch=tanssi-polkadot-stable2407#4a003906b0987b16a473dd83bdb7ffc57395635a"
 dependencies = [
  "frame-benchmarking",
  "frame-support",
@@ -7621,7 +7855,7 @@ dependencies = [
 [[package]]
 name = "pallet-xcm"
 version = "16.0.0"
-source = "git+https://github.com/paritytech/polkadot-sdk?tag=polkadot-stable2407-1#16b0fd09d9e9281c20ee0c1d8b87d011e3e3454e"
+source = "git+https://github.com/moondance-labs/polkadot-sdk?branch=tanssi-polkadot-stable2407#4a003906b0987b16a473dd83bdb7ffc57395635a"
 dependencies = [
  "bounded-collections",
  "frame-benchmarking",
@@ -7644,7 +7878,7 @@ dependencies = [
 [[package]]
 name = "pallet-xcm-benchmarks"
 version = "16.0.0"
-source = "git+https://github.com/paritytech/polkadot-sdk?tag=polkadot-stable2407-1#16b0fd09d9e9281c20ee0c1d8b87d011e3e3454e"
+source = "git+https://github.com/moondance-labs/polkadot-sdk?branch=tanssi-polkadot-stable2407#4a003906b0987b16a473dd83bdb7ffc57395635a"
 dependencies = [
  "frame-benchmarking",
  "frame-support",
@@ -7706,7 +7940,7 @@ dependencies = [
 [[package]]
 name = "parachains-common"
 version = "17.0.0"
-source = "git+https://github.com/paritytech/polkadot-sdk?tag=polkadot-stable2407-1#16b0fd09d9e9281c20ee0c1d8b87d011e3e3454e"
+source = "git+https://github.com/moondance-labs/polkadot-sdk?branch=tanssi-polkadot-stable2407#4a003906b0987b16a473dd83bdb7ffc57395635a"
 dependencies = [
  "cumulus-primitives-core",
  "cumulus-primitives-utility",
@@ -8025,10 +8259,10 @@ checksum = "d231b230927b5e4ad203db57bbcbee2802f6bce620b1e4a9024a07d94e2907ec"
 [[package]]
 name = "polkadot-approval-distribution"
 version = "17.0.0"
-source = "git+https://github.com/paritytech/polkadot-sdk?tag=polkadot-stable2407-1#16b0fd09d9e9281c20ee0c1d8b87d011e3e3454e"
+source = "git+https://github.com/moondance-labs/polkadot-sdk?branch=tanssi-polkadot-stable2407#4a003906b0987b16a473dd83bdb7ffc57395635a"
 dependencies = [
  "bitvec",
- "futures",
+ "futures 0.3.30",
  "futures-timer",
  "itertools 0.11.0",
  "polkadot-node-jaeger",
@@ -8045,10 +8279,10 @@ dependencies = [
 [[package]]
 name = "polkadot-availability-bitfield-distribution"
 version = "17.0.0"
-source = "git+https://github.com/paritytech/polkadot-sdk?tag=polkadot-stable2407-1#16b0fd09d9e9281c20ee0c1d8b87d011e3e3454e"
+source = "git+https://github.com/moondance-labs/polkadot-sdk?branch=tanssi-polkadot-stable2407#4a003906b0987b16a473dd83bdb7ffc57395635a"
 dependencies = [
  "always-assert",
- "futures",
+ "futures 0.3.30",
  "futures-timer",
  "polkadot-node-network-protocol",
  "polkadot-node-subsystem",
@@ -8060,12 +8294,12 @@ dependencies = [
 
 [[package]]
 name = "polkadot-availability-distribution"
-version = "17.0.1"
-source = "git+https://github.com/paritytech/polkadot-sdk?tag=polkadot-stable2407-1#16b0fd09d9e9281c20ee0c1d8b87d011e3e3454e"
+version = "17.0.0"
+source = "git+https://github.com/moondance-labs/polkadot-sdk?branch=tanssi-polkadot-stable2407#4a003906b0987b16a473dd83bdb7ffc57395635a"
 dependencies = [
  "derive_more",
  "fatality",
- "futures",
+ "futures 0.3.30",
  "parity-scale-codec",
  "polkadot-erasure-coding",
  "polkadot-node-network-protocol",
@@ -8085,11 +8319,11 @@ dependencies = [
 [[package]]
 name = "polkadot-availability-recovery"
 version = "17.0.0"
-source = "git+https://github.com/paritytech/polkadot-sdk?tag=polkadot-stable2407-1#16b0fd09d9e9281c20ee0c1d8b87d011e3e3454e"
+source = "git+https://github.com/moondance-labs/polkadot-sdk?branch=tanssi-polkadot-stable2407#4a003906b0987b16a473dd83bdb7ffc57395635a"
 dependencies = [
  "async-trait",
  "fatality",
- "futures",
+ "futures 0.3.30",
  "parity-scale-codec",
  "polkadot-erasure-coding",
  "polkadot-node-network-protocol",
@@ -8118,12 +8352,12 @@ dependencies = [
 [[package]]
 name = "polkadot-cli"
 version = "17.0.0"
-source = "git+https://github.com/paritytech/polkadot-sdk?tag=polkadot-stable2407-1#16b0fd09d9e9281c20ee0c1d8b87d011e3e3454e"
+source = "git+https://github.com/moondance-labs/polkadot-sdk?branch=tanssi-polkadot-stable2407#4a003906b0987b16a473dd83bdb7ffc57395635a"
 dependencies = [
  "cfg-if",
  "clap",
  "frame-benchmarking-cli",
- "futures",
+ "futures 0.3.30",
  "log",
  "polkadot-node-metrics",
  "polkadot-node-primitives",
@@ -8146,11 +8380,11 @@ dependencies = [
 [[package]]
 name = "polkadot-collator-protocol"
 version = "17.0.0"
-source = "git+https://github.com/paritytech/polkadot-sdk?tag=polkadot-stable2407-1#16b0fd09d9e9281c20ee0c1d8b87d011e3e3454e"
+source = "git+https://github.com/moondance-labs/polkadot-sdk?branch=tanssi-polkadot-stable2407#4a003906b0987b16a473dd83bdb7ffc57395635a"
 dependencies = [
  "bitvec",
  "fatality",
- "futures",
+ "futures 0.3.30",
  "futures-timer",
  "polkadot-node-network-protocol",
  "polkadot-node-primitives",
@@ -8168,7 +8402,7 @@ dependencies = [
 [[package]]
 name = "polkadot-core-primitives"
 version = "15.0.0"
-source = "git+https://github.com/paritytech/polkadot-sdk?tag=polkadot-stable2407-1#16b0fd09d9e9281c20ee0c1d8b87d011e3e3454e"
+source = "git+https://github.com/moondance-labs/polkadot-sdk?branch=tanssi-polkadot-stable2407#4a003906b0987b16a473dd83bdb7ffc57395635a"
 dependencies = [
  "parity-scale-codec",
  "scale-info",
@@ -8179,11 +8413,11 @@ dependencies = [
 [[package]]
 name = "polkadot-dispute-distribution"
 version = "17.0.0"
-source = "git+https://github.com/paritytech/polkadot-sdk?tag=polkadot-stable2407-1#16b0fd09d9e9281c20ee0c1d8b87d011e3e3454e"
+source = "git+https://github.com/moondance-labs/polkadot-sdk?branch=tanssi-polkadot-stable2407#4a003906b0987b16a473dd83bdb7ffc57395635a"
 dependencies = [
  "derive_more",
  "fatality",
- "futures",
+ "futures 0.3.30",
  "futures-timer",
  "indexmap 2.4.0",
  "parity-scale-codec",
@@ -8204,7 +8438,7 @@ dependencies = [
 [[package]]
 name = "polkadot-erasure-coding"
 version = "15.0.0"
-source = "git+https://github.com/paritytech/polkadot-sdk?tag=polkadot-stable2407-1#16b0fd09d9e9281c20ee0c1d8b87d011e3e3454e"
+source = "git+https://github.com/moondance-labs/polkadot-sdk?branch=tanssi-polkadot-stable2407#4a003906b0987b16a473dd83bdb7ffc57395635a"
 dependencies = [
  "parity-scale-codec",
  "polkadot-node-primitives",
@@ -8218,9 +8452,9 @@ dependencies = [
 [[package]]
 name = "polkadot-gossip-support"
 version = "17.0.0"
-source = "git+https://github.com/paritytech/polkadot-sdk?tag=polkadot-stable2407-1#16b0fd09d9e9281c20ee0c1d8b87d011e3e3454e"
+source = "git+https://github.com/moondance-labs/polkadot-sdk?branch=tanssi-polkadot-stable2407#4a003906b0987b16a473dd83bdb7ffc57395635a"
 dependencies = [
- "futures",
+ "futures 0.3.30",
  "futures-timer",
  "polkadot-node-network-protocol",
  "polkadot-node-subsystem",
@@ -8240,13 +8474,13 @@ dependencies = [
 [[package]]
 name = "polkadot-network-bridge"
 version = "17.0.0"
-source = "git+https://github.com/paritytech/polkadot-sdk?tag=polkadot-stable2407-1#16b0fd09d9e9281c20ee0c1d8b87d011e3e3454e"
+source = "git+https://github.com/moondance-labs/polkadot-sdk?branch=tanssi-polkadot-stable2407#4a003906b0987b16a473dd83bdb7ffc57395635a"
 dependencies = [
  "always-assert",
  "async-trait",
  "bytes",
  "fatality",
- "futures",
+ "futures 0.3.30",
  "parity-scale-codec",
  "parking_lot 0.12.3",
  "polkadot-node-metrics",
@@ -8263,9 +8497,9 @@ dependencies = [
 [[package]]
 name = "polkadot-node-collation-generation"
 version = "17.0.0"
-source = "git+https://github.com/paritytech/polkadot-sdk?tag=polkadot-stable2407-1#16b0fd09d9e9281c20ee0c1d8b87d011e3e3454e"
+source = "git+https://github.com/moondance-labs/polkadot-sdk?branch=tanssi-polkadot-stable2407#4a003906b0987b16a473dd83bdb7ffc57395635a"
 dependencies = [
- "futures",
+ "futures 0.3.30",
  "parity-scale-codec",
  "polkadot-erasure-coding",
  "polkadot-node-primitives",
@@ -8281,11 +8515,11 @@ dependencies = [
 [[package]]
 name = "polkadot-node-core-approval-voting"
 version = "17.0.0"
-source = "git+https://github.com/paritytech/polkadot-sdk?tag=polkadot-stable2407-1#16b0fd09d9e9281c20ee0c1d8b87d011e3e3454e"
+source = "git+https://github.com/moondance-labs/polkadot-sdk?branch=tanssi-polkadot-stable2407#4a003906b0987b16a473dd83bdb7ffc57395635a"
 dependencies = [
  "bitvec",
  "derive_more",
- "futures",
+ "futures 0.3.30",
  "futures-timer",
  "itertools 0.11.0",
  "kvdb",
@@ -8314,10 +8548,10 @@ dependencies = [
 [[package]]
 name = "polkadot-node-core-av-store"
 version = "17.0.0"
-source = "git+https://github.com/paritytech/polkadot-sdk?tag=polkadot-stable2407-1#16b0fd09d9e9281c20ee0c1d8b87d011e3e3454e"
+source = "git+https://github.com/moondance-labs/polkadot-sdk?branch=tanssi-polkadot-stable2407#4a003906b0987b16a473dd83bdb7ffc57395635a"
 dependencies = [
  "bitvec",
- "futures",
+ "futures 0.3.30",
  "futures-timer",
  "kvdb",
  "parity-scale-codec",
@@ -8336,11 +8570,11 @@ dependencies = [
 [[package]]
 name = "polkadot-node-core-backing"
 version = "17.0.0"
-source = "git+https://github.com/paritytech/polkadot-sdk?tag=polkadot-stable2407-1#16b0fd09d9e9281c20ee0c1d8b87d011e3e3454e"
+source = "git+https://github.com/moondance-labs/polkadot-sdk?branch=tanssi-polkadot-stable2407#4a003906b0987b16a473dd83bdb7ffc57395635a"
 dependencies = [
  "bitvec",
  "fatality",
- "futures",
+ "futures 0.3.30",
  "polkadot-erasure-coding",
  "polkadot-node-primitives",
  "polkadot-node-subsystem",
@@ -8356,9 +8590,9 @@ dependencies = [
 [[package]]
 name = "polkadot-node-core-bitfield-signing"
 version = "17.0.0"
-source = "git+https://github.com/paritytech/polkadot-sdk?tag=polkadot-stable2407-1#16b0fd09d9e9281c20ee0c1d8b87d011e3e3454e"
+source = "git+https://github.com/moondance-labs/polkadot-sdk?branch=tanssi-polkadot-stable2407#4a003906b0987b16a473dd83bdb7ffc57395635a"
 dependencies = [
- "futures",
+ "futures 0.3.30",
  "polkadot-node-subsystem",
  "polkadot-node-subsystem-util",
  "polkadot-primitives",
@@ -8370,11 +8604,11 @@ dependencies = [
 
 [[package]]
 name = "polkadot-node-core-candidate-validation"
-version = "17.1.0"
-source = "git+https://github.com/paritytech/polkadot-sdk?tag=polkadot-stable2407-1#16b0fd09d9e9281c20ee0c1d8b87d011e3e3454e"
+version = "17.0.0"
+source = "git+https://github.com/moondance-labs/polkadot-sdk?branch=tanssi-polkadot-stable2407#4a003906b0987b16a473dd83bdb7ffc57395635a"
 dependencies = [
  "async-trait",
- "futures",
+ "futures 0.3.30",
  "futures-timer",
  "parity-scale-codec",
  "polkadot-node-core-pvf",
@@ -8385,8 +8619,6 @@ dependencies = [
  "polkadot-overseer",
  "polkadot-parachain-primitives",
  "polkadot-primitives",
- "sp-application-crypto",
- "sp-keystore",
  "sp-maybe-compressed-blob",
  "tracing-gum",
 ]
@@ -8394,9 +8626,9 @@ dependencies = [
 [[package]]
 name = "polkadot-node-core-chain-api"
 version = "17.0.0"
-source = "git+https://github.com/paritytech/polkadot-sdk?tag=polkadot-stable2407-1#16b0fd09d9e9281c20ee0c1d8b87d011e3e3454e"
+source = "git+https://github.com/moondance-labs/polkadot-sdk?branch=tanssi-polkadot-stable2407#4a003906b0987b16a473dd83bdb7ffc57395635a"
 dependencies = [
- "futures",
+ "futures 0.3.30",
  "polkadot-node-metrics",
  "polkadot-node-subsystem",
  "polkadot-node-subsystem-types",
@@ -8408,9 +8640,9 @@ dependencies = [
 [[package]]
 name = "polkadot-node-core-chain-selection"
 version = "17.0.0"
-source = "git+https://github.com/paritytech/polkadot-sdk?tag=polkadot-stable2407-1#16b0fd09d9e9281c20ee0c1d8b87d011e3e3454e"
+source = "git+https://github.com/moondance-labs/polkadot-sdk?branch=tanssi-polkadot-stable2407#4a003906b0987b16a473dd83bdb7ffc57395635a"
 dependencies = [
- "futures",
+ "futures 0.3.30",
  "futures-timer",
  "kvdb",
  "parity-scale-codec",
@@ -8425,10 +8657,10 @@ dependencies = [
 [[package]]
 name = "polkadot-node-core-dispute-coordinator"
 version = "17.0.0"
-source = "git+https://github.com/paritytech/polkadot-sdk?tag=polkadot-stable2407-1#16b0fd09d9e9281c20ee0c1d8b87d011e3e3454e"
+source = "git+https://github.com/moondance-labs/polkadot-sdk?branch=tanssi-polkadot-stable2407#4a003906b0987b16a473dd83bdb7ffc57395635a"
 dependencies = [
  "fatality",
- "futures",
+ "futures 0.3.30",
  "kvdb",
  "parity-scale-codec",
  "polkadot-node-primitives",
@@ -8444,10 +8676,10 @@ dependencies = [
 [[package]]
 name = "polkadot-node-core-parachains-inherent"
 version = "17.0.0"
-source = "git+https://github.com/paritytech/polkadot-sdk?tag=polkadot-stable2407-1#16b0fd09d9e9281c20ee0c1d8b87d011e3e3454e"
+source = "git+https://github.com/moondance-labs/polkadot-sdk?branch=tanssi-polkadot-stable2407#4a003906b0987b16a473dd83bdb7ffc57395635a"
 dependencies = [
  "async-trait",
- "futures",
+ "futures 0.3.30",
  "futures-timer",
  "polkadot-node-subsystem",
  "polkadot-overseer",
@@ -8460,11 +8692,14 @@ dependencies = [
 
 [[package]]
 name = "polkadot-node-core-prospective-parachains"
-version = "16.1.0"
-source = "git+https://github.com/paritytech/polkadot-sdk?tag=polkadot-stable2407-1#16b0fd09d9e9281c20ee0c1d8b87d011e3e3454e"
+version = "16.0.0"
+source = "git+https://github.com/moondance-labs/polkadot-sdk?branch=tanssi-polkadot-stable2407#4a003906b0987b16a473dd83bdb7ffc57395635a"
 dependencies = [
+ "bitvec",
  "fatality",
- "futures",
+ "futures 0.3.30",
+ "parity-scale-codec",
+ "polkadot-node-primitives",
  "polkadot-node-subsystem",
  "polkadot-node-subsystem-util",
  "polkadot-primitives",
@@ -8475,11 +8710,11 @@ dependencies = [
 [[package]]
 name = "polkadot-node-core-provisioner"
 version = "17.0.0"
-source = "git+https://github.com/paritytech/polkadot-sdk?tag=polkadot-stable2407-1#16b0fd09d9e9281c20ee0c1d8b87d011e3e3454e"
+source = "git+https://github.com/moondance-labs/polkadot-sdk?branch=tanssi-polkadot-stable2407#4a003906b0987b16a473dd83bdb7ffc57395635a"
 dependencies = [
  "bitvec",
  "fatality",
- "futures",
+ "futures 0.3.30",
  "futures-timer",
  "polkadot-node-primitives",
  "polkadot-node-subsystem",
@@ -8493,13 +8728,13 @@ dependencies = [
 [[package]]
 name = "polkadot-node-core-pvf"
 version = "17.0.0"
-source = "git+https://github.com/paritytech/polkadot-sdk?tag=polkadot-stable2407-1#16b0fd09d9e9281c20ee0c1d8b87d011e3e3454e"
+source = "git+https://github.com/moondance-labs/polkadot-sdk?branch=tanssi-polkadot-stable2407#4a003906b0987b16a473dd83bdb7ffc57395635a"
 dependencies = [
  "always-assert",
  "array-bytes",
  "blake3",
  "cfg-if",
- "futures",
+ "futures 0.3.30",
  "futures-timer",
  "parity-scale-codec",
  "pin-project",
@@ -8522,9 +8757,9 @@ dependencies = [
 [[package]]
 name = "polkadot-node-core-pvf-checker"
 version = "17.0.0"
-source = "git+https://github.com/paritytech/polkadot-sdk?tag=polkadot-stable2407-1#16b0fd09d9e9281c20ee0c1d8b87d011e3e3454e"
+source = "git+https://github.com/moondance-labs/polkadot-sdk?branch=tanssi-polkadot-stable2407#4a003906b0987b16a473dd83bdb7ffc57395635a"
 dependencies = [
- "futures",
+ "futures 0.3.30",
  "polkadot-node-primitives",
  "polkadot-node-subsystem",
  "polkadot-node-subsystem-util",
@@ -8538,10 +8773,10 @@ dependencies = [
 [[package]]
 name = "polkadot-node-core-pvf-common"
 version = "15.0.0"
-source = "git+https://github.com/paritytech/polkadot-sdk?tag=polkadot-stable2407-1#16b0fd09d9e9281c20ee0c1d8b87d011e3e3454e"
+source = "git+https://github.com/moondance-labs/polkadot-sdk?branch=tanssi-polkadot-stable2407#4a003906b0987b16a473dd83bdb7ffc57395635a"
 dependencies = [
  "cpu-time",
- "futures",
+ "futures 0.3.30",
  "landlock",
  "libc",
  "nix 0.28.0",
@@ -8564,9 +8799,9 @@ dependencies = [
 [[package]]
 name = "polkadot-node-core-runtime-api"
 version = "17.0.0"
-source = "git+https://github.com/paritytech/polkadot-sdk?tag=polkadot-stable2407-1#16b0fd09d9e9281c20ee0c1d8b87d011e3e3454e"
+source = "git+https://github.com/moondance-labs/polkadot-sdk?branch=tanssi-polkadot-stable2407#4a003906b0987b16a473dd83bdb7ffc57395635a"
 dependencies = [
- "futures",
+ "futures 0.3.30",
  "polkadot-node-metrics",
  "polkadot-node-subsystem",
  "polkadot-node-subsystem-types",
@@ -8579,7 +8814,7 @@ dependencies = [
 [[package]]
 name = "polkadot-node-jaeger"
 version = "17.0.0"
-source = "git+https://github.com/paritytech/polkadot-sdk?tag=polkadot-stable2407-1#16b0fd09d9e9281c20ee0c1d8b87d011e3e3454e"
+source = "git+https://github.com/moondance-labs/polkadot-sdk?branch=tanssi-polkadot-stable2407#4a003906b0987b16a473dd83bdb7ffc57395635a"
 dependencies = [
  "lazy_static",
  "log",
@@ -8598,10 +8833,10 @@ dependencies = [
 [[package]]
 name = "polkadot-node-metrics"
 version = "17.0.0"
-source = "git+https://github.com/paritytech/polkadot-sdk?tag=polkadot-stable2407-1#16b0fd09d9e9281c20ee0c1d8b87d011e3e3454e"
+source = "git+https://github.com/moondance-labs/polkadot-sdk?branch=tanssi-polkadot-stable2407#4a003906b0987b16a473dd83bdb7ffc57395635a"
 dependencies = [
  "bs58 0.5.1",
- "futures",
+ "futures 0.3.30",
  "futures-timer",
  "log",
  "parity-scale-codec",
@@ -8617,14 +8852,14 @@ dependencies = [
 [[package]]
 name = "polkadot-node-network-protocol"
 version = "17.0.0"
-source = "git+https://github.com/paritytech/polkadot-sdk?tag=polkadot-stable2407-1#16b0fd09d9e9281c20ee0c1d8b87d011e3e3454e"
+source = "git+https://github.com/moondance-labs/polkadot-sdk?branch=tanssi-polkadot-stable2407#4a003906b0987b16a473dd83bdb7ffc57395635a"
 dependencies = [
  "async-channel 1.9.0",
  "async-trait",
  "bitvec",
  "derive_more",
  "fatality",
- "futures",
+ "futures 0.3.30",
  "hex",
  "parity-scale-codec",
  "polkadot-node-jaeger",
@@ -8643,11 +8878,11 @@ dependencies = [
 [[package]]
 name = "polkadot-node-primitives"
 version = "15.0.0"
-source = "git+https://github.com/paritytech/polkadot-sdk?tag=polkadot-stable2407-1#16b0fd09d9e9281c20ee0c1d8b87d011e3e3454e"
+source = "git+https://github.com/moondance-labs/polkadot-sdk?branch=tanssi-polkadot-stable2407#4a003906b0987b16a473dd83bdb7ffc57395635a"
 dependencies = [
  "bitvec",
  "bounded-vec",
- "futures",
+ "futures 0.3.30",
  "parity-scale-codec",
  "polkadot-parachain-primitives",
  "polkadot-primitives",
@@ -8666,7 +8901,7 @@ dependencies = [
 [[package]]
 name = "polkadot-node-subsystem"
 version = "17.0.0"
-source = "git+https://github.com/paritytech/polkadot-sdk?tag=polkadot-stable2407-1#16b0fd09d9e9281c20ee0c1d8b87d011e3e3454e"
+source = "git+https://github.com/moondance-labs/polkadot-sdk?branch=tanssi-polkadot-stable2407#4a003906b0987b16a473dd83bdb7ffc57395635a"
 dependencies = [
  "polkadot-node-jaeger",
  "polkadot-node-subsystem-types",
@@ -8675,14 +8910,14 @@ dependencies = [
 
 [[package]]
 name = "polkadot-node-subsystem-types"
-version = "17.1.0"
-source = "git+https://github.com/paritytech/polkadot-sdk?tag=polkadot-stable2407-1#16b0fd09d9e9281c20ee0c1d8b87d011e3e3454e"
+version = "17.0.0"
+source = "git+https://github.com/moondance-labs/polkadot-sdk?branch=tanssi-polkadot-stable2407#4a003906b0987b16a473dd83bdb7ffc57395635a"
 dependencies = [
  "async-trait",
  "bitvec",
  "derive_more",
  "fatality",
- "futures",
+ "futures 0.3.30",
  "orchestra",
  "polkadot-node-jaeger",
  "polkadot-node-network-protocol",
@@ -8705,13 +8940,13 @@ dependencies = [
 
 [[package]]
 name = "polkadot-node-subsystem-util"
-version = "17.1.0"
-source = "git+https://github.com/paritytech/polkadot-sdk?tag=polkadot-stable2407-1#16b0fd09d9e9281c20ee0c1d8b87d011e3e3454e"
+version = "17.0.0"
+source = "git+https://github.com/moondance-labs/polkadot-sdk?branch=tanssi-polkadot-stable2407#4a003906b0987b16a473dd83bdb7ffc57395635a"
 dependencies = [
  "async-trait",
  "derive_more",
  "fatality",
- "futures",
+ "futures 0.3.30",
  "futures-channel",
  "itertools 0.11.0",
  "kvdb",
@@ -8742,10 +8977,10 @@ dependencies = [
 [[package]]
 name = "polkadot-overseer"
 version = "17.0.0"
-source = "git+https://github.com/paritytech/polkadot-sdk?tag=polkadot-stable2407-1#16b0fd09d9e9281c20ee0c1d8b87d011e3e3454e"
+source = "git+https://github.com/moondance-labs/polkadot-sdk?branch=tanssi-polkadot-stable2407#4a003906b0987b16a473dd83bdb7ffc57395635a"
 dependencies = [
  "async-trait",
- "futures",
+ "futures 0.3.30",
  "futures-timer",
  "orchestra",
  "parking_lot 0.12.3",
@@ -8764,7 +8999,7 @@ dependencies = [
 [[package]]
 name = "polkadot-parachain-primitives"
 version = "14.0.0"
-source = "git+https://github.com/paritytech/polkadot-sdk?tag=polkadot-stable2407-1#16b0fd09d9e9281c20ee0c1d8b87d011e3e3454e"
+source = "git+https://github.com/moondance-labs/polkadot-sdk?branch=tanssi-polkadot-stable2407#4a003906b0987b16a473dd83bdb7ffc57395635a"
 dependencies = [
  "bounded-collections",
  "derive_more",
@@ -8780,10 +9015,10 @@ dependencies = [
 [[package]]
 name = "polkadot-primitives"
 version = "15.0.0"
-source = "git+https://github.com/paritytech/polkadot-sdk?tag=polkadot-stable2407-1#16b0fd09d9e9281c20ee0c1d8b87d011e3e3454e"
+source = "git+https://github.com/moondance-labs/polkadot-sdk?branch=tanssi-polkadot-stable2407#4a003906b0987b16a473dd83bdb7ffc57395635a"
 dependencies = [
  "bitvec",
- "hex-literal",
+ "hex-literal 0.4.1",
  "log",
  "parity-scale-codec",
  "polkadot-core-primitives",
@@ -8806,7 +9041,7 @@ dependencies = [
 [[package]]
 name = "polkadot-rpc"
 version = "17.0.0"
-source = "git+https://github.com/paritytech/polkadot-sdk?tag=polkadot-stable2407-1#16b0fd09d9e9281c20ee0c1d8b87d011e3e3454e"
+source = "git+https://github.com/moondance-labs/polkadot-sdk?branch=tanssi-polkadot-stable2407#4a003906b0987b16a473dd83bdb7ffc57395635a"
 dependencies = [
  "jsonrpsee",
  "mmr-rpc",
@@ -8841,7 +9076,7 @@ dependencies = [
 [[package]]
 name = "polkadot-runtime-common"
 version = "16.0.0"
-source = "git+https://github.com/paritytech/polkadot-sdk?tag=polkadot-stable2407-1#16b0fd09d9e9281c20ee0c1d8b87d011e3e3454e"
+source = "git+https://github.com/moondance-labs/polkadot-sdk?branch=tanssi-polkadot-stable2407#4a003906b0987b16a473dd83bdb7ffc57395635a"
 dependencies = [
  "bitvec",
  "frame-benchmarking",
@@ -8891,7 +9126,7 @@ dependencies = [
 [[package]]
 name = "polkadot-runtime-metrics"
 version = "16.0.0"
-source = "git+https://github.com/paritytech/polkadot-sdk?tag=polkadot-stable2407-1#16b0fd09d9e9281c20ee0c1d8b87d011e3e3454e"
+source = "git+https://github.com/moondance-labs/polkadot-sdk?branch=tanssi-polkadot-stable2407#4a003906b0987b16a473dd83bdb7ffc57395635a"
 dependencies = [
  "bs58 0.5.1",
  "frame-benchmarking",
@@ -8902,8 +9137,8 @@ dependencies = [
 
 [[package]]
 name = "polkadot-runtime-parachains"
-version = "16.0.1"
-source = "git+https://github.com/paritytech/polkadot-sdk?tag=polkadot-stable2407-1#16b0fd09d9e9281c20ee0c1d8b87d011e3e3454e"
+version = "16.0.0"
+source = "git+https://github.com/moondance-labs/polkadot-sdk?branch=tanssi-polkadot-stable2407#4a003906b0987b16a473dd83bdb7ffc57395635a"
 dependencies = [
  "bitflags 1.3.2",
  "bitvec",
@@ -8949,8 +9184,8 @@ dependencies = [
 
 [[package]]
 name = "polkadot-service"
-version = "17.0.1"
-source = "git+https://github.com/paritytech/polkadot-sdk?tag=polkadot-stable2407-1#16b0fd09d9e9281c20ee0c1d8b87d011e3e3454e"
+version = "17.0.0"
+source = "git+https://github.com/moondance-labs/polkadot-sdk?branch=tanssi-polkadot-stable2407#4a003906b0987b16a473dd83bdb7ffc57395635a"
 dependencies = [
  "async-trait",
  "bitvec",
@@ -8960,8 +9195,8 @@ dependencies = [
  "frame-support",
  "frame-system",
  "frame-system-rpc-runtime-api",
- "futures",
- "hex-literal",
+ "futures 0.3.30",
+ "hex-literal 0.4.1",
  "is_executable",
  "kvdb",
  "kvdb-rocksdb",
@@ -9071,12 +9306,12 @@ dependencies = [
 [[package]]
 name = "polkadot-statement-distribution"
 version = "17.0.0"
-source = "git+https://github.com/paritytech/polkadot-sdk?tag=polkadot-stable2407-1#16b0fd09d9e9281c20ee0c1d8b87d011e3e3454e"
+source = "git+https://github.com/moondance-labs/polkadot-sdk?branch=tanssi-polkadot-stable2407#4a003906b0987b16a473dd83bdb7ffc57395635a"
 dependencies = [
  "arrayvec 0.7.6",
  "bitvec",
  "fatality",
- "futures",
+ "futures 0.3.30",
  "futures-timer",
  "indexmap 2.4.0",
  "parity-scale-codec",
@@ -9094,7 +9329,7 @@ dependencies = [
 [[package]]
 name = "polkadot-statement-table"
 version = "15.0.0"
-source = "git+https://github.com/paritytech/polkadot-sdk?tag=polkadot-stable2407-1#16b0fd09d9e9281c20ee0c1d8b87d011e3e3454e"
+source = "git+https://github.com/moondance-labs/polkadot-sdk?branch=tanssi-polkadot-stable2407#4a003906b0987b16a473dd83bdb7ffc57395635a"
 dependencies = [
  "parity-scale-codec",
  "polkadot-primitives",
@@ -9343,7 +9578,7 @@ dependencies = [
  "coarsetime",
  "crossbeam-queue",
  "derive_more",
- "futures",
+ "futures 0.3.30",
  "futures-timer",
  "nanorand",
  "thiserror",
@@ -10043,7 +10278,7 @@ dependencies = [
 [[package]]
 name = "rococo-runtime"
 version = "17.0.0"
-source = "git+https://github.com/paritytech/polkadot-sdk?tag=polkadot-stable2407-1#16b0fd09d9e9281c20ee0c1d8b87d011e3e3454e"
+source = "git+https://github.com/moondance-labs/polkadot-sdk?branch=tanssi-polkadot-stable2407#4a003906b0987b16a473dd83bdb7ffc57395635a"
 dependencies = [
  "binary-merkle-tree",
  "bitvec",
@@ -10055,7 +10290,7 @@ dependencies = [
  "frame-system-benchmarking",
  "frame-system-rpc-runtime-api",
  "frame-try-runtime",
- "hex-literal",
+ "hex-literal 0.4.1",
  "log",
  "pallet-asset-rate",
  "pallet-authority-discovery",
@@ -10143,7 +10378,7 @@ dependencies = [
 [[package]]
 name = "rococo-runtime-constants"
 version = "16.0.0"
-source = "git+https://github.com/paritytech/polkadot-sdk?tag=polkadot-stable2407-1#16b0fd09d9e9281c20ee0c1d8b87d011e3e3454e"
+source = "git+https://github.com/moondance-labs/polkadot-sdk?branch=tanssi-polkadot-stable2407#4a003906b0987b16a473dd83bdb7ffc57395635a"
 dependencies = [
  "frame-support",
  "polkadot-primitives",
@@ -10179,7 +10414,7 @@ version = "0.10.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "322c53fd76a18698f1c27381d58091de3a043d356aa5bd0d510608b565f469a0"
 dependencies = [
- "futures",
+ "futures 0.3.30",
  "log",
  "netlink-packet-route",
  "netlink-proto",
@@ -10434,7 +10669,7 @@ version = "0.4.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "d8c9026ff5d2f23da5e45bbc283f156383001bfb09c4e44256d02c1a685fe9a1"
 dependencies = [
- "futures",
+ "futures 0.3.30",
  "pin-project",
  "static_assertions",
 ]
@@ -10466,7 +10701,7 @@ dependencies = [
 [[package]]
 name = "sc-allocator"
 version = "29.0.0"
-source = "git+https://github.com/paritytech/polkadot-sdk?tag=polkadot-stable2407-1#16b0fd09d9e9281c20ee0c1d8b87d011e3e3454e"
+source = "git+https://github.com/moondance-labs/polkadot-sdk?branch=tanssi-polkadot-stable2407#4a003906b0987b16a473dd83bdb7ffc57395635a"
 dependencies = [
  "log",
  "sp-core",
@@ -10477,10 +10712,10 @@ dependencies = [
 [[package]]
 name = "sc-authority-discovery"
 version = "0.44.0"
-source = "git+https://github.com/paritytech/polkadot-sdk?tag=polkadot-stable2407-1#16b0fd09d9e9281c20ee0c1d8b87d011e3e3454e"
+source = "git+https://github.com/moondance-labs/polkadot-sdk?branch=tanssi-polkadot-stable2407#4a003906b0987b16a473dd83bdb7ffc57395635a"
 dependencies = [
  "async-trait",
- "futures",
+ "futures 0.3.30",
  "futures-timer",
  "ip_network",
  "libp2p",
@@ -10507,9 +10742,9 @@ dependencies = [
 [[package]]
 name = "sc-basic-authorship"
 version = "0.44.0"
-source = "git+https://github.com/paritytech/polkadot-sdk?tag=polkadot-stable2407-1#16b0fd09d9e9281c20ee0c1d8b87d011e3e3454e"
+source = "git+https://github.com/moondance-labs/polkadot-sdk?branch=tanssi-polkadot-stable2407#4a003906b0987b16a473dd83bdb7ffc57395635a"
 dependencies = [
- "futures",
+ "futures 0.3.30",
  "futures-timer",
  "log",
  "parity-scale-codec",
@@ -10529,7 +10764,7 @@ dependencies = [
 [[package]]
 name = "sc-block-builder"
 version = "0.42.0"
-source = "git+https://github.com/paritytech/polkadot-sdk?tag=polkadot-stable2407-1#16b0fd09d9e9281c20ee0c1d8b87d011e3e3454e"
+source = "git+https://github.com/moondance-labs/polkadot-sdk?branch=tanssi-polkadot-stable2407#4a003906b0987b16a473dd83bdb7ffc57395635a"
 dependencies = [
  "parity-scale-codec",
  "sp-api",
@@ -10544,7 +10779,7 @@ dependencies = [
 [[package]]
 name = "sc-chain-spec"
 version = "37.0.0"
-source = "git+https://github.com/paritytech/polkadot-sdk?tag=polkadot-stable2407-1#16b0fd09d9e9281c20ee0c1d8b87d011e3e3454e"
+source = "git+https://github.com/moondance-labs/polkadot-sdk?branch=tanssi-polkadot-stable2407#4a003906b0987b16a473dd83bdb7ffc57395635a"
 dependencies = [
  "array-bytes",
  "docify",
@@ -10571,7 +10806,7 @@ dependencies = [
 [[package]]
 name = "sc-chain-spec-derive"
 version = "12.0.0"
-source = "git+https://github.com/paritytech/polkadot-sdk?tag=polkadot-stable2407-1#16b0fd09d9e9281c20ee0c1d8b87d011e3e3454e"
+source = "git+https://github.com/moondance-labs/polkadot-sdk?branch=tanssi-polkadot-stable2407#4a003906b0987b16a473dd83bdb7ffc57395635a"
 dependencies = [
  "proc-macro-crate 3.1.0",
  "proc-macro2",
@@ -10582,13 +10817,13 @@ dependencies = [
 [[package]]
 name = "sc-cli"
 version = "0.46.0"
-source = "git+https://github.com/paritytech/polkadot-sdk?tag=polkadot-stable2407-1#16b0fd09d9e9281c20ee0c1d8b87d011e3e3454e"
+source = "git+https://github.com/moondance-labs/polkadot-sdk?branch=tanssi-polkadot-stable2407#4a003906b0987b16a473dd83bdb7ffc57395635a"
 dependencies = [
  "array-bytes",
  "chrono",
  "clap",
  "fdlimit",
- "futures",
+ "futures 0.3.30",
  "itertools 0.11.0",
  "libp2p-identity",
  "log",
@@ -10600,6 +10835,7 @@ dependencies = [
  "rpassword",
  "sc-client-api",
  "sc-client-db",
+ "sc-executor",
  "sc-keystore",
  "sc-mixnet",
  "sc-network",
@@ -10615,6 +10851,8 @@ dependencies = [
  "sp-keystore",
  "sp-panic-handler",
  "sp-runtime",
+ "sp-state-machine",
+ "sp-storage",
  "sp-version",
  "thiserror",
  "tokio",
@@ -10623,10 +10861,10 @@ dependencies = [
 [[package]]
 name = "sc-client-api"
 version = "37.0.0"
-source = "git+https://github.com/paritytech/polkadot-sdk?tag=polkadot-stable2407-1#16b0fd09d9e9281c20ee0c1d8b87d011e3e3454e"
+source = "git+https://github.com/moondance-labs/polkadot-sdk?branch=tanssi-polkadot-stable2407#4a003906b0987b16a473dd83bdb7ffc57395635a"
 dependencies = [
  "fnv",
- "futures",
+ "futures 0.3.30",
  "log",
  "parity-scale-codec",
  "parking_lot 0.12.3",
@@ -10650,7 +10888,7 @@ dependencies = [
 [[package]]
 name = "sc-client-db"
 version = "0.44.0"
-source = "git+https://github.com/paritytech/polkadot-sdk?tag=polkadot-stable2407-1#16b0fd09d9e9281c20ee0c1d8b87d011e3e3454e"
+source = "git+https://github.com/moondance-labs/polkadot-sdk?branch=tanssi-polkadot-stable2407#4a003906b0987b16a473dd83bdb7ffc57395635a"
 dependencies = [
  "hash-db",
  "kvdb",
@@ -10676,10 +10914,10 @@ dependencies = [
 [[package]]
 name = "sc-consensus"
 version = "0.43.0"
-source = "git+https://github.com/paritytech/polkadot-sdk?tag=polkadot-stable2407-1#16b0fd09d9e9281c20ee0c1d8b87d011e3e3454e"
+source = "git+https://github.com/moondance-labs/polkadot-sdk?branch=tanssi-polkadot-stable2407#4a003906b0987b16a473dd83bdb7ffc57395635a"
 dependencies = [
  "async-trait",
- "futures",
+ "futures 0.3.30",
  "log",
  "mockall 0.11.4",
  "parking_lot 0.12.3",
@@ -10700,10 +10938,10 @@ dependencies = [
 [[package]]
 name = "sc-consensus-aura"
 version = "0.44.0"
-source = "git+https://github.com/paritytech/polkadot-sdk?tag=polkadot-stable2407-1#16b0fd09d9e9281c20ee0c1d8b87d011e3e3454e"
+source = "git+https://github.com/moondance-labs/polkadot-sdk?branch=tanssi-polkadot-stable2407#4a003906b0987b16a473dd83bdb7ffc57395635a"
 dependencies = [
  "async-trait",
- "futures",
+ "futures 0.3.30",
  "log",
  "parity-scale-codec",
  "sc-block-builder",
@@ -10729,11 +10967,11 @@ dependencies = [
 [[package]]
 name = "sc-consensus-babe"
 version = "0.44.0"
-source = "git+https://github.com/paritytech/polkadot-sdk?tag=polkadot-stable2407-1#16b0fd09d9e9281c20ee0c1d8b87d011e3e3454e"
+source = "git+https://github.com/moondance-labs/polkadot-sdk?branch=tanssi-polkadot-stable2407#4a003906b0987b16a473dd83bdb7ffc57395635a"
 dependencies = [
  "async-trait",
  "fork-tree",
- "futures",
+ "futures 0.3.30",
  "log",
  "num-bigint",
  "num-rational",
@@ -10765,9 +11003,9 @@ dependencies = [
 [[package]]
 name = "sc-consensus-babe-rpc"
 version = "0.44.0"
-source = "git+https://github.com/paritytech/polkadot-sdk?tag=polkadot-stable2407-1#16b0fd09d9e9281c20ee0c1d8b87d011e3e3454e"
+source = "git+https://github.com/moondance-labs/polkadot-sdk?branch=tanssi-polkadot-stable2407#4a003906b0987b16a473dd83bdb7ffc57395635a"
 dependencies = [
- "futures",
+ "futures 0.3.30",
  "jsonrpsee",
  "sc-consensus-babe",
  "sc-consensus-epochs",
@@ -10787,13 +11025,13 @@ dependencies = [
 [[package]]
 name = "sc-consensus-beefy"
 version = "23.0.0"
-source = "git+https://github.com/paritytech/polkadot-sdk?tag=polkadot-stable2407-1#16b0fd09d9e9281c20ee0c1d8b87d011e3e3454e"
+source = "git+https://github.com/moondance-labs/polkadot-sdk?branch=tanssi-polkadot-stable2407#4a003906b0987b16a473dd83bdb7ffc57395635a"
 dependencies = [
  "array-bytes",
  "async-channel 1.9.0",
  "async-trait",
  "fnv",
- "futures",
+ "futures 0.3.30",
  "log",
  "parity-scale-codec",
  "parking_lot 0.12.3",
@@ -10823,9 +11061,9 @@ dependencies = [
 [[package]]
 name = "sc-consensus-beefy-rpc"
 version = "23.0.0"
-source = "git+https://github.com/paritytech/polkadot-sdk?tag=polkadot-stable2407-1#16b0fd09d9e9281c20ee0c1d8b87d011e3e3454e"
+source = "git+https://github.com/moondance-labs/polkadot-sdk?branch=tanssi-polkadot-stable2407#4a003906b0987b16a473dd83bdb7ffc57395635a"
 dependencies = [
- "futures",
+ "futures 0.3.30",
  "jsonrpsee",
  "log",
  "parity-scale-codec",
@@ -10843,7 +11081,7 @@ dependencies = [
 [[package]]
 name = "sc-consensus-epochs"
 version = "0.43.0"
-source = "git+https://github.com/paritytech/polkadot-sdk?tag=polkadot-stable2407-1#16b0fd09d9e9281c20ee0c1d8b87d011e3e3454e"
+source = "git+https://github.com/moondance-labs/polkadot-sdk?branch=tanssi-polkadot-stable2407#4a003906b0987b16a473dd83bdb7ffc57395635a"
 dependencies = [
  "fork-tree",
  "parity-scale-codec",
@@ -10855,8 +11093,8 @@ dependencies = [
 
 [[package]]
 name = "sc-consensus-grandpa"
-version = "0.29.1"
-source = "git+https://github.com/paritytech/polkadot-sdk?tag=polkadot-stable2407-1#16b0fd09d9e9281c20ee0c1d8b87d011e3e3454e"
+version = "0.29.0"
+source = "git+https://github.com/moondance-labs/polkadot-sdk?branch=tanssi-polkadot-stable2407#4a003906b0987b16a473dd83bdb7ffc57395635a"
 dependencies = [
  "ahash",
  "array-bytes",
@@ -10864,7 +11102,7 @@ dependencies = [
  "dyn-clone",
  "finality-grandpa",
  "fork-tree",
- "futures",
+ "futures 0.3.30",
  "futures-timer",
  "log",
  "parity-scale-codec",
@@ -10900,10 +11138,10 @@ dependencies = [
 [[package]]
 name = "sc-consensus-grandpa-rpc"
 version = "0.29.0"
-source = "git+https://github.com/paritytech/polkadot-sdk?tag=polkadot-stable2407-1#16b0fd09d9e9281c20ee0c1d8b87d011e3e3454e"
+source = "git+https://github.com/moondance-labs/polkadot-sdk?branch=tanssi-polkadot-stable2407#4a003906b0987b16a473dd83bdb7ffc57395635a"
 dependencies = [
  "finality-grandpa",
- "futures",
+ "futures 0.3.30",
  "jsonrpsee",
  "log",
  "parity-scale-codec",
@@ -10918,12 +11156,47 @@ dependencies = [
 ]
 
 [[package]]
+name = "sc-consensus-manual-seal"
+version = "0.45.0"
+source = "git+https://github.com/moondance-labs/polkadot-sdk?branch=tanssi-polkadot-stable2407#4a003906b0987b16a473dd83bdb7ffc57395635a"
+dependencies = [
+ "assert_matches",
+ "async-trait",
+ "futures 0.3.30",
+ "futures-timer",
+ "jsonrpsee",
+ "log",
+ "parity-scale-codec",
+ "sc-client-api",
+ "sc-consensus",
+ "sc-consensus-aura",
+ "sc-consensus-babe",
+ "sc-consensus-epochs",
+ "sc-transaction-pool",
+ "sc-transaction-pool-api",
+ "serde",
+ "sp-api",
+ "sp-blockchain",
+ "sp-consensus",
+ "sp-consensus-aura",
+ "sp-consensus-babe",
+ "sp-consensus-slots",
+ "sp-core",
+ "sp-inherents",
+ "sp-keystore",
+ "sp-runtime",
+ "sp-timestamp",
+ "substrate-prometheus-endpoint",
+ "thiserror",
+]
+
+[[package]]
 name = "sc-consensus-slots"
 version = "0.43.0"
-source = "git+https://github.com/paritytech/polkadot-sdk?tag=polkadot-stable2407-1#16b0fd09d9e9281c20ee0c1d8b87d011e3e3454e"
+source = "git+https://github.com/moondance-labs/polkadot-sdk?branch=tanssi-polkadot-stable2407#4a003906b0987b16a473dd83bdb7ffc57395635a"
 dependencies = [
  "async-trait",
- "futures",
+ "futures 0.3.30",
  "futures-timer",
  "log",
  "parity-scale-codec",
@@ -10943,8 +11216,9 @@ dependencies = [
 [[package]]
 name = "sc-executor"
 version = "0.40.0"
-source = "git+https://github.com/paritytech/polkadot-sdk?tag=polkadot-stable2407-1#16b0fd09d9e9281c20ee0c1d8b87d011e3e3454e"
+source = "git+https://github.com/moondance-labs/polkadot-sdk?branch=tanssi-polkadot-stable2407#4a003906b0987b16a473dd83bdb7ffc57395635a"
 dependencies = [
+ "log",
  "parity-scale-codec",
  "parking_lot 0.12.3",
  "sc-executor-common",
@@ -10966,8 +11240,9 @@ dependencies = [
 [[package]]
 name = "sc-executor-common"
 version = "0.35.0"
-source = "git+https://github.com/paritytech/polkadot-sdk?tag=polkadot-stable2407-1#16b0fd09d9e9281c20ee0c1d8b87d011e3e3454e"
+source = "git+https://github.com/moondance-labs/polkadot-sdk?branch=tanssi-polkadot-stable2407#4a003906b0987b16a473dd83bdb7ffc57395635a"
 dependencies = [
+ "parity-scale-codec",
  "polkavm",
  "sc-allocator",
  "sp-maybe-compressed-blob",
@@ -10979,7 +11254,7 @@ dependencies = [
 [[package]]
 name = "sc-executor-polkavm"
 version = "0.32.0"
-source = "git+https://github.com/paritytech/polkadot-sdk?tag=polkadot-stable2407-1#16b0fd09d9e9281c20ee0c1d8b87d011e3e3454e"
+source = "git+https://github.com/moondance-labs/polkadot-sdk?branch=tanssi-polkadot-stable2407#4a003906b0987b16a473dd83bdb7ffc57395635a"
 dependencies = [
  "log",
  "polkavm",
@@ -10990,12 +11265,13 @@ dependencies = [
 [[package]]
 name = "sc-executor-wasmtime"
 version = "0.35.0"
-source = "git+https://github.com/paritytech/polkadot-sdk?tag=polkadot-stable2407-1#16b0fd09d9e9281c20ee0c1d8b87d011e3e3454e"
+source = "git+https://github.com/moondance-labs/polkadot-sdk?branch=tanssi-polkadot-stable2407#4a003906b0987b16a473dd83bdb7ffc57395635a"
 dependencies = [
  "anyhow",
  "cfg-if",
  "libc",
  "log",
+ "parity-scale-codec",
  "parking_lot 0.12.3",
  "rustix 0.36.17",
  "sc-allocator",
@@ -11008,10 +11284,10 @@ dependencies = [
 [[package]]
 name = "sc-informant"
 version = "0.43.0"
-source = "git+https://github.com/paritytech/polkadot-sdk?tag=polkadot-stable2407-1#16b0fd09d9e9281c20ee0c1d8b87d011e3e3454e"
+source = "git+https://github.com/moondance-labs/polkadot-sdk?branch=tanssi-polkadot-stable2407#4a003906b0987b16a473dd83bdb7ffc57395635a"
 dependencies = [
  "ansi_term",
- "futures",
+ "futures 0.3.30",
  "futures-timer",
  "log",
  "sc-client-api",
@@ -11025,7 +11301,7 @@ dependencies = [
 [[package]]
 name = "sc-keystore"
 version = "33.0.0"
-source = "git+https://github.com/paritytech/polkadot-sdk?tag=polkadot-stable2407-1#16b0fd09d9e9281c20ee0c1d8b87d011e3e3454e"
+source = "git+https://github.com/moondance-labs/polkadot-sdk?branch=tanssi-polkadot-stable2407#4a003906b0987b16a473dd83bdb7ffc57395635a"
 dependencies = [
  "array-bytes",
  "parking_lot 0.12.3",
@@ -11039,13 +11315,13 @@ dependencies = [
 [[package]]
 name = "sc-mixnet"
 version = "0.14.0"
-source = "git+https://github.com/paritytech/polkadot-sdk?tag=polkadot-stable2407-1#16b0fd09d9e9281c20ee0c1d8b87d011e3e3454e"
+source = "git+https://github.com/moondance-labs/polkadot-sdk?branch=tanssi-polkadot-stable2407#4a003906b0987b16a473dd83bdb7ffc57395635a"
 dependencies = [
  "array-bytes",
  "arrayvec 0.7.6",
  "blake2 0.10.6",
  "bytes",
- "futures",
+ "futures 0.3.30",
  "futures-timer",
  "log",
  "mixnet",
@@ -11068,7 +11344,7 @@ dependencies = [
 [[package]]
 name = "sc-network"
 version = "0.44.0"
-source = "git+https://github.com/paritytech/polkadot-sdk?tag=polkadot-stable2407-1#16b0fd09d9e9281c20ee0c1d8b87d011e3e3454e"
+source = "git+https://github.com/moondance-labs/polkadot-sdk?branch=tanssi-polkadot-stable2407#4a003906b0987b16a473dd83bdb7ffc57395635a"
 dependencies = [
  "array-bytes",
  "async-channel 1.9.0",
@@ -11078,7 +11354,7 @@ dependencies = [
  "cid 0.9.0",
  "either",
  "fnv",
- "futures",
+ "futures 0.3.30",
  "futures-timer",
  "ip_network",
  "libp2p",
@@ -11119,11 +11395,11 @@ dependencies = [
 [[package]]
 name = "sc-network-common"
 version = "0.43.0"
-source = "git+https://github.com/paritytech/polkadot-sdk?tag=polkadot-stable2407-1#16b0fd09d9e9281c20ee0c1d8b87d011e3e3454e"
+source = "git+https://github.com/moondance-labs/polkadot-sdk?branch=tanssi-polkadot-stable2407#4a003906b0987b16a473dd83bdb7ffc57395635a"
 dependencies = [
  "async-trait",
  "bitflags 1.3.2",
- "futures",
+ "futures 0.3.30",
  "libp2p-identity",
  "parity-scale-codec",
  "prost-build 0.12.6",
@@ -11137,10 +11413,10 @@ dependencies = [
 [[package]]
 name = "sc-network-gossip"
 version = "0.44.0"
-source = "git+https://github.com/paritytech/polkadot-sdk?tag=polkadot-stable2407-1#16b0fd09d9e9281c20ee0c1d8b87d011e3e3454e"
+source = "git+https://github.com/moondance-labs/polkadot-sdk?branch=tanssi-polkadot-stable2407#4a003906b0987b16a473dd83bdb7ffc57395635a"
 dependencies = [
  "ahash",
- "futures",
+ "futures 0.3.30",
  "futures-timer",
  "log",
  "sc-network",
@@ -11156,11 +11432,11 @@ dependencies = [
 [[package]]
 name = "sc-network-light"
 version = "0.43.0"
-source = "git+https://github.com/paritytech/polkadot-sdk?tag=polkadot-stable2407-1#16b0fd09d9e9281c20ee0c1d8b87d011e3e3454e"
+source = "git+https://github.com/moondance-labs/polkadot-sdk?branch=tanssi-polkadot-stable2407#4a003906b0987b16a473dd83bdb7ffc57395635a"
 dependencies = [
  "array-bytes",
  "async-channel 1.9.0",
- "futures",
+ "futures 0.3.30",
  "log",
  "parity-scale-codec",
  "prost 0.12.6",
@@ -11177,13 +11453,13 @@ dependencies = [
 [[package]]
 name = "sc-network-sync"
 version = "0.43.0"
-source = "git+https://github.com/paritytech/polkadot-sdk?tag=polkadot-stable2407-1#16b0fd09d9e9281c20ee0c1d8b87d011e3e3454e"
+source = "git+https://github.com/moondance-labs/polkadot-sdk?branch=tanssi-polkadot-stable2407#4a003906b0987b16a473dd83bdb7ffc57395635a"
 dependencies = [
  "array-bytes",
  "async-channel 1.9.0",
  "async-trait",
  "fork-tree",
- "futures",
+ "futures 0.3.30",
  "futures-timer",
  "libp2p",
  "log",
@@ -11214,10 +11490,10 @@ dependencies = [
 [[package]]
 name = "sc-network-transactions"
 version = "0.43.0"
-source = "git+https://github.com/paritytech/polkadot-sdk?tag=polkadot-stable2407-1#16b0fd09d9e9281c20ee0c1d8b87d011e3e3454e"
+source = "git+https://github.com/moondance-labs/polkadot-sdk?branch=tanssi-polkadot-stable2407#4a003906b0987b16a473dd83bdb7ffc57395635a"
 dependencies = [
  "array-bytes",
- "futures",
+ "futures 0.3.30",
  "log",
  "parity-scale-codec",
  "sc-network",
@@ -11233,7 +11509,7 @@ dependencies = [
 [[package]]
 name = "sc-network-types"
 version = "0.12.1"
-source = "git+https://github.com/paritytech/polkadot-sdk?tag=polkadot-stable2407-1#16b0fd09d9e9281c20ee0c1d8b87d011e3e3454e"
+source = "git+https://github.com/moondance-labs/polkadot-sdk?branch=tanssi-polkadot-stable2407#4a003906b0987b16a473dd83bdb7ffc57395635a"
 dependencies = [
  "bs58 0.5.1",
  "ed25519-dalek",
@@ -11250,12 +11526,12 @@ dependencies = [
 [[package]]
 name = "sc-offchain"
 version = "39.0.0"
-source = "git+https://github.com/paritytech/polkadot-sdk?tag=polkadot-stable2407-1#16b0fd09d9e9281c20ee0c1d8b87d011e3e3454e"
+source = "git+https://github.com/moondance-labs/polkadot-sdk?branch=tanssi-polkadot-stable2407#4a003906b0987b16a473dd83bdb7ffc57395635a"
 dependencies = [
  "array-bytes",
  "bytes",
  "fnv",
- "futures",
+ "futures 0.3.30",
  "futures-timer",
  "hyper 0.14.30",
  "hyper-rustls",
@@ -11284,7 +11560,7 @@ dependencies = [
 [[package]]
 name = "sc-proposer-metrics"
 version = "0.18.0"
-source = "git+https://github.com/paritytech/polkadot-sdk?tag=polkadot-stable2407-1#16b0fd09d9e9281c20ee0c1d8b87d011e3e3454e"
+source = "git+https://github.com/moondance-labs/polkadot-sdk?branch=tanssi-polkadot-stable2407#4a003906b0987b16a473dd83bdb7ffc57395635a"
 dependencies = [
  "log",
  "substrate-prometheus-endpoint",
@@ -11293,9 +11569,9 @@ dependencies = [
 [[package]]
 name = "sc-rpc"
 version = "39.0.0"
-source = "git+https://github.com/paritytech/polkadot-sdk?tag=polkadot-stable2407-1#16b0fd09d9e9281c20ee0c1d8b87d011e3e3454e"
+source = "git+https://github.com/moondance-labs/polkadot-sdk?branch=tanssi-polkadot-stable2407#4a003906b0987b16a473dd83bdb7ffc57395635a"
 dependencies = [
- "futures",
+ "futures 0.3.30",
  "jsonrpsee",
  "log",
  "parity-scale-codec",
@@ -11325,7 +11601,7 @@ dependencies = [
 [[package]]
 name = "sc-rpc-api"
 version = "0.43.0"
-source = "git+https://github.com/paritytech/polkadot-sdk?tag=polkadot-stable2407-1#16b0fd09d9e9281c20ee0c1d8b87d011e3e3454e"
+source = "git+https://github.com/moondance-labs/polkadot-sdk?branch=tanssi-polkadot-stable2407#4a003906b0987b16a473dd83bdb7ffc57395635a"
 dependencies = [
  "jsonrpsee",
  "parity-scale-codec",
@@ -11345,10 +11621,10 @@ dependencies = [
 [[package]]
 name = "sc-rpc-server"
 version = "16.0.2"
-source = "git+https://github.com/paritytech/polkadot-sdk?tag=polkadot-stable2407-1#16b0fd09d9e9281c20ee0c1d8b87d011e3e3454e"
+source = "git+https://github.com/moondance-labs/polkadot-sdk?branch=tanssi-polkadot-stable2407#4a003906b0987b16a473dd83bdb7ffc57395635a"
 dependencies = [
  "forwarded-header-value",
- "futures",
+ "futures 0.3.30",
  "governor",
  "http 1.1.0",
  "http-body-util",
@@ -11367,10 +11643,10 @@ dependencies = [
 [[package]]
 name = "sc-rpc-spec-v2"
 version = "0.44.0"
-source = "git+https://github.com/paritytech/polkadot-sdk?tag=polkadot-stable2407-1#16b0fd09d9e9281c20ee0c1d8b87d011e3e3454e"
+source = "git+https://github.com/moondance-labs/polkadot-sdk?branch=tanssi-polkadot-stable2407#4a003906b0987b16a473dd83bdb7ffc57395635a"
 dependencies = [
  "array-bytes",
- "futures",
+ "futures 0.3.30",
  "futures-util",
  "hex",
  "jsonrpsee",
@@ -11399,12 +11675,12 @@ dependencies = [
 [[package]]
 name = "sc-service"
 version = "0.45.0"
-source = "git+https://github.com/paritytech/polkadot-sdk?tag=polkadot-stable2407-1#16b0fd09d9e9281c20ee0c1d8b87d011e3e3454e"
+source = "git+https://github.com/moondance-labs/polkadot-sdk?branch=tanssi-polkadot-stable2407#4a003906b0987b16a473dd83bdb7ffc57395635a"
 dependencies = [
  "async-trait",
  "directories",
  "exit-future",
- "futures",
+ "futures 0.3.30",
  "futures-timer",
  "jsonrpsee",
  "log",
@@ -11463,7 +11739,7 @@ dependencies = [
 [[package]]
 name = "sc-state-db"
 version = "0.36.0"
-source = "git+https://github.com/paritytech/polkadot-sdk?tag=polkadot-stable2407-1#16b0fd09d9e9281c20ee0c1d8b87d011e3e3454e"
+source = "git+https://github.com/moondance-labs/polkadot-sdk?branch=tanssi-polkadot-stable2407#4a003906b0987b16a473dd83bdb7ffc57395635a"
 dependencies = [
  "log",
  "parity-scale-codec",
@@ -11474,7 +11750,7 @@ dependencies = [
 [[package]]
 name = "sc-storage-monitor"
 version = "0.22.0"
-source = "git+https://github.com/paritytech/polkadot-sdk?tag=polkadot-stable2407-1#16b0fd09d9e9281c20ee0c1d8b87d011e3e3454e"
+source = "git+https://github.com/moondance-labs/polkadot-sdk?branch=tanssi-polkadot-stable2407#4a003906b0987b16a473dd83bdb7ffc57395635a"
 dependencies = [
  "clap",
  "fs4",
@@ -11487,7 +11763,7 @@ dependencies = [
 [[package]]
 name = "sc-sync-state-rpc"
 version = "0.44.0"
-source = "git+https://github.com/paritytech/polkadot-sdk?tag=polkadot-stable2407-1#16b0fd09d9e9281c20ee0c1d8b87d011e3e3454e"
+source = "git+https://github.com/moondance-labs/polkadot-sdk?branch=tanssi-polkadot-stable2407#4a003906b0987b16a473dd83bdb7ffc57395635a"
 dependencies = [
  "jsonrpsee",
  "parity-scale-codec",
@@ -11506,10 +11782,10 @@ dependencies = [
 [[package]]
 name = "sc-sysinfo"
 version = "37.0.0"
-source = "git+https://github.com/paritytech/polkadot-sdk?tag=polkadot-stable2407-1#16b0fd09d9e9281c20ee0c1d8b87d011e3e3454e"
+source = "git+https://github.com/moondance-labs/polkadot-sdk?branch=tanssi-polkadot-stable2407#4a003906b0987b16a473dd83bdb7ffc57395635a"
 dependencies = [
  "derive_more",
- "futures",
+ "futures 0.3.30",
  "libc",
  "log",
  "rand",
@@ -11527,10 +11803,10 @@ dependencies = [
 [[package]]
 name = "sc-telemetry"
 version = "24.0.0"
-source = "git+https://github.com/paritytech/polkadot-sdk?tag=polkadot-stable2407-1#16b0fd09d9e9281c20ee0c1d8b87d011e3e3454e"
+source = "git+https://github.com/moondance-labs/polkadot-sdk?branch=tanssi-polkadot-stable2407#4a003906b0987b16a473dd83bdb7ffc57395635a"
 dependencies = [
  "chrono",
- "futures",
+ "futures 0.3.30",
  "libp2p",
  "log",
  "parking_lot 0.12.3",
@@ -11547,7 +11823,7 @@ dependencies = [
 [[package]]
 name = "sc-tracing"
 version = "37.0.0"
-source = "git+https://github.com/paritytech/polkadot-sdk?tag=polkadot-stable2407-1#16b0fd09d9e9281c20ee0c1d8b87d011e3e3454e"
+source = "git+https://github.com/moondance-labs/polkadot-sdk?branch=tanssi-polkadot-stable2407#4a003906b0987b16a473dd83bdb7ffc57395635a"
 dependencies = [
  "ansi_term",
  "chrono",
@@ -11577,7 +11853,7 @@ dependencies = [
 [[package]]
 name = "sc-tracing-proc-macro"
 version = "11.0.0"
-source = "git+https://github.com/paritytech/polkadot-sdk?tag=polkadot-stable2407-1#16b0fd09d9e9281c20ee0c1d8b87d011e3e3454e"
+source = "git+https://github.com/moondance-labs/polkadot-sdk?branch=tanssi-polkadot-stable2407#4a003906b0987b16a473dd83bdb7ffc57395635a"
 dependencies = [
  "proc-macro-crate 3.1.0",
  "proc-macro2",
@@ -11588,10 +11864,10 @@ dependencies = [
 [[package]]
 name = "sc-transaction-pool"
 version = "37.0.0"
-source = "git+https://github.com/paritytech/polkadot-sdk?tag=polkadot-stable2407-1#16b0fd09d9e9281c20ee0c1d8b87d011e3e3454e"
+source = "git+https://github.com/moondance-labs/polkadot-sdk?branch=tanssi-polkadot-stable2407#4a003906b0987b16a473dd83bdb7ffc57395635a"
 dependencies = [
  "async-trait",
- "futures",
+ "futures 0.3.30",
  "futures-timer",
  "linked-hash-map",
  "log",
@@ -11615,10 +11891,10 @@ dependencies = [
 [[package]]
 name = "sc-transaction-pool-api"
 version = "37.0.0"
-source = "git+https://github.com/paritytech/polkadot-sdk?tag=polkadot-stable2407-1#16b0fd09d9e9281c20ee0c1d8b87d011e3e3454e"
+source = "git+https://github.com/moondance-labs/polkadot-sdk?branch=tanssi-polkadot-stable2407#4a003906b0987b16a473dd83bdb7ffc57395635a"
 dependencies = [
  "async-trait",
- "futures",
+ "futures 0.3.30",
  "log",
  "parity-scale-codec",
  "serde",
@@ -11631,10 +11907,10 @@ dependencies = [
 [[package]]
 name = "sc-utils"
 version = "17.0.0"
-source = "git+https://github.com/paritytech/polkadot-sdk?tag=polkadot-stable2407-1#16b0fd09d9e9281c20ee0c1d8b87d011e3e3454e"
+source = "git+https://github.com/moondance-labs/polkadot-sdk?branch=tanssi-polkadot-stable2407#4a003906b0987b16a473dd83bdb7ffc57395635a"
 dependencies = [
  "async-channel 1.9.0",
- "futures",
+ "futures 0.3.30",
  "futures-timer",
  "lazy_static",
  "log",
@@ -12120,7 +12396,7 @@ checksum = "826167069c09b99d56f31e9ae5c99049e932a98c9dc2dac47645b08dbbf76ba7"
 [[package]]
 name = "slot-range-helper"
 version = "15.0.0"
-source = "git+https://github.com/paritytech/polkadot-sdk?tag=polkadot-stable2407-1#16b0fd09d9e9281c20ee0c1d8b87d011e3e3454e"
+source = "git+https://github.com/moondance-labs/polkadot-sdk?branch=tanssi-polkadot-stable2407#4a003906b0987b16a473dd83bdb7ffc57395635a"
 dependencies = [
  "enumn",
  "parity-scale-codec",
@@ -12301,7 +12577,7 @@ checksum = "41d1c5305e39e09653383c2c7244f2f78b3bcae37cf50c64cb4789c9f5096ec2"
 dependencies = [
  "base64 0.13.1",
  "bytes",
- "futures",
+ "futures 0.3.30",
  "httparse",
  "log",
  "rand",
@@ -12316,7 +12592,7 @@ checksum = "37468c595637c10857701c990f93a40ce0e357cedb0953d1c26c8d8027f9bb53"
 dependencies = [
  "base64 0.22.1",
  "bytes",
- "futures",
+ "futures 0.3.30",
  "http 1.1.0",
  "httparse",
  "log",
@@ -12327,7 +12603,7 @@ dependencies = [
 [[package]]
 name = "sp-api"
 version = "34.0.0"
-source = "git+https://github.com/paritytech/polkadot-sdk?tag=polkadot-stable2407-1#16b0fd09d9e9281c20ee0c1d8b87d011e3e3454e"
+source = "git+https://github.com/moondance-labs/polkadot-sdk?branch=tanssi-polkadot-stable2407#4a003906b0987b16a473dd83bdb7ffc57395635a"
 dependencies = [
  "docify",
  "hash-db",
@@ -12349,7 +12625,7 @@ dependencies = [
 [[package]]
 name = "sp-api-proc-macro"
 version = "20.0.0"
-source = "git+https://github.com/paritytech/polkadot-sdk?tag=polkadot-stable2407-1#16b0fd09d9e9281c20ee0c1d8b87d011e3e3454e"
+source = "git+https://github.com/moondance-labs/polkadot-sdk?branch=tanssi-polkadot-stable2407#4a003906b0987b16a473dd83bdb7ffc57395635a"
 dependencies = [
  "Inflector",
  "blake2 0.10.6",
@@ -12363,7 +12639,7 @@ dependencies = [
 [[package]]
 name = "sp-application-crypto"
 version = "38.0.0"
-source = "git+https://github.com/paritytech/polkadot-sdk?tag=polkadot-stable2407-1#16b0fd09d9e9281c20ee0c1d8b87d011e3e3454e"
+source = "git+https://github.com/moondance-labs/polkadot-sdk?branch=tanssi-polkadot-stable2407#4a003906b0987b16a473dd83bdb7ffc57395635a"
 dependencies = [
  "parity-scale-codec",
  "scale-info",
@@ -12375,7 +12651,7 @@ dependencies = [
 [[package]]
 name = "sp-arithmetic"
 version = "26.0.0"
-source = "git+https://github.com/paritytech/polkadot-sdk?tag=polkadot-stable2407-1#16b0fd09d9e9281c20ee0c1d8b87d011e3e3454e"
+source = "git+https://github.com/moondance-labs/polkadot-sdk?branch=tanssi-polkadot-stable2407#4a003906b0987b16a473dd83bdb7ffc57395635a"
 dependencies = [
  "docify",
  "integer-sqrt",
@@ -12389,7 +12665,7 @@ dependencies = [
 [[package]]
 name = "sp-authority-discovery"
 version = "34.0.0"
-source = "git+https://github.com/paritytech/polkadot-sdk?tag=polkadot-stable2407-1#16b0fd09d9e9281c20ee0c1d8b87d011e3e3454e"
+source = "git+https://github.com/moondance-labs/polkadot-sdk?branch=tanssi-polkadot-stable2407#4a003906b0987b16a473dd83bdb7ffc57395635a"
 dependencies = [
  "parity-scale-codec",
  "scale-info",
@@ -12401,7 +12677,7 @@ dependencies = [
 [[package]]
 name = "sp-block-builder"
 version = "34.0.0"
-source = "git+https://github.com/paritytech/polkadot-sdk?tag=polkadot-stable2407-1#16b0fd09d9e9281c20ee0c1d8b87d011e3e3454e"
+source = "git+https://github.com/moondance-labs/polkadot-sdk?branch=tanssi-polkadot-stable2407#4a003906b0987b16a473dd83bdb7ffc57395635a"
 dependencies = [
  "sp-api",
  "sp-inherents",
@@ -12410,10 +12686,10 @@ dependencies = [
 
 [[package]]
 name = "sp-blockchain"
-version = "37.0.1"
-source = "git+https://github.com/paritytech/polkadot-sdk?tag=polkadot-stable2407-1#16b0fd09d9e9281c20ee0c1d8b87d011e3e3454e"
+version = "37.0.0"
+source = "git+https://github.com/moondance-labs/polkadot-sdk?branch=tanssi-polkadot-stable2407#4a003906b0987b16a473dd83bdb7ffc57395635a"
 dependencies = [
- "futures",
+ "futures 0.3.30",
  "parity-scale-codec",
  "parking_lot 0.12.3",
  "schnellru",
@@ -12430,10 +12706,10 @@ dependencies = [
 [[package]]
 name = "sp-consensus"
 version = "0.40.0"
-source = "git+https://github.com/paritytech/polkadot-sdk?tag=polkadot-stable2407-1#16b0fd09d9e9281c20ee0c1d8b87d011e3e3454e"
+source = "git+https://github.com/moondance-labs/polkadot-sdk?branch=tanssi-polkadot-stable2407#4a003906b0987b16a473dd83bdb7ffc57395635a"
 dependencies = [
  "async-trait",
- "futures",
+ "futures 0.3.30",
  "log",
  "sp-core",
  "sp-inherents",
@@ -12445,7 +12721,7 @@ dependencies = [
 [[package]]
 name = "sp-consensus-aura"
 version = "0.40.0"
-source = "git+https://github.com/paritytech/polkadot-sdk?tag=polkadot-stable2407-1#16b0fd09d9e9281c20ee0c1d8b87d011e3e3454e"
+source = "git+https://github.com/moondance-labs/polkadot-sdk?branch=tanssi-polkadot-stable2407#4a003906b0987b16a473dd83bdb7ffc57395635a"
 dependencies = [
  "async-trait",
  "parity-scale-codec",
@@ -12461,7 +12737,7 @@ dependencies = [
 [[package]]
 name = "sp-consensus-babe"
 version = "0.40.0"
-source = "git+https://github.com/paritytech/polkadot-sdk?tag=polkadot-stable2407-1#16b0fd09d9e9281c20ee0c1d8b87d011e3e3454e"
+source = "git+https://github.com/moondance-labs/polkadot-sdk?branch=tanssi-polkadot-stable2407#4a003906b0987b16a473dd83bdb7ffc57395635a"
 dependencies = [
  "async-trait",
  "parity-scale-codec",
@@ -12479,7 +12755,7 @@ dependencies = [
 [[package]]
 name = "sp-consensus-beefy"
 version = "22.0.0"
-source = "git+https://github.com/paritytech/polkadot-sdk?tag=polkadot-stable2407-1#16b0fd09d9e9281c20ee0c1d8b87d011e3e3454e"
+source = "git+https://github.com/moondance-labs/polkadot-sdk?branch=tanssi-polkadot-stable2407#4a003906b0987b16a473dd83bdb7ffc57395635a"
 dependencies = [
  "lazy_static",
  "parity-scale-codec",
@@ -12499,7 +12775,7 @@ dependencies = [
 [[package]]
 name = "sp-consensus-grandpa"
 version = "21.0.0"
-source = "git+https://github.com/paritytech/polkadot-sdk?tag=polkadot-stable2407-1#16b0fd09d9e9281c20ee0c1d8b87d011e3e3454e"
+source = "git+https://github.com/moondance-labs/polkadot-sdk?branch=tanssi-polkadot-stable2407#4a003906b0987b16a473dd83bdb7ffc57395635a"
 dependencies = [
  "finality-grandpa",
  "log",
@@ -12516,7 +12792,7 @@ dependencies = [
 [[package]]
 name = "sp-consensus-slots"
 version = "0.40.0"
-source = "git+https://github.com/paritytech/polkadot-sdk?tag=polkadot-stable2407-1#16b0fd09d9e9281c20ee0c1d8b87d011e3e3454e"
+source = "git+https://github.com/moondance-labs/polkadot-sdk?branch=tanssi-polkadot-stable2407#4a003906b0987b16a473dd83bdb7ffc57395635a"
 dependencies = [
  "parity-scale-codec",
  "scale-info",
@@ -12527,7 +12803,7 @@ dependencies = [
 [[package]]
 name = "sp-core"
 version = "34.0.0"
-source = "git+https://github.com/paritytech/polkadot-sdk?tag=polkadot-stable2407-1#16b0fd09d9e9281c20ee0c1d8b87d011e3e3454e"
+source = "git+https://github.com/moondance-labs/polkadot-sdk?branch=tanssi-polkadot-stable2407#4a003906b0987b16a473dd83bdb7ffc57395635a"
 dependencies = [
  "array-bytes",
  "bitflags 1.3.2",
@@ -12536,7 +12812,7 @@ dependencies = [
  "bs58 0.5.1",
  "dyn-clonable",
  "ed25519-zebra",
- "futures",
+ "futures 0.3.30",
  "hash-db",
  "hash256-std-hasher",
  "impl-serde",
@@ -12573,7 +12849,7 @@ dependencies = [
 [[package]]
 name = "sp-crypto-hashing"
 version = "0.1.0"
-source = "git+https://github.com/paritytech/polkadot-sdk?tag=polkadot-stable2407-1#16b0fd09d9e9281c20ee0c1d8b87d011e3e3454e"
+source = "git+https://github.com/moondance-labs/polkadot-sdk?branch=tanssi-polkadot-stable2407#4a003906b0987b16a473dd83bdb7ffc57395635a"
 dependencies = [
  "blake2b_simd",
  "byteorder",
@@ -12586,7 +12862,7 @@ dependencies = [
 [[package]]
 name = "sp-crypto-hashing-proc-macro"
 version = "0.1.0"
-source = "git+https://github.com/paritytech/polkadot-sdk?tag=polkadot-stable2407-1#16b0fd09d9e9281c20ee0c1d8b87d011e3e3454e"
+source = "git+https://github.com/moondance-labs/polkadot-sdk?branch=tanssi-polkadot-stable2407#4a003906b0987b16a473dd83bdb7ffc57395635a"
 dependencies = [
  "quote",
  "sp-crypto-hashing",
@@ -12596,7 +12872,7 @@ dependencies = [
 [[package]]
 name = "sp-database"
 version = "10.0.0"
-source = "git+https://github.com/paritytech/polkadot-sdk?tag=polkadot-stable2407-1#16b0fd09d9e9281c20ee0c1d8b87d011e3e3454e"
+source = "git+https://github.com/moondance-labs/polkadot-sdk?branch=tanssi-polkadot-stable2407#4a003906b0987b16a473dd83bdb7ffc57395635a"
 dependencies = [
  "kvdb",
  "parking_lot 0.12.3",
@@ -12605,7 +12881,7 @@ dependencies = [
 [[package]]
 name = "sp-debug-derive"
 version = "14.0.0"
-source = "git+https://github.com/paritytech/polkadot-sdk?tag=polkadot-stable2407-1#16b0fd09d9e9281c20ee0c1d8b87d011e3e3454e"
+source = "git+https://github.com/moondance-labs/polkadot-sdk?branch=tanssi-polkadot-stable2407#4a003906b0987b16a473dd83bdb7ffc57395635a"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -12615,7 +12891,7 @@ dependencies = [
 [[package]]
 name = "sp-externalities"
 version = "0.29.0"
-source = "git+https://github.com/paritytech/polkadot-sdk?tag=polkadot-stable2407-1#16b0fd09d9e9281c20ee0c1d8b87d011e3e3454e"
+source = "git+https://github.com/moondance-labs/polkadot-sdk?branch=tanssi-polkadot-stable2407#4a003906b0987b16a473dd83bdb7ffc57395635a"
 dependencies = [
  "environmental",
  "parity-scale-codec",
@@ -12625,7 +12901,7 @@ dependencies = [
 [[package]]
 name = "sp-genesis-builder"
 version = "0.15.0"
-source = "git+https://github.com/paritytech/polkadot-sdk?tag=polkadot-stable2407-1#16b0fd09d9e9281c20ee0c1d8b87d011e3e3454e"
+source = "git+https://github.com/moondance-labs/polkadot-sdk?branch=tanssi-polkadot-stable2407#4a003906b0987b16a473dd83bdb7ffc57395635a"
 dependencies = [
  "parity-scale-codec",
  "scale-info",
@@ -12637,7 +12913,7 @@ dependencies = [
 [[package]]
 name = "sp-inherents"
 version = "34.0.0"
-source = "git+https://github.com/paritytech/polkadot-sdk?tag=polkadot-stable2407-1#16b0fd09d9e9281c20ee0c1d8b87d011e3e3454e"
+source = "git+https://github.com/moondance-labs/polkadot-sdk?branch=tanssi-polkadot-stable2407#4a003906b0987b16a473dd83bdb7ffc57395635a"
 dependencies = [
  "async-trait",
  "impl-trait-for-tuples",
@@ -12650,7 +12926,7 @@ dependencies = [
 [[package]]
 name = "sp-io"
 version = "38.0.0"
-source = "git+https://github.com/paritytech/polkadot-sdk?tag=polkadot-stable2407-1#16b0fd09d9e9281c20ee0c1d8b87d011e3e3454e"
+source = "git+https://github.com/moondance-labs/polkadot-sdk?branch=tanssi-polkadot-stable2407#4a003906b0987b16a473dd83bdb7ffc57395635a"
 dependencies = [
  "bytes",
  "docify",
@@ -12676,7 +12952,7 @@ dependencies = [
 [[package]]
 name = "sp-keyring"
 version = "39.0.0"
-source = "git+https://github.com/paritytech/polkadot-sdk?tag=polkadot-stable2407-1#16b0fd09d9e9281c20ee0c1d8b87d011e3e3454e"
+source = "git+https://github.com/moondance-labs/polkadot-sdk?branch=tanssi-polkadot-stable2407#4a003906b0987b16a473dd83bdb7ffc57395635a"
 dependencies = [
  "sp-core",
  "sp-runtime",
@@ -12686,7 +12962,7 @@ dependencies = [
 [[package]]
 name = "sp-keystore"
 version = "0.40.0"
-source = "git+https://github.com/paritytech/polkadot-sdk?tag=polkadot-stable2407-1#16b0fd09d9e9281c20ee0c1d8b87d011e3e3454e"
+source = "git+https://github.com/moondance-labs/polkadot-sdk?branch=tanssi-polkadot-stable2407#4a003906b0987b16a473dd83bdb7ffc57395635a"
 dependencies = [
  "parity-scale-codec",
  "parking_lot 0.12.3",
@@ -12697,7 +12973,7 @@ dependencies = [
 [[package]]
 name = "sp-maybe-compressed-blob"
 version = "11.0.0"
-source = "git+https://github.com/paritytech/polkadot-sdk?tag=polkadot-stable2407-1#16b0fd09d9e9281c20ee0c1d8b87d011e3e3454e"
+source = "git+https://github.com/moondance-labs/polkadot-sdk?branch=tanssi-polkadot-stable2407#4a003906b0987b16a473dd83bdb7ffc57395635a"
 dependencies = [
  "thiserror",
  "zstd 0.12.4",
@@ -12706,7 +12982,7 @@ dependencies = [
 [[package]]
 name = "sp-metadata-ir"
 version = "0.7.0"
-source = "git+https://github.com/paritytech/polkadot-sdk?tag=polkadot-stable2407-1#16b0fd09d9e9281c20ee0c1d8b87d011e3e3454e"
+source = "git+https://github.com/moondance-labs/polkadot-sdk?branch=tanssi-polkadot-stable2407#4a003906b0987b16a473dd83bdb7ffc57395635a"
 dependencies = [
  "frame-metadata",
  "parity-scale-codec",
@@ -12716,7 +12992,7 @@ dependencies = [
 [[package]]
 name = "sp-mixnet"
 version = "0.12.0"
-source = "git+https://github.com/paritytech/polkadot-sdk?tag=polkadot-stable2407-1#16b0fd09d9e9281c20ee0c1d8b87d011e3e3454e"
+source = "git+https://github.com/moondance-labs/polkadot-sdk?branch=tanssi-polkadot-stable2407#4a003906b0987b16a473dd83bdb7ffc57395635a"
 dependencies = [
  "parity-scale-codec",
  "scale-info",
@@ -12727,7 +13003,7 @@ dependencies = [
 [[package]]
 name = "sp-mmr-primitives"
 version = "34.0.0"
-source = "git+https://github.com/paritytech/polkadot-sdk?tag=polkadot-stable2407-1#16b0fd09d9e9281c20ee0c1d8b87d011e3e3454e"
+source = "git+https://github.com/moondance-labs/polkadot-sdk?branch=tanssi-polkadot-stable2407#4a003906b0987b16a473dd83bdb7ffc57395635a"
 dependencies = [
  "log",
  "parity-scale-codec",
@@ -12744,7 +13020,7 @@ dependencies = [
 [[package]]
 name = "sp-npos-elections"
 version = "34.0.0"
-source = "git+https://github.com/paritytech/polkadot-sdk?tag=polkadot-stable2407-1#16b0fd09d9e9281c20ee0c1d8b87d011e3e3454e"
+source = "git+https://github.com/moondance-labs/polkadot-sdk?branch=tanssi-polkadot-stable2407#4a003906b0987b16a473dd83bdb7ffc57395635a"
 dependencies = [
  "parity-scale-codec",
  "scale-info",
@@ -12757,7 +13033,7 @@ dependencies = [
 [[package]]
 name = "sp-offchain"
 version = "34.0.0"
-source = "git+https://github.com/paritytech/polkadot-sdk?tag=polkadot-stable2407-1#16b0fd09d9e9281c20ee0c1d8b87d011e3e3454e"
+source = "git+https://github.com/moondance-labs/polkadot-sdk?branch=tanssi-polkadot-stable2407#4a003906b0987b16a473dd83bdb7ffc57395635a"
 dependencies = [
  "sp-api",
  "sp-core",
@@ -12767,7 +13043,7 @@ dependencies = [
 [[package]]
 name = "sp-panic-handler"
 version = "13.0.0"
-source = "git+https://github.com/paritytech/polkadot-sdk?tag=polkadot-stable2407-1#16b0fd09d9e9281c20ee0c1d8b87d011e3e3454e"
+source = "git+https://github.com/moondance-labs/polkadot-sdk?branch=tanssi-polkadot-stable2407#4a003906b0987b16a473dd83bdb7ffc57395635a"
 dependencies = [
  "backtrace",
  "lazy_static",
@@ -12777,7 +13053,7 @@ dependencies = [
 [[package]]
 name = "sp-rpc"
 version = "32.0.0"
-source = "git+https://github.com/paritytech/polkadot-sdk?tag=polkadot-stable2407-1#16b0fd09d9e9281c20ee0c1d8b87d011e3e3454e"
+source = "git+https://github.com/moondance-labs/polkadot-sdk?branch=tanssi-polkadot-stable2407#4a003906b0987b16a473dd83bdb7ffc57395635a"
 dependencies = [
  "rustc-hash",
  "serde",
@@ -12787,7 +13063,7 @@ dependencies = [
 [[package]]
 name = "sp-runtime"
 version = "39.0.0"
-source = "git+https://github.com/paritytech/polkadot-sdk?tag=polkadot-stable2407-1#16b0fd09d9e9281c20ee0c1d8b87d011e3e3454e"
+source = "git+https://github.com/moondance-labs/polkadot-sdk?branch=tanssi-polkadot-stable2407#4a003906b0987b16a473dd83bdb7ffc57395635a"
 dependencies = [
  "docify",
  "either",
@@ -12813,7 +13089,7 @@ dependencies = [
 [[package]]
 name = "sp-runtime-interface"
 version = "28.0.0"
-source = "git+https://github.com/paritytech/polkadot-sdk?tag=polkadot-stable2407-1#16b0fd09d9e9281c20ee0c1d8b87d011e3e3454e"
+source = "git+https://github.com/moondance-labs/polkadot-sdk?branch=tanssi-polkadot-stable2407#4a003906b0987b16a473dd83bdb7ffc57395635a"
 dependencies = [
  "bytes",
  "impl-trait-for-tuples",
@@ -12832,7 +13108,7 @@ dependencies = [
 [[package]]
 name = "sp-runtime-interface-proc-macro"
 version = "18.0.0"
-source = "git+https://github.com/paritytech/polkadot-sdk?tag=polkadot-stable2407-1#16b0fd09d9e9281c20ee0c1d8b87d011e3e3454e"
+source = "git+https://github.com/moondance-labs/polkadot-sdk?branch=tanssi-polkadot-stable2407#4a003906b0987b16a473dd83bdb7ffc57395635a"
 dependencies = [
  "Inflector",
  "expander",
@@ -12845,7 +13121,7 @@ dependencies = [
 [[package]]
 name = "sp-session"
 version = "35.0.0"
-source = "git+https://github.com/paritytech/polkadot-sdk?tag=polkadot-stable2407-1#16b0fd09d9e9281c20ee0c1d8b87d011e3e3454e"
+source = "git+https://github.com/moondance-labs/polkadot-sdk?branch=tanssi-polkadot-stable2407#4a003906b0987b16a473dd83bdb7ffc57395635a"
 dependencies = [
  "parity-scale-codec",
  "scale-info",
@@ -12859,7 +13135,7 @@ dependencies = [
 [[package]]
 name = "sp-staking"
 version = "34.0.0"
-source = "git+https://github.com/paritytech/polkadot-sdk?tag=polkadot-stable2407-1#16b0fd09d9e9281c20ee0c1d8b87d011e3e3454e"
+source = "git+https://github.com/moondance-labs/polkadot-sdk?branch=tanssi-polkadot-stable2407#4a003906b0987b16a473dd83bdb7ffc57395635a"
 dependencies = [
  "impl-trait-for-tuples",
  "parity-scale-codec",
@@ -12872,7 +13148,7 @@ dependencies = [
 [[package]]
 name = "sp-state-machine"
 version = "0.43.0"
-source = "git+https://github.com/paritytech/polkadot-sdk?tag=polkadot-stable2407-1#16b0fd09d9e9281c20ee0c1d8b87d011e3e3454e"
+source = "git+https://github.com/moondance-labs/polkadot-sdk?branch=tanssi-polkadot-stable2407#4a003906b0987b16a473dd83bdb7ffc57395635a"
 dependencies = [
  "hash-db",
  "log",
@@ -12892,7 +13168,7 @@ dependencies = [
 [[package]]
 name = "sp-statement-store"
 version = "18.0.0"
-source = "git+https://github.com/paritytech/polkadot-sdk?tag=polkadot-stable2407-1#16b0fd09d9e9281c20ee0c1d8b87d011e3e3454e"
+source = "git+https://github.com/moondance-labs/polkadot-sdk?branch=tanssi-polkadot-stable2407#4a003906b0987b16a473dd83bdb7ffc57395635a"
 dependencies = [
  "aes-gcm",
  "curve25519-dalek",
@@ -12916,12 +13192,12 @@ dependencies = [
 [[package]]
 name = "sp-std"
 version = "14.0.0"
-source = "git+https://github.com/paritytech/polkadot-sdk?tag=polkadot-stable2407-1#16b0fd09d9e9281c20ee0c1d8b87d011e3e3454e"
+source = "git+https://github.com/moondance-labs/polkadot-sdk?branch=tanssi-polkadot-stable2407#4a003906b0987b16a473dd83bdb7ffc57395635a"
 
 [[package]]
 name = "sp-storage"
 version = "21.0.0"
-source = "git+https://github.com/paritytech/polkadot-sdk?tag=polkadot-stable2407-1#16b0fd09d9e9281c20ee0c1d8b87d011e3e3454e"
+source = "git+https://github.com/moondance-labs/polkadot-sdk?branch=tanssi-polkadot-stable2407#4a003906b0987b16a473dd83bdb7ffc57395635a"
 dependencies = [
  "impl-serde",
  "parity-scale-codec",
@@ -12933,7 +13209,7 @@ dependencies = [
 [[package]]
 name = "sp-timestamp"
 version = "34.0.0"
-source = "git+https://github.com/paritytech/polkadot-sdk?tag=polkadot-stable2407-1#16b0fd09d9e9281c20ee0c1d8b87d011e3e3454e"
+source = "git+https://github.com/moondance-labs/polkadot-sdk?branch=tanssi-polkadot-stable2407#4a003906b0987b16a473dd83bdb7ffc57395635a"
 dependencies = [
  "async-trait",
  "parity-scale-codec",
@@ -12945,7 +13221,7 @@ dependencies = [
 [[package]]
 name = "sp-tracing"
 version = "17.0.0"
-source = "git+https://github.com/paritytech/polkadot-sdk?tag=polkadot-stable2407-1#16b0fd09d9e9281c20ee0c1d8b87d011e3e3454e"
+source = "git+https://github.com/moondance-labs/polkadot-sdk?branch=tanssi-polkadot-stable2407#4a003906b0987b16a473dd83bdb7ffc57395635a"
 dependencies = [
  "parity-scale-codec",
  "tracing",
@@ -12956,7 +13232,7 @@ dependencies = [
 [[package]]
 name = "sp-transaction-pool"
 version = "34.0.0"
-source = "git+https://github.com/paritytech/polkadot-sdk?tag=polkadot-stable2407-1#16b0fd09d9e9281c20ee0c1d8b87d011e3e3454e"
+source = "git+https://github.com/moondance-labs/polkadot-sdk?branch=tanssi-polkadot-stable2407#4a003906b0987b16a473dd83bdb7ffc57395635a"
 dependencies = [
  "sp-api",
  "sp-runtime",
@@ -12965,7 +13241,7 @@ dependencies = [
 [[package]]
 name = "sp-transaction-storage-proof"
 version = "34.0.0"
-source = "git+https://github.com/paritytech/polkadot-sdk?tag=polkadot-stable2407-1#16b0fd09d9e9281c20ee0c1d8b87d011e3e3454e"
+source = "git+https://github.com/moondance-labs/polkadot-sdk?branch=tanssi-polkadot-stable2407#4a003906b0987b16a473dd83bdb7ffc57395635a"
 dependencies = [
  "async-trait",
  "parity-scale-codec",
@@ -12979,7 +13255,7 @@ dependencies = [
 [[package]]
 name = "sp-trie"
 version = "37.0.0"
-source = "git+https://github.com/paritytech/polkadot-sdk?tag=polkadot-stable2407-1#16b0fd09d9e9281c20ee0c1d8b87d011e3e3454e"
+source = "git+https://github.com/moondance-labs/polkadot-sdk?branch=tanssi-polkadot-stable2407#4a003906b0987b16a473dd83bdb7ffc57395635a"
 dependencies = [
  "ahash",
  "hash-db",
@@ -13002,7 +13278,7 @@ dependencies = [
 [[package]]
 name = "sp-version"
 version = "37.0.0"
-source = "git+https://github.com/paritytech/polkadot-sdk?tag=polkadot-stable2407-1#16b0fd09d9e9281c20ee0c1d8b87d011e3e3454e"
+source = "git+https://github.com/moondance-labs/polkadot-sdk?branch=tanssi-polkadot-stable2407#4a003906b0987b16a473dd83bdb7ffc57395635a"
 dependencies = [
  "impl-serde",
  "parity-scale-codec",
@@ -13019,7 +13295,7 @@ dependencies = [
 [[package]]
 name = "sp-version-proc-macro"
 version = "14.0.0"
-source = "git+https://github.com/paritytech/polkadot-sdk?tag=polkadot-stable2407-1#16b0fd09d9e9281c20ee0c1d8b87d011e3e3454e"
+source = "git+https://github.com/moondance-labs/polkadot-sdk?branch=tanssi-polkadot-stable2407#4a003906b0987b16a473dd83bdb7ffc57395635a"
 dependencies = [
  "parity-scale-codec",
  "proc-macro2",
@@ -13030,7 +13306,7 @@ dependencies = [
 [[package]]
 name = "sp-wasm-interface"
 version = "21.0.0"
-source = "git+https://github.com/paritytech/polkadot-sdk?tag=polkadot-stable2407-1#16b0fd09d9e9281c20ee0c1d8b87d011e3e3454e"
+source = "git+https://github.com/moondance-labs/polkadot-sdk?branch=tanssi-polkadot-stable2407#4a003906b0987b16a473dd83bdb7ffc57395635a"
 dependencies = [
  "anyhow",
  "impl-trait-for-tuples",
@@ -13042,7 +13318,7 @@ dependencies = [
 [[package]]
 name = "sp-weights"
 version = "31.0.0"
-source = "git+https://github.com/paritytech/polkadot-sdk?tag=polkadot-stable2407-1#16b0fd09d9e9281c20ee0c1d8b87d011e3e3454e"
+source = "git+https://github.com/moondance-labs/polkadot-sdk?branch=tanssi-polkadot-stable2407#4a003906b0987b16a473dd83bdb7ffc57395635a"
 dependencies = [
  "bounded-collections",
  "parity-scale-codec",
@@ -13108,7 +13384,7 @@ checksum = "a8f112729512f8e442d81f95a8a7ddf2b7c6b8a1a6f509a95864142b30cab2d3"
 [[package]]
 name = "staging-parachain-info"
 version = "0.16.0"
-source = "git+https://github.com/paritytech/polkadot-sdk?tag=polkadot-stable2407-1#16b0fd09d9e9281c20ee0c1d8b87d011e3e3454e"
+source = "git+https://github.com/moondance-labs/polkadot-sdk?branch=tanssi-polkadot-stable2407#4a003906b0987b16a473dd83bdb7ffc57395635a"
 dependencies = [
  "cumulus-primitives-core",
  "frame-support",
@@ -13121,7 +13397,7 @@ dependencies = [
 [[package]]
 name = "staging-xcm"
 version = "14.1.0"
-source = "git+https://github.com/paritytech/polkadot-sdk?tag=polkadot-stable2407-1#16b0fd09d9e9281c20ee0c1d8b87d011e3e3454e"
+source = "git+https://github.com/moondance-labs/polkadot-sdk?branch=tanssi-polkadot-stable2407#4a003906b0987b16a473dd83bdb7ffc57395635a"
 dependencies = [
  "array-bytes",
  "bounded-collections",
@@ -13139,7 +13415,7 @@ dependencies = [
 [[package]]
 name = "staging-xcm-builder"
 version = "16.0.0"
-source = "git+https://github.com/paritytech/polkadot-sdk?tag=polkadot-stable2407-1#16b0fd09d9e9281c20ee0c1d8b87d011e3e3454e"
+source = "git+https://github.com/moondance-labs/polkadot-sdk?branch=tanssi-polkadot-stable2407#4a003906b0987b16a473dd83bdb7ffc57395635a"
 dependencies = [
  "frame-support",
  "frame-system",
@@ -13160,7 +13436,7 @@ dependencies = [
 [[package]]
 name = "staging-xcm-executor"
 version = "16.0.0"
-source = "git+https://github.com/paritytech/polkadot-sdk?tag=polkadot-stable2407-1#16b0fd09d9e9281c20ee0c1d8b87d011e3e3454e"
+source = "git+https://github.com/moondance-labs/polkadot-sdk?branch=tanssi-polkadot-stable2407#4a003906b0987b16a473dd83bdb7ffc57395635a"
 dependencies = [
  "environmental",
  "frame-benchmarking",
@@ -13281,7 +13557,7 @@ dependencies = [
 [[package]]
 name = "substrate-bip39"
 version = "0.6.0"
-source = "git+https://github.com/paritytech/polkadot-sdk?tag=polkadot-stable2407-1#16b0fd09d9e9281c20ee0c1d8b87d011e3e3454e"
+source = "git+https://github.com/moondance-labs/polkadot-sdk?branch=tanssi-polkadot-stable2407#4a003906b0987b16a473dd83bdb7ffc57395635a"
 dependencies = [
  "hmac 0.12.1",
  "pbkdf2",
@@ -13293,16 +13569,16 @@ dependencies = [
 [[package]]
 name = "substrate-build-script-utils"
 version = "11.0.0"
-source = "git+https://github.com/paritytech/polkadot-sdk?tag=polkadot-stable2407-1#16b0fd09d9e9281c20ee0c1d8b87d011e3e3454e"
+source = "git+https://github.com/moondance-labs/polkadot-sdk?branch=tanssi-polkadot-stable2407#4a003906b0987b16a473dd83bdb7ffc57395635a"
 
 [[package]]
 name = "substrate-frame-rpc-system"
 version = "38.0.0"
-source = "git+https://github.com/paritytech/polkadot-sdk?tag=polkadot-stable2407-1#16b0fd09d9e9281c20ee0c1d8b87d011e3e3454e"
+source = "git+https://github.com/moondance-labs/polkadot-sdk?branch=tanssi-polkadot-stable2407#4a003906b0987b16a473dd83bdb7ffc57395635a"
 dependencies = [
  "docify",
  "frame-system-rpc-runtime-api",
- "futures",
+ "futures 0.3.30",
  "jsonrpsee",
  "log",
  "parity-scale-codec",
@@ -13318,7 +13594,7 @@ dependencies = [
 [[package]]
 name = "substrate-prometheus-endpoint"
 version = "0.17.0"
-source = "git+https://github.com/paritytech/polkadot-sdk?tag=polkadot-stable2407-1#16b0fd09d9e9281c20ee0c1d8b87d011e3e3454e"
+source = "git+https://github.com/moondance-labs/polkadot-sdk?branch=tanssi-polkadot-stable2407#4a003906b0987b16a473dd83bdb7ffc57395635a"
 dependencies = [
  "http-body-util",
  "hyper 1.4.1",
@@ -13332,7 +13608,7 @@ dependencies = [
 [[package]]
 name = "substrate-state-trie-migration-rpc"
 version = "37.0.0"
-source = "git+https://github.com/paritytech/polkadot-sdk?tag=polkadot-stable2407-1#16b0fd09d9e9281c20ee0c1d8b87d011e3e3454e"
+source = "git+https://github.com/moondance-labs/polkadot-sdk?branch=tanssi-polkadot-stable2407#4a003906b0987b16a473dd83bdb7ffc57395635a"
 dependencies = [
  "jsonrpsee",
  "parity-scale-codec",
@@ -13349,7 +13625,7 @@ dependencies = [
 [[package]]
 name = "substrate-wasm-builder"
 version = "24.0.0"
-source = "git+https://github.com/paritytech/polkadot-sdk?tag=polkadot-stable2407-1#16b0fd09d9e9281c20ee0c1d8b87d011e3e3454e"
+source = "git+https://github.com/moondance-labs/polkadot-sdk?branch=tanssi-polkadot-stable2407#4a003906b0987b16a473dd83bdb7ffc57395635a"
 dependencies = [
  "array-bytes",
  "build-helper",
@@ -13534,6 +13810,21 @@ name = "termtree"
 version = "0.4.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "3369f5ac52d5eb6ab48c6b4ffdc8efbcad6b89c765749064ba298f2c68a16a76"
+
+[[package]]
+name = "test-relay-sproof-builder"
+version = "0.1.0"
+source = "git+https://github.com/moondance-labs/dancekit?branch=tanssi-polkadot-stable2407#83c5af140bffb06af6111f5cac7f3075315fa453"
+dependencies = [
+ "cumulus-primitives-core",
+ "dp-collator-assignment",
+ "dp-core",
+ "frame-support",
+ "parity-scale-codec",
+ "sp-runtime",
+ "sp-state-machine",
+ "sp-trie",
+]
 
 [[package]]
 name = "thiserror"
@@ -13924,7 +14215,7 @@ dependencies = [
 [[package]]
 name = "tracing-gum"
 version = "15.0.0"
-source = "git+https://github.com/paritytech/polkadot-sdk?tag=polkadot-stable2407-1#16b0fd09d9e9281c20ee0c1d8b87d011e3e3454e"
+source = "git+https://github.com/moondance-labs/polkadot-sdk?branch=tanssi-polkadot-stable2407#4a003906b0987b16a473dd83bdb7ffc57395635a"
 dependencies = [
  "coarsetime",
  "polkadot-primitives",
@@ -13935,7 +14226,7 @@ dependencies = [
 [[package]]
 name = "tracing-gum-proc-macro"
 version = "5.0.0"
-source = "git+https://github.com/paritytech/polkadot-sdk?tag=polkadot-stable2407-1#16b0fd09d9e9281c20ee0c1d8b87d011e3e3454e"
+source = "git+https://github.com/moondance-labs/polkadot-sdk?branch=tanssi-polkadot-stable2407#4a003906b0987b16a473dd83bdb7ffc57395635a"
 dependencies = [
  "expander",
  "proc-macro-crate 3.1.0",
@@ -14445,7 +14736,7 @@ version = "0.2.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "be0ecb0db480561e9a7642b5d3e4187c128914e58aa84330b9493e3eb68c5e7f"
 dependencies = [
- "futures",
+ "futures 0.3.30",
  "js-sys",
  "parking_lot 0.11.2",
  "pin-utils",
@@ -14737,7 +15028,7 @@ dependencies = [
 [[package]]
 name = "westend-runtime"
 version = "17.0.0"
-source = "git+https://github.com/paritytech/polkadot-sdk?tag=polkadot-stable2407-1#16b0fd09d9e9281c20ee0c1d8b87d011e3e3454e"
+source = "git+https://github.com/moondance-labs/polkadot-sdk?branch=tanssi-polkadot-stable2407#4a003906b0987b16a473dd83bdb7ffc57395635a"
 dependencies = [
  "binary-merkle-tree",
  "bitvec",
@@ -14750,7 +15041,7 @@ dependencies = [
  "frame-system-benchmarking",
  "frame-system-rpc-runtime-api",
  "frame-try-runtime",
- "hex-literal",
+ "hex-literal 0.4.1",
  "log",
  "pallet-asset-rate",
  "pallet-authority-discovery",
@@ -14843,7 +15134,7 @@ dependencies = [
 [[package]]
 name = "westend-runtime-constants"
 version = "16.0.0"
-source = "git+https://github.com/paritytech/polkadot-sdk?tag=polkadot-stable2407-1#16b0fd09d9e9281c20ee0c1d8b87d011e3e3454e"
+source = "git+https://github.com/moondance-labs/polkadot-sdk?branch=tanssi-polkadot-stable2407#4a003906b0987b16a473dd83bdb7ffc57395635a"
 dependencies = [
  "frame-support",
  "polkadot-primitives",
@@ -15287,7 +15578,7 @@ dependencies = [
 [[package]]
 name = "xcm-procedural"
 version = "10.1.0"
-source = "git+https://github.com/paritytech/polkadot-sdk?tag=polkadot-stable2407-1#16b0fd09d9e9281c20ee0c1d8b87d011e3e3454e"
+source = "git+https://github.com/moondance-labs/polkadot-sdk?branch=tanssi-polkadot-stable2407#4a003906b0987b16a473dd83bdb7ffc57395635a"
 dependencies = [
  "Inflector",
  "proc-macro2",
@@ -15298,7 +15589,7 @@ dependencies = [
 [[package]]
 name = "xcm-runtime-apis"
 version = "0.3.0"
-source = "git+https://github.com/paritytech/polkadot-sdk?tag=polkadot-stable2407-1#16b0fd09d9e9281c20ee0c1d8b87d011e3e3454e"
+source = "git+https://github.com/moondance-labs/polkadot-sdk?branch=tanssi-polkadot-stable2407#4a003906b0987b16a473dd83bdb7ffc57395635a"
 dependencies = [
  "frame-support",
  "parity-scale-codec",
@@ -15330,7 +15621,7 @@ version = "0.12.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "9ed0164ae619f2dc144909a9f082187ebb5893693d8c0196e8085283ccd4b776"
 dependencies = [
- "futures",
+ "futures 0.3.30",
  "log",
  "nohash-hasher",
  "parking_lot 0.12.3",

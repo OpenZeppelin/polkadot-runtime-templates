@@ -1,8 +1,9 @@
 use cumulus_primitives_core::ParaId;
 use generic_runtime_template::{
-    constants::currency::EXISTENTIAL_DEPOSIT, AccountId, AuraId, Signature,
+    AccountId, AuraId, Signature,
 };
 use sc_chain_spec::{ChainSpecExtension, ChainSpecGroup};
+use sc_network::config::MultiaddrWithPeerId;
 use sc_service::ChainType;
 use serde::{Deserialize, Serialize};
 use sp_core::{sr25519, Pair, Public};
@@ -56,15 +57,7 @@ where
     AccountPublic::from(get_from_seed::<TPublic>(seed)).into_account()
 }
 
-/// Generate the session keys from individual elements.
-///
-/// The input must be a tuple of individual keys (a single arg for now since we
-/// have just one key).
-pub fn template_session_keys(keys: AuraId) -> generic_runtime_template::SessionKeys {
-    generic_runtime_template::SessionKeys { aura: keys }
-}
-
-pub fn development_config() -> ChainSpec {
+pub fn development_config(para_id: ParaId, boot_nodes: Vec<String>) -> ChainSpec {
     // Give your base currency a unit name and decimal places
     let mut properties = sc_chain_spec::Properties::new();
     properties.insert("tokenSymbol".into(), "UNIT".into());
@@ -73,29 +66,26 @@ pub fn development_config() -> ChainSpec {
     // This is very important for us, it lets us track the usage of our templates, and have no downside for the node/runtime. Please do not remove :)
     properties.insert("basedOn".into(), "OpenZeppelin Generic Template".into());
 
+    let boot_nodes: Vec<MultiaddrWithPeerId> = boot_nodes
+        .into_iter()
+        .map(|x| {
+            x.parse::<MultiaddrWithPeerId>()
+                .unwrap_or_else(|e| panic!("invalid bootnode address format {:?}: {:?}", x, e))
+        })
+        .collect();
+
     ChainSpec::builder(
         generic_runtime_template::WASM_BINARY.expect("WASM binary was not built, please build it!"),
         Extensions {
             relay_chain: "paseo-local".into(),
             // You MUST set this to the correct network!
-            para_id: 1000,
+            para_id: para_id.into(),
         },
     )
     .with_name("Development")
     .with_id("dev")
     .with_chain_type(ChainType::Development)
     .with_genesis_config_patch(testnet_genesis(
-        // initial collators.
-        vec![
-            (
-                get_account_id_from_seed::<sr25519::Public>("Alice"),
-                get_collator_keys_from_seed("Alice"),
-            ),
-            (
-                get_account_id_from_seed::<sr25519::Public>("Bob"),
-                get_collator_keys_from_seed("Bob"),
-            ),
-        ],
         vec![
             get_account_id_from_seed::<sr25519::Public>("Alice"),
             get_account_id_from_seed::<sr25519::Public>("Bob"),
@@ -111,17 +101,26 @@ pub fn development_config() -> ChainSpec {
             get_account_id_from_seed::<sr25519::Public>("Ferdie//stash"),
         ],
         get_account_id_from_seed::<sr25519::Public>("Alice"),
-        1000.into(),
+        para_id,
     ))
+    .with_boot_nodes(boot_nodes)
     .build()
 }
 
-pub fn local_testnet_config() -> ChainSpec {
+pub fn local_testnet_config(para_id: ParaId, boot_nodes: Vec<String>) -> ChainSpec {
     // Give your base currency a unit name and decimal places
     let mut properties = sc_chain_spec::Properties::new();
     properties.insert("tokenSymbol".into(), "UNIT".into());
     properties.insert("tokenDecimals".into(), 12.into());
     properties.insert("ss58Format".into(), 42.into());
+
+    let boot_nodes: Vec<MultiaddrWithPeerId> = boot_nodes
+        .into_iter()
+        .map(|x| {
+            x.parse::<MultiaddrWithPeerId>()
+                .unwrap_or_else(|e| panic!("invalid bootnode address format {:?}: {:?}", x, e))
+        })
+        .collect();
 
     #[allow(deprecated)]
     ChainSpec::builder(
@@ -129,7 +128,7 @@ pub fn local_testnet_config() -> ChainSpec {
         Extensions {
             relay_chain: "paseo-local".into(),
             // You MUST set this to the correct network!
-            para_id: 1000,
+            para_id: para_id.into(),
         },
     )
     .with_name("Local Testnet")
@@ -138,16 +137,6 @@ pub fn local_testnet_config() -> ChainSpec {
     .with_genesis_config_patch(testnet_genesis(
         // initial collators.
         vec![
-            (
-                get_account_id_from_seed::<sr25519::Public>("Alice"),
-                get_collator_keys_from_seed("Alice"),
-            ),
-            (
-                get_account_id_from_seed::<sr25519::Public>("Bob"),
-                get_collator_keys_from_seed("Bob"),
-            ),
-        ],
-        vec![
             get_account_id_from_seed::<sr25519::Public>("Alice"),
             get_account_id_from_seed::<sr25519::Public>("Bob"),
             get_account_id_from_seed::<sr25519::Public>("Charlie"),
@@ -162,15 +151,15 @@ pub fn local_testnet_config() -> ChainSpec {
             get_account_id_from_seed::<sr25519::Public>("Ferdie//stash"),
         ],
         get_account_id_from_seed::<sr25519::Public>("Alice"),
-        1000.into(),
+        para_id,
     ))
     .with_protocol_id("template-local")
     .with_properties(properties)
+    .with_boot_nodes(boot_nodes)
     .build()
 }
 
 fn testnet_genesis(
-    invulnerables: Vec<(AccountId, AuraId)>,
     endowed_accounts: Vec<AccountId>,
     root: AccountId,
     id: ParaId,
@@ -181,22 +170,6 @@ fn testnet_genesis(
         },
         "parachainInfo": {
             "parachainId": id,
-        },
-        "collatorSelection": {
-            "invulnerables": invulnerables.iter().cloned().map(|(acc, _)| acc).collect::<Vec<_>>(),
-            "candidacyBond": EXISTENTIAL_DEPOSIT * 16,
-        },
-        "session": {
-            "keys": invulnerables
-                .into_iter()
-                .map(|(acc, aura)| {
-                    (
-                        acc.clone(),                 // account id
-                        acc,                         // validator id
-                        template_session_keys(aura), // session keys
-                    )
-                })
-            .collect::<Vec<_>>(),
         },
         "treasury": {},
         "polkadotXcm": {
