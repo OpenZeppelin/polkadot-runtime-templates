@@ -68,15 +68,15 @@ parameter_types! {
     pub const SS58Prefix: u16 = 42;
 }
 /// OpenZeppelin configuration
-pub struct Configuration;
-impl SystemConfig for Configuration {
+pub struct OpenZeppelinSystemConfig;
+impl SystemConfig for OpenZeppelinSystemConfig {
     type AccountId = AccountId;
     type PreimageOrigin = EnsureRoot<AccountId>;
     type SS58Prefix = SS58Prefix;
     type ScheduleOrigin = EnsureRoot<AccountId>;
     type Version = Version;
 }
-impl_oz_system!(Configuration);
+impl_oz_system!(OpenZeppelinSystemConfig);
 
 impl pallet_authorship::Config for Runtime {
     type EventHandler = (CollatorSelection,);
