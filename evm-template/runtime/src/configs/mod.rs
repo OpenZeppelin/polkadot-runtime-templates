@@ -46,6 +46,8 @@ use xcm_config::{RelayLocation, XcmOriginToTransactDispatchOrigin};
 
 #[cfg(feature = "runtime-benchmarks")]
 use crate::benchmark::{OpenHrmpChannel, PayWithEnsure};
+#[cfg(feature = "async-backing")]
+use crate::constants::SLOT_DURATION;
 use crate::{
     constants::{
         currency::{deposit, CENTS, EXISTENTIAL_DEPOSIT, GRAND, MICROCENTS},
@@ -64,8 +66,6 @@ use crate::{
     RuntimeFreezeReason, RuntimeHoldReason, RuntimeOrigin, RuntimeTask, Session, SessionKeys,
     System, Timestamp, Treasury, UncheckedExtrinsic, WeightToFee, XcmpQueue,
 };
-#[cfg(feature = "async-backing")]
-use crate::constants::SLOT_DURATION;
 
 parameter_types! {
     pub const Version: RuntimeVersion = VERSION;
