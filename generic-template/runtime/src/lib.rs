@@ -11,8 +11,8 @@ pub mod constants;
 mod types;
 mod weights;
 
-use frame_support::{
-    weights::{WeightToFeeCoefficient, WeightToFeeCoefficients, WeightToFeePolynomial},
+use frame_support::weights::{
+    WeightToFeeCoefficient, WeightToFeeCoefficients, WeightToFeePolynomial,
 };
 use smallvec::smallvec;
 pub use sp_consensus_aura::sr25519::AuthorityId as AuraId;
@@ -105,31 +105,30 @@ pub fn native_version() -> NativeVersion {
     NativeVersion { runtime_version: VERSION, can_author_with: Default::default() }
 }
 
-
 #[frame_support::runtime]
 mod runtime {
-	#[runtime::runtime]
-	#[runtime::derive(
-		RuntimeCall,
-		RuntimeEvent,
-		RuntimeError,
-		RuntimeOrigin,
-		RuntimeFreezeReason,
-		RuntimeHoldReason,
-		RuntimeSlashReason,
-		RuntimeLockId,
-		RuntimeTask
-	)]
-	pub struct Runtime;
+    #[runtime::runtime]
+    #[runtime::derive(
+        RuntimeCall,
+        RuntimeEvent,
+        RuntimeError,
+        RuntimeOrigin,
+        RuntimeFreezeReason,
+        RuntimeHoldReason,
+        RuntimeSlashReason,
+        RuntimeLockId,
+        RuntimeTask
+    )]
+    pub struct Runtime;
 
-	#[runtime::pallet_index(0)]
-	pub type System = frame_system;
-	#[runtime::pallet_index(1)]
-	pub type ParachainSystem = cumulus_pallet_parachain_system;
-	#[runtime::pallet_index(2)]
-	pub type Timestamp = pallet_timestamp;
-	#[runtime::pallet_index(3)]
-	pub type ParachainInfo = parachain_info;
+    #[runtime::pallet_index(0)]
+    pub type System = frame_system;
+    #[runtime::pallet_index(1)]
+    pub type ParachainSystem = cumulus_pallet_parachain_system;
+    #[runtime::pallet_index(2)]
+    pub type Timestamp = pallet_timestamp;
+    #[runtime::pallet_index(3)]
+    pub type ParachainInfo = parachain_info;
     #[runtime::pallet_index(4)]
     pub type Proxy = pallet_proxy;
     #[runtime::pallet_index(5)]
@@ -141,19 +140,19 @@ mod runtime {
     #[runtime::pallet_index(8)]
     pub type Preimage = pallet_preimage;
 
-	// Monetary stuff.
-	#[runtime::pallet_index(10)]
-	pub type Balances = pallet_balances;
-	#[runtime::pallet_index(11)]
-	pub type TransactionPayment = pallet_transaction_payment;
+    // Monetary stuff.
+    #[runtime::pallet_index(10)]
+    pub type Balances = pallet_balances;
+    #[runtime::pallet_index(11)]
+    pub type TransactionPayment = pallet_transaction_payment;
     #[runtime::pallet_index(12)]
     pub type Assets = pallet_assets;
     #[runtime::pallet_index(13)]
     pub type Treasury = pallet_treasury;
 
-	// Governance
-	#[runtime::pallet_index(15)]
-	pub type Sudo = pallet_sudo;
+    // Governance
+    #[runtime::pallet_index(15)]
+    pub type Sudo = pallet_sudo;
     #[runtime::pallet_index(16)]
     pub type ConvictionVoting = pallet_conviction_voting;
     #[runtime::pallet_index(17)]
@@ -163,27 +162,27 @@ mod runtime {
     #[runtime::pallet_index(19)]
     pub type Whitelist = pallet_whitelist;
 
-	// Collator support. The order of these 4 are important and shall not change.
-	#[runtime::pallet_index(20)]
-	pub type Authorship = pallet_authorship;
-	#[runtime::pallet_index(21)]
-	pub type CollatorSelection = pallet_collator_selection;
-	#[runtime::pallet_index(22)]
-	pub type Session = pallet_session;
-	#[runtime::pallet_index(23)]
-	pub type Aura = pallet_aura;
-	#[runtime::pallet_index(24)]
-	pub type AuraExt = cumulus_pallet_aura_ext;
+    // Collator support. The order of these 4 are important and shall not change.
+    #[runtime::pallet_index(20)]
+    pub type Authorship = pallet_authorship;
+    #[runtime::pallet_index(21)]
+    pub type CollatorSelection = pallet_collator_selection;
+    #[runtime::pallet_index(22)]
+    pub type Session = pallet_session;
+    #[runtime::pallet_index(23)]
+    pub type Aura = pallet_aura;
+    #[runtime::pallet_index(24)]
+    pub type AuraExt = cumulus_pallet_aura_ext;
 
-	// XCM helpers.
-	#[runtime::pallet_index(30)]
-	pub type XcmpQueue = cumulus_pallet_xcmp_queue;
-	#[runtime::pallet_index(31)]
-	pub type PolkadotXcm = pallet_xcm;
-	#[runtime::pallet_index(32)]
-	pub type CumulusXcm = cumulus_pallet_xcm;
-	#[runtime::pallet_index(33)]
-	pub type MessageQueue = pallet_message_queue;
+    // XCM helpers.
+    #[runtime::pallet_index(30)]
+    pub type XcmpQueue = cumulus_pallet_xcmp_queue;
+    #[runtime::pallet_index(31)]
+    pub type PolkadotXcm = pallet_xcm;
+    #[runtime::pallet_index(32)]
+    pub type CumulusXcm = cumulus_pallet_xcm;
+    #[runtime::pallet_index(33)]
+    pub type MessageQueue = pallet_message_queue;
 }
 
 cumulus_pallet_parachain_system::register_validate_block! {
