@@ -75,13 +75,13 @@ fn main() {
     };
 
     ziggy::fuzz!(|data: &[u8]| {
-        let mut iteratable = Data::from_data(data);
+        let mut iterable = Data::from_data(data);
 
         // Max weight for a block.
         let max_weight: Weight = Weight::from_parts(WEIGHT_REF_TIME_PER_SECOND * 2, 0);
 
         let extrinsics: Vec<(Option<u32>, usize, RuntimeCall)> =
-            iteratable.extract_extrinsics::<RuntimeCall>();
+            iterable.extract_extrinsics::<RuntimeCall>();
 
         if extrinsics.is_empty() {
             return;
@@ -278,7 +278,7 @@ fn main() {
 
             let total_issuance = pallet_balances::TotalIssuance::<Runtime>::get();
             let counted_issuance = counted_free + counted_reserved;
-            // The reason we do not simply use `!=` here is that some balance might be transfered to another chain via XCM.
+            // The reason we do not simply use `!=` here is that some balance might be transferred to another chain via XCM.
             // If we find some kind of workaround for this, we could replace `<` by `!=` here and make the check stronger.
             assert!(
                 total_issuance <= counted_issuance,

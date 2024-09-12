@@ -14,7 +14,7 @@ pub mod currency {
     pub const GRAND: Balance = 1_000 * DOLLARS;
 
     /// NB: Notice, that existential deposit was set to 0 intentionally to increase compatibility with EVM.
-    /// Hovewer, it leads to some risks, most importantly state bloating.
+    /// However, it leads to some risks, most importantly state bloating.
     /// We acknowledge that there is such a risk and we have an opened issue to resolve it:
     /// https://github.com/OpenZeppelin/polkadot-runtime-templates/issues/195
     /// If you read this message please check out this issue to see if it is resolved and what can you do to implement the fix.

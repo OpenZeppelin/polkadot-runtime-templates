@@ -52,7 +52,7 @@ The result is equivalent to the dispatched result if the threshold is exactly�
 
 TIP: If this is the final approval, you will want to use `as_multi` instead. `approve_as_multi` won’t trigger the dispatch, even if there are enough approvals.
 
-The reason is: `as_multi` needs `call` parameter, whereas `approve_as_mutli` needs `call_hash`. `call_hash` is enough to find the multisig operation entry in the storage, and increment the vote count. We don’t need the `call` itself to increment the vote count. Whereas, if `call` is supplied, and if we have enough approvals, the logic for execution will be triggered. This is a design choice.
+The reason is: `as_multi` needs `call` parameter, whereas `approve_as_multi` needs `call_hash`. `call_hash` is enough to find the multisig operation entry in the storage, and increment the vote count. We don’t need the `call` itself to increment the vote count. Whereas, if `call` is supplied, and if we have enough approvals, the logic for execution will be triggered. This is a design choice.
 
 **Params:**
 
