@@ -64,6 +64,8 @@ use crate::{
     RuntimeFreezeReason, RuntimeHoldReason, RuntimeOrigin, RuntimeTask, Session, SessionKeys,
     System, Timestamp, Treasury, UncheckedExtrinsic, WeightToFee, XcmpQueue,
 };
+#[cfg(feature = "async-backing")]
+use crate::constants::SLOT_DURATION;
 
 parameter_types! {
     pub const Version: RuntimeVersion = VERSION;
