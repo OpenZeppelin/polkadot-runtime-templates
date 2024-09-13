@@ -93,7 +93,6 @@ substrate-build-script-utils = { workspace = true }
 [features]
 default = []
 async-backing = []
-experimental = []
 runtime-benchmarks = [
 	"evm-runtime-template/runtime-benchmarks",
 	"frame-benchmarking-cli/runtime-benchmarks",

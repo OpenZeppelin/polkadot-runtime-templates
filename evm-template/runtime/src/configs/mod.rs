@@ -50,7 +50,7 @@ use crate::{
     constants::{
         currency::{deposit, CENTS, EXISTENTIAL_DEPOSIT, GRAND, MICROCENTS},
         AVERAGE_ON_INITIALIZE_RATIO, DAYS, HOURS, MAXIMUM_BLOCK_WEIGHT, MAX_BLOCK_LENGTH,
-        NORMAL_DISPATCH_RATIO, SLOT_DURATION, VERSION, WEIGHT_PER_GAS,
+        NORMAL_DISPATCH_RATIO, VERSION, WEIGHT_PER_GAS,
     },
     opaque,
     types::{
@@ -204,10 +204,7 @@ impl pallet_preimage::Config for Runtime {
 }
 
 impl pallet_timestamp::Config for Runtime {
-    #[cfg(feature = "experimental")]
     type MinimumPeriod = ConstU64<0>;
-    #[cfg(not(feature = "experimental"))]
-    type MinimumPeriod = ConstU64<{ SLOT_DURATION / 2 }>;
     /// A timestamp: milliseconds since the unix epoch.
     type Moment = u64;
     type OnTimestampSet = Aura;
@@ -329,7 +326,7 @@ impl pallet_transaction_payment::Config for Runtime {
     /// With fast adjusting fees change rapidly, but fixed for all users at each block (no tipping)
     type FeeMultiplierUpdate = SlowAdjustingFeeUpdate<Self>;
     type LengthToFee = ConstantMultiplier<Balance, TransactionByteFee>;
-    type OnChargeTransaction = pallet_transaction_payment::CurrencyAdapter<Balances, ()>;
+    type OnChargeTransaction = pallet_transaction_payment::FungibleAdapter<Balances, ()>;
     type OperationalFeeMultiplier = OperationalFeeMultiplier;
     type RuntimeEvent = RuntimeEvent;
     type WeightToFee = WeightToFee;
@@ -412,7 +409,9 @@ impl cumulus_pallet_xcmp_queue::Config for Runtime {
     type ChannelInfo = ParachainSystem;
     type ControllerOrigin = EnsureRoot<AccountId>;
     type ControllerOriginConverter = XcmOriginToTransactDispatchOrigin;
+    type MaxActiveOutboundChannels = ConstU32<128>;
     type MaxInboundSuspended = MaxInboundSuspended;
+    type MaxPageSize = ConstU32<{ 1 << 16 }>;
     /// Ensure that this value is not set to null (or NoPriceForMessageDelivery) to prevent spamming
     type PriceForSiblingDelivery = PriceForSiblingParachainDelivery;
     type RuntimeEvent = RuntimeEvent;
