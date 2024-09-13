@@ -20,6 +20,9 @@ jobs:
       
       - name: Add dependencies
         run: cargo install ziggy cargo-afl honggfuzz grcov
+
+      - name: Build AFL config
+        run: cargo afl config --build
       
       - name: Add target
         run: rustup target add wasm32-unknown-unknown

@@ -36,7 +36,7 @@ The inputs are defined below in the glossary and config sections.
 ** `WeightToFee` -- Mapping between the smallest unit of weight and smallest unit of fee. Type must implement the trait `WeightToFee<Balance = BalanceOf<Self>>`.
 ** `LengthToFee` -- Convert a length value into a deductible fee based on the currency type. Type must implement the trait `WeightToFee<Balance = BalanceOf<Self>>`.
 * Pallet-specific constants:
-** `OperationalFeeMultiplier` -- A fee mulitiplier for `Operational` extrinsics to compute "virtual tip" to boost their `priority`. Type must implement the trait `Get<u32>`.
+** `OperationalFeeMultiplier` -- A fee multiplier for `Operational` extrinsics to compute "virtual tip" to boost their `priority`. Type must implement the trait `Get<u32>`.
 * Common configs:
 ** `RuntimeEvent`
 
