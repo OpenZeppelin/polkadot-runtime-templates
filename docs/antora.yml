@@ -1,6 +1,6 @@
 name: substrate-runtimes
 title: Substrate Runtimes
-version: 2.0.0
+version: 2.0.1
 nav:
   - modules/ROOT/nav.adoc
 asciidoc:
