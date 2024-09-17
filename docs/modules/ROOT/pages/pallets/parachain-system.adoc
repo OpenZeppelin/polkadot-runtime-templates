@@ -27,7 +27,7 @@ This pallet is a core element of each parachain. It will:
 ** `DmpQueue` — a handler for the incoming *downward* messages from relay chain
 ** `ReservedDmpWeight` — xref:glossary.adoc#weight[weight] reserved for DMP message processing. This config seems to be is not used as the function that processes these messages (`enqueue_inbound_downward_messages`) returns used weight.
 ** `XcmpMessageHandler` — a handler for the incoming _horizontal_ messages from other parachains
-** `ReservedXcmpWeight` — default weight limit for the for the XCMP message processing. May be overriden by storage `ReservedXcmpWeightOverride` . If incoming messages in block will exceed the weight limit, they won’t be processed.
+** `ReservedXcmpWeight` — default weight limit for the for the XCMP message processing. May be overridden by storage `ReservedXcmpWeightOverride` . If incoming messages in block will exceed the weight limit, they won’t be processed.
 ** `CheckAssociatedRelayNumber` — type that implements `trait CheckAssociatedRelayNumber` . Currently there are three implementations: no check (`AnyRelayNumber`), strict increase (`RelayNumberStrictlyIncreases`), monotonic increase (`RelayNumberMonotonicallyIncreases`). It is needed to maintain some order between blocks in relay chain and parachain.
 ** `ConsensusHook` — this is a feature-enabled config ( for the management of the xref:glossary.adoc#unincluded_segment[unincluded segment]. Requires the implementation of `trait ConsensusHook`. There are several implementations of it, in `parachain-system` crate (`FixedCapacityUnincludedSegment`) and in `aura-ext` crate (`FixedVelocityConsensusHook`). It is needed to maintain the logic of segment length handling.
 * Common parameters for all pallets:
