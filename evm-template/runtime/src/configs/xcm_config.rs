@@ -2,10 +2,11 @@ use core::marker::PhantomData;
 
 use frame_support::{
     parameter_types,
-    traits::{ConstU32, ContainsPair, Contains, Everything, Nothing, PalletInfoAccess},
+    traits::{ConstU32, Contains, ContainsPair, Everything, Nothing, PalletInfoAccess},
     weights::Weight,
 };
 use frame_system::EnsureRoot;
+use orml_traits::location::{RelativeReserveProvider, Reserve};
 use pallet_xcm::XcmPassthrough;
 use polkadot_parachain_primitives::primitives::{self, Sibling};
 use xcm::latest::prelude::{Assets as XcmAssets, *};
@@ -13,12 +14,11 @@ use xcm_builder::{
     AccountKey20Aliases, AllowExplicitUnpaidExecutionFrom, AllowTopLevelPaidExecutionFrom,
     ConvertedConcreteId, DenyReserveTransferToRelayChain, DenyThenTry, EnsureXcmOrigin,
     FixedWeightBounds, FrameTransactionalProcessor, FungibleAdapter, FungiblesAdapter, HandleFee,
-    IsChildSystemParachain, IsConcrete, NoChecking, ParentIsPreset,
-    RelayChainAsNative, SiblingParachainAsNative, SiblingParachainConvertsVia,
-    SignedAccountKey20AsNative, SovereignSignedViaLocation, TakeWeightCredit, TrailingSetTopicAsId,
-    UsingComponents, WithComputedOrigin, WithUniqueTopic, XcmFeeManagerFromComponents,
+    IsChildSystemParachain, IsConcrete, NoChecking, ParentIsPreset, RelayChainAsNative,
+    SiblingParachainAsNative, SiblingParachainConvertsVia, SignedAccountKey20AsNative,
+    SovereignSignedViaLocation, TakeWeightCredit, TrailingSetTopicAsId, UsingComponents,
+    WithComputedOrigin, WithUniqueTopic, XcmFeeManagerFromComponents,
 };
-use orml_traits::location::{Reserve, RelativeReserveProvider};
 use xcm_executor::{
     traits::{FeeReason, JustTry, TransactAsset},
     XcmExecutor,
@@ -198,16 +198,16 @@ parameter_types! {
 pub struct MultiNativeAsset<ReserveProvider>(PhantomData<ReserveProvider>);
 impl<ReserveProvider> ContainsPair<Asset, Location> for MultiNativeAsset<ReserveProvider>
 where
-	ReserveProvider: Reserve,
+    ReserveProvider: Reserve,
 {
-	fn contains(asset: &Asset, origin: &Location) -> bool {
-		if let Some(ref reserve) = ReserveProvider::reserve(asset) {
-			if reserve == origin {
-				return true;
-			}
-		}
-		false
-	}
+    fn contains(asset: &Asset, origin: &Location) -> bool {
+        if let Some(ref reserve) = ReserveProvider::reserve(asset) {
+            if reserve == origin {
+                return true;
+            }
+        }
+        false
+    }
 }
 
 /// Asset filter that allows all assets from a certain location matching asset id.
@@ -242,7 +242,6 @@ parameter_types! {
     pub EthereumLocation: Location = Location::new(2, [GlobalConsensus(Ethereum { chain_id: 1 })]);
 }
 
-
 pub struct XcmConfig;
 impl xcm_executor::Config for XcmConfig {
     type Aliasers = Nothing;
@@ -266,10 +265,10 @@ impl xcm_executor::Config for XcmConfig {
     /// The IsReserve type must be set to specify which <MultiAsset, MultiLocation> pair we trust to deposit reserve assets on our chain. We can also use the unit type () to block ReserveAssetDeposited instructions.
     /// The IsTeleporter type must be set to specify which <MultiAsset, MultiLocation> pair we trust to teleport assets to our chain. We can also use the unit type () to block ReceiveTeleportedAssets instruction.
     type IsReserve = (
-		NativeAssetFrom<AssetHubLocation>,
-		AssetPrefixFrom<EthereumLocation, AssetHubLocation>,
-		MultiNativeAsset<RelativeReserveProvider>,
-	);
+        NativeAssetFrom<AssetHubLocation>,
+        AssetPrefixFrom<EthereumLocation, AssetHubLocation>,
+        MultiNativeAsset<RelativeReserveProvider>,
+    );
     type IsTeleporter = ();
     type MaxAssetsIntoHolding = MaxAssetsIntoHolding;
     type MessageExporter = ();
