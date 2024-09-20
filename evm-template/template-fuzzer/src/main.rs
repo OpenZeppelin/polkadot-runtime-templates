@@ -113,7 +113,7 @@ fn process_input(accounts: &[AccountId], genesis: &Storage, data: &[u8]) {
                 continue;
             }
 
-            let origin = accounts[origin_no].clone();
+            let origin = accounts[origin_no];
 
             println!("\n    origin:     {origin:?}");
             println!("    call:       {extrinsic:?}");
@@ -288,9 +288,9 @@ fn check_invariants(block: u32, initial_total_issuance: Balance) {
         counted_free += info.data.free;
         counted_reserved += info.data.reserved;
         let max_lock: Balance =
-            Balances::locks(&account).iter().map(|l| l.amount).max().unwrap_or_default();
+            Balances::locks(account).iter().map(|l| l.amount).max().unwrap_or_default();
         assert_eq!(max_lock, info.data.frozen, "Max lock should be equal to frozen balance");
-        let sum_holds: Balance = Holds::<Runtime>::get(&account).iter().map(|l| l.amount).sum();
+        let sum_holds: Balance = Holds::<Runtime>::get(account).iter().map(|l| l.amount).sum();
         assert!(
             sum_holds <= info.data.reserved,
             "Sum of all holds ({sum_holds}) should be less than or equal to reserved balance {}",
