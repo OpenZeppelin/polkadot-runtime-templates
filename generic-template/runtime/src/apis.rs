@@ -1,6 +1,5 @@
 use frame_support::{
-    genesis_builder_helper::{build_state, get_preset},
-    weights::Weight,
+    genesis_builder_helper::{build_state, get_preset}, traits::PalletInfoAccess, weights::Weight
 };
 use sp_api::impl_runtime_apis;
 use sp_consensus_aura::sr25519::AuthorityId as AuraId;
@@ -261,7 +260,7 @@ impl_runtime_apis! {
                 ParachainSystem,
             >;
             use pallet_xcm::benchmarking::Pallet as PalletXcmExtrinsicsBenchmark;
-            use xcm::latest::prelude::{Asset, AssetId, Assets as AssetList, Fungible, Location, Parachain, Parent, ParentThen};
+            use xcm::latest::prelude::{Asset, AssetId, Assets as AssetList, Fungible, Location, Parachain, Parent, ParentThen, PalletInstance, GeneralIndex};
             impl pallet_xcm::benchmarking::Config for Runtime {
                 type DeliveryHelper = cumulus_primitives_utility::ToParentDeliveryHelper<
                     xcm_config::XcmConfig,
@@ -278,10 +277,39 @@ impl_runtime_apis! {
                 }
 
                 fn reserve_transferable_asset_and_dest() -> Option<(Asset, Location)> {
+
+                    ParachainSystem::open_outbound_hrmp_channel_for_benchmarks_or_tests(
+                        RandomParaId::get().into()
+                    );
+                    let fee_amount: u128 = <Runtime as pallet_balances::Config>::ExistentialDeposit::get();
+                    let balance = 3001070000000;
+                    let who = frame_benchmarking::whitelisted_caller();
+                    let _ =
+                        <Balances as frame_support::traits::Currency<_>>::make_free_balance_be(&who, balance);
+
+                    let asset_amount: u128 = 10u128;
+                    let initial_asset_amount: u128 = asset_amount * 10;
+
+                    let (asset_id, _, _) = pallet_assets::benchmarking::create_default_minted_asset::<
+                        Runtime,
+                        ()
+                    >(true, initial_asset_amount);
+
+                    let asset_id_u32: u32 = asset_id.into();
+
+                    let location = Location {parents: 0, interior: (PalletInstance(<Assets as PalletInfoAccess>::index() as u8), GeneralIndex(asset_id_u32 as u128)).into()};
+                    let asset_id = AssetId(location.clone());
+                    let asset = Asset {
+                        id: asset_id.clone(),
+                        fun: Fungible(ExistentialDeposit::get()),
+                    };
+                    let local_asset_id: crate::types::AssetId = 1;
+                    // TODO: create account id to create asset
+                    let account_id: AccountId = [0u8;32].into();
                     Some((
                         Asset {
                             fun: Fungible(ExistentialDeposit::get()),
-                            id: AssetId(Parent.into())
+                            id: AssetId(location.into())
                         }.into(),
                         ParentThen(Parachain(RandomParaId::get().into()).into()).into(),
                     ))
@@ -294,7 +322,7 @@ impl_runtime_apis! {
 
                 fn get_asset() -> Asset {
                     Asset {
-                        id: AssetId(Location::parent()),
+                        id: AssetId((Location {parents: 0, interior: (PalletInstance(<Assets as PalletInfoAccess>::index() as u8), GeneralIndex(1)).into()}).into()),
                         fun: Fungible(ExistentialDeposit::get()),
                     }
                 }
