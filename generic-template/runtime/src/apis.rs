@@ -278,7 +278,7 @@ impl_runtime_apis! {
                 }
 
                 fn reserve_transferable_asset_and_dest() -> Option<(Asset, Location)> {
-                    use frame_system::traits::PalletInfoAccess;
+                    use frame_support::traits::PalletInfoAccess;
                     ParachainSystem::open_outbound_hrmp_channel_for_benchmarks_or_tests(
                         RandomParaId::get().into()
                     );
@@ -309,7 +309,7 @@ impl_runtime_apis! {
 
                 fn set_up_complex_asset_transfer(
                 ) -> Option<(AssetList, u32, Location, Box<dyn FnOnce()>)> {
-                    use frame_system::traits::PalletInfoAccess;
+                    use frame_support::traits::PalletInfoAccess;
                     // set up local asset
                     let asset_amount: u128 = 10u128;
                     let initial_asset_amount: u128 = 1000000011;
@@ -354,7 +354,7 @@ impl_runtime_apis! {
                 }
 
                 fn get_asset() -> Asset {
-                    use frame_system::traits::PalletInfoAccess;
+                    use frame_support::traits::PalletInfoAccess;
                     Asset {
                         id: AssetId((Location {parents: 0, interior: (PalletInstance(<Assets as PalletInfoAccess>::index() as u8), GeneralIndex(1)).into()}).into()),
                         fun: Fungible(ExistentialDeposit::get()),
