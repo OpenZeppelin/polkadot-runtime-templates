@@ -11,8 +11,8 @@ use frame_support::{
     dispatch::DispatchClass,
     parameter_types,
     traits::{
-        AsEnsureOriginWithArg, ConstU32, ConstU64, Contains, EitherOfDiverse, InstanceFilter,
-        TransformOrigin,
+        AsEnsureOriginWithArg, ConstU32, ConstU64, Contains, EitherOfDiverse,
+        InstanceFilter, TransformOrigin,
     },
     weights::{ConstantMultiplier, Weight},
     PalletId,
@@ -27,7 +27,7 @@ use parachains_common::message_queue::{NarrowOriginToSibling, ParaIdToSibling};
 use parity_scale_codec::{Decode, Encode, MaxEncodedLen};
 use polkadot_runtime_common::{BlockHashCount, SlowAdjustingFeeUpdate};
 use polkadot_runtime_wrappers::{
-    impl_openzeppelin_consensus, impl_openzeppelin_system, ConsensusConfig, SystemConfig,
+    impl_openzeppelin_assets, impl_openzeppelin_consensus, impl_openzeppelin_system, AssetsConfig, ConsensusConfig, SystemConfig,
 };
 use scale_info::TypeInfo;
 use sp_consensus_aura::sr25519::AuthorityId as AuraId;
@@ -65,15 +65,16 @@ use crate::{
 };
 
 parameter_types! {
-    pub const Version: RuntimeVersion = VERSION;
+    pub const ExistentialDeposit: Balance = EXISTENTIAL_DEPOSIT;
     // generic substrate prefix. For more info, see: [Polkadot Accounts In-Depth](https://wiki.polkadot.network/docs/learn-account-advanced#:~:text=The%20address%20format%20used%20in,belonging%20to%20a%20specific%20network)
     pub const SS58Prefix: u16 = 42;
+    pub const Version: RuntimeVersion = VERSION;
 }
 /// OpenZeppelin configuration
-/// TODO: consider moving this and its impls into openzeppelin_config.rs
 pub struct OpenZeppelinConfig;
 impl SystemConfig for OpenZeppelinConfig {
     type AccountId = AccountId;
+    type ExistentialDeposit = ExistentialDeposit;
     type PreimageOrigin = EnsureRoot<AccountId>;
     type SS58Prefix = SS58Prefix;
     type ScheduleOrigin = EnsureRoot<AccountId>;
@@ -82,61 +83,21 @@ impl SystemConfig for OpenZeppelinConfig {
 impl ConsensusConfig for OpenZeppelinConfig {
     type CollatorSelectionUpdateOrigin = CollatorSelectionUpdateOrigin;
 }
-impl_openzeppelin_system!(OpenZeppelinConfig);
-impl_openzeppelin_consensus!(OpenZeppelinConfig);
-
 parameter_types! {
     pub const AssetDeposit: Balance = 10 * CENTS;
     pub const AssetAccountDeposit: Balance = deposit(1, 16);
     pub const ApprovalDeposit: Balance = EXISTENTIAL_DEPOSIT;
-    pub const StringLimit: u32 = 50;
-    pub const MetadataDepositBase: Balance = deposit(1, 68);
-    pub const MetadataDepositPerByte: Balance = deposit(0, 1);
-    pub const RemoveItemsLimit: u32 = 1000;
 }
-
-impl pallet_assets::Config for Runtime {
+impl AssetsConfig for OpenZeppelinConfig {
     type ApprovalDeposit = ApprovalDeposit;
     type AssetAccountDeposit = AssetAccountDeposit;
     type AssetDeposit = AssetDeposit;
-    type AssetId = u32;
-    type AssetIdParameter = parity_scale_codec::Compact<u32>;
-    type Balance = Balance;
-    #[cfg(feature = "runtime-benchmarks")]
-    type BenchmarkHelper = ();
-    type CallbackHandle = ();
     type CreateOrigin = AsEnsureOriginWithArg<EnsureSigned<AccountId>>;
-    type Currency = Balances;
-    type Extra = ();
     type ForceOrigin = EnsureRoot<AccountId>;
-    type Freezer = ();
-    type MetadataDepositBase = MetadataDepositBase;
-    type MetadataDepositPerByte = MetadataDepositPerByte;
-    type RemoveItemsLimit = RemoveItemsLimit;
-    type RuntimeEvent = RuntimeEvent;
-    type StringLimit = StringLimit;
-    /// Rerun benchmarks if you are making changes to runtime configuration.
-    type WeightInfo = weights::pallet_assets::WeightInfo<Runtime>;
 }
-
-parameter_types! {
-    /// Relay Chain `TransactionByteFee` / 10
-    pub const TransactionByteFee: Balance = 10 * MICROCENTS;
-    pub const OperationalFeeMultiplier: u8 = 5;
-}
-
-impl pallet_transaction_payment::Config for Runtime {
-    /// There are two possible mechanisms available: slow and fast adjusting.
-    /// With slow adjusting fees stay almost constant in short periods of time, changing only in long term.
-    /// It may lead to long inclusion times during spikes, therefore tipping is enabled.
-    /// With fast adjusting fees change rapidly, but fixed for all users at each block (no tipping)
-    type FeeMultiplierUpdate = SlowAdjustingFeeUpdate<Self>;
-    type LengthToFee = ConstantMultiplier<Balance, TransactionByteFee>;
-    type OnChargeTransaction = pallet_transaction_payment::CurrencyAdapter<Balances, ()>;
-    type OperationalFeeMultiplier = OperationalFeeMultiplier;
-    type RuntimeEvent = RuntimeEvent;
-    type WeightToFee = WeightToFee;
-}
+impl_openzeppelin_system!(OpenZeppelinConfig);
+impl_openzeppelin_consensus!(OpenZeppelinConfig);
+impl_openzeppelin_assets!(OpenZeppelinConfig);
 
 impl pallet_sudo::Config for Runtime {
     type RuntimeCall = RuntimeCall;

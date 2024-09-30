@@ -67,6 +67,7 @@ use crate::{
 };
 
 parameter_types! {
+    pub const ExistentialDeposit: Balance = EXISTENTIAL_DEPOSIT;
     pub const Version: RuntimeVersion = VERSION;
     // generic substrate prefix. For more info, see: [Polkadot Accounts In-Depth](https://wiki.polkadot.network/docs/learn-account-advanced#:~:text=The%20address%20format%20used%20in,belonging%20to%20a%20specific%20network)
     pub const SS58Prefix: u16 = 42;
@@ -75,6 +76,7 @@ parameter_types! {
 pub struct OpenZeppelinSystemConfig;
 impl SystemConfig for OpenZeppelinSystemConfig {
     type AccountId = AccountId;
+    type ExistentialDeposit = ExistentialDeposit;
     type PreimageOrigin = EnsureRoot<AccountId>;
     type SS58Prefix = SS58Prefix;
     type ScheduleOrigin = EnsureRoot<AccountId>;
