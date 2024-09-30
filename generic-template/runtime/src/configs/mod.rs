@@ -26,7 +26,7 @@ use governance::{origins::Treasurer, TreasurySpender};
 use parachains_common::message_queue::{NarrowOriginToSibling, ParaIdToSibling};
 use parity_scale_codec::{Decode, Encode, MaxEncodedLen};
 use polkadot_runtime_common::{BlockHashCount, SlowAdjustingFeeUpdate};
-use polkadot_runtime_wrappers::{impl_oz_system, SystemConfig};
+use polkadot_runtime_wrappers::{impl_openzeppelin_system, SystemConfig};
 use scale_info::TypeInfo;
 use sp_consensus_aura::sr25519::AuthorityId as AuraId;
 use sp_runtime::{
@@ -76,7 +76,7 @@ impl SystemConfig for OpenZeppelinSystemConfig {
     type ScheduleOrigin = EnsureRoot<AccountId>;
     type Version = Version;
 }
-impl_oz_system!(OpenZeppelinSystemConfig);
+impl_openzeppelin_system!(OpenZeppelinSystemConfig);
 
 impl pallet_authorship::Config for Runtime {
     type EventHandler = (CollatorSelection,);
