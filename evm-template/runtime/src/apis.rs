@@ -506,7 +506,7 @@ impl_runtime_apis! {
                     use xcm_primitives::AssetTypeGetter;
                     use frame_system::RawOrigin;
 
-                    // set up fee asset 
+                    // set up fee asset
                     let fee_location = RelayLocation::get();
                     let who: AccountId = frame_benchmarking::whitelisted_caller();
 
@@ -566,7 +566,7 @@ impl_runtime_apis! {
                 ) -> Option<(AssetList, u32, Location, Box<dyn FnOnce()>)> {
                     use xcm_primitives::AssetTypeGetter;
                     // set up local asset
-                    let initial_asset_amount: u128 = 1000000011;                    
+                    let initial_asset_amount: u128 = 1000000011;
 
                     let (asset_id, _, _) = pallet_assets::benchmarking::create_default_minted_asset::<
                         Runtime,
@@ -600,7 +600,7 @@ impl_runtime_apis! {
                     let fee_index: u32 = 0;
 
                     let who = frame_benchmarking::whitelisted_caller();
-                    
+
                     let verify: Box<dyn FnOnce()> = Box::new(move || {
                         // verify balance after transfer, decreased by
                         // transferred amount (and delivery fees)

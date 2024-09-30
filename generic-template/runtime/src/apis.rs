@@ -1,5 +1,7 @@
 use frame_support::{
-    genesis_builder_helper::{build_state, get_preset}, traits::PalletInfoAccess, weights::Weight
+    genesis_builder_helper::{build_state, get_preset},
+    traits::PalletInfoAccess,
+    weights::Weight,
 };
 use sp_api::impl_runtime_apis;
 use sp_consensus_aura::sr25519::AuthorityId as AuraId;
@@ -17,7 +19,10 @@ use crate::Aura;
 #[cfg(feature = "async-backing")]
 use crate::{constants::SLOT_DURATION, types::ConsensusHook};
 use crate::{
-    constants::VERSION, types::{AccountId, Balance, Block, Executive, Nonce}, InherentDataExt, ParachainSystem, Runtime, RuntimeCall, RuntimeGenesisConfig, SessionKeys, System, TransactionPayment
+    constants::VERSION,
+    types::{AccountId, Balance, Block, Executive, Nonce},
+    InherentDataExt, ParachainSystem, Runtime, RuntimeCall, RuntimeGenesisConfig, SessionKeys,
+    System, TransactionPayment,
 };
 
 impl_runtime_apis! {
