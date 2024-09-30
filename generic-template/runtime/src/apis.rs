@@ -3,7 +3,6 @@ use frame_support::{
     weights::Weight,
 };
 use polkadot_runtime_wrappers::impl_openzeppelin_runtime_apis;
-use sp_api::impl_runtime_apis;
 use sp_consensus_aura::sr25519::AuthorityId as AuraId;
 use sp_core::{crypto::KeyTypeId, OpaqueMetadata};
 use sp_runtime::{
