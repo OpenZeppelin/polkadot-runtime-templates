@@ -26,7 +26,9 @@ use governance::{origins::Treasurer, TreasurySpender};
 use parachains_common::message_queue::{NarrowOriginToSibling, ParaIdToSibling};
 use parity_scale_codec::{Decode, Encode, MaxEncodedLen};
 use polkadot_runtime_common::{BlockHashCount, SlowAdjustingFeeUpdate};
-use polkadot_runtime_wrappers::{impl_openzeppelin_system, SystemConfig};
+use polkadot_runtime_wrappers::{
+    impl_openzeppelin_consensus, impl_openzeppelin_system, ConsensusConfig, SystemConfig,
+};
 use scale_info::TypeInfo;
 use sp_consensus_aura::sr25519::AuthorityId as AuraId;
 use sp_runtime::{
@@ -68,20 +70,20 @@ parameter_types! {
     pub const SS58Prefix: u16 = 42;
 }
 /// OpenZeppelin configuration
-pub struct OpenZeppelinSystemConfig;
-impl SystemConfig for OpenZeppelinSystemConfig {
+/// TODO: consider moving this and its impls into openzeppelin_config.rs
+pub struct OpenZeppelinConfig;
+impl SystemConfig for OpenZeppelinConfig {
     type AccountId = AccountId;
     type PreimageOrigin = EnsureRoot<AccountId>;
     type SS58Prefix = SS58Prefix;
     type ScheduleOrigin = EnsureRoot<AccountId>;
     type Version = Version;
 }
-impl_openzeppelin_system!(OpenZeppelinSystemConfig);
-
-impl pallet_authorship::Config for Runtime {
-    type EventHandler = (CollatorSelection,);
-    type FindAuthor = pallet_session::FindAccountFromAuthorIndex<Self, Aura>;
+impl ConsensusConfig for OpenZeppelinConfig {
+    type CollatorSelectionUpdateOrigin = CollatorSelectionUpdateOrigin;
 }
+impl_openzeppelin_system!(OpenZeppelinConfig);
+impl_openzeppelin_consensus!(OpenZeppelinConfig);
 
 parameter_types! {
     pub const AssetDeposit: Balance = 10 * CENTS;
@@ -173,8 +175,6 @@ impl pallet_message_queue::Config for Runtime {
     type WeightInfo = weights::pallet_message_queue::WeightInfo<Runtime>;
 }
 
-impl cumulus_pallet_aura_ext::Config for Runtime {}
-
 parameter_types! {
     pub const MaxInboundSuspended: u32 = 1000;
     /// The asset ID for the asset that we use to pay for message delivery fees.
@@ -239,53 +239,6 @@ impl pallet_session::Config for Runtime {
     type ValidatorIdOf = pallet_collator_selection::IdentityCollator;
     /// Rerun benchmarks if you are making changes to runtime configuration.
     type WeightInfo = weights::pallet_session::WeightInfo<Runtime>;
-}
-
-#[cfg(not(feature = "async-backing"))]
-parameter_types! {
-    pub const AllowMultipleBlocksPerSlot: bool = false;
-    pub const MaxAuthorities: u32 = 100_000;
-}
-
-#[cfg(feature = "async-backing")]
-parameter_types! {
-    pub const AllowMultipleBlocksPerSlot: bool = true;
-    pub const MaxAuthorities: u32 = 100_000;
-}
-
-impl pallet_aura::Config for Runtime {
-    type AllowMultipleBlocksPerSlot = AllowMultipleBlocksPerSlot;
-    type AuthorityId = AuraId;
-    type DisabledValidators = ();
-    type MaxAuthorities = MaxAuthorities;
-    type SlotDuration = pallet_aura::MinimumPeriodTimesTwo<Self>;
-}
-
-parameter_types! {
-    pub const PotId: PalletId = PalletId(*b"PotStake");
-    pub const SessionLength: BlockNumber = 6 * HOURS;
-    // StakingAdmin pluralistic body.
-    pub const StakingAdminBodyId: BodyId = BodyId::Defense;
-    pub const MaxCandidates: u32 = 100;
-    pub const MaxInvulnerables: u32 = 20;
-    pub const MinEligibleCollators: u32 = 4;
-}
-
-impl pallet_collator_selection::Config for Runtime {
-    type Currency = Balances;
-    // should be a multiple of session or things will get inconsistent
-    type KickThreshold = Period;
-    type MaxCandidates = MaxCandidates;
-    type MaxInvulnerables = MaxInvulnerables;
-    type MinEligibleCollators = MinEligibleCollators;
-    type PotId = PotId;
-    type RuntimeEvent = RuntimeEvent;
-    type UpdateOrigin = CollatorSelectionUpdateOrigin;
-    type ValidatorId = <Self as frame_system::Config>::AccountId;
-    type ValidatorIdOf = pallet_collator_selection::IdentityCollator;
-    type ValidatorRegistration = Session;
-    /// Rerun benchmarks if you are making changes to runtime configuration.
-    type WeightInfo = weights::pallet_collator_selection::WeightInfo<Runtime>;
 }
 
 #[cfg(feature = "runtime-benchmarks")]
