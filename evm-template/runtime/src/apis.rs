@@ -1,6 +1,6 @@
 use frame_support::{
     genesis_builder_helper::{build_state, get_preset},
-    traits::{OnFinalize, PalletInfoAccess},
+    traits::OnFinalize,
     weights::Weight,
 };
 use pallet_ethereum::{
@@ -503,6 +503,7 @@ impl_runtime_apis! {
                 }
 
                 fn reserve_transferable_asset_and_dest() -> Option<(Asset, Location)> {
+                    use frame_system::traits::PalletInfoAccess;
                     use xcm_primitives::AssetTypeGetter;
                     use frame_system::RawOrigin;
 
@@ -564,6 +565,7 @@ impl_runtime_apis! {
 
                 fn set_up_complex_asset_transfer(
                 ) -> Option<(AssetList, u32, Location, Box<dyn FnOnce()>)> {
+                    use frame_system::traits::PalletInfoAccess;
                     use xcm_primitives::AssetTypeGetter;
                     // set up local asset
                     let initial_asset_amount: u128 = 1000000011;

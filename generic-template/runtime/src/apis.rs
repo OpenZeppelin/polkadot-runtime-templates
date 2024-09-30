@@ -1,6 +1,5 @@
 use frame_support::{
     genesis_builder_helper::{build_state, get_preset},
-    traits::PalletInfoAccess,
     weights::Weight,
 };
 use sp_api::impl_runtime_apis;
@@ -279,7 +278,7 @@ impl_runtime_apis! {
                 }
 
                 fn reserve_transferable_asset_and_dest() -> Option<(Asset, Location)> {
-
+                    use frame_system::traits::PalletInfoAccess;
                     ParachainSystem::open_outbound_hrmp_channel_for_benchmarks_or_tests(
                         RandomParaId::get().into()
                     );
@@ -310,6 +309,7 @@ impl_runtime_apis! {
 
                 fn set_up_complex_asset_transfer(
                 ) -> Option<(AssetList, u32, Location, Box<dyn FnOnce()>)> {
+                    use frame_system::traits::PalletInfoAccess;
                     // set up local asset
                     let asset_amount: u128 = 10u128;
                     let initial_asset_amount: u128 = 1000000011;
@@ -354,6 +354,7 @@ impl_runtime_apis! {
                 }
 
                 fn get_asset() -> Asset {
+                    use frame_system::traits::PalletInfoAccess;
                     Asset {
                         id: AssetId((Location {parents: 0, interior: (PalletInstance(<Assets as PalletInfoAccess>::index() as u8), GeneralIndex(1)).into()}).into()),
                         fun: Fungible(ExistentialDeposit::get()),
