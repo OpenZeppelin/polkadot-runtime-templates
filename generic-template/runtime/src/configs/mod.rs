@@ -11,8 +11,8 @@ use frame_support::{
     dispatch::DispatchClass,
     parameter_types,
     traits::{
-        AsEnsureOriginWithArg, ConstU32, ConstU64, Contains, EitherOfDiverse,
-        InstanceFilter, TransformOrigin,
+        AsEnsureOriginWithArg, ConstU32, ConstU64, Contains, EitherOfDiverse, InstanceFilter,
+        TransformOrigin,
     },
     weights::{ConstantMultiplier, Weight},
     PalletId,
@@ -27,7 +27,8 @@ use parachains_common::message_queue::{NarrowOriginToSibling, ParaIdToSibling};
 use parity_scale_codec::{Decode, Encode, MaxEncodedLen};
 use polkadot_runtime_common::{BlockHashCount, SlowAdjustingFeeUpdate};
 use polkadot_runtime_wrappers::{
-    impl_openzeppelin_assets, impl_openzeppelin_consensus, impl_openzeppelin_system, AssetsConfig, ConsensusConfig, SystemConfig,
+    impl_openzeppelin_assets, impl_openzeppelin_consensus, impl_openzeppelin_governance,
+    impl_openzeppelin_system, AssetsConfig, ConsensusConfig, GovernanceConfig, SystemConfig,
 };
 use scale_info::TypeInfo;
 use sp_consensus_aura::sr25519::AuthorityId as AuraId;
@@ -95,16 +96,33 @@ impl AssetsConfig for OpenZeppelinConfig {
     type CreateOrigin = AsEnsureOriginWithArg<EnsureSigned<AccountId>>;
     type ForceOrigin = EnsureRoot<AccountId>;
 }
+parameter_types! {
+    pub const ProposalBond: Permill = Permill::from_percent(5);
+    pub const ProposalBondMinimum: Balance = 2 * GRAND;
+    pub const ProposalBondMaximum: Balance = GRAND;
+    pub const SpendPeriod: BlockNumber = 6 * DAYS;
+    pub const PayoutSpendPeriod: BlockNumber = 30 * DAYS;
+    pub const VoteLockingPeriod: BlockNumber = 7 * DAYS;
+    pub const TreasuryPalletId: PalletId = PalletId(*b"py/trsry");
+    // The asset's interior location for the paying account. This is the Treasury
+    // pallet instance (which sits at index 13).
+    pub TreasuryInteriorLocation: InteriorLocation = PalletInstance(13).into();
+}
+impl GovernanceConfig for OpenZeppelinConfig {
+    type PayoutSpendPeriod = PayoutSpendPeriod;
+    type ProposalBond = ProposalBond;
+    type ProposalBondMaximum = ProposalBondMaximum;
+    type ProposalBondMinimum = ProposalBondMinimum;
+    type VoteLockingPeriod = VoteLockingPeriod;
+    type SpendPeriod = SpendPeriod;
+    type TreasuryApproveOrigin = EitherOfDiverse<EnsureRoot<AccountId>, Treasurer>;
+    type TreasuryPalletId = TreasuryPalletId;
+    type TreasuryInteriorLocation = TreasuryInteriorLocation;
+}
 impl_openzeppelin_system!(OpenZeppelinConfig);
 impl_openzeppelin_consensus!(OpenZeppelinConfig);
 impl_openzeppelin_assets!(OpenZeppelinConfig);
-
-impl pallet_sudo::Config for Runtime {
-    type RuntimeCall = RuntimeCall;
-    type RuntimeEvent = RuntimeEvent;
-    /// Rerun benchmarks if you are making changes to runtime configuration.
-    type WeightInfo = weights::pallet_sudo::WeightInfo<Runtime>;
-}
+impl_openzeppelin_governance!(OpenZeppelinConfig);
 
 parameter_types! {
     pub MessageQueueServiceWeight: Weight = Perbill::from_percent(35) * RuntimeBlockWeights::get().max_block;
@@ -157,102 +175,4 @@ impl cumulus_pallet_xcmp_queue::Config for Runtime {
     type WeightInfo = weights::cumulus_pallet_xcmp_queue::WeightInfo<Runtime>;
     // Enqueue XCMP messages from siblings for later processing.
     type XcmpQueue = TransformOrigin<MessageQueue, AggregateMessageOrigin, ParaId, ParaIdToSibling>;
-}
-
-parameter_types! {
-    // One storage item; key size is 32; value is size 4+4+16+32 bytes = 56 bytes.
-    pub const DepositBase: Balance = deposit(1, 88);
-    // Additional storage item size of 32 bytes.
-    pub const DepositFactor: Balance = deposit(0, 32);
-    pub const MaxSignatories: u16 = 100;
-}
-
-impl pallet_multisig::Config for Runtime {
-    type Currency = Balances;
-    type DepositBase = DepositBase;
-    type DepositFactor = DepositFactor;
-    type MaxSignatories = MaxSignatories;
-    type RuntimeCall = RuntimeCall;
-    type RuntimeEvent = RuntimeEvent;
-    /// Rerun benchmarks if you are making changes to runtime configuration.
-    type WeightInfo = weights::pallet_multisig::WeightInfo<Runtime>;
-}
-
-parameter_types! {
-    // pallet_session ends the session after a fixed period of blocks.
-    // The first session will have length of Offset,
-    // and the following sessions will have length of Period.
-    // This may prove nonsensical if Offset >= Period.
-    pub const Period: u32 = 6 * HOURS;
-    pub const Offset: u32 = 0;
-}
-
-impl pallet_session::Config for Runtime {
-    type Keys = SessionKeys;
-    type NextSessionRotation = pallet_session::PeriodicSessions<Period, Offset>;
-    type RuntimeEvent = RuntimeEvent;
-    // Essentially just Aura, but let's be pedantic.
-    type SessionHandler = <SessionKeys as sp_runtime::traits::OpaqueKeys>::KeyTypeIdProviders;
-    type SessionManager = CollatorSelection;
-    type ShouldEndSession = pallet_session::PeriodicSessions<Period, Offset>;
-    type ValidatorId = <Self as frame_system::Config>::AccountId;
-    // we don't have stash and controller, thus we don't need the convert as well.
-    type ValidatorIdOf = pallet_collator_selection::IdentityCollator;
-    /// Rerun benchmarks if you are making changes to runtime configuration.
-    type WeightInfo = weights::pallet_session::WeightInfo<Runtime>;
-}
-
-#[cfg(feature = "runtime-benchmarks")]
-parameter_types! {
-    pub LocationParents: u8 = 1;
-    pub BenchmarkParaId: u8 = 0;
-}
-
-parameter_types! {
-    pub const ProposalBond: Permill = Permill::from_percent(5);
-    pub const ProposalBondMinimum: Balance = 2 * GRAND;
-    pub const ProposalBondMaximum: Balance = GRAND;
-    pub const SpendPeriod: BlockNumber = 6 * DAYS;
-    pub const Burn: Permill = Permill::from_perthousand(2);
-    pub const TreasuryPalletId: PalletId = PalletId(*b"py/trsry");
-    pub const PayoutSpendPeriod: BlockNumber = 30 * DAYS;
-    // The asset's interior location for the paying account. This is the Treasury
-    // pallet instance (which sits at index 13).
-    pub TreasuryInteriorLocation: InteriorLocation = PalletInstance(13).into();
-    pub const MaxApprovals: u32 = 100;
-    pub TreasuryAccount: AccountId = Treasury::account_id();
-}
-
-impl pallet_treasury::Config for Runtime {
-    type ApproveOrigin = EitherOfDiverse<EnsureRoot<AccountId>, Treasurer>;
-    type AssetKind = AssetKind;
-    type BalanceConverter = frame_support::traits::tokens::UnityAssetBalanceConversion;
-    #[cfg(feature = "runtime-benchmarks")]
-    type BenchmarkHelper = polkadot_runtime_common::impls::benchmarks::TreasuryArguments<
-        LocationParents,
-        BenchmarkParaId,
-    >;
-    type Beneficiary = Beneficiary;
-    type BeneficiaryLookup = IdentityLookup<Self::Beneficiary>;
-    type Burn = ();
-    type BurnDestination = ();
-    type Currency = Balances;
-    type MaxApprovals = MaxApprovals;
-    type OnSlash = Treasury;
-    type PalletId = TreasuryPalletId;
-    #[cfg(feature = "runtime-benchmarks")]
-    type Paymaster = PayWithEnsure<TreasuryPaymaster, OpenHrmpChannel<BenchmarkParaId>>;
-    #[cfg(not(feature = "runtime-benchmarks"))]
-    type Paymaster = TreasuryPaymaster;
-    type PayoutPeriod = PayoutSpendPeriod;
-    type ProposalBond = ProposalBond;
-    type ProposalBondMaximum = ProposalBondMaximum;
-    type ProposalBondMinimum = ProposalBondMinimum;
-    type RejectOrigin = EitherOfDiverse<EnsureRoot<AccountId>, Treasurer>;
-    type RuntimeEvent = RuntimeEvent;
-    type SpendFunds = ();
-    type SpendOrigin = TreasurySpender;
-    type SpendPeriod = SpendPeriod;
-    /// Rerun benchmarks if you are making changes to runtime configuration.
-    type WeightInfo = weights::pallet_treasury::WeightInfo<Runtime>;
 }
