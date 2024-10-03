@@ -11,8 +11,8 @@ use frame_support::{
     dispatch::DispatchClass,
     parameter_types,
     traits::{
-        AsEnsureOriginWithArg, ConstU32, ConstU64, Contains, EitherOfDiverse, InstanceFilter,
-        TransformOrigin,
+        AsEnsureOriginWithArg, ConstU32, ConstU64, Contains, EitherOf, EitherOfDiverse,
+        InstanceFilter, TransformOrigin,
     },
     weights::{ConstantMultiplier, Weight},
     PalletId,
@@ -22,7 +22,7 @@ use frame_system::{
     EnsureRoot, EnsureSigned,
 };
 pub use governance::origins::pallet_custom_origins;
-use governance::{origins::Treasurer, TreasurySpender};
+use governance::{origins::Treasurer, TreasurySpender, WhitelistedCaller};
 use parachains_common::message_queue::{NarrowOriginToSibling, ParaIdToSibling};
 use parity_scale_codec::{Decode, Encode, MaxEncodedLen};
 use polkadot_runtime_common::{BlockHashCount, SlowAdjustingFeeUpdate};
@@ -61,8 +61,9 @@ use crate::{
     },
     weights::{self, BlockExecutionWeight, ExtrinsicBaseWeight, RocksDbWeight},
     Aura, Balances, CollatorSelection, MessageQueue, OriginCaller, PalletInfo, ParachainSystem,
-    Preimage, Runtime, RuntimeCall, RuntimeEvent, RuntimeFreezeReason, RuntimeHoldReason,
-    RuntimeOrigin, RuntimeTask, Session, SessionKeys, System, Treasury, WeightToFee, XcmpQueue,
+    Preimage, Referenda, Runtime, RuntimeCall, RuntimeEvent, RuntimeFreezeReason,
+    RuntimeHoldReason, RuntimeOrigin, RuntimeTask, Session, SessionKeys, System, Treasury,
+    WeightToFee, XcmpQueue,
 };
 
 parameter_types! {
@@ -110,6 +111,7 @@ parameter_types! {
 }
 impl GovernanceConfig for OpenZeppelinConfig {
     type ConvictionVoteLockingPeriod = VoteLockingPeriod;
+    type DispatchWhitelistedOrigin = EitherOf<EnsureRoot<AccountId>, WhitelistedCaller>;
     type TreasuryApproveOrigin = EitherOfDiverse<EnsureRoot<AccountId>, Treasurer>;
     type TreasuryInteriorLocation = TreasuryInteriorLocation;
     type TreasuryOnSlash = Treasury;
@@ -121,6 +123,7 @@ impl GovernanceConfig for OpenZeppelinConfig {
     type TreasuryRejectOrigin = EitherOfDiverse<EnsureRoot<AccountId>, Treasurer>;
     type TreasurySpendOrigin = TreasurySpender;
     type TreasurySpendPeriod = SpendPeriod;
+    type WhitelistOrigin = EnsureRoot<AccountId>;
 }
 impl_openzeppelin_system!(OpenZeppelinConfig);
 impl_openzeppelin_consensus!(OpenZeppelinConfig);

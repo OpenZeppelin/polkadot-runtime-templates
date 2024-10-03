@@ -8625,7 +8625,6 @@ version = "0.0.1"
 dependencies = [
  "frame-support",
  "scale-info",
- "sp-api",
  "sp-std 14.0.0 (git+https://github.com/paritytech/polkadot-sdk?tag=polkadot-v1.10.0)",
  "sp-version",
 ]

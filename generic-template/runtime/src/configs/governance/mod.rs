@@ -16,25 +16,9 @@ use crate::{
         DAYS,
     },
     types::{AccountId, Balance, BlockNumber},
-    weights, Balances, Preimage, Referenda, Runtime, RuntimeCall, RuntimeEvent, RuntimeOrigin,
-    Scheduler, Treasury,
+    weights, Balances, Preimage, Runtime, RuntimeCall, RuntimeEvent, RuntimeOrigin, Scheduler,
+    Treasury,
 };
-
-parameter_types! {
-    pub const VoteLockingPeriod: BlockNumber = 7 * DAYS;
-}
-
-impl pallet_conviction_voting::Config for Runtime {
-    type Currency = Balances;
-    type MaxTurnout =
-        frame_support::traits::tokens::currency::ActiveIssuanceOf<Balances, Self::AccountId>;
-    type MaxVotes = ConstU32<512>;
-    type Polls = Referenda;
-    type RuntimeEvent = RuntimeEvent;
-    type VoteLockingPeriod = VoteLockingPeriod;
-    /// Rerun benchmarks if you are making changes to runtime configuration.
-    type WeightInfo = weights::pallet_conviction_voting::WeightInfo<Runtime>;
-}
 
 parameter_types! {
     pub const MaxBalance: Balance = Balance::MAX;
@@ -42,16 +26,6 @@ parameter_types! {
 pub type TreasurySpender = EitherOf<EnsureRootWithSuccess<AccountId, MaxBalance>, Spender>;
 
 impl origins::pallet_custom_origins::Config for Runtime {}
-
-impl pallet_whitelist::Config for Runtime {
-    type DispatchWhitelistedOrigin = EitherOf<EnsureRoot<Self::AccountId>, WhitelistedCaller>;
-    type Preimages = Preimage;
-    type RuntimeCall = RuntimeCall;
-    type RuntimeEvent = RuntimeEvent;
-    /// Rerun benchmarks if you are making changes to runtime configuration.
-    type WeightInfo = weights::pallet_whitelist::WeightInfo<Runtime>;
-    type WhitelistOrigin = EnsureRoot<Self::AccountId>;
-}
 
 parameter_types! {
     pub const AlarmInterval: BlockNumber = 1;
