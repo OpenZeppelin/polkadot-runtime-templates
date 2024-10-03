@@ -170,49 +170,6 @@ impl cumulus_pallet_xcmp_queue::Config for Runtime {
     type XcmpQueue = TransformOrigin<MessageQueue, AggregateMessageOrigin, ParaId, ParaIdToSibling>;
 }
 
-parameter_types! {
-    // One storage item; key size is 32; value is size 4+4+16+32 bytes = 56 bytes.
-    pub const DepositBase: Balance = deposit(1, 88);
-    // Additional storage item size of 32 bytes.
-    pub const DepositFactor: Balance = deposit(0, 32);
-    pub const MaxSignatories: u16 = 100;
-}
-
-impl pallet_multisig::Config for Runtime {
-    type Currency = Balances;
-    type DepositBase = DepositBase;
-    type DepositFactor = DepositFactor;
-    type MaxSignatories = MaxSignatories;
-    type RuntimeCall = RuntimeCall;
-    type RuntimeEvent = RuntimeEvent;
-    /// Rerun benchmarks if you are making changes to runtime configuration.
-    type WeightInfo = weights::pallet_multisig::WeightInfo<Runtime>;
-}
-
-parameter_types! {
-    // pallet_session ends the session after a fixed period of blocks.
-    // The first session will have length of Offset,
-    // and the following sessions will have length of Period.
-    // This may prove nonsensical if Offset >= Period.
-    pub const Period: u32 = 6 * HOURS;
-    pub const Offset: u32 = 0;
-}
-
-impl pallet_session::Config for Runtime {
-    type Keys = SessionKeys;
-    type NextSessionRotation = pallet_session::PeriodicSessions<Period, Offset>;
-    type RuntimeEvent = RuntimeEvent;
-    // Essentially just Aura, but let's be pedantic.
-    type SessionHandler = <SessionKeys as sp_runtime::traits::OpaqueKeys>::KeyTypeIdProviders;
-    type SessionManager = CollatorSelection;
-    type ShouldEndSession = pallet_session::PeriodicSessions<Period, Offset>;
-    type ValidatorId = <Self as frame_system::Config>::AccountId;
-    // we don't have stash and controller, thus we don't need the convert as well.
-    type ValidatorIdOf = pallet_collator_selection::IdentityCollator;
-    /// Rerun benchmarks if you are making changes to runtime configuration.
-    type WeightInfo = weights::pallet_session::WeightInfo<Runtime>;
-}
-
 #[cfg(not(feature = "async-backing"))]
 parameter_types! {
     pub const AllowMultipleBlocksPerSlot: bool = false;
