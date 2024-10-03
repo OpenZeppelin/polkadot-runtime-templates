@@ -109,15 +109,18 @@ parameter_types! {
     pub TreasuryInteriorLocation: InteriorLocation = PalletInstance(13).into();
 }
 impl GovernanceConfig for OpenZeppelinConfig {
-    type PayoutSpendPeriod = PayoutSpendPeriod;
-    type ProposalBond = ProposalBond;
-    type ProposalBondMaximum = ProposalBondMaximum;
-    type ProposalBondMinimum = ProposalBondMinimum;
-    type VoteLockingPeriod = VoteLockingPeriod;
-    type SpendPeriod = SpendPeriod;
+    type ConvictionVoteLockingPeriod = VoteLockingPeriod;
     type TreasuryApproveOrigin = EitherOfDiverse<EnsureRoot<AccountId>, Treasurer>;
-    type TreasuryPalletId = TreasuryPalletId;
     type TreasuryInteriorLocation = TreasuryInteriorLocation;
+    type TreasuryOnSlash = Treasury;
+    type TreasuryPalletId = TreasuryPalletId;
+    type TreasuryPayoutSpendPeriod = PayoutSpendPeriod;
+    type TreasuryProposalBond = ProposalBond;
+    type TreasuryProposalBondMaximum = ProposalBondMaximum;
+    type TreasuryProposalBondMinimum = ProposalBondMinimum;
+    type TreasuryRejectOrigin = EitherOfDiverse<EnsureRoot<AccountId>, Treasurer>;
+    type TreasurySpendOrigin = TreasurySpender;
+    type TreasurySpendPeriod = SpendPeriod;
 }
 impl_openzeppelin_system!(OpenZeppelinConfig);
 impl_openzeppelin_consensus!(OpenZeppelinConfig);
