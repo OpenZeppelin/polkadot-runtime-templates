@@ -19,10 +19,10 @@ use frame_support::{
 };
 use frame_system::{
     limits::{BlockLength, BlockWeights},
-    EnsureRoot, EnsureSigned,
+    EnsureRoot, EnsureRootWithSuccess, EnsureSigned,
 };
 pub use governance::origins::pallet_custom_origins;
-use governance::{origins::Treasurer, TreasurySpender, WhitelistedCaller};
+use governance::{origins::Treasurer, tracks, Spender, WhitelistedCaller};
 use parachains_common::message_queue::{NarrowOriginToSibling, ParaIdToSibling};
 use parity_scale_codec::{Decode, Encode, MaxEncodedLen};
 use polkadot_runtime_common::{BlockHashCount, SlowAdjustingFeeUpdate};
@@ -62,8 +62,8 @@ use crate::{
     weights::{self, BlockExecutionWeight, ExtrinsicBaseWeight, RocksDbWeight},
     Aura, Balances, CollatorSelection, MessageQueue, OriginCaller, PalletInfo, ParachainSystem,
     Preimage, Referenda, Runtime, RuntimeCall, RuntimeEvent, RuntimeFreezeReason,
-    RuntimeHoldReason, RuntimeOrigin, RuntimeTask, Session, SessionKeys, System, Treasury,
-    WeightToFee, XcmpQueue,
+    RuntimeHoldReason, RuntimeOrigin, RuntimeTask, Scheduler, Session, SessionKeys, System,
+    Treasury, WeightToFee, XcmpQueue,
 };
 
 parameter_types! {
@@ -98,6 +98,9 @@ impl AssetsConfig for OpenZeppelinConfig {
     type ForceOrigin = EnsureRoot<AccountId>;
 }
 parameter_types! {
+    pub const AlarmInterval: BlockNumber = 1;
+    pub const SubmissionDeposit: Balance = 3 * CENTS;
+    pub const UndecidingTimeout: BlockNumber = 14 * DAYS;
     pub const ProposalBond: Permill = Permill::from_percent(5);
     pub const ProposalBondMinimum: Balance = 2 * GRAND;
     pub const ProposalBondMaximum: Balance = GRAND;
@@ -112,6 +115,13 @@ parameter_types! {
 impl GovernanceConfig for OpenZeppelinConfig {
     type ConvictionVoteLockingPeriod = VoteLockingPeriod;
     type DispatchWhitelistedOrigin = EitherOf<EnsureRoot<AccountId>, WhitelistedCaller>;
+    type ReferendaAlarmInterval = AlarmInterval;
+    type ReferendaCancelOrigin = EnsureRoot<AccountId>;
+    type ReferendaKillOrigin = EnsureRoot<AccountId>;
+    type ReferendaSlash = Treasury;
+    type ReferendaSubmissionDeposit = SubmissionDeposit;
+    type ReferendaSubmitOrigin = EnsureSigned<AccountId>;
+    type ReferendaUndecidingTimeout = UndecidingTimeout;
     type TreasuryApproveOrigin = EitherOfDiverse<EnsureRoot<AccountId>, Treasurer>;
     type TreasuryInteriorLocation = TreasuryInteriorLocation;
     type TreasuryOnSlash = Treasury;
