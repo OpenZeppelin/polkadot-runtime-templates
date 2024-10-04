@@ -4,6 +4,7 @@ on:
   schedule:
     # Runs at 00:00 UTC every Sunday
     - cron: '0 0 * * 0'
+  workflow_dispatch:
 
 jobs:
   generic-template-fuzzer:
@@ -18,14 +19,15 @@ jobs:
           profile: minimal
           toolchain: stable
       
+      - name: Add target
+        run: rustup target add wasm32-unknown-unknown
+      
       - name: Add dependencies
         run: cargo install ziggy cargo-afl honggfuzz grcov
 
       - name: Build AFL config
         run: cargo afl config --build
-      
-      - name: Add target
-        run: rustup target add wasm32-unknown-unknown
+        working-directory: generic-template/template-fuzzer
 
       - name: Run Ziggy Fuzzing
         run: |
