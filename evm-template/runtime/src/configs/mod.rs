@@ -29,7 +29,9 @@ use pallet_evm::{EVMCurrencyAdapter, EnsureAccountId20, IdentityAddressMapping};
 use parachains_common::message_queue::{NarrowOriginToSibling, ParaIdToSibling};
 use parity_scale_codec::{Decode, Encode, MaxEncodedLen};
 use polkadot_runtime_common::{BlockHashCount, SlowAdjustingFeeUpdate};
-use polkadot_runtime_wrappers::{impl_openzeppelin_system, SystemConfig};
+use polkadot_runtime_wrappers::{
+    impl_openzeppelin_consensus, impl_openzeppelin_system, ConsensusConfig, SystemConfig,
+};
 use scale_info::TypeInfo;
 use sp_consensus_aura::sr25519::AuthorityId as AuraId;
 use sp_core::{H160, U256};
@@ -51,7 +53,7 @@ use crate::benchmark::{OpenHrmpChannel, PayWithEnsure};
 use crate::constants::SLOT_DURATION;
 use crate::{
     constants::{
-        currency::{deposit, CENTS, EXISTENTIAL_DEPOSIT, GRAND, MICROCENTS},
+        currency::{deposit, CENTS, EXISTENTIAL_DEPOSIT, MICROCENTS},
         AVERAGE_ON_INITIALIZE_RATIO, DAYS, HOURS, MAXIMUM_BLOCK_WEIGHT, MAX_BLOCK_LENGTH,
         NORMAL_DISPATCH_RATIO, VERSION, WEIGHT_PER_GAS,
     },
@@ -75,8 +77,8 @@ parameter_types! {
     pub const SS58Prefix: u16 = 42;
 }
 /// OpenZeppelin configuration
-pub struct OpenZeppelinSystemConfig;
-impl SystemConfig for OpenZeppelinSystemConfig {
+pub struct OpenZeppelinConfig;
+impl SystemConfig for OpenZeppelinConfig {
     type AccountId = AccountId;
     type ExistentialDeposit = ExistentialDeposit;
     type PreimageOrigin = EnsureRoot<AccountId>;
@@ -84,12 +86,11 @@ impl SystemConfig for OpenZeppelinSystemConfig {
     type ScheduleOrigin = EnsureRoot<AccountId>;
     type Version = Version;
 }
-impl_openzeppelin_system!(OpenZeppelinSystemConfig);
-
-impl pallet_authorship::Config for Runtime {
-    type EventHandler = (CollatorSelection,);
-    type FindAuthor = pallet_session::FindAccountFromAuthorIndex<Self, Aura>;
+impl ConsensusConfig for OpenZeppelinConfig {
+    type CollatorSelectionUpdateOrigin = CollatorSelectionUpdateOrigin;
 }
+impl_openzeppelin_system!(OpenZeppelinConfig);
+impl_openzeppelin_consensus!(OpenZeppelinConfig);
 
 parameter_types! {
     /// Relay Chain `TransactionByteFee` / 10
@@ -147,8 +148,6 @@ impl pallet_message_queue::Config for Runtime {
     type WeightInfo = weights::pallet_message_queue::WeightInfo<Runtime>;
 }
 
-impl cumulus_pallet_aura_ext::Config for Runtime {}
-
 parameter_types! {
     pub const MaxInboundSuspended: u32 = 1000;
     /// The asset ID for the asset that we use to pay for message delivery fees.
@@ -174,59 +173,7 @@ impl cumulus_pallet_xcmp_queue::Config for Runtime {
     type XcmpQueue = TransformOrigin<MessageQueue, AggregateMessageOrigin, ParaId, ParaIdToSibling>;
 }
 
-#[cfg(not(feature = "async-backing"))]
 parameter_types! {
-    pub const AllowMultipleBlocksPerSlot: bool = false;
-    pub const MaxAuthorities: u32 = 100_000;
-}
-
-#[cfg(feature = "async-backing")]
-parameter_types! {
-    pub const AllowMultipleBlocksPerSlot: bool = true;
-    pub const MaxAuthorities: u32 = 100_000;
-}
-
-impl pallet_aura::Config for Runtime {
-    type AllowMultipleBlocksPerSlot = AllowMultipleBlocksPerSlot;
-    type AuthorityId = AuraId;
-    type DisabledValidators = ();
-    type MaxAuthorities = MaxAuthorities;
-    #[cfg(feature = "async-backing")]
-    type SlotDuration = ConstU64<SLOT_DURATION>;
-    #[cfg(not(feature = "async-backing"))]
-    type SlotDuration = pallet_aura::MinimumPeriodTimesTwo<Self>;
-}
-
-parameter_types! {
-    pub const PotId: PalletId = PalletId(*b"PotStake");
-    pub const SessionLength: BlockNumber = 6 * HOURS;
-    // StakingAdmin pluralistic body.
-    pub const StakingAdminBodyId: BodyId = BodyId::Defense;
-    pub const MaxCandidates: u32 = 100;
-    pub const MaxInvulnerables: u32 = 20;
-    pub const MinEligibleCollators: u32 = 4;
-}
-
-impl pallet_collator_selection::Config for Runtime {
-    type Currency = Balances;
-    // should be a multiple of session or things will get inconsistent
-    type KickThreshold = Period;
-    type MaxCandidates = MaxCandidates;
-    type MaxInvulnerables = MaxInvulnerables;
-    type MinEligibleCollators = MinEligibleCollators;
-    type PotId = PotId;
-    type RuntimeEvent = RuntimeEvent;
-    type UpdateOrigin = CollatorSelectionUpdateOrigin;
-    type ValidatorId = <Self as frame_system::Config>::AccountId;
-    type ValidatorIdOf = pallet_collator_selection::IdentityCollator;
-    type ValidatorRegistration = Session;
-    type WeightInfo = weights::pallet_collator_selection::WeightInfo<Runtime>;
-}
-
-parameter_types! {
-    pub const ProposalBond: Permill = Permill::from_percent(5);
-    pub const ProposalBondMinimum: Balance = 2 * GRAND;
-    pub const ProposalBondMaximum: Balance = GRAND;
     pub const SpendPeriod: BlockNumber = 6 * DAYS;
     pub const Burn: Permill = Permill::from_perthousand(2);
     pub const TreasuryPalletId: PalletId = PalletId(*b"py/trsry");
