@@ -163,6 +163,7 @@ std = [
 	"parity-scale-codec/std",
 	"polkadot-parachain-primitives/std",
 	"polkadot-runtime-common/std",
+	"polkadot-runtime-wrappers/std",
 	"scale-info/std",
 	"sp-api/std",
 	"sp-arithmetic/std",
@@ -181,7 +182,6 @@ std = [
 	"xcm-executor/std",
 	"xcm-primitives/std",
 	"xcm/std",
-	"polkadot-runtime-wrappers/std",
 ]
 async-backing = []
 
