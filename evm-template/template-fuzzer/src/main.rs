@@ -5,9 +5,8 @@ use std::{
 
 // Local Imports
 use evm_runtime_template::{
-    configs::MaxCandidates, constants::SLOT_DURATION, AccountId, AllPalletsWithSystem, Balance,
-    Balances, EVMChainIdConfig, Executive, Runtime, RuntimeCall, RuntimeOrigin, SudoConfig,
-    UncheckedExtrinsic,
+    constants::SLOT_DURATION, AccountId, AllPalletsWithSystem, Balance, Balances, EVMChainIdConfig,
+    Executive, Runtime, RuntimeCall, RuntimeOrigin, SudoConfig, UncheckedExtrinsic,
 };
 use frame_support::{
     dispatch::GetDispatchInfo,
@@ -263,7 +262,7 @@ fn recursive_call_filter(call: &RuntimeCall, origin: usize) -> bool {
         ) => false,
         RuntimeCall::CollatorSelection(
             pallet_collator_selection::Call::set_desired_candidates { max },
-        ) => *max < MaxCandidates::get(),
+        ) => *max < <Runtime as pallet_collator_selection::Config>::MaxCandidates::get(),
         RuntimeCall::Balances(pallet_balances::Call::force_adjust_total_issuance { .. }) => false,
 
         _ => true,

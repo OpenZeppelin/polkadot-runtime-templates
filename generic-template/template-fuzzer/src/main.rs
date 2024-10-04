@@ -11,8 +11,8 @@ use frame_support::{
 use frame_system::Account;
 // Local Imports
 use generic_runtime_template::{
-    configs::MaxCandidates, constants::SLOT_DURATION, AllPalletsWithSystem, Balance, Balances,
-    Executive, Runtime, RuntimeCall, RuntimeOrigin, SudoConfig, UncheckedExtrinsic,
+    constants::SLOT_DURATION, AllPalletsWithSystem, Balance, Balances, Executive, Runtime,
+    RuntimeCall, RuntimeOrigin, SudoConfig, UncheckedExtrinsic,
 };
 use pallet_balances::{Holds, TotalIssuance};
 use parachains_common::AccountId;
@@ -295,7 +295,7 @@ fn recursive_call_filter(call: &RuntimeCall, origin: usize) -> bool {
         ) => false,
         RuntimeCall::CollatorSelection(
             pallet_collator_selection::Call::set_desired_candidates { max },
-        ) => *max < MaxCandidates::get(),
+        ) => *max < <Runtime as pallet_collator_selection::Config>::MaxCandidates::get(),
         RuntimeCall::Balances(pallet_balances::Call::force_adjust_total_issuance { .. }) => false,
 
         _ => true,
