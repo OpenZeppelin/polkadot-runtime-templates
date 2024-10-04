@@ -13,19 +13,18 @@ use sp_runtime::{
 use xcm::VersionedLocation;
 use xcm_builder::PayOverXcm;
 
-use crate::{
-    configs::{xcm_config, TreasuryInteriorLocation},
-    constants::HOURS,
-};
 pub use crate::{
     configs::{
-        xcm_config::RelayLocation, FeeAssetId, StakingAdminBodyId, ToSiblingBaseDeliveryFee,
-        TransactionByteFee,
+        FeeAssetId, RelayLocation, StakingAdminBodyId, ToSiblingBaseDeliveryFee, TransactionByteFee,
     },
     constants::{
         BLOCK_PROCESSING_VELOCITY, RELAY_CHAIN_SLOT_DURATION_MILLIS, UNINCLUDED_SEGMENT_CAPACITY,
     },
     AllPalletsWithSystem, Runtime, RuntimeCall, XcmpQueue,
+};
+use crate::{
+    configs::{TreasuryInteriorLocation, XcmRouter},
+    constants::HOURS,
 };
 
 /// Alias to 512-bit hash when used in the context of a transaction signature on
@@ -113,7 +112,7 @@ pub type AssetKind = VersionedLocatableAsset;
 /// This is a type that describes how we should transfer bounties from treasury pallet
 pub type TreasuryPaymaster = PayOverXcm<
     TreasuryInteriorLocation,
-    xcm_config::XcmRouter,
+    XcmRouter,
     crate::PolkadotXcm,
     ConstU32<{ 6 * HOURS }>,
     Beneficiary,

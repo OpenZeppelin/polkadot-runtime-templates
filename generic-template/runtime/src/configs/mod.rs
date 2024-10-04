@@ -1,5 +1,4 @@
 pub mod governance;
-pub mod xcm_config;
 
 #[cfg(feature = "async-backing")]
 use cumulus_pallet_parachain_system::RelayNumberMonotonicallyIncreases;
@@ -11,8 +10,8 @@ use frame_support::{
     dispatch::DispatchClass,
     parameter_types,
     traits::{
-        AsEnsureOriginWithArg, ConstU32, ConstU64, Contains, EitherOf, EitherOfDiverse,
-        InstanceFilter, TransformOrigin,
+        AsEnsureOriginWithArg, ConstU32, ConstU64, Contains, EitherOf, EitherOfDiverse, Everything,
+        InstanceFilter, Nothing, PalletInfoAccess, TransformOrigin,
     },
     weights::{ConstantMultiplier, Weight},
     PalletId,
@@ -23,9 +22,11 @@ use frame_system::{
 };
 pub use governance::origins::pallet_custom_origins;
 use governance::{origins::Treasurer, tracks, Spender, WhitelistedCaller};
+use pallet_xcm::XcmPassthrough;
 use parachains_common::message_queue::{NarrowOriginToSibling, ParaIdToSibling};
 use parity_scale_codec::{Decode, Encode, MaxEncodedLen};
-use polkadot_runtime_common::{BlockHashCount, SlowAdjustingFeeUpdate};
+use polkadot_parachain_primitives::primitives::{self, Sibling};
+use polkadot_runtime_common::{impls::ToAuthor, BlockHashCount, SlowAdjustingFeeUpdate};
 use polkadot_runtime_wrappers::{
     impl_openzeppelin_assets, impl_openzeppelin_consensus, impl_openzeppelin_governance,
     impl_openzeppelin_system, impl_openzeppelin_xcm, AssetsConfig, ConsensusConfig,
@@ -38,14 +39,20 @@ use sp_runtime::{
     Perbill, Permill, RuntimeDebug,
 };
 use sp_version::RuntimeVersion;
-use xcm::latest::{
-    prelude::{AssetId, BodyId},
-    InteriorLocation,
-    Junction::PalletInstance,
-};
+use xcm::latest::{prelude::*, InteriorLocation, Junction::PalletInstance};
 #[cfg(not(feature = "runtime-benchmarks"))]
 use xcm_builder::ProcessXcmMessage;
-use xcm_config::{RelayLocation, XcmOriginToTransactDispatchOrigin};
+use xcm_builder::{
+    AccountId32Aliases, AllowExplicitUnpaidExecutionFrom, AllowTopLevelPaidExecutionFrom,
+    DenyReserveTransferToRelayChain, DenyThenTry, EnsureXcmOrigin, FixedWeightBounds,
+    FrameTransactionalProcessor, FungibleAdapter, FungiblesAdapter, IsChildSystemParachain,
+    IsConcrete, NativeAsset, NoChecking, ParentIsPreset, RelayChainAsNative,
+    SiblingParachainAsNative, SiblingParachainConvertsVia, SignedAccountId32AsNative,
+    SignedToAccountId32, SovereignSignedViaLocation, TakeWeightCredit, TrailingSetTopicAsId,
+    UsingComponents, WithComputedOrigin, WithUniqueTopic, XcmFeeManagerFromComponents,
+    XcmFeeToAccount,
+};
+use xcm_executor::XcmExecutor;
 
 #[cfg(feature = "runtime-benchmarks")]
 use crate::benchmark::{OpenHrmpChannel, PayWithEnsure};
@@ -61,10 +68,10 @@ use crate::{
         PriceForSiblingParachainDelivery, TreasuryPaymaster,
     },
     weights::{self, BlockExecutionWeight, ExtrinsicBaseWeight, RocksDbWeight},
-    Aura, Balances, CollatorSelection, MessageQueue, OriginCaller, PalletInfo, ParachainSystem,
-    Preimage, Referenda, Runtime, RuntimeCall, RuntimeEvent, RuntimeFreezeReason,
-    RuntimeHoldReason, RuntimeOrigin, RuntimeTask, Scheduler, Session, SessionKeys, System,
-    Treasury, WeightToFee, XcmpQueue,
+    AllPalletsWithSystem, Assets, Aura, Balances, CollatorSelection, MessageQueue, OriginCaller,
+    PalletInfo, ParachainInfo, ParachainSystem, PolkadotXcm, Preimage, Referenda, Runtime,
+    RuntimeCall, RuntimeEvent, RuntimeFreezeReason, RuntimeHoldReason, RuntimeOrigin, RuntimeTask,
+    Scheduler, Session, SessionKeys, System, Treasury, WeightToFee, XcmpQueue,
 };
 
 parameter_types! {
@@ -143,9 +150,12 @@ parameter_types! {
     pub const MaxInboundSuspended: u32 = 1000;
 }
 impl XcmConfig for OpenZeppelinConfig {
+    type ExecuteXcmOrigin = EnsureXcmOrigin<RuntimeOrigin, LocalOriginToLocation>;
     type MessageQueueHeapSize = HeapSize;
     type MessageQueueMaxStale = MaxStale;
     type MessageQueueServiceWeight = MessageQueueServiceWeight;
+    type SendXcmOrigin = EnsureXcmOrigin<RuntimeOrigin, LocalOriginToLocation>;
+    type XcmAdminOrigin = EnsureRoot<AccountId>;
     type XcmpQueueControllerOrigin = EnsureRoot<AccountId>;
     type XcmpQueueMaxInboundSuspended = MaxInboundSuspended;
 }
