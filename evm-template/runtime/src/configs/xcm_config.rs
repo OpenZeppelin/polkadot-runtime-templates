@@ -11,7 +11,7 @@ use pallet_xcm::XcmPassthrough;
 use polkadot_parachain_primitives::primitives::{self, Sibling};
 use xcm::latest::prelude::{Assets as XcmAssets, *};
 use xcm_builder::{
-    AccountKey20Aliases, AllowExplicitUnpaidExecutionFrom, AllowTopLevelPaidExecutionFrom,
+    AccountKey20Aliases, AllowExplicitUnpaidExecutionFrom, AllowTopLevelPaidExecutionFrom, Case,
     ConvertedConcreteId, DenyReserveTransferToRelayChain, DenyThenTry, EnsureXcmOrigin,
     FixedWeightBounds, FrameTransactionalProcessor, FungibleAdapter, FungiblesAdapter, HandleFee,
     IsChildSystemParachain, IsConcrete, NoChecking, ParentIsPreset, RelayChainAsNative,
@@ -23,7 +23,7 @@ use xcm_executor::{
     traits::{FeeReason, JustTry, TransactAsset},
     XcmExecutor,
 };
-use xcm_primitives::AsAssetType;
+use xcm_primitives::{AbsoluteAndRelativeReserve, AsAssetType};
 
 use crate::{
     configs::{
@@ -36,7 +36,6 @@ use crate::{
 };
 
 parameter_types! {
-    pub const RelayLocation: Location = Location::parent();
     pub const RelayNetwork: Option<NetworkId> = None;
     pub AssetsPalletLocation: Location =
         PalletInstance(<Assets as PalletInfoAccess>::index() as u8).into();
@@ -189,57 +188,66 @@ pub fn deposit_or_burn_fee<AssetTransactor: TransactAsset, AccountId: Clone + In
     }
 }
 
-parameter_types! {
-    pub TreasuryAccount: AccountId = Treasury::account_id();
-}
-
-/// A `FilterAssetLocation` implementation. Filters multi native assets whose
-/// reserve is same with `origin`.
-pub struct MultiNativeAsset<ReserveProvider>(PhantomData<ReserveProvider>);
-impl<ReserveProvider> ContainsPair<Asset, Location> for MultiNativeAsset<ReserveProvider>
+/// Matches foreign assets from a given origin.
+/// Foreign assets are assets bridged from other consensus systems. i.e parents > 1.
+pub struct IsBridgedConcreteAssetFrom<Origin>(PhantomData<Origin>);
+impl<Origin> ContainsPair<Asset, Location> for IsBridgedConcreteAssetFrom<Origin>
 where
-    ReserveProvider: Reserve,
-{
-    fn contains(asset: &Asset, origin: &Location) -> bool {
-        if let Some(ref reserve) = ReserveProvider::reserve(asset) {
-            if reserve == origin {
-                return true;
-            }
-        }
-        false
-    }
-}
-
-/// Asset filter that allows all assets from a certain location matching asset id.
-pub struct AssetPrefixFrom<Prefix, Origin>(PhantomData<(Prefix, Origin)>);
-impl<Prefix, Origin> ContainsPair<Asset, Location> for AssetPrefixFrom<Prefix, Origin>
-where
-    Prefix: Get<Location>,
     Origin: Get<Location>,
 {
     fn contains(asset: &Asset, origin: &Location) -> bool {
         let loc = Origin::get();
         &loc == origin
-            && matches!(asset, Asset { id: AssetId(asset_loc), fun: Fungible(_a) }
-			if asset_loc.starts_with(&Prefix::get()))
+            && matches!(
+                asset,
+                Asset { id: AssetId(Location { parents: 2, .. }), fun: Fungibility::Fungible(_) },
+            )
     }
 }
 
-/// Asset filter that allows native/relay asset if coming from a certain location.
-pub struct NativeAssetFrom<T>(PhantomData<T>);
-impl<T: Get<Location>> ContainsPair<Asset, Location> for NativeAssetFrom<T> {
-    fn contains(asset: &Asset, origin: &Location) -> bool {
-        let loc = T::get();
-        &loc == origin
-            && matches!(asset, Asset { id: AssetId(asset_loc), fun: Fungible(_a) }
-			if *asset_loc == Location::from(Parent))
-    }
+// TODO: We are not using all of them now, butwWe will require these in the future for `orml_tokens` configuration
+parameter_types! {
+    pub const BaseXcmWeight: Weight = Weight::from_parts(200_000_000u64, 0);
+    pub const MaxAssetsForTransfer: usize = 2;
+
+    // This is how we are going to detect whether the asset is a Reserve asset
+    // This however is the chain part only
+    pub SelfLocation: Location = Location::here();
+    // We need this to be able to catch when someone is trying to execute a non-
+    // cross-chain transfer in xtokens through the absolute path way
+    pub SelfLocationAbsolute: Location = Location {
+        parents:1,
+        interior: [
+            Parachain(ParachainInfo::parachain_id().into())
+        ].into()
+    };
 }
 
 parameter_types! {
-  /// Location of Asset Hub
-  pub AssetHubLocation: Location = (Parent, Parachain(1000)).into();
-    pub EthereumLocation: Location = Location::new(2, [GlobalConsensus(Ethereum { chain_id: 1 })]);
+    /// Location of Asset Hub
+   pub AssetHubLocation: Location = Location::new(1, [Parachain(1000)]);
+   pub const RelayLocation: Location = Location::parent();
+   pub RelayLocationFilter: AssetFilter = Wild(AllOf {
+       fun: WildFungible,
+       id: xcm::prelude::AssetId(RelayLocation::get()),
+   });
+   pub RelayChainNativeAssetFromAssetHub: (AssetFilter, Location) = (
+       RelayLocationFilter::get(),
+       AssetHubLocation::get()
+   );
+}
+
+type Reserves = (
+    // Assets bridged from different consensus systems held in reserve on Asset Hub.
+    IsBridgedConcreteAssetFrom<AssetHubLocation>,
+    // Relaychain (DOT) from Asset Hub
+    Case<RelayChainNativeAssetFromAssetHub>,
+    // Assets which the reserve is the same as the origin.
+    MultiNativeAsset<AbsoluteAndRelativeReserve<SelfLocationAbsolute>>,
+);
+
+parameter_types! {
+    pub TreasuryAccount: AccountId = Treasury::account_id();
 }
 
 pub struct XcmConfig;
@@ -264,11 +272,7 @@ impl xcm_executor::Config for XcmConfig {
     /// Please, keep these two configs (`IsReserve` and `IsTeleporter`) mutually exclusive.
     /// The IsReserve type must be set to specify which <MultiAsset, MultiLocation> pair we trust to deposit reserve assets on our chain. We can also use the unit type () to block ReserveAssetDeposited instructions.
     /// The IsTeleporter type must be set to specify which <MultiAsset, MultiLocation> pair we trust to teleport assets to our chain. We can also use the unit type () to block ReceiveTeleportedAssets instruction.
-    type IsReserve = (
-        NativeAssetFrom<AssetHubLocation>,
-        AssetPrefixFrom<EthereumLocation, AssetHubLocation>,
-        MultiNativeAsset<RelativeReserveProvider>,
-    );
+    type IsReserve = Reserves;
     type IsTeleporter = ();
     type MaxAssetsIntoHolding = MaxAssetsIntoHolding;
     type MessageExporter = ();
