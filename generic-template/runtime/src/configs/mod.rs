@@ -60,7 +60,7 @@ use crate::{
     constants::{
         currency::{deposit, CENTS, EXISTENTIAL_DEPOSIT, GRAND, MICROCENTS},
         AVERAGE_ON_INITIALIZE_RATIO, DAYS, HOURS, MAXIMUM_BLOCK_WEIGHT, MAX_BLOCK_LENGTH,
-        NORMAL_DISPATCH_RATIO, SLOT_DURATION, VERSION,
+        NORMAL_DISPATCH_RATIO, VERSION,
     },
     types::{
         AccountId, AssetKind, Balance, Beneficiary, Block, BlockNumber,

@@ -28,26 +28,25 @@ use frame_benchmarking_cli::SUBSTRATE_REFERENCE_HARDWARE;
 use sc_client_api::Backend;
 use sc_consensus::ImportQueue;
 use sc_executor::WasmExecutor;
-use sc_network::NetworkBlock;
-use sc_network_sync::SyncingService;
+use sc_network::{config::FullNetworkConfiguration, NetworkBlock};
 use sc_service::{Configuration, PartialComponents, TFullBackend, TFullClient, TaskManager};
 use sc_telemetry::{Telemetry, TelemetryHandle, TelemetryWorker, TelemetryWorkerHandle};
 use sc_transaction_pool_api::OffchainTransactionPoolFactory;
-use sp_core::U256;
+use sp_core::{H256, U256};
 use sp_keystore::KeystorePtr;
 use substrate_prometheus_endpoint::Registry;
 
 use crate::eth::{
     db_config_dir, new_frontier_partial, spawn_frontier_tasks, BackendType, EthConfiguration,
-    FrontierBackend, FrontierPartialComponents,
+    FrontierBackend, FrontierPartialComponents, StorageOverrideHandler,
 };
 
 #[cfg(not(feature = "runtime-benchmarks"))]
-type HostFunctions =
+pub type HostFunctions =
     (sp_io::SubstrateHostFunctions, cumulus_client_service::storage_proof_size::HostFunctions);
 
 #[cfg(feature = "runtime-benchmarks")]
-type HostFunctions = (
+pub type HostFunctions = (
     sp_io::SubstrateHostFunctions,
     cumulus_client_service::storage_proof_size::HostFunctions,
     frame_benchmarking::benchmarking::HostFunctions,
@@ -72,8 +71,8 @@ pub type Service = PartialComponents<
         ParachainBlockImport,
         Option<Telemetry>,
         Option<TelemetryWorkerHandle>,
-        FrontierBackend,
-        Arc<fc_rpc::OverrideHandle<Block>>,
+        FrontierBackend<ParachainClient>,
+        Arc<dyn fc_storage::StorageOverride<Block>>,
     ),
 >;
 
@@ -132,14 +131,14 @@ pub fn new_partial(
         &task_manager,
     )?;
 
-    let overrides = crate::rpc::overrides_handle(client.clone());
+    let storage_override = Arc::new(StorageOverrideHandler::new(client.clone()));
 
     let frontier_backend = match eth_config.frontier_backend_type {
-        BackendType::KeyValue => FrontierBackend::KeyValue(fc_db::kv::Backend::open(
+        BackendType::KeyValue => FrontierBackend::KeyValue(Arc::new(fc_db::kv::Backend::open(
             Arc::clone(&client),
             &config.database,
             &db_config_dir(config),
-        )?),
+        )?)),
         BackendType::Sql => {
             let db_path = db_config_dir(config).join("sql");
             std::fs::create_dir_all(&db_path).expect("failed creating sql db directory");
@@ -156,10 +155,10 @@ pub fn new_partial(
                 }),
                 eth_config.frontier_sql_backend_pool_size,
                 std::num::NonZeroU32::new(eth_config.frontier_sql_backend_num_ops_timeout),
-                overrides.clone(),
+                storage_override.clone(),
             ))
             .unwrap_or_else(|err| panic!("failed creating sql backend: {:?}", err));
-            FrontierBackend::Sql(backend)
+            FrontierBackend::Sql(Arc::new(backend))
         }
     };
 
@@ -171,7 +170,13 @@ pub fn new_partial(
         task_manager,
         transaction_pool,
         select_chain: (),
-        other: (block_import, telemetry, telemetry_worker_handle, frontier_backend, overrides),
+        other: (
+            block_import,
+            telemetry,
+            telemetry_worker_handle,
+            frontier_backend,
+            storage_override,
+        ),
     })
 }
 
@@ -198,7 +203,10 @@ async fn start_node_impl(
 
     let (block_import, mut telemetry, telemetry_worker_handle, frontier_backend, overrides) =
         params.other;
-    let net_config = sc_network::config::FullNetworkConfiguration::new(&parachain_config.network);
+
+    let frontier_backend = Arc::new(frontier_backend);
+    let net_config: FullNetworkConfiguration<Block, H256, sc_network::NetworkWorker<_, _>> =
+        sc_network::config::FullNetworkConfiguration::new(&parachain_config.network);
 
     let client = params.client.clone();
     let backend = params.backend.clone();
@@ -248,7 +256,7 @@ async fn start_node_impl(
                 transaction_pool: Some(OffchainTransactionPoolFactory::new(
                     transaction_pool.clone(),
                 )),
-                network_provider: network.clone(),
+                network_provider: Arc::new(network.clone()),
                 is_validator: parachain_config.role.is_authority(),
                 enable_http_requests: false,
                 custom_extensions: move |_| vec![],
@@ -306,9 +314,9 @@ async fn start_node_impl(
                 enable_dev_signer,
                 network: network.clone(),
                 sync: sync_service.clone(),
-                frontier_backend: match frontier_backend.clone() {
-                    fc_db::Backend::KeyValue(b) => Arc::new(b),
-                    fc_db::Backend::Sql(b) => Arc::new(b),
+                frontier_backend: match &*frontier_backend.clone() {
+                    fc_db::Backend::KeyValue(b) => b.clone(),
+                    fc_db::Backend::Sql(b) => b.clone(),
                 },
                 overrides: overrides.clone(),
                 block_data_cache: block_data_cache.clone(),
@@ -431,7 +439,6 @@ async fn start_node_impl(
             &task_manager,
             relay_chain_interface.clone(),
             transaction_pool,
-            sync_service.clone(),
             params.keystore_container.keystore(),
             relay_chain_slot_duration,
             para_id,
@@ -454,8 +461,6 @@ fn build_import_queue(
     telemetry: Option<TelemetryHandle>,
     task_manager: &TaskManager,
 ) -> Result<sc_consensus::DefaultImportQueue<Block>, sc_service::Error> {
-    let slot_duration = cumulus_client_consensus_aura::slot_duration(&*client)?;
-
     Ok(cumulus_client_consensus_aura::equivocation_import_queue::fully_verifying_import_queue::<
         sp_consensus_aura::sr25519::AuthorityPair,
         _,
@@ -469,7 +474,6 @@ fn build_import_queue(
             let timestamp = sp_timestamp::InherentDataProvider::from_system_time();
             Ok(timestamp)
         },
-        slot_duration,
         &task_manager.spawn_essential_handle(),
         config.prometheus_registry(),
         telemetry,
@@ -485,7 +489,6 @@ fn start_consensus(
     task_manager: &TaskManager,
     relay_chain_interface: Arc<dyn RelayChainInterface>,
     transaction_pool: Arc<sc_transaction_pool::FullPool<Block, ParachainClient>>,
-    sync_oracle: Arc<SyncingService<Block>>,
     keystore: KeystorePtr,
     relay_chain_slot_duration: Duration,
     para_id: ParaId,
@@ -497,11 +500,6 @@ fn start_consensus(
     use cumulus_client_consensus_aura::collators::basic::{self as basic_aura, Params};
     #[cfg(feature = "async-backing")]
     use cumulus_client_consensus_aura::collators::lookahead::{self as aura, Params};
-
-    // NOTE: because we use Aura here explicitly, we can use
-    // `CollatorSybilResistance::Resistant` when starting the network.
-    #[cfg(not(feature = "async-backing"))]
-    let slot_duration = cumulus_client_consensus_aura::slot_duration(&*client)?;
 
     let proposer_factory = sc_basic_authorship::ProposerFactory::with_proof_recording(
         task_manager.spawn_handle(),
@@ -534,13 +532,10 @@ fn start_consensus(
         code_hash_provider: move |block_hash| {
             client.code_at(block_hash).ok().map(ValidationCode).map(|c| c.hash())
         },
-        sync_oracle,
         keystore,
         collator_key,
         para_id,
         overseer_handle,
-        #[cfg(not(feature = "async-backing"))]
-        slot_duration,
         relay_chain_slot_duration,
         proposer,
         collator_service,
@@ -556,15 +551,13 @@ fn start_consensus(
     };
 
     #[cfg(not(feature = "async-backing"))]
-    let fut =
-        basic_aura::run::<Block, sp_consensus_aura::sr25519::AuthorityPair, _, _, _, _, _, _, _>(
-            params,
-        );
+    let fut = basic_aura::run::<Block, sp_consensus_aura::sr25519::AuthorityPair, _, _, _, _, _, _>(
+        params,
+    );
     #[cfg(feature = "async-backing")]
-    let fut =
-        aura::run::<Block, sp_consensus_aura::sr25519::AuthorityPair, _, _, _, _, _, _, _, _, _>(
-            params,
-        );
+    let fut = aura::run::<Block, sp_consensus_aura::sr25519::AuthorityPair, _, _, _, _, _, _, _, _>(
+        params,
+    );
     task_manager.spawn_essential_handle().spawn("aura", None, fut);
 
     Ok(())
