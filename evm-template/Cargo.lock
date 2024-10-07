@@ -3007,7 +3007,9 @@ dependencies = [
  "frame-try-runtime",
  "hex-literal",
  "log",
+ "orml-traits",
  "orml-xcm-support",
+ "orml-xtokens",
  "pallet-asset-manager",
  "pallet-assets",
  "pallet-aura",
@@ -6871,6 +6873,7 @@ dependencies = [
  "parity-scale-codec",
  "paste",
  "scale-info",
+ "serde",
  "sp-core",
  "sp-io",
  "sp-runtime",
@@ -6886,6 +6889,7 @@ dependencies = [
  "frame-support",
  "parity-scale-codec",
  "scale-info",
+ "serde",
  "sp-core",
  "sp-io",
  "sp-runtime",
@@ -6900,6 +6904,27 @@ dependencies = [
  "frame-support",
  "orml-traits",
  "parity-scale-codec",
+ "sp-runtime",
+ "sp-std",
+ "staging-xcm",
+ "staging-xcm-executor",
+]
+
+[[package]]
+name = "orml-xtokens"
+version = "0.10.0"
+source = "git+https://github.com/OpenZeppelin/open-runtime-module-library?branch=polkadot-stable2407-1#aafe9077c9ec61dd8b3a42e899ef8353b2b050c0"
+dependencies = [
+ "frame-support",
+ "frame-system",
+ "log",
+ "orml-traits",
+ "orml-xcm-support",
+ "pallet-xcm",
+ "parity-scale-codec",
+ "scale-info",
+ "serde",
+ "sp-io",
  "sp-runtime",
  "sp-std",
  "staging-xcm",
