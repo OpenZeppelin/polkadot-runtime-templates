@@ -5,7 +5,7 @@ use std::{
 
 use frame_support::{
     dispatch::GetDispatchInfo,
-    traits::{IntegrityTest, TryState, TryStateSelect},
+    traits::{Get, IntegrityTest, TryState, TryStateSelect},
     weights::{constants::WEIGHT_REF_TIME_PER_SECOND, Weight},
 };
 use frame_system::Account;
