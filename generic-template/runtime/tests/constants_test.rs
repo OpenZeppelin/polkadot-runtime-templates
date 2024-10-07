@@ -197,7 +197,7 @@ mod runtime_tests {
         #[cfg(feature = "async-backing")]
         assert!(AllowMultipleBlocksPerSlot::get());
 
-        assert_eq!(MaxAuthorities::get(), 100_000);
+        assert_eq!(<Runtime as pallet_aura::Config>::MaxAuthorities::get(), 100_000);
     }
 
     #[test]
@@ -212,11 +212,11 @@ mod runtime_tests {
 
         assert_eq!(StakingAdminBodyId::get(), BodyId::Defense);
 
-        assert_eq!(MaxCandidates::get(), 100);
+        assert_eq!(<Runtime as pallet_collator_selection::Config>::MaxCandidates::get(), 100);
 
-        assert_eq!(MaxInvulnerables::get(), 20);
+        assert_eq!(<Runtime as pallet_collator_selection::Config>::MaxInvulnerables::get(), 20);
 
-        assert_eq!(MinEligibleCollators::get(), 4);
+        assert_eq!(<Runtime as pallet_collator_selection::Config>::MinEligibleCollators::get(), 4);
     }
 }
 
