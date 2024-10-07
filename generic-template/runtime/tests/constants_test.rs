@@ -222,7 +222,7 @@ mod runtime_tests {
 
 mod xcm_tests {
     use frame_support::weights::Weight;
-    use generic_runtime_template::configs::xcm_config::*;
+    use generic_runtime_template::configs::*;
 
     #[test]
     fn xcm_executor_constants() {
