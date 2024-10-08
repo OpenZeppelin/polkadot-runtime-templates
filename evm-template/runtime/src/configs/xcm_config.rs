@@ -301,7 +301,6 @@ impl pallet_xcm::Config for Runtime {
     type XcmExecuteFilter = Everything;
     #[cfg(not(feature = "runtime-benchmarks"))]
     type XcmExecuteFilter = Nothing;
-    // ^ Disable dispatchable execute on the XCM pallet.
     // Needs to be `Everything` for local testing.
     type XcmExecutor = XcmExecutor<XcmConfig>;
     type XcmReserveTransferFilter = Everything;

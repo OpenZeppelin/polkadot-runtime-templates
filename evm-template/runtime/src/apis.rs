@@ -478,6 +478,7 @@ impl_runtime_apis! {
                 ).into());
                 /// The base fee for the message delivery fees. Kusama is based for the reference.
                 pub const ToParentBaseDeliveryFee: u128 = CENTS.saturating_mul(3);
+                pub const InitialTransferAssetAmount: u128 = 4001070000100;
             }
             pub type PriceForParentDelivery = polkadot_runtime_common::xcm_sender::ExponentialPrice<
                 FeeAssetId,
@@ -523,7 +524,7 @@ impl_runtime_apis! {
                         RawOrigin::Signed(manager_id.clone()).into(),
                         local_asset_id.into(),
                         sp_runtime::MultiAddress::Id(who),
-                        3001010000000,
+                        InitialTransferAssetAmount::get(),
                     );
                     AssetManager::set_asset_type_asset_id(asset_type.clone(), local_asset_id.into());
 
@@ -533,7 +534,7 @@ impl_runtime_apis! {
                     );
 
                     // set up transfer asset
-                    let initial_asset_amount: u128 = 4001070000100;
+                    let initial_asset_amount: u128 = InitialTransferAssetAmount::get();
                     let (asset_id, _, _) = pallet_assets::benchmarking::create_default_minted_asset::<
                         Runtime,
                         ()
