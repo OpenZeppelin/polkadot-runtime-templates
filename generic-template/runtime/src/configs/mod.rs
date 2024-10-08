@@ -109,13 +109,11 @@ parameter_types! {
     pub const AlarmInterval: BlockNumber = 1;
     pub const SubmissionDeposit: Balance = 3 * CENTS;
     pub const UndecidingTimeout: BlockNumber = 14 * DAYS;
-    pub const ProposalBond: Permill = Permill::from_percent(5);
-    pub const ProposalBondMinimum: Balance = 2 * GRAND;
-    pub const ProposalBondMaximum: Balance = GRAND;
     pub const SpendPeriod: BlockNumber = 6 * DAYS;
     pub const PayoutSpendPeriod: BlockNumber = 30 * DAYS;
     pub const VoteLockingPeriod: BlockNumber = 7 * DAYS;
     pub const TreasuryPalletId: PalletId = PalletId(*b"py/trsry");
+    pub TreasuryAccount: AccountId = Treasury::account_id();
     // The asset's interior location for the paying account. This is the Treasury
     // pallet instance (which sits at index 13).
     pub TreasuryInteriorLocation: InteriorLocation = PalletInstance(13).into();
@@ -130,14 +128,9 @@ impl GovernanceConfig for OpenZeppelinConfig {
     type ReferendaSubmissionDeposit = SubmissionDeposit;
     type ReferendaSubmitOrigin = EnsureSigned<AccountId>;
     type ReferendaUndecidingTimeout = UndecidingTimeout;
-    type TreasuryApproveOrigin = EitherOfDiverse<EnsureRoot<AccountId>, Treasurer>;
     type TreasuryInteriorLocation = TreasuryInteriorLocation;
-    type TreasuryOnSlash = Treasury;
     type TreasuryPalletId = TreasuryPalletId;
     type TreasuryPayoutSpendPeriod = PayoutSpendPeriod;
-    type TreasuryProposalBond = ProposalBond;
-    type TreasuryProposalBondMaximum = ProposalBondMaximum;
-    type TreasuryProposalBondMinimum = ProposalBondMinimum;
     type TreasuryRejectOrigin = EitherOfDiverse<EnsureRoot<AccountId>, Treasurer>;
     type TreasurySpendOrigin = TreasurySpender;
     type TreasurySpendPeriod = SpendPeriod;

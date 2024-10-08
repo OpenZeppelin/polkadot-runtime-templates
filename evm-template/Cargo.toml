@@ -28,6 +28,7 @@ serde_json = "1.0.121"
 smallvec = "1.11.0"
 
 polkadot-runtime-wrappers = { git = "https://github.com/OpenZeppelin/polkadot-runtime-wrappers.git", branch = "amar-oz-system-wrapper-poc", default-features = false }
+#polkadot-runtime-wrappers = { path = "../../polkadot-runtime-wrappers", default-features = false }
 
 # Substrate
 frame-benchmarking = { git = "https://github.com/paritytech/polkadot-sdk", default-features = false, tag = "polkadot-stable2407-1" }
