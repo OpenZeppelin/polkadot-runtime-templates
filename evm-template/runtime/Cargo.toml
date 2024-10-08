@@ -99,10 +99,10 @@ orml-traits = { workspace = true }
 orml-xcm-support = { workspace = true }
 orml-xtokens = { workspace = true }
 
-
 # Moonbeam
 pallet-asset-manager = { workspace = true }
 xcm-primitives = { workspace = true }
+pallet-erc20-xcm-bridge = { workspace = true }
 
 [dev-dependencies]
 sp-io = { workspace = true }
@@ -145,6 +145,7 @@ std = [
 	"pallet-base-fee/std",
 	"pallet-collator-selection/std",
 	"pallet-conviction-voting/std",
+	"pallet-erc20-xcm-bridge/std",
 	"pallet-ethereum/std",
 	"pallet-evm-chain-id/std",
 	"pallet-evm/std",
@@ -245,6 +246,7 @@ try-runtime = [
 	"pallet-base-fee/try-runtime",
 	"pallet-collator-selection/try-runtime",
 	"pallet-conviction-voting/try-runtime",
+	"pallet-erc20-xcm-bridge/try-runtime",
 	"pallet-ethereum/try-runtime",
 	"pallet-evm-chain-id/try-runtime",
 	"pallet-message-queue/try-runtime",

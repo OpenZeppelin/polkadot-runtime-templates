@@ -20,11 +20,11 @@ use xcm_builder::{
     FixedWeightBounds, FrameTransactionalProcessor, FungibleAdapter, FungiblesAdapter, HandleFee,
     IsChildSystemParachain, IsConcrete, NoChecking, ParentIsPreset, RelayChainAsNative,
     SiblingParachainAsNative, SiblingParachainConvertsVia, SignedAccountKey20AsNative,
-    SovereignSignedViaLocation, TakeWeightCredit, TrailingSetTopicAsId, UsingComponents,
-    WithComputedOrigin, WithUniqueTopic, XcmFeeManagerFromComponents,
+    SovereignSignedViaLocation, TakeWeightCredit, TrailingSetTopicAsId, WithComputedOrigin,
+    WithUniqueTopic, XcmFeeManagerFromComponents,
 };
 use xcm_executor::{
-    traits::{FeeReason, JustTry, TransactAsset},
+    traits::{ConvertLocation, FeeReason, JustTry, TransactAsset},
     XcmExecutor,
 };
 use xcm_primitives::{
@@ -33,12 +33,12 @@ use xcm_primitives::{
 
 use crate::{
     configs::{
-        AssetType, ParachainSystem, Runtime, RuntimeCall, RuntimeEvent, RuntimeOrigin, WeightToFee,
+        AssetType, ParachainSystem, Runtime, RuntimeCall, RuntimeEvent, RuntimeOrigin,
         XcmpQueue,
     },
-    types::{AccountId, AssetId, Balance, XcmFeesToAccount},
-    weights, AllPalletsWithSystem, AssetManager, Assets, Balances, ParachainInfo, PolkadotXcm,
-    Treasury,
+    types::{AccountId, AssetId, Balance},
+    weights, AllPalletsWithSystem, AssetManager, Assets, Balances, Erc20XcmBridge, ParachainInfo,
+    PolkadotXcm, Treasury, EVM,
 };
 
 parameter_types! {
@@ -259,6 +259,7 @@ impl xcm_executor::Config for XcmConfig {
     // How to withdraw and deposit an asset.
     type AssetTransactor = AssetTransactors;
     type AssetTrap = PolkadotXcm;
+    // TODO: we might need to change this
     type Barrier = Barrier;
     type CallDispatcher = RuntimeCall;
     /// When changing this config, keep in mind, that you should collect fees.
@@ -282,10 +283,8 @@ impl xcm_executor::Config for XcmConfig {
     type RuntimeCall = RuntimeCall;
     type SafeCallFilter = Everything;
     type SubscriptionService = PolkadotXcm;
-    type Trader = (
-        UsingComponents<WeightToFee, BalancesPalletLocation, AccountId, Balances, ()>,
-        xcm_primitives::FirstAssetTrader<AssetType, AssetManager, XcmFeesToAccount>,
-    );
+    type Trader = ();
+    // TODO: we need to change this as well
     type TransactionalProcessor = FrameTransactionalProcessor;
     type UniversalAliases = Nothing;
     // Teleporting is disabled.
@@ -444,7 +443,7 @@ where
             }
             CurrencyId::ForeignAsset(asset) => AssetXConverter::convert_back(&asset),
             CurrencyId::Erc20 { contract_address } => {
-                let mut location = Erc20XcmBridgePalletLocation::get();
+                let mut location = Erc20XcmBridgePalletLocation::get(); // TODO: if we do not have an alternative, we need to import this pallet from moonbeam
                 location
                     .push_interior(Junction::AccountKey20 {
                         key: contract_address.0,
@@ -455,6 +454,38 @@ where
             }
         }
     }
+}
+
+/// Wrapper type around `LocationToAccountId` to convert an `AccountId` to type `H160`.
+pub struct LocationToH160;
+impl ConvertLocation<H160> for LocationToH160 {
+    fn convert_location(location: &Location) -> Option<H160> {
+        <LocationToAccountId as ConvertLocation<AccountId>>::convert_location(location)
+            .map(Into::into)
+    }
+}
+
+parameter_types! {
+    // This is the relative view of erc20 assets.
+    // Identified by this prefix + AccountKey20(contractAddress)
+    // We use the RELATIVE multilocation
+    pub Erc20XcmBridgePalletLocation: Location = Location {
+        parents:0,
+        interior: [
+            PalletInstance(<Erc20XcmBridge as PalletInfoAccess>::index() as u8)
+        ].into()
+    };
+
+    // To be able to support almost all erc20 implementations,
+    // we provide a sufficiently hight gas limit.
+    pub Erc20XcmBridgeTransferGasLimit: u64 = 800_000;
+}
+
+impl pallet_erc20_xcm_bridge::Config for Runtime {
+    type AccountIdConverter = LocationToH160;
+    type Erc20MultilocationPrefix = Erc20XcmBridgePalletLocation;
+    type Erc20TransferGasLimit = Erc20XcmBridgeTransferGasLimit;
+    type EvmRunner = EVM;
 }
 
 impl orml_xtokens::Config for Runtime {
@@ -473,5 +504,5 @@ impl orml_xtokens::Config for Runtime {
     type SelfLocation = SelfLocation;
     type UniversalLocation = UniversalLocation;
     type Weigher = XcmWeigher;
-    type XcmExecutor = XcmExecutor;
+    type XcmExecutor = XcmExecutor<XcmConfig>;
 }
