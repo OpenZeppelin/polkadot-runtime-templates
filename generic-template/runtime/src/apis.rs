@@ -261,7 +261,7 @@ impl_runtime_apis! {
                 ParachainSystem,
             >;
             use pallet_xcm::benchmarking::Pallet as PalletXcmExtrinsicsBenchmark;
-            use xcm::latest::prelude::{Asset, AssetId, Assets as AssetList, Fungible, Location, Parachain, Parent, ParentThen};
+            use xcm::latest::prelude::{Asset, AssetId, Assets as AssetList, Fungible, Location, Parachain, Parent, ParentThen, PalletInstance, GeneralIndex};
             impl pallet_xcm::benchmarking::Config for Runtime {
                 type DeliveryHelper = cumulus_primitives_utility::ToParentDeliveryHelper<
                     xcm_config::XcmConfig,
@@ -278,10 +278,30 @@ impl_runtime_apis! {
                 }
 
                 fn reserve_transferable_asset_and_dest() -> Option<(Asset, Location)> {
+                    use frame_support::traits::PalletInfoAccess;
+                    ParachainSystem::open_outbound_hrmp_channel_for_benchmarks_or_tests(
+                        RandomParaId::get().into()
+                    );
+                    let balance = 3001070000000;
+                    let who = frame_benchmarking::whitelisted_caller();
+                    let _ =
+                        <Balances as frame_support::traits::Currency<_>>::make_free_balance_be(&who, balance);
+
+                    let asset_amount: u128 = 10u128;
+                    let initial_asset_amount: u128 = asset_amount * 10;
+
+                    let (asset_id, _, _) = pallet_assets::benchmarking::create_default_minted_asset::<
+                        Runtime,
+                        ()
+                    >(true, initial_asset_amount);
+
+                    let asset_id_u32: u32 = asset_id.into();
+
+                    let location = Location {parents: 0, interior: (PalletInstance(<Assets as PalletInfoAccess>::index() as u8), GeneralIndex(asset_id_u32 as u128)).into()};
                     Some((
                         Asset {
                             fun: Fungible(ExistentialDeposit::get()),
-                            id: AssetId(Parent.into())
+                            id: AssetId(location.into())
                         }.into(),
                         ParentThen(Parachain(RandomParaId::get().into()).into()).into(),
                     ))
@@ -289,12 +309,54 @@ impl_runtime_apis! {
 
                 fn set_up_complex_asset_transfer(
                 ) -> Option<(AssetList, u32, Location, Box<dyn FnOnce()>)> {
-                    None
+                    use frame_support::traits::PalletInfoAccess;
+                    // set up local asset
+                    let asset_amount: u128 = 10u128;
+                    let initial_asset_amount: u128 = 1000000011;
+                    let (asset_id, _, _) = pallet_assets::benchmarking::create_default_minted_asset::<
+                        Runtime,
+                        ()
+                    >(true, initial_asset_amount);
+                    let asset_id_u32: u32 = asset_id.into();
+
+                    let self_reserve = Location {
+                        parents:0,
+                        interior: [
+                            PalletInstance(<Assets as PalletInfoAccess>::index() as u8), GeneralIndex(asset_id_u32 as u128)
+                        ].into()
+                    };
+
+                    let destination: xcm::v4::Location = Parent.into();
+
+                    let fee_amount: u128 = <Runtime as pallet_balances::Config>::ExistentialDeposit::get();
+                    let fee_asset: Asset = (self_reserve.clone(), fee_amount).into();
+
+                    // Give some multiple of transferred amount
+                    let balance = fee_amount * 1000;
+                    let who = frame_benchmarking::whitelisted_caller();
+                    let _ =
+                        <Balances as frame_support::traits::Currency<_>>::make_free_balance_be(&who, balance);
+
+                    // verify initial balance
+                    assert_eq!(Balances::free_balance(&who), balance);
+                    let transfer_asset: Asset = (self_reserve.clone(), asset_amount).into();
+
+                    let assets: cumulus_primitives_core::Assets = vec![fee_asset.clone(), transfer_asset].into();
+                    let fee_index: u32 = 0;
+
+                    let verify: Box<dyn FnOnce()> = Box::new(move || {
+                        // verify balance after transfer, decreased by
+                        // transferred amount (and delivery fees)
+                        assert!(Assets::balance(asset_id_u32, &who) <= initial_asset_amount - fee_amount);
+                    });
+
+                    Some((assets, fee_index, destination, verify))
                 }
 
                 fn get_asset() -> Asset {
+                    use frame_support::traits::PalletInfoAccess;
                     Asset {
-                        id: AssetId(Location::parent()),
+                        id: AssetId((Location {parents: 0, interior: (PalletInstance(<Assets as PalletInfoAccess>::index() as u8), GeneralIndex(1)).into()}).into()),
                         fun: Fungible(ExistentialDeposit::get()),
                     }
                 }
