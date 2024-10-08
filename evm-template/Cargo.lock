@@ -3007,6 +3007,7 @@ dependencies = [
  "frame-try-runtime",
  "hex-literal",
  "log",
+ "orml-xcm-support",
  "pallet-asset-manager",
  "pallet-assets",
  "pallet-aura",
@@ -6684,7 +6685,7 @@ version = "0.7.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "af1844ef2428cc3e1cb900be36181049ef3d3193c63e43026cfe202983b27a56"
 dependencies = [
- "proc-macro-crate 3.2.0",
+ "proc-macro-crate 1.1.3",
  "proc-macro2",
  "quote",
  "syn 2.0.77",
@@ -6861,7 +6862,7 @@ dependencies = [
 [[package]]
 name = "orml-traits"
 version = "0.10.0"
-source = "git+https://github.com/openzeppelin/open-runtime-module-library?branch=polkadot-stable2407-1#aafe9077c9ec61dd8b3a42e899ef8353b2b050c0"
+source = "git+https://github.com/OpenZeppelin/open-runtime-module-library?branch=polkadot-stable2407-1#aafe9077c9ec61dd8b3a42e899ef8353b2b050c0"
 dependencies = [
  "frame-support",
  "impl-trait-for-tuples",
@@ -6880,7 +6881,7 @@ dependencies = [
 [[package]]
 name = "orml-utilities"
 version = "0.10.0"
-source = "git+https://github.com/openzeppelin/open-runtime-module-library?branch=polkadot-stable2407-1#aafe9077c9ec61dd8b3a42e899ef8353b2b050c0"
+source = "git+https://github.com/OpenZeppelin/open-runtime-module-library?branch=polkadot-stable2407-1#aafe9077c9ec61dd8b3a42e899ef8353b2b050c0"
 dependencies = [
  "frame-support",
  "parity-scale-codec",
@@ -6889,6 +6890,20 @@ dependencies = [
  "sp-io",
  "sp-runtime",
  "sp-std",
+]
+
+[[package]]
+name = "orml-xcm-support"
+version = "0.10.0"
+source = "git+https://github.com/OpenZeppelin/open-runtime-module-library?branch=polkadot-stable2407-1#aafe9077c9ec61dd8b3a42e899ef8353b2b050c0"
+dependencies = [
+ "frame-support",
+ "orml-traits",
+ "parity-scale-codec",
+ "sp-runtime",
+ "sp-std",
+ "staging-xcm",
+ "staging-xcm-executor",
 ]
 
 [[package]]

@@ -159,6 +159,9 @@ pallet-evm-precompile-modexp = { git = "https://github.com/OpenZeppelin/frontier
 pallet-evm-precompile-sha3fips = { git = "https://github.com/OpenZeppelin/frontier", branch = "polkadot-stable2407-1", default-features = false }
 pallet-evm-precompile-simple = { git = "https://github.com/OpenZeppelin/frontier", branch = "polkadot-stable2407-1", default-features = false }
 
+# ORML
+orml-xcm-support = { git = "https://github.com/OpenZeppelin/open-runtime-module-library", branch = "polkadot-stable2407-1", default-features = false }
+
 # Moonbeam
 pallet-asset-manager = { git = "https://github.com/OpenZeppelin/moonbeam.git", branch = "polkadot-stable2407-1", default-features = false }
 xcm-primitives = { git = "https://github.com/OpenZeppelin/moonbeam.git", branch = "polkadot-stable2407-1", default-features = false }
