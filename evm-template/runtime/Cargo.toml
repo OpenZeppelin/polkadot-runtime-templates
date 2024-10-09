@@ -101,8 +101,10 @@ orml-xtokens = { workspace = true }
 
 # Moonbeam
 pallet-asset-manager = { workspace = true }
-xcm-primitives = { workspace = true }
 pallet-erc20-xcm-bridge = { workspace = true }
+pallet-xcm-weight-trader = { workspace = true }
+xcm-primitives = { workspace = true }
+
 
 [dev-dependencies]
 sp-io = { workspace = true }
@@ -164,6 +166,7 @@ std = [
 	"pallet-utility/std",
 	"pallet-whitelist/std",
 	"pallet-xcm/std",
+	"pallet-xcm-weight-trader/std",
 	"parachain-info/std",
 	"parachains-common/std",
 	"parity-scale-codec/std",
@@ -220,6 +223,7 @@ runtime-benchmarks = [
 	"pallet-utility/runtime-benchmarks",
 	"pallet-whitelist/runtime-benchmarks",
 	"pallet-xcm/runtime-benchmarks",
+	"pallet-xcm-weight-trader/runtime-benchmarks",
 	"parachains-common/runtime-benchmarks",
 	"polkadot-parachain-primitives/runtime-benchmarks",
 	"polkadot-runtime-common/runtime-benchmarks",

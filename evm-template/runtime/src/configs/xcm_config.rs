@@ -33,8 +33,7 @@ use xcm_primitives::{
 
 use crate::{
     configs::{
-        AssetType, ParachainSystem, Runtime, RuntimeCall, RuntimeEvent, RuntimeOrigin,
-        XcmpQueue,
+        AssetType, ParachainSystem, Runtime, RuntimeCall, RuntimeEvent, RuntimeOrigin, XcmpQueue,
     },
     types::{AccountId, AssetId, Balance},
     weights, AllPalletsWithSystem, AssetManager, Assets, Balances, Erc20XcmBridge, ParachainInfo,
@@ -258,8 +257,7 @@ impl xcm_executor::Config for XcmConfig {
     type AssetLocker = ();
     // How to withdraw and deposit an asset.
     type AssetTransactor = AssetTransactors;
-    type AssetTrap = PolkadotXcm;
-    // TODO: we might need to change this
+    type AssetTrap = pallet_erc20_xcm_bridge::AssetTrapWrapper<PolkadotXcm, Runtime>;
     type Barrier = Barrier;
     type CallDispatcher = RuntimeCall;
     /// When changing this config, keep in mind, that you should collect fees.
@@ -283,8 +281,7 @@ impl xcm_executor::Config for XcmConfig {
     type RuntimeCall = RuntimeCall;
     type SafeCallFilter = Everything;
     type SubscriptionService = PolkadotXcm;
-    type Trader = ();
-    // TODO: we need to change this as well
+    type Trader = pallet_xcm_weight_trader::Trader<Runtime>;
     type TransactionalProcessor = FrameTransactionalProcessor;
     type UniversalAliases = Nothing;
     // Teleporting is disabled.
@@ -505,4 +502,38 @@ impl orml_xtokens::Config for Runtime {
     type UniversalLocation = UniversalLocation;
     type Weigher = XcmWeigher;
     type XcmExecutor = XcmExecutor<XcmConfig>;
+}
+
+pub struct AssetFeesFilter;
+impl frame_support::traits::Contains<Location> for AssetFeesFilter {
+    fn contains(location: &Location) -> bool {
+        location.parent_count() > 0
+            && location.first_interior() != Erc20XcmBridgePalletLocation::get().first_interior()
+    }
+}
+
+// implement your own business logic for who can add/edit/remove/resume supported assets
+pub type AddSupportedAssetOrigin = EnsureRoot<AccountId>;
+pub type EditSupportedAssetOrigin = EnsureRoot<AccountId>;
+pub type RemoveSupportedAssetOrigin = EnsureRoot<AccountId>;
+pub type ResumeSupportedAssetOrigin = EnsureRoot<AccountId>;
+
+impl pallet_xcm_weight_trader::Config for Runtime {
+    type AccountIdToLocation = AccountIdToLocation<AccountId>;
+    type AddSupportedAssetOrigin = AddSupportedAssetOrigin;
+    type AssetLocationFilter = AssetFeesFilter;
+    type AssetTransactor = AssetTransactors;
+    type Balance = Balance;
+    type EditSupportedAssetOrigin = EditSupportedAssetOrigin;
+    type NativeLocation = SelfReserve;
+    #[cfg(feature = "runtime-benchmarks")]
+    type NotFilteredLocation = RelayLocation;
+    type PauseSupportedAssetOrigin = EditSupportedAssetOrigin;
+    type RemoveSupportedAssetOrigin = RemoveSupportedAssetOrigin;
+    type ResumeSupportedAssetOrigin = ResumeSupportedAssetOrigin;
+    type RuntimeEvent = RuntimeEvent;
+    // TODO: update this when we update benchmarks
+    type WeightInfo = weights::pallet_xcm::WeightInfo<Runtime>;
+    type WeightToFee = <Runtime as pallet_transaction_payment::Config>::WeightToFee;
+    type XcmFeesAccount = XcmFeeToAccount;
 }
