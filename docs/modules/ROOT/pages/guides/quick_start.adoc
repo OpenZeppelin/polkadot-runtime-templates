@@ -4,12 +4,12 @@
 
 = Quick start
 
-* Begin by visiting our link:https://github.com/OpenZeppelin/polkadot-runtime-templates[repository]. You can fork it, use it as a template, or simply clone it to your local directory.
+* Begin by visiting our link:https://github.com/OpenZeppelin/polkadot-runtime-templates[repository]. You can fork it, or simply clone it to your local directory.
 ```bash
 git clone git@github.com:OpenZeppelin/polkadot-runtime-templates.git
 ```
 
-* Move to the directory of the template you want to use. We will use the `generic runtime template` for this tutorial.
+* Move to the directory of the template you want to use. We will use the `generic runtime template` for this tutorial, but it is the same for the same applies to the xref:runtimes/evm.adoc[EVM Runtime Template].
 ```bash
 cd generic-template
 ```
@@ -19,11 +19,11 @@ cd generic-template
 cargo build --release
 ```
 
-* Receive some `ROC` from the link:https://paritytech.github.io/polkadot-testnet-faucet/[Rococo faucet]
+* Receive some `PSO` from the link:https://paritytech.github.io/polkadot-testnet-faucet/[Paseo faucet]
 
-* Reserve a ParaId on Rococo:
+* Reserve a ParaId on Paseo:
 
-** Go to link:https://polkadot.js.org/apps[PolkadotJS]. Check that it points to Rococo testnet.
+** Go to link:https://polkadot.js.org/apps[PolkadotJS]. Check that it points to Paseo testnet.
 ** Go to `Network` > `Parachains`
 ** Go to `Parathreads` tab
 ** Click the `+ ParaId` button
@@ -41,7 +41,7 @@ cargo build --release
 ** Edit the chainspec:
 
 *** Update `name`, `id` and `protocolId` to unique values.
-*** Change `relay_chain` from `rococo-local` to `rococo`.
+*** Change `relay_chain` from `paseo-local` to `paseo`.
 *** Change `para_id` and `parachainInfo.parachainId` from `1000` to the previously saved parachain id.
 
 ** Generate a raw chainspec with this command:
@@ -50,7 +50,7 @@ cargo build --release
 ./target/release/parachain-template-node build-spec --chain plain-parachain-chainspec.json --disable-default-bootnode --raw > raw-parachain-chainspec.json
 ```
 
-* Run two nodes and wait until it syncs with the Rococo relay chain. This can take a fairly long time(up to 2 days), so we can use the `fast-unsafe` flag to make the process faster since we are on a testnet(~ 3 hours). `fast` downloads the blocks without executing the transactions, and `unsafe` skips downloading the state proofs(which we are ok with since it is Rococo).
+* Run two nodes and wait until it syncs with the Paseo relay chain. This can take a fairly long time(up to 2 days), so we can use the `fast-unsafe` flag to make the process faster since we are on a testnet(~ 3 hours). `fast` downloads the blocks without executing the transactions, and `unsafe` skips downloading the state proofs(which we are ok with since it is Paseo).
 +
 ```bash
 ./target/release/parachain-template-node \
@@ -63,7 +63,7 @@ cargo build --release
     --rpc-port 8844 \
     -- \
     --execution wasm \
-    --chain <path to the Rococo chainspec> \
+    --chain <path to the Paseo chainspec> \
     --port 30343 \
     --rpc-port 9977 \
     --sync fast-unsafe
@@ -80,13 +80,13 @@ cargo build --release
     --rpc-port 8845 \
     -- \
     --execution wasm \
-    --chain <path to the Rococo chainspec> \
+    --chain <path to the Paseo chainspec> \
     --port 30343 \
     --rpc-port 9977 \
     --sync fast-unsafe
 ```
 ** `<path to datadir>` is where the downloaded chain state will be stored. It can be any folder on your computer.
-** `<path to the Rococo chainspec>` is where your Rococo chainspec is stored. You can download this file from the link:https://github.com/paritytech/polkadot-sdk/blob/release-polkadot-v1.10.0/polkadot/node/service/chain-specs/rococo.jsonofficial[official Polkadot sdk repository].
+** `<path to the Paseo chainspec>` is where your Paseo chainspec is stored. You can download this file from the link:https://github.com/paritytech/polkadot-sdk/blob/release-polkadot-v1.10.0/polkadot/node/service/chain-specs/paseo.json[official Polkadot sdk repository].
 
 * Register a parathread:
 
@@ -100,7 +100,7 @@ cargo build --release
 ```bash
 ./target/release/parachain-template-node export-genesis-wasm --chain raw-parachain-chainspec.json para-<paraId>-wasm
 ```
-** Go to link:https://polkadot.js.org/apps[PolkadotJS]. Check that it points to Rococo testnet.
+** Go to link:https://polkadot.js.org/apps[PolkadotJS]. Check that it points to Paseo testnet.
 ** Go to `Network` > `Parachains`.
 ** Go to `Parathreads` tab.
 ** Click the `+ ParaThread` button.
@@ -110,16 +110,16 @@ cargo build --release
 
 * When a parachain gets synced with a relaychain, you may start producing blocks as a parathread:
 ** Create some transaction with a PolkadotJS pointing to your parachain setup.
-** With a PolkadotJS pointing to Rococo go to `Developer` > `Extrinsics`.
+** With a PolkadotJS pointing to Paseo go to `Developer` > `Extrinsics`.
 ** Submit an extrinsic `onDemandAssignmentProvider.placeOrderAllowDeath` or `onDemandAssignmentProvider.placeOrderKeepAlive`:
-*** `maxAmount` should be not less than 10_000_000 and it is amount of 0.00001 ROC. It is an amount of ROC paid for the block.
+*** `maxAmount` should be not less than 10_000_000 and it is amount of 0.00001 PAS. It is an amount of PAS paid for the block.
 *** `paraId` should be set to your parachain id.
 *** Click `Submit` and `Sign and Submit`.
-** In some time your parathread will produce a block and in one of the next blocks of Rococo there will be an inclusion of this block
+** In some time your parathread will produce a block and in one of the next blocks of Paseo there will be an inclusion of this block
 
 == What's next?
 
 - Read our general guides to understand more about the concepts of runtime development.
 
-- Learn more about the runtime configuration. Currently, we have two runtime templates: xref:guides/runtimes/generic.adoc[Generic Runtime Template] and xref:runtimes/evm.adoc[EVM Runtime Template].
+- Learn more about the runtime configuration. Currently, we have two runtime templates: xref:runtimes/generic.adoc[Generic Runtime Template] and xref:runtimes/evm.adoc[EVM Runtime Template].
 - Explore the documentation for pallets. It may be useful if you are considering building a frontend for your parachain.
