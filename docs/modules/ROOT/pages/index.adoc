@@ -3,7 +3,7 @@
 
 = Polkadot Parachain Runtimes
 
-A collection of runtimes that describe parachains with different purposes.
+A collection of secure runtime templates to build parachains more easily on Polkadot.
 
 == Runtimes
 * xref:runtimes/generic.adoc[Generic Runtime Template]
