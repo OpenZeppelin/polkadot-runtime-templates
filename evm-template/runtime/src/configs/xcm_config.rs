@@ -30,7 +30,7 @@ use xcm_executor::{
 use xcm_primitives::{
     AbsoluteAndRelativeReserve, AccountIdToCurrencyId, AccountIdToLocation, AsAssetType,
 };
-
+use crate::configs::asset_config::AccountIdAssetIdConversion;
 use crate::{
     configs::{
         AssetType, ParachainSystem, Runtime, RuntimeCall, RuntimeEvent, RuntimeOrigin, XcmpQueue,
@@ -533,7 +533,7 @@ impl pallet_xcm_weight_trader::Config for Runtime {
     type ResumeSupportedAssetOrigin = ResumeSupportedAssetOrigin;
     type RuntimeEvent = RuntimeEvent;
     // TODO: update this when we update benchmarks
-    type WeightInfo = weights::pallet_xcm::WeightInfo<Runtime>;
+    type WeightInfo = weights::pallet_xcm_weight_trader::WeightInfo<Runtime>;
     type WeightToFee = <Runtime as pallet_transaction_payment::Config>::WeightToFee;
-    type XcmFeesAccount = XcmFeeToAccount;
+    type XcmFeesAccount = TreasuryAccount;
 }
