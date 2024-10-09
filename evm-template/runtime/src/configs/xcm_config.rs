@@ -37,7 +37,7 @@ use crate::{
     },
     types::{AccountId, AssetId, Balance},
     weights, AllPalletsWithSystem, AssetManager, Assets, Balances, Erc20XcmBridge, ParachainInfo,
-    PolkadotXcm, Treasury, EVM,
+    PolkadotXcm, Treasury,
 };
 
 parameter_types! {
@@ -482,7 +482,7 @@ impl pallet_erc20_xcm_bridge::Config for Runtime {
     type AccountIdConverter = LocationToH160;
     type Erc20MultilocationPrefix = Erc20XcmBridgePalletLocation;
     type Erc20TransferGasLimit = Erc20XcmBridgeTransferGasLimit;
-    type EvmRunner = EVM;
+    type EvmRunner = pallet_evm::runner::stack::Runner<Self>;
 }
 
 impl orml_xtokens::Config for Runtime {

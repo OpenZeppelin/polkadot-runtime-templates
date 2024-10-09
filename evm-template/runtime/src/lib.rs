@@ -249,6 +249,10 @@ mod runtime {
     pub type CumulusXcm = cumulus_pallet_xcm;
     #[runtime::pallet_index(33)]
     pub type MessageQueue = pallet_message_queue;
+    #[runtime::pallet_index(34)]
+    pub type XTokens = orml_xtokens;
+    #[runtime::pallet_index(35)]
+    pub type XcmWeightTrader = pallet_xcm_weight_trader;
 
     // EVM
     #[runtime::pallet_index(40)]
