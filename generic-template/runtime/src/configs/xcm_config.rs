@@ -156,6 +156,7 @@ impl xcm_executor::Config for XcmConfig {
     type AssetTrap = PolkadotXcm;
     type Barrier = Barrier;
     type CallDispatcher = RuntimeCall;
+    /// When changing this config, keep in mind, that you should collect fees.
     type FeeManager = XcmFeeManagerFromComponents<
         IsChildSystemParachain<primitives::Id>,
         XcmFeeToAccount<Self::AssetTransactor, AccountId, TreasuryAccount>,
@@ -163,6 +164,7 @@ impl xcm_executor::Config for XcmConfig {
     type HrmpChannelAcceptedHandler = ();
     type HrmpChannelClosingHandler = ();
     type HrmpNewChannelOpenRequestHandler = ();
+    /// Please, keep these two configs (`IsReserve` and `IsTeleporter`) mutually exclusive
     type IsReserve = NativeAsset;
     type IsTeleporter = ();
     type MaxAssetsIntoHolding = MaxAssetsIntoHolding;
@@ -180,6 +182,7 @@ impl xcm_executor::Config for XcmConfig {
     // Teleporting is disabled.
     type UniversalLocation = UniversalLocation;
     type Weigher = FixedWeightBounds<UnitWeightCost, RuntimeCall, MaxInstructions>;
+    type XcmRecorder = PolkadotXcm;
     type XcmSender = XcmRouter;
 }
 
@@ -208,7 +211,7 @@ impl pallet_xcm::Config for Runtime {
     type CurrencyMatcher = ();
     type ExecuteXcmOrigin = EnsureXcmOrigin<RuntimeOrigin, LocalOriginToLocation>;
     type MaxLockers = MaxLockers;
-    type MaxRemoteLockConsumers = MaxLockers;
+    type MaxRemoteLockConsumers = MaxRemoteLockConsumers;
     type RemoteLockConsumerIdentifier = ();
     type RuntimeCall = RuntimeCall;
     type RuntimeEvent = RuntimeEvent;
@@ -218,12 +221,15 @@ impl pallet_xcm::Config for Runtime {
     type TrustedLockers = ();
     type UniversalLocation = UniversalLocation;
     type Weigher = FixedWeightBounds<UnitWeightCost, RuntimeCall, MaxInstructions>;
+    /// Rerun benchmarks if you are making changes to runtime configuration.
     type WeightInfo = weights::pallet_xcm::WeightInfo<Runtime>;
+    #[cfg(feature = "runtime-benchmarks")]
+    type XcmExecuteFilter = Everything;
+    #[cfg(not(feature = "runtime-benchmarks"))]
     type XcmExecuteFilter = Nothing;
-    // ^ Disable dispatchable execute on the XCM pallet.
     // Needs to be `Everything` for local testing.
     type XcmExecutor = XcmExecutor<XcmConfig>;
-    type XcmReserveTransferFilter = Nothing;
+    type XcmReserveTransferFilter = Everything;
     type XcmRouter = XcmRouter;
     type XcmTeleportFilter = Nothing;
 

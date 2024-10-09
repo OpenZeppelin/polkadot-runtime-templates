@@ -1,3 +1,5 @@
+use core::marker::PhantomData;
+
 use frame_support::{
     parameter_types,
     traits::{ConstU32, Contains, Everything, Nothing, PalletInfoAccess},
@@ -5,17 +7,21 @@ use frame_support::{
 };
 use frame_system::EnsureRoot;
 use pallet_xcm::XcmPassthrough;
-use polkadot_parachain_primitives::primitives::Sibling;
-use xcm::latest::prelude::*;
+use polkadot_parachain_primitives::primitives::{self, Sibling};
+use xcm::latest::prelude::{Assets as XcmAssets, *};
 use xcm_builder::{
     AccountKey20Aliases, AllowExplicitUnpaidExecutionFrom, AllowTopLevelPaidExecutionFrom,
     ConvertedConcreteId, DenyReserveTransferToRelayChain, DenyThenTry, EnsureXcmOrigin,
-    FixedWeightBounds, FrameTransactionalProcessor, FungibleAdapter, FungiblesAdapter, IsConcrete,
-    NativeAsset, NoChecking, ParentIsPreset, RelayChainAsNative, SiblingParachainAsNative,
-    SiblingParachainConvertsVia, SignedAccountKey20AsNative, SovereignSignedViaLocation,
-    TakeWeightCredit, TrailingSetTopicAsId, UsingComponents, WithComputedOrigin, WithUniqueTopic,
+    FixedWeightBounds, FrameTransactionalProcessor, FungibleAdapter, FungiblesAdapter, HandleFee,
+    IsChildSystemParachain, IsConcrete, NativeAsset, NoChecking, ParentIsPreset,
+    RelayChainAsNative, SiblingParachainAsNative, SiblingParachainConvertsVia,
+    SignedAccountKey20AsNative, SovereignSignedViaLocation, TakeWeightCredit, TrailingSetTopicAsId,
+    UsingComponents, WithComputedOrigin, WithUniqueTopic, XcmFeeManagerFromComponents,
 };
-use xcm_executor::{traits::JustTry, XcmExecutor};
+use xcm_executor::{
+    traits::{FeeReason, JustTry, TransactAsset},
+    XcmExecutor,
+};
 use xcm_primitives::AsAssetType;
 
 use crate::{
@@ -25,6 +31,7 @@ use crate::{
     },
     types::{AccountId, AssetId, Balance, XcmFeesToAccount},
     weights, AllPalletsWithSystem, AssetManager, Assets, Balances, ParachainInfo, PolkadotXcm,
+    Treasury,
 };
 
 parameter_types! {
@@ -141,6 +148,50 @@ pub type Barrier = TrailingSetTopicAsId<
     >,
 >;
 
+/// A `HandleFee` implementation that simply deposits the fees into a specific on-chain
+/// `ReceiverAccount`.
+///
+/// It reuses the `AssetTransactor` configured on the XCM executor to deposit fee assets. If
+/// the `AssetTransactor` returns an error while calling `deposit_asset`, then a warning will be
+/// logged and the fee burned.
+pub struct XcmFeeToAccount<AssetTransactor, AccountId, ReceiverAccount>(
+    PhantomData<(AssetTransactor, AccountId, ReceiverAccount)>,
+);
+impl<
+        AssetTransactor: TransactAsset,
+        AccountId: Clone + Into<[u8; 20]>,
+        ReceiverAccount: Get<AccountId>,
+    > HandleFee for XcmFeeToAccount<AssetTransactor, AccountId, ReceiverAccount>
+{
+    fn handle_fee(fee: XcmAssets, context: Option<&XcmContext>, _reason: FeeReason) -> XcmAssets {
+        deposit_or_burn_fee::<AssetTransactor, _>(fee, context, ReceiverAccount::get());
+
+        XcmAssets::new()
+    }
+}
+
+pub fn deposit_or_burn_fee<AssetTransactor: TransactAsset, AccountId: Clone + Into<[u8; 20]>>(
+    fee: XcmAssets,
+    context: Option<&XcmContext>,
+    receiver: AccountId,
+) {
+    let dest = AccountKey20 { network: None, key: receiver.into() }.into();
+    for asset in fee.into_inner() {
+        if let Err(e) = AssetTransactor::deposit_asset(&asset, &dest, context) {
+            log::trace!(
+                target: "xcm::fees",
+                "`AssetTransactor::deposit_asset` returned error: {:?}. Burning fee: {:?}. \
+                They might be burned.",
+                e, asset,
+            );
+        }
+    }
+}
+
+parameter_types! {
+    pub TreasuryAccount: AccountId = Treasury::account_id();
+}
+
 pub struct XcmConfig;
 impl xcm_executor::Config for XcmConfig {
     type Aliasers = Nothing;
@@ -152,10 +203,17 @@ impl xcm_executor::Config for XcmConfig {
     type AssetTrap = PolkadotXcm;
     type Barrier = Barrier;
     type CallDispatcher = RuntimeCall;
-    type FeeManager = ();
+    /// When changing this config, keep in mind, that you should collect fees.
+    type FeeManager = XcmFeeManagerFromComponents<
+        IsChildSystemParachain<primitives::Id>,
+        XcmFeeToAccount<Self::AssetTransactor, AccountId, TreasuryAccount>,
+    >;
     type HrmpChannelAcceptedHandler = ();
     type HrmpChannelClosingHandler = ();
     type HrmpNewChannelOpenRequestHandler = ();
+    /// Please, keep these two configs (`IsReserve` and `IsTeleporter`) mutually exclusive.
+    /// The IsReserve type must be set to specify which <MultiAsset, MultiLocation> pair we trust to deposit reserve assets on our chain. We can also use the unit type () to block ReserveAssetDeposited instructions.
+    /// The IsTeleporter type must be set to specify which <MultiAsset, MultiLocation> pair we trust to teleport assets to our chain. We can also use the unit type () to block ReceiveTeleportedAssets instruction.
     type IsReserve = NativeAsset;
     type IsTeleporter = ();
     type MaxAssetsIntoHolding = MaxAssetsIntoHolding;
@@ -175,6 +233,7 @@ impl xcm_executor::Config for XcmConfig {
     // Teleporting is disabled.
     type UniversalLocation = UniversalLocation;
     type Weigher = FixedWeightBounds<UnitWeightCost, RuntimeCall, MaxInstructions>;
+    type XcmRecorder = PolkadotXcm;
     type XcmSender = XcmRouter;
 }
 
@@ -226,7 +285,7 @@ impl pallet_xcm::Config for Runtime {
     type CurrencyMatcher = ();
     type ExecuteXcmOrigin = EnsureXcmOrigin<RuntimeOrigin, LocalOriginToLocation>;
     type MaxLockers = MaxLockers;
-    type MaxRemoteLockConsumers = MaxLockers;
+    type MaxRemoteLockConsumers = MaxRemoteLockConsumers;
     type RemoteLockConsumerIdentifier = ();
     type RuntimeCall = RuntimeCall;
     type RuntimeEvent = RuntimeEvent;
@@ -236,12 +295,15 @@ impl pallet_xcm::Config for Runtime {
     type TrustedLockers = ();
     type UniversalLocation = UniversalLocation;
     type Weigher = FixedWeightBounds<UnitWeightCost, RuntimeCall, MaxInstructions>;
+    /// Rerun benchmarks if you are making changes to runtime configuration.
     type WeightInfo = weights::pallet_xcm::WeightInfo<Runtime>;
+    #[cfg(feature = "runtime-benchmarks")]
+    type XcmExecuteFilter = Everything;
+    #[cfg(not(feature = "runtime-benchmarks"))]
     type XcmExecuteFilter = Nothing;
-    // ^ Disable dispatchable execute on the XCM pallet.
     // Needs to be `Everything` for local testing.
     type XcmExecutor = XcmExecutor<XcmConfig>;
-    type XcmReserveTransferFilter = Nothing;
+    type XcmReserveTransferFilter = Everything;
     type XcmRouter = XcmRouter;
     type XcmTeleportFilter = Nothing;
 

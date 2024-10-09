@@ -25,10 +25,7 @@ pub use governance::origins::pallet_custom_origins;
 use governance::{origins::Treasurer, TreasurySpender};
 use parachains_common::message_queue::{NarrowOriginToSibling, ParaIdToSibling};
 use parity_scale_codec::{Decode, Encode, MaxEncodedLen};
-use polkadot_runtime_common::{
-    impls::{LocatableAssetConverter, VersionedLocatableAsset, VersionedLocationConverter},
-    BlockHashCount, SlowAdjustingFeeUpdate,
-};
+use polkadot_runtime_common::{BlockHashCount, SlowAdjustingFeeUpdate};
 use scale_info::TypeInfo;
 use sp_consensus_aura::sr25519::AuthorityId as AuraId;
 use sp_runtime::{
@@ -36,31 +33,29 @@ use sp_runtime::{
     Perbill, Permill, RuntimeDebug,
 };
 use sp_version::RuntimeVersion;
-use xcm::{
-    latest::{
-        prelude::{AssetId, BodyId},
-        InteriorLocation,
-        Junction::PalletInstance,
-    },
-    VersionedLocation,
+use xcm::latest::{
+    prelude::{AssetId, BodyId},
+    InteriorLocation,
+    Junction::PalletInstance,
 };
-use xcm_builder::PayOverXcm;
 #[cfg(not(feature = "runtime-benchmarks"))]
 use xcm_builder::ProcessXcmMessage;
 use xcm_config::{RelayLocation, XcmOriginToTransactDispatchOrigin};
 
+#[cfg(feature = "runtime-benchmarks")]
+use crate::benchmark::{OpenHrmpChannel, PayWithEnsure};
 use crate::{
     constants::{
-        currency::{deposit, CENTS, EXISTENTIAL_DEPOSIT, MICROCENTS},
+        currency::{deposit, CENTS, EXISTENTIAL_DEPOSIT, GRAND, MICROCENTS},
         AVERAGE_ON_INITIALIZE_RATIO, DAYS, HOURS, MAXIMUM_BLOCK_WEIGHT, MAX_BLOCK_LENGTH,
-        NORMAL_DISPATCH_RATIO, SLOT_DURATION, VERSION,
+        NORMAL_DISPATCH_RATIO, VERSION,
     },
     types::{
-        AccountId, Balance, Block, BlockNumber, CollatorSelectionUpdateOrigin, ConsensusHook, Hash,
-        Nonce, PriceForSiblingParachainDelivery,
+        AccountId, AssetKind, Balance, Beneficiary, Block, BlockNumber,
+        CollatorSelectionUpdateOrigin, ConsensusHook, Hash, Nonce,
+        PriceForSiblingParachainDelivery, TreasuryPaymaster,
     },
-    weights,
-    weights::{BlockExecutionWeight, ExtrinsicBaseWeight, RocksDbWeight},
+    weights::{self, BlockExecutionWeight, ExtrinsicBaseWeight, RocksDbWeight},
     Aura, Balances, CollatorSelection, MessageQueue, OriginCaller, PalletInfo, ParachainSystem,
     Preimage, Runtime, RuntimeCall, RuntimeEvent, RuntimeFreezeReason, RuntimeHoldReason,
     RuntimeOrigin, RuntimeTask, Session, SessionKeys, System, Treasury, WeightToFee, XcmpQueue,
@@ -176,6 +171,7 @@ impl pallet_scheduler::Config for Runtime {
     type RuntimeEvent = RuntimeEvent;
     type RuntimeOrigin = RuntimeOrigin;
     type ScheduleOrigin = EnsureRoot<AccountId>;
+    /// Rerun benchmarks if you are making changes to runtime configuration.
     type WeightInfo = weights::pallet_scheduler::WeightInfo<Runtime>;
 }
 
@@ -199,17 +195,16 @@ impl pallet_preimage::Config for Runtime {
     type Currency = Balances;
     type ManagerOrigin = EnsureRoot<AccountId>;
     type RuntimeEvent = RuntimeEvent;
+    /// Rerun benchmarks if you are making changes to runtime configuration.
     type WeightInfo = weights::pallet_preimage::WeightInfo<Runtime>;
 }
 
 impl pallet_timestamp::Config for Runtime {
-    #[cfg(feature = "experimental")]
     type MinimumPeriod = ConstU64<0>;
-    #[cfg(not(feature = "experimental"))]
-    type MinimumPeriod = ConstU64<{ SLOT_DURATION / 2 }>;
     /// A timestamp: milliseconds since the unix epoch.
     type Moment = u64;
     type OnTimestampSet = Aura;
+    /// Rerun benchmarks if you are making changes to runtime configuration.
     type WeightInfo = weights::pallet_timestamp::WeightInfo<Runtime>;
 }
 
@@ -284,6 +279,7 @@ impl pallet_proxy::Config for Runtime {
     type ProxyType = ProxyType;
     type RuntimeCall = RuntimeCall;
     type RuntimeEvent = RuntimeEvent;
+    /// Rerun benchmarks if you are making changes to runtime configuration.
     type WeightInfo = weights::pallet_proxy::WeightInfo<Runtime>;
 }
 
@@ -309,6 +305,7 @@ impl pallet_balances::Config for Runtime {
     type RuntimeEvent = RuntimeEvent;
     type RuntimeFreezeReason = RuntimeFreezeReason;
     type RuntimeHoldReason = RuntimeHoldReason;
+    /// Rerun benchmarks if you are making changes to runtime configuration.
     type WeightInfo = weights::pallet_balances::WeightInfo<Runtime>;
 }
 
@@ -326,8 +323,8 @@ impl pallet_assets::Config for Runtime {
     type ApprovalDeposit = ApprovalDeposit;
     type AssetAccountDeposit = AssetAccountDeposit;
     type AssetDeposit = AssetDeposit;
-    type AssetId = u32;
-    type AssetIdParameter = parity_scale_codec::Compact<u32>;
+    type AssetId = crate::types::AssetId;
+    type AssetIdParameter = parity_scale_codec::Compact<crate::types::AssetId>;
     type Balance = Balance;
     #[cfg(feature = "runtime-benchmarks")]
     type BenchmarkHelper = ();
@@ -342,6 +339,7 @@ impl pallet_assets::Config for Runtime {
     type RemoveItemsLimit = RemoveItemsLimit;
     type RuntimeEvent = RuntimeEvent;
     type StringLimit = StringLimit;
+    /// Rerun benchmarks if you are making changes to runtime configuration.
     type WeightInfo = weights::pallet_assets::WeightInfo<Runtime>;
 }
 
@@ -352,6 +350,10 @@ parameter_types! {
 }
 
 impl pallet_transaction_payment::Config for Runtime {
+    /// There are two possible mechanisms available: slow and fast adjusting.
+    /// With slow adjusting fees stay almost constant in short periods of time, changing only in long term.
+    /// It may lead to long inclusion times during spikes, therefore tipping is enabled.
+    /// With fast adjusting fees change rapidly, but fixed for all users at each block (no tipping)
     type FeeMultiplierUpdate = SlowAdjustingFeeUpdate<Self>;
     type LengthToFee = ConstantMultiplier<Balance, TransactionByteFee>;
     type OnChargeTransaction = pallet_transaction_payment::FungibleAdapter<Balances, ()>;
@@ -363,6 +365,7 @@ impl pallet_transaction_payment::Config for Runtime {
 impl pallet_sudo::Config for Runtime {
     type RuntimeCall = RuntimeCall;
     type RuntimeEvent = RuntimeEvent;
+    /// Rerun benchmarks if you are making changes to runtime configuration.
     type WeightInfo = weights::pallet_sudo::WeightInfo<Runtime>;
 }
 
@@ -385,6 +388,7 @@ impl cumulus_pallet_parachain_system::Config for Runtime {
     type ReservedXcmpWeight = ReservedXcmpWeight;
     type RuntimeEvent = RuntimeEvent;
     type SelfParaId = parachain_info::Pallet<Runtime>;
+    /// Rerun benchmarks if you are making changes to runtime configuration.
     type WeightInfo = weights::cumulus_pallet_parachain_system::WeightInfo<Runtime>;
     type XcmpMessageHandler = XcmpQueue;
 }
@@ -417,6 +421,7 @@ impl pallet_message_queue::Config for Runtime {
     type RuntimeEvent = RuntimeEvent;
     type ServiceWeight = MessageQueueServiceWeight;
     type Size = u32;
+    /// Rerun benchmarks if you are making changes to runtime configuration.
     type WeightInfo = weights::pallet_message_queue::WeightInfo<Runtime>;
 }
 
@@ -434,10 +439,14 @@ impl cumulus_pallet_xcmp_queue::Config for Runtime {
     type ChannelInfo = ParachainSystem;
     type ControllerOrigin = EnsureRoot<AccountId>;
     type ControllerOriginConverter = XcmOriginToTransactDispatchOrigin;
+    type MaxActiveOutboundChannels = ConstU32<128>;
     type MaxInboundSuspended = MaxInboundSuspended;
+    type MaxPageSize = ConstU32<{ 1 << 16 }>;
+    /// Ensure that this value is not set to null (or NoPriceForMessageDelivery) to prevent spamming
     type PriceForSiblingDelivery = PriceForSiblingParachainDelivery;
     type RuntimeEvent = RuntimeEvent;
     type VersionWrapper = ();
+    /// Rerun benchmarks if you are making changes to runtime configuration.
     type WeightInfo = weights::cumulus_pallet_xcmp_queue::WeightInfo<Runtime>;
     // Enqueue XCMP messages from siblings for later processing.
     type XcmpQueue = TransformOrigin<MessageQueue, AggregateMessageOrigin, ParaId, ParaIdToSibling>;
@@ -458,6 +467,7 @@ impl pallet_multisig::Config for Runtime {
     type MaxSignatories = MaxSignatories;
     type RuntimeCall = RuntimeCall;
     type RuntimeEvent = RuntimeEvent;
+    /// Rerun benchmarks if you are making changes to runtime configuration.
     type WeightInfo = weights::pallet_multisig::WeightInfo<Runtime>;
 }
 
@@ -481,6 +491,7 @@ impl pallet_session::Config for Runtime {
     type ValidatorId = <Self as frame_system::Config>::AccountId;
     // we don't have stash and controller, thus we don't need the convert as well.
     type ValidatorIdOf = pallet_collator_selection::IdentityCollator;
+    /// Rerun benchmarks if you are making changes to runtime configuration.
     type WeightInfo = weights::pallet_session::WeightInfo<Runtime>;
 }
 
@@ -527,6 +538,7 @@ impl pallet_collator_selection::Config for Runtime {
     type ValidatorId = <Self as frame_system::Config>::AccountId;
     type ValidatorIdOf = pallet_collator_selection::IdentityCollator;
     type ValidatorRegistration = Session;
+    /// Rerun benchmarks if you are making changes to runtime configuration.
     type WeightInfo = weights::pallet_collator_selection::WeightInfo<Runtime>;
 }
 
@@ -534,13 +546,20 @@ impl pallet_utility::Config for Runtime {
     type PalletsOrigin = OriginCaller;
     type RuntimeCall = RuntimeCall;
     type RuntimeEvent = RuntimeEvent;
+    /// Rerun benchmarks if you are making changes to runtime configuration.
     type WeightInfo = weights::pallet_utility::WeightInfo<Runtime>;
+}
+
+#[cfg(feature = "runtime-benchmarks")]
+parameter_types! {
+    pub LocationParents: u8 = 1;
+    pub BenchmarkParaId: u8 = 0;
 }
 
 parameter_types! {
     pub const ProposalBond: Permill = Permill::from_percent(5);
-    pub const ProposalBondMinimum: Balance = 2000; // * CENTS
-    pub const ProposalBondMaximum: Balance = 1;// * GRAND;
+    pub const ProposalBondMinimum: Balance = 2 * GRAND;
+    pub const ProposalBondMaximum: Balance = GRAND;
     pub const SpendPeriod: BlockNumber = 6 * DAYS;
     pub const Burn: Permill = Permill::from_perthousand(2);
     pub const TreasuryPalletId: PalletId = PalletId(*b"py/trsry");
@@ -553,37 +572,30 @@ parameter_types! {
 }
 
 impl pallet_treasury::Config for Runtime {
-    type ApproveOrigin = EitherOfDiverse<EnsureRoot<AccountId>, Treasurer>;
-    type AssetKind = VersionedLocatableAsset;
+    type AssetKind = AssetKind;
     type BalanceConverter = frame_support::traits::tokens::UnityAssetBalanceConversion;
     #[cfg(feature = "runtime-benchmarks")]
-    type BenchmarkHelper = polkadot_runtime_common::impls::benchmarks::TreasuryArguments;
-    type Beneficiary = VersionedLocation;
+    type BenchmarkHelper = polkadot_runtime_common::impls::benchmarks::TreasuryArguments<
+        LocationParents,
+        BenchmarkParaId,
+    >;
+    type Beneficiary = Beneficiary;
     type BeneficiaryLookup = IdentityLookup<Self::Beneficiary>;
     type Burn = ();
     type BurnDestination = ();
     type Currency = Balances;
     type MaxApprovals = MaxApprovals;
-    type OnSlash = Treasury;
     type PalletId = TreasuryPalletId;
-    type Paymaster = PayOverXcm<
-        TreasuryInteriorLocation,
-        xcm_config::XcmRouter,
-        crate::PolkadotXcm,
-        ConstU32<{ 6 * HOURS }>,
-        Self::Beneficiary,
-        Self::AssetKind,
-        LocatableAssetConverter,
-        VersionedLocationConverter,
-    >;
+    #[cfg(feature = "runtime-benchmarks")]
+    type Paymaster = PayWithEnsure<TreasuryPaymaster, OpenHrmpChannel<BenchmarkParaId>>;
+    #[cfg(not(feature = "runtime-benchmarks"))]
+    type Paymaster = TreasuryPaymaster;
     type PayoutPeriod = PayoutSpendPeriod;
-    type ProposalBond = ProposalBond;
-    type ProposalBondMaximum = ProposalBondMaximum;
-    type ProposalBondMinimum = ProposalBondMinimum;
     type RejectOrigin = EitherOfDiverse<EnsureRoot<AccountId>, Treasurer>;
     type RuntimeEvent = RuntimeEvent;
     type SpendFunds = ();
     type SpendOrigin = TreasurySpender;
     type SpendPeriod = SpendPeriod;
-    type WeightInfo = pallet_treasury::weights::SubstrateWeight<Runtime>;
+    /// Rerun benchmarks if you are making changes to runtime configuration.
+    type WeightInfo = weights::pallet_treasury::WeightInfo<Runtime>;
 }

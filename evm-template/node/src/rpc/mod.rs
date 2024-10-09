@@ -7,7 +7,7 @@
 mod eth;
 use std::sync::Arc;
 
-use parachain_template_runtime::{opaque::Block, AccountId, Balance, Nonce};
+use evm_runtime_template::{opaque::Block, AccountId, Balance, Nonce};
 use sc_client_api::{backend::Backend, AuxStore, BlockchainEvents, StorageProvider, UsageProvider};
 pub use sc_rpc::DenyUnsafe;
 use sc_rpc::SubscriptionTaskExecutor;
@@ -20,7 +20,7 @@ use sp_consensus_aura::sr25519::AuthorityId as AuraId;
 use sp_inherents::CreateInherentDataProviders;
 use sp_runtime::traits::Block as BlockT;
 
-pub use self::eth::{overrides_handle, EthDeps};
+pub use self::eth::EthDeps;
 use crate::rpc::eth::create_eth;
 
 /// A type representing all RPC extensions.

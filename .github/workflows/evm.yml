@@ -21,6 +21,12 @@ on:
         default: false
         type: boolean
 
+# If new code is pushed to a PR branch, then cancel in progress workflows for
+# that PR. Ensures that we don't waste CI time, and returns results quicker.
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
 env:
   # Not needed in CI, should make things a bit faster
   CARGO_INCREMENTAL: 0
@@ -29,6 +35,10 @@ env:
   WASM_BUILD_CLEAN_TARGET: 1
   # stripping symbols and optimizing for binary size
   RUSTFLAGS: -C strip=symbols -C opt-level=s
+  # Enable sscache
+  RUSTC_WRAPPER: "sccache"
+  SCCACHE_GHA_ENABLED: "true"
+  SCCACHE_CACHE_SIZE: "50GB"
 
 jobs:
   evm-clippy-fmt-test:
@@ -52,6 +62,9 @@ jobs:
       - name: git checkout
         uses: actions/checkout@v4
 
+      - name: Run sccache
+        uses: mozilla-actions/sccache-action@v0.0.4
+
       - name: Install Protoc
         uses: arduino/setup-protoc@9b1ee5b22b0a3f1feb8c2ff99b32c89b3c3191e9 # v2.0.0
         with:
@@ -59,27 +72,37 @@ jobs:
 
       - name: install rust toolchain
         uses: actions-rust-lang/setup-rust-toolchain@v1
+        with:
+          components: clippy, rustfmt
 
       - name: Install toml-sort
         run: cargo install --git https://github.com/4meta5/toml_sort
+
       - name: Add file permissions for toml-sort
         run: chmod +x ./scripts/toml-sort.sh
+
       - name: Add file permissions for check-toml-sorted
         run: chmod +x ./scripts/check-toml-sorted.sh
+
       - name: Check Cargo.toml files are formatted using toml_sort
         run: ./scripts/check-toml-sorted.sh
 
       - name: Check format
         run: cargo fmt --all -- --check
 
+      - name: "Install nextest"
+        uses: taiki-e/install-action@v2
+        with:
+          tool: cargo-nextest
+
       - name: Run tests
-        run: cargo test --release
+        run: cargo nextest run --release
 
       - name: Check benchmarking compilation
         run: cargo check --release --features runtime-benchmarks
 
       - name: Run tests with async backing
-        run: cargo test --release --features="async-backing"
+        run: cargo nextest run --release --features="async-backing"
 
       - name: Check clippy
         run: cargo clippy --release --locked --all-targets -- -D warnings
@@ -89,7 +112,9 @@ jobs:
         env:
           RUSTDOCFLAGS: "-D rustdoc::broken-intra-doc-links -D rustdoc::private_intra_doc_links"
 
-      - name: Upload coverage reports to Codecov
-        uses: codecov/codecov-action@v3
-        env:
-          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
+      # Will enable the below back again once we tackle #260
+      # FIXME: Calculate coverage and define how to upload all template coverage reports
+      # - name: Upload coverage reports to Codecov
+      #   uses: codecov/codecov-action@v3
+      #   env:
+      #     CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}

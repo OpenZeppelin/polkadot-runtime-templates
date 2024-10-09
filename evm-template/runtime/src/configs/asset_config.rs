@@ -62,7 +62,8 @@ impl pallet_assets::Config for Runtime {
     type RemoveItemsLimit = RemoveItemsLimit;
     type RuntimeEvent = RuntimeEvent;
     type StringLimit = StringLimit;
-    type WeightInfo = weights::pallet_assets::WeightInfo<Runtime>; //FIXME: run & update
+    /// Rerun benchmarks if you are making changes to runtime configuration.
+    type WeightInfo = weights::pallet_assets::WeightInfo<Runtime>;
 }
 
 // Our AssetType. For now we only handle Xcm Assets
@@ -180,5 +181,6 @@ impl pallet_asset_manager::Config for Runtime {
     type ForeignAssetModifierOrigin = EnsureRoot<AccountId>;
     type ForeignAssetType = AssetType;
     type RuntimeEvent = RuntimeEvent;
+    /// Rerun benchmarks if you are making changes to runtime configuration.
     type WeightInfo = weights::pallet_asset_manager::WeightInfo<Runtime>;
 }

@@ -1,0 +1,147 @@
+:source-highlighter: highlight.js
+:highlightjs-languages: rust
+:github-icon: pass:[<svg class="icon"><use href="#github-icon"/></svg>]
+
+= Sending Cross-Chain Messages between Parachains
+
+The supported way to exchange cross-chain messages (XCM) between parachains is to use Horizontal Relay-routed Message Passing (HRMP) channels.
+
+Each HRMP channel is unidirectional. In order to enable full connectivity between two parachains, two HRMP channels must be opened: one for sending outgoing XCM and the other for receiving incoming XCM.
+
+== Opening an HRMP Channel
+
+Opening a channel between two parachains A and B takes 2 steps:
+1. parachain A initiates a channel request
+2. parachain B accepts the channel request
+
+For step (1), parachain A calls `hrmp > hrmpInitOpenChannel(recipient, proposedMaxCapacity, proposedMaxMessageSize)` to create a channel request with the input configuration.
+
+For step (2), parachain B calls `hrmp > hrmpAcceptOpenChannel(sender)` to accept the channel open request from the input sender.
+
+In order to dispatch a call from its sovereign origin, a parachain may use governance to send the encoded call in a Transact instruction to the Relay Chain, but it may also execute this logic autonomously (e.g. on the notification that a channel was requested).
+
+== Connecting to Ecosystem Parachains
+
+The examples in this section include steps to connect to existing parachains in the Polkadot ecosystem. Examples include the following Polkadot parachains:
+1. AssetHub supports managing asset balances as well as the execution of cross-chain transfers.
+2. Snowbridge supports sending ERC20 tokens between Polkadot parachains and Ethereum in both directions.
+3. HydraDX supports DeFi functionality to provide liquidity to Polkadot.
+
+For all examples:
+. `paraId` for the user's parachain is set to `43211234`.
+. `proposedMaxCapacity` and `proposedMaxMessageSize` are set to the values of Polkadot `config.hrmpChannelMaxCapacity = 1000` and `config.hrmpChannelMaxMessageSize = 102400`, respectively.
+
+=== AssetHub
+
+AssetHub supports managing asset balances as well as the execution of cross-chain transfers.
+
+AssetHub is a common-good, system parachain and is therefore controlled by relay chain governance. This means it is sufficient to propose opening both channels at once through the relay chain's `GeneralAdmin` track. The proposal should set its call (proposed to be executed) to `utility.batchAll` with the input including 2 calls to `hrmp.forceOpenHrmpChannel` to open a channel in each direction between the user parachain and AssetHub.
+
+The first call to `hrmp.forceOpenHrmpChannel` proposes opening a unidirectional channel to send XCM from the user parachain to AssetHub. If AssetHub's paraId is set to `1000`, here are the inputs:
+```
+hrmp.forceOpenChannel(
+	sender = 43211234,
+	recipient = 1000,
+	max_capacity = 1000,
+	max_message_size = 102400,
+)
+```
+Here is the second call to open a unidirectional channel to send XCM from AssetHub to the user parachain:
+```
+hrmp.forceOpenChannel(
+	sender = 1000,
+	recipient = 43211234,
+	max_capacity = 1000,
+	max_message_size = 102400,
+)
+```
+
+link:https://polkadot.subsquare.io/referenda/438[Here] is a successful example of this proposal which passed to open 2 HRMP channels between Unique Network and AssetHub. link:https://polkadot.polkassembly.io/referenda/594[Here] is another example of a proposal executed to open HRMP Channels between AssetHub and Mythos.
+
+=== Snowbridge
+
+Snowbridge supports sending ERC20 tokens between Polkadot parachains and Ethereum in both directions.
+
+Snowbridge leverages AssetHub to mint ERC20 tokens received from Ethereum and send them to parachains. This implies that a prerequisite step for receiving ERC20 tokens via Snowbridge is opening HRMP channels with AssetHub by following the previous section.
+
+The standard way of interacting with Snowbridge is to make calls to the link:https://github.com/Snowfork/snowbridge/blob/main/contracts/src/interfaces/IGateway.sol[Gateway] contract deployed on Ethereum at link:https://etherscan.io/address/0x27ca963C279c93801941e1eB8799c23f407d68e7[this address].
+
+If an ERC20 token has already been bridged before, the user may send the following transaction to the Gateway to send ERC20 tokens to parachain `destinationChain` from Ethereum and deposit into account `destinationAddress` on that parachain.
+```solidity, ignore
+function sendToken(address token, ParaID destinationChain, MultiAddress destinationAddress, uint128 destinationFee, uint128 amount)
+    external
+    payable;
+```
+
+If the ERC20 tokens has not been bridged before, there is a prerequisite step to register the ERC20 token on AssetHub via the `ForeignAssets` pallet. To register ERC20 tokens for the first time, the user may send the following transaction to the Gateway:
+```solidity, ignore
+function registerToken(address token) external payable;
+```
+The above function sends a message to the AssetHub parachain to register a new fungible asset in the `ForeignAssets` pallet. To account for delivery costs, the above function charges a fee in Ether which may be retrieved beforehand by calling `quoteRegisterFee`.
+
+For more information, see the link:https://docs.snowbridge.network[Snowbridge Docs]. For more information on the Snowbridge deployment to Polkadot, see the link:https://polkadot.polkassembly.io/referenda/680[governance proposal which initialized Snowbridge on BridgeHub and AssetHub].
+
+=== HydraDX
+
+HydraDX supports DeFi functionality to provide liquidity to Polkadot.
+
+The `Opening an HRMP Channel` section shows the general steps for opening two HRMP channels between any two parachains.
+
+To propose opening a channel to send XCM to HydraDX, the sending parachain may call: 
+```
+hrmp.hrmpInitOpenChannel(
+	recipient = 2034,
+	proposedMaxCapacity = 1000,
+	proposedMaxMessageSize = 102400,
+)
+```
+
+HydraDX may accept the channel open request from the sending parachain with paraID 43211234 by calling:
+```
+hrmpAcceptOpenChannel(
+	sender = 43211234
+)
+```
+
+HydraDX may call the following to propose opening a channel to send XCM from HydraDX to the parachain with paraID 43211234: 
+```
+hrmp.hrmpInitOpenChannel(
+	recipient = 43211234,
+	proposedMaxCapacity = 1000,
+	proposedMaxMessageSize = 102400,
+)
+```
+
+Assuming the HydraDX has paraID 2034, the receiving parachain may accept the channel open request by calling:
+```
+hrmpAcceptOpenChannel(
+	sender = 2034
+)
+```
+
+Note that in order to dispatch a call from its sovereign origin, a parachain may use governance to send the encoded call in a Transact instruction to the Relay Chain, but it may also execute this logic autonomously (e.g. on the notification that a channel was requested). HRMP extrinsics often must be called from the parachain’s sovereign account as origin, often via a democracy proposal.
+
+link:https://moonbeam.polkassembly.network/referendum/93[Here] is an example of a proposal on Moonbeam to Open/Accept HRMP channels with HydraDX.
+
+== Bonus: HRMP Channel Notification Handlers
+
+There are 3 handlers that may be configured as hooks to implement automated logic for when a `HRMP` notification is received:
+. `HrmpChannelAcceptedHandler`
+. `HrmpChannelClosingHandler`
+. `HrmpNewChannelOpenRequestHandler`
+
+Each follows a similar interface:
+```rust
+pub trait HandleHrmpNewChannelOpenRequest {
+	fn handle(sender: u32, max_message_size: u32, max_capacity: u32) -> XcmResult;
+}
+
+pub trait HandleHrmpChannelAccepted {
+	fn handle(recipient: u32) -> XcmResult;
+}
+
+pub trait HandleHrmpChannelClosing {
+	fn handle(initiator: u32, sender: u32, recipient: u32) -> XcmResult;
+}
+```
+The default implementation `()` returns `Ok(())` without executing any effects. Read more in the link:https://wiki.polkadot.network/docs/build-hrmp-channels[Polkadot documentation].
