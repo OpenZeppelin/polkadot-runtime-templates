@@ -415,13 +415,6 @@ impl_runtime_apis! {
             (weight, RuntimeBlockWeights::get().max_block)
         }
 
-        fn on_runtime_upgrade(checks: frame_try_runtime::UpgradeCheckSelect) -> (Weight, Weight) {
-d
-            let weight = Executive::try_runtime_upgrade(checks)
-                .expect("runtime upgrade logic *must* be infallible");
-            (weight, RuntimeBlockWeights::get().max_block)
-        }
-
         fn execute_block(
             block: Block,
             state_root_check: bool,

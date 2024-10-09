@@ -272,6 +272,7 @@ try-runtime = [
 	"parachain-info/try-runtime",
 	"polkadot-runtime-common/try-runtime",
 	"sp-runtime/try-runtime",
+	"pallet-xcm-weight-trader/try-runtime",
 ]
 
 # A feature that should be enabled when the runtime should be built for on-chain
