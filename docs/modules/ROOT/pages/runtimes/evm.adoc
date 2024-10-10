@@ -1,11 +1,11 @@
 :source-highlighter: highlight.js
 :highlightjs-languages: rust
 :github-icon: pass:[<svg class="icon"><use href="#github-icon"/></svg>]
-= Generic Runtime
+= EVM Runtime
 
 == Purpose
 
-EVM Runtime Template is built on top of the link:generic.adoc[Generic Runtime Template].
+EVM Runtime Template is built on top of the xref:runtimes/generic.adoc[Generic Runtime Template].
 
 The purpose of this template is to provide EVM compatibilities embedded into the runtime.
 

@@ -25,7 +25,7 @@ fn load_spec(
 ) -> std::result::Result<Box<dyn ChainSpec>, String> {
     Ok(match id {
         "dev" => Box::new(chain_spec::development_config(contracts_path)),
-        "template-rococo" => Box::new(chain_spec::local_testnet_config(contracts_path)),
+        "template-paseo" => Box::new(chain_spec::local_testnet_config(contracts_path)),
         "" | "local" => Box::new(chain_spec::local_testnet_config(contracts_path)),
         path => Box::new(chain_spec::ChainSpec::from_json_file(std::path::PathBuf::from(path))?),
     })

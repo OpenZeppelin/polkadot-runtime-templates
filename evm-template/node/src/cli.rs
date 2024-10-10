@@ -96,12 +96,12 @@ const AFTER_HELP_EXAMPLE: &str = color_print::cstr!(
     r#"<bold><underline>Examples:</></>
    <bold>parachain-template-node build-spec --disable-default-bootnode > plain-parachain-chainspec.json</>
            Export a chainspec for a local testnet in json format.
-   <bold>parachain-template-node --chain plain-parachain-chainspec.json --tmp -- --chain rococo-local</>
+   <bold>parachain-template-node --chain plain-parachain-chainspec.json --tmp -- --chain paseo-local</>
            Launch a full node with chain specification loaded from plain-parachain-chainspec.json.
    <bold>parachain-template-node</>
-           Launch a full node with default parachain <italic>local-testnet</> and relay chain <italic>rococo-local</>.
+           Launch a full node with default parachain <italic>local-testnet</> and relay chain <italic>paseo-local</>.
    <bold>parachain-template-node --collator</>
-           Launch a collator with default parachain <italic>local-testnet</> and relay chain <italic>rococo-local</>.
+           Launch a collator with default parachain <italic>local-testnet</> and relay chain <italic>paseo-local</>.
  "#
 );
 #[derive(Debug, clap::Parser)]
