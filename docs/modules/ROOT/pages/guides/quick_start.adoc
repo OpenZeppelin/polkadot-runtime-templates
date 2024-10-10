@@ -27,15 +27,20 @@ cargo build --release
 ** Go to `Network` > `Parachains`
 ** Go to `Parathreads` tab
 ** Click the `+ ParaId` button
-** Save a `parachain id` for the further usage.
+** Save the `parachain id` for the further usage.
 ** Click `Submit` and `Sign and Submit`.
 
 * Generate and customize a chainspec:
 
+[NOTE]
+====
+We use the `generic-template-node` executable throughout all the commands since we are using the `generic-template`, but make sure to update the name of the executable if you are using any of the other runtime template.
+====
+
 ** Generate a plain chainspec with this command:
 +
 ```bash
-./target/release/parachain-template-node build-spec --disable-default-bootnode > plain-parachain-chainspec.json
+./target/release/generic-template-node build-spec --disable-default-bootnode > plain-parachain-chainspec.json
 ```
 
 ** Edit the chainspec:
@@ -47,13 +52,13 @@ cargo build --release
 ** Generate a raw chainspec with this command:
 +
 ```bash
-./target/release/parachain-template-node build-spec --chain plain-parachain-chainspec.json --disable-default-bootnode --raw > raw-parachain-chainspec.json
+./target/release/generic-template-node build-spec --chain plain-parachain-chainspec.json --disable-default-bootnode --raw > raw-parachain-chainspec.json
 ```
 
-* Run two nodes and wait until it syncs with the Paseo relay chain. This can take a fairly long time(up to 2 days), so we can use the `fast-unsafe` flag to make the process faster since we are on a testnet(~ 3 hours). `fast` downloads the blocks without executing the transactions, and `unsafe` skips downloading the state proofs(which we are ok with since it is Paseo).
+* Run two nodes and wait until it syncs with the Paseo relay chain. This can take a fairly long time(up to 2 days), so we can use the `fast-unsafe` flag to make the process faster since we are on a testnet(~ 3 hours). `fast` downloads the blocks without executing the transactions, and `unsafe` skips downloading the state proofs(which we are ok with since it is a testnet).
 +
 ```bash
-./target/release/parachain-template-node \
+./target/release/generic-template-node \
     --alice \
     --collator \
     --force-authoring \
@@ -70,7 +75,7 @@ cargo build --release
 ```
 +
 ```bash
-./target/release/parachain-template-node \
+./target/release/generic-template-node \
     --bob \
     --collator \
     --force-authoring \
@@ -93,12 +98,12 @@ cargo build --release
 ** Generate a genesis state:
 +
 ```bash
-./target/release/parachain-template-node export-genesis-state --chain raw-parachain-chainspec.json para-<paraId>-genesis-state
+./target/release/generic-template-node export-genesis-state --chain raw-parachain-chainspec.json para-<paraId>-genesis-state
 ```
 ** Generate a genesis wasm:
 +
 ```bash
-./target/release/parachain-template-node export-genesis-wasm --chain raw-parachain-chainspec.json para-<paraId>-wasm
+./target/release/generic-template-node export-genesis-wasm --chain raw-parachain-chainspec.json para-<paraId>-wasm
 ```
 ** Go to link:https://polkadot.js.org/apps[PolkadotJS]. Check that it points to Paseo testnet.
 ** Go to `Network` > `Parachains`.
