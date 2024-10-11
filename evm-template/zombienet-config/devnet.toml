@@ -1,5 +1,5 @@
 [relaychain]
-chain = "rococo-local"
+chain = "paseo-local"
 default_command = "./bin-v1.6.0/polkadot"
 
 [[relaychain.nodes]]

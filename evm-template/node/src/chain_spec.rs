@@ -83,7 +83,7 @@ pub fn development_config(contracts_path: ContractsPath) -> ChainSpec {
     ChainSpec::builder(
         evm_runtime_template::WASM_BINARY.expect("WASM binary was not built, please build it!"),
         Extensions {
-            relay_chain: "rococo-local".into(),
+            relay_chain: "paseo-local".into(),
             // You MUST set this to the correct network!
             para_id: 1000,
         },
@@ -134,7 +134,7 @@ pub fn local_testnet_config(contracts_path: ContractsPath) -> ChainSpec {
     ChainSpec::builder(
         evm_runtime_template::WASM_BINARY.expect("WASM binary was not built, please build it!"),
         Extensions {
-            relay_chain: "rococo-local".into(),
+            relay_chain: "paseo-local".into(),
             // You MUST set this to the correct network!
             para_id: 1000,
         },
