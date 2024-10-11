@@ -8624,7 +8624,6 @@ version = "7.0.0"
 source = "git+https://github.com/paritytech/polkadot-sdk?tag=polkadot-v1.10.0#7049c3c98836b3e9253f6aaa69b6bf3d622e3962"
 dependencies = [
  "async-trait",
- "bitvec",
  "frame-benchmarking",
  "frame-benchmarking-cli",
  "frame-support",
@@ -8680,7 +8679,6 @@ dependencies = [
  "polkadot-runtime-parachains",
  "polkadot-statement-distribution",
  "rococo-runtime",
- "rococo-runtime-constants",
  "sc-authority-discovery",
  "sc-basic-authorship",
  "sc-block-builder",
