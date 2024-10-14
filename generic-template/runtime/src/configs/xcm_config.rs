@@ -1,24 +1,29 @@
+use core::marker::PhantomData;
+
 use frame_support::{
     parameter_types,
-    traits::{ConstU32, Contains, Everything, Nothing, PalletInfoAccess},
+    pallet_prelude::Get,
+    traits::{ConstU32, Contains, ContainsPair, Everything, Nothing, PalletInfoAccess},
     weights::Weight,
 };
 use frame_system::EnsureRoot;
+use orml_xcm_support::MultiNativeAsset;
 use pallet_xcm::XcmPassthrough;
 use polkadot_parachain_primitives::primitives::{self, Sibling};
 use polkadot_runtime_common::impls::ToAuthor;
 use xcm::latest::prelude::*;
-use xcm_builder::{
+use xcm_builder::{ Case,
     AccountId32Aliases, AllowExplicitUnpaidExecutionFrom, AllowTopLevelPaidExecutionFrom,
     DenyReserveTransferToRelayChain, DenyThenTry, EnsureXcmOrigin, FixedWeightBounds,
     FrameTransactionalProcessor, FungibleAdapter, FungiblesAdapter, IsChildSystemParachain,
-    IsConcrete, NativeAsset, NoChecking, ParentIsPreset, RelayChainAsNative,
+    IsConcrete, NoChecking, ParentIsPreset, RelayChainAsNative,
     SiblingParachainAsNative, SiblingParachainConvertsVia, SignedAccountId32AsNative,
     SignedToAccountId32, SovereignSignedViaLocation, TakeWeightCredit, TrailingSetTopicAsId,
     UsingComponents, WithComputedOrigin, WithUniqueTopic, XcmFeeManagerFromComponents,
     XcmFeeToAccount,
 };
 use xcm_executor::XcmExecutor;
+use xcm_primitives::{AbsoluteAndRelativeReserve};
 
 use super::TreasuryAccount;
 use crate::{
@@ -31,7 +36,6 @@ use crate::{
 };
 
 parameter_types! {
-    pub const RelayLocation: Location = Location::parent();
     pub const RelayNetwork: Option<NetworkId> = None;
     pub PlaceholderAccount: AccountId = PolkadotXcm::check_account();
     pub AssetsPalletLocation: Location =
@@ -145,6 +149,46 @@ pub type Barrier = TrailingSetTopicAsId<
     >,
 >;
 
+/// Matches foreign assets from a given origin.
+/// Foreign assets are assets bridged from other consensus systems. i.e parents > 1.
+pub struct IsBridgedConcreteAssetFrom<Origin>(PhantomData<Origin>);
+impl<Origin> ContainsPair<Asset, Location> for IsBridgedConcreteAssetFrom<Origin>
+where
+    Origin: Get<Location>,
+{
+    fn contains(asset: &Asset, origin: &Location) -> bool {
+        let loc = Origin::get();
+        &loc == origin
+            && matches!(
+                asset,
+                Asset { id: AssetId(Location { parents: 2, .. }), fun: Fungibility::Fungible(_) },
+            )
+    }
+}
+
+parameter_types! {
+    /// Location of Asset Hub
+   pub AssetHubLocation: Location = Location::new(1, [Parachain(1000)]);
+   pub const RelayLocation: Location = Location::parent();
+   pub RelayLocationFilter: AssetFilter = Wild(AllOf {
+       fun: WildFungible,
+       id: xcm::prelude::AssetId(RelayLocation::get()),
+   });
+   pub RelayChainNativeAssetFromAssetHub: (AssetFilter, Location) = (
+       RelayLocationFilter::get(),
+       AssetHubLocation::get()
+   );
+}
+
+type Reserves = (
+    // Assets bridged from different consensus systems held in reserve on Asset Hub.
+    IsBridgedConcreteAssetFrom<AssetHubLocation>,
+    // Relaychain (DOT) from Asset Hub
+    Case<RelayChainNativeAssetFromAssetHub>,
+    // Assets which the reserve is the same as the origin.
+    MultiNativeAsset<AbsoluteAndRelativeReserve<SelfLocationAbsolute>>,
+);
+
 pub struct XcmConfig;
 impl xcm_executor::Config for XcmConfig {
     type Aliasers = Nothing;
@@ -165,7 +209,7 @@ impl xcm_executor::Config for XcmConfig {
     type HrmpChannelClosingHandler = ();
     type HrmpNewChannelOpenRequestHandler = ();
     /// Please, keep these two configs (`IsReserve` and `IsTeleporter`) mutually exclusive
-    type IsReserve = NativeAsset;
+    type IsReserve = Reserves;
     type IsTeleporter = ();
     type MaxAssetsIntoHolding = MaxAssetsIntoHolding;
     type MessageExporter = ();
@@ -239,4 +283,23 @@ impl pallet_xcm::Config for Runtime {
 impl cumulus_pallet_xcm::Config for Runtime {
     type RuntimeEvent = RuntimeEvent;
     type XcmExecutor = XcmExecutor<XcmConfig>;
+}
+
+
+// We are not using all of these below atm, but we will need them when configuring `orml_xtokens`
+parameter_types! {
+    pub const BaseXcmWeight: Weight = Weight::from_parts(200_000_000u64, 0);
+    pub const MaxAssetsForTransfer: usize = 2;
+
+    // This is how we are going to detect whether the asset is a Reserve asset
+    // This however is the chain part only
+    pub SelfLocation: Location = Location::here();
+    // We need this to be able to catch when someone is trying to execute a non-
+    // cross-chain transfer in xtokens through the absolute path way
+    pub SelfLocationAbsolute: Location = Location {
+        parents:1,
+        interior: [
+            Parachain(ParachainInfo::parachain_id().into())
+        ].into()
+    };
 }
