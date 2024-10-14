@@ -30,10 +30,11 @@ use xcm_executor::{
 use xcm_primitives::{
     AbsoluteAndRelativeReserve, AccountIdToCurrencyId, AccountIdToLocation, AsAssetType,
 };
-use crate::configs::asset_config::AccountIdAssetIdConversion;
+
 use crate::{
     configs::{
-        AssetType, ParachainSystem, Runtime, RuntimeCall, RuntimeEvent, RuntimeOrigin, XcmpQueue,
+        asset_config::AccountIdAssetIdConversion, AssetType, ParachainSystem, Runtime, RuntimeCall,
+        RuntimeEvent, RuntimeOrigin, XcmpQueue,
     },
     types::{AccountId, AssetId, Balance},
     weights, AllPalletsWithSystem, AssetManager, Assets, Balances, Erc20XcmBridge, ParachainInfo,
@@ -474,7 +475,7 @@ parameter_types! {
     };
 
     // To be able to support almost all erc20 implementations,
-    // we provide a sufficiently hight gas limit.
+    // we provide a sufficiently high gas limit.
     pub Erc20XcmBridgeTransferGasLimit: u64 = 800_000;
 }
 
