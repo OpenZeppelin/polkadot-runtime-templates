@@ -6,9 +6,13 @@ use frame_support::{
     weights::Weight,
 };
 use frame_system::EnsureRoot;
+use orml_traits::parameter_type_with_key;
 use orml_xcm_support::MultiNativeAsset;
 use pallet_xcm::XcmPassthrough;
+use parity_scale_codec::{Decode, Encode};
 use polkadot_parachain_primitives::primitives::{self, Sibling};
+use scale_info::TypeInfo;
+use sp_core::H160;
 use xcm::latest::prelude::{Assets as XcmAssets, *};
 use xcm_builder::{
     AccountKey20Aliases, AllowExplicitUnpaidExecutionFrom, AllowTopLevelPaidExecutionFrom, Case,
@@ -16,23 +20,25 @@ use xcm_builder::{
     FixedWeightBounds, FrameTransactionalProcessor, FungibleAdapter, FungiblesAdapter, HandleFee,
     IsChildSystemParachain, IsConcrete, NoChecking, ParentIsPreset, RelayChainAsNative,
     SiblingParachainAsNative, SiblingParachainConvertsVia, SignedAccountKey20AsNative,
-    SovereignSignedViaLocation, TakeWeightCredit, TrailingSetTopicAsId, UsingComponents,
-    WithComputedOrigin, WithUniqueTopic, XcmFeeManagerFromComponents,
+    SovereignSignedViaLocation, TakeWeightCredit, TrailingSetTopicAsId, WithComputedOrigin,
+    WithUniqueTopic, XcmFeeManagerFromComponents,
 };
 use xcm_executor::{
-    traits::{FeeReason, JustTry, TransactAsset},
+    traits::{ConvertLocation, FeeReason, JustTry, TransactAsset},
     XcmExecutor,
 };
-use xcm_primitives::{AbsoluteAndRelativeReserve, AsAssetType};
+use xcm_primitives::{
+    AbsoluteAndRelativeReserve, AccountIdToCurrencyId, AccountIdToLocation, AsAssetType,
+};
 
 use crate::{
     configs::{
-        AssetType, ParachainSystem, Runtime, RuntimeCall, RuntimeEvent, RuntimeOrigin, WeightToFee,
-        XcmpQueue,
+        asset_config::AccountIdAssetIdConversion, AssetType, ParachainSystem, Runtime, RuntimeCall,
+        RuntimeEvent, RuntimeOrigin, XcmpQueue,
     },
-    types::{AccountId, AssetId, Balance, XcmFeesToAccount},
-    weights, AllPalletsWithSystem, AssetManager, Assets, Balances, ParachainInfo, PolkadotXcm,
-    Treasury,
+    types::{AccountId, AssetId, Balance},
+    weights, AllPalletsWithSystem, AssetManager, Assets, Balances, Erc20XcmBridge, ParachainInfo,
+    PolkadotXcm, Treasury,
 };
 
 parameter_types! {
@@ -42,6 +48,16 @@ parameter_types! {
     pub BalancesPalletLocation: Location = PalletInstance(<Balances as PalletInfoAccess>::index() as u8).into();
     pub RelayChainOrigin: RuntimeOrigin = cumulus_pallet_xcm::Origin::Relay.into();
     pub UniversalLocation: InteriorLocation = Parachain(ParachainInfo::parachain_id().into()).into();
+        // Self Reserve location, defines the multilocation identifiying the self-reserve currency
+    // This is used to match it also against our Balances pallet when we receive such
+    // a Location: (Self Balances pallet index)
+    // We use the RELATIVE multilocation
+    pub SelfReserve: Location = Location {
+        parents:0,
+        interior: [
+            PalletInstance(<Balances as PalletInfoAccess>::index() as u8)
+        ].into()
+    };
 }
 
 /// `AssetId/Balancer` converter for `TrustBackedAssets`
@@ -232,6 +248,8 @@ parameter_types! {
     pub TreasuryAccount: AccountId = Treasury::account_id();
 }
 
+pub type XcmWeigher = FixedWeightBounds<UnitWeightCost, RuntimeCall, MaxInstructions>;
+
 pub struct XcmConfig;
 impl xcm_executor::Config for XcmConfig {
     type Aliasers = Nothing;
@@ -240,7 +258,7 @@ impl xcm_executor::Config for XcmConfig {
     type AssetLocker = ();
     // How to withdraw and deposit an asset.
     type AssetTransactor = AssetTransactors;
-    type AssetTrap = PolkadotXcm;
+    type AssetTrap = pallet_erc20_xcm_bridge::AssetTrapWrapper<PolkadotXcm, Runtime>;
     type Barrier = Barrier;
     type CallDispatcher = RuntimeCall;
     /// When changing this config, keep in mind, that you should collect fees.
@@ -264,15 +282,12 @@ impl xcm_executor::Config for XcmConfig {
     type RuntimeCall = RuntimeCall;
     type SafeCallFilter = Everything;
     type SubscriptionService = PolkadotXcm;
-    type Trader = (
-        UsingComponents<WeightToFee, BalancesPalletLocation, AccountId, Balances, ()>,
-        xcm_primitives::FirstAssetTrader<AssetType, AssetManager, XcmFeesToAccount>,
-    );
+    type Trader = pallet_xcm_weight_trader::Trader<Runtime>;
     type TransactionalProcessor = FrameTransactionalProcessor;
     type UniversalAliases = Nothing;
     // Teleporting is disabled.
     type UniversalLocation = UniversalLocation;
-    type Weigher = FixedWeightBounds<UnitWeightCost, RuntimeCall, MaxInstructions>;
+    type Weigher = XcmWeigher;
     type XcmRecorder = PolkadotXcm;
     type XcmSender = XcmRouter;
 }
@@ -334,7 +349,7 @@ impl pallet_xcm::Config for Runtime {
     type SovereignAccountOf = LocationToAccountId;
     type TrustedLockers = ();
     type UniversalLocation = UniversalLocation;
-    type Weigher = FixedWeightBounds<UnitWeightCost, RuntimeCall, MaxInstructions>;
+    type Weigher = XcmWeigher;
     /// Rerun benchmarks if you are making changes to runtime configuration.
     type WeightInfo = weights::pallet_xcm::WeightInfo<Runtime>;
     type XcmExecuteFilter = Nothing;
@@ -369,4 +384,155 @@ parameter_types! {
             Parachain(ParachainInfo::parachain_id().into())
         ].into()
     };
+}
+
+parameter_type_with_key! {
+    pub ParachainMinFee: |location: Location| -> Option<u128> {
+        match (location.parents, location.first_interior()) {
+            // Polkadot AssetHub fee
+            (1, Some(Parachain(1000u32))) => Some(50_000_000u128),
+            _ => None,
+        }
+    };
+}
+
+// Our currencyId. We distinguish for now between SelfReserve, and Others, defined by their Id.
+#[derive(Clone, Eq, Debug, PartialEq, Ord, PartialOrd, Encode, Decode, TypeInfo)]
+pub enum CurrencyId {
+    // Our native token
+    SelfReserve,
+    // Assets representing other chains native tokens
+    ForeignAsset(AssetId),
+    // Erc20 token
+    Erc20 { contract_address: H160 },
+}
+
+impl AccountIdToCurrencyId<AccountId, CurrencyId> for Runtime {
+    fn account_to_currency_id(account: AccountId) -> Option<CurrencyId> {
+        Some(match account {
+            // the self-reserve currency is identified by the pallet-balances address
+            a if a == H160::from_low_u64_be(2050).into() => CurrencyId::SelfReserve,
+            // the rest of the currencies, by their corresponding erc20 address
+            _ => match Runtime::account_to_asset_id(account) {
+                // We distinguish by prefix, and depending on it we create either
+                // Foreign or Local
+                Some((_prefix, asset_id)) => CurrencyId::ForeignAsset(asset_id),
+                // If no known prefix is identified, we consider that it's a "real" erc20 token
+                // (i.e. managed by a real smart contract)
+                None => CurrencyId::Erc20 { contract_address: account.into() },
+            },
+        })
+    }
+}
+// How to convert from CurrencyId to Location
+pub struct CurrencyIdToLocation<AssetXConverter>(sp_std::marker::PhantomData<AssetXConverter>);
+impl<AssetXConverter> sp_runtime::traits::Convert<CurrencyId, Option<Location>>
+    for CurrencyIdToLocation<AssetXConverter>
+where
+    AssetXConverter: sp_runtime::traits::MaybeEquivalence<Location, AssetId>,
+{
+    fn convert(currency: CurrencyId) -> Option<Location> {
+        match currency {
+            CurrencyId::SelfReserve => {
+                let multi: Location = SelfReserve::get();
+                Some(multi)
+            }
+            CurrencyId::ForeignAsset(asset) => AssetXConverter::convert_back(&asset),
+            CurrencyId::Erc20 { contract_address } => {
+                let mut location = Erc20XcmBridgePalletLocation::get(); // TODO: if we do not have an alternative, we need to import this pallet from moonbeam
+                location
+                    .push_interior(Junction::AccountKey20 {
+                        key: contract_address.0,
+                        network: None,
+                    })
+                    .ok();
+                Some(location)
+            }
+        }
+    }
+}
+
+/// Wrapper type around `LocationToAccountId` to convert an `AccountId` to type `H160`.
+pub struct LocationToH160;
+impl ConvertLocation<H160> for LocationToH160 {
+    fn convert_location(location: &Location) -> Option<H160> {
+        <LocationToAccountId as ConvertLocation<AccountId>>::convert_location(location)
+            .map(Into::into)
+    }
+}
+
+parameter_types! {
+    // This is the relative view of erc20 assets.
+    // Identified by this prefix + AccountKey20(contractAddress)
+    // We use the RELATIVE multilocation
+    pub Erc20XcmBridgePalletLocation: Location = Location {
+        parents:0,
+        interior: [
+            PalletInstance(<Erc20XcmBridge as PalletInfoAccess>::index() as u8)
+        ].into()
+    };
+
+    // To be able to support almost all erc20 implementations,
+    // we provide a sufficiently high gas limit.
+    pub Erc20XcmBridgeTransferGasLimit: u64 = 800_000;
+}
+
+impl pallet_erc20_xcm_bridge::Config for Runtime {
+    type AccountIdConverter = LocationToH160;
+    type Erc20MultilocationPrefix = Erc20XcmBridgePalletLocation;
+    type Erc20TransferGasLimit = Erc20XcmBridgeTransferGasLimit;
+    type EvmRunner = pallet_evm::runner::stack::Runner<Self>;
+}
+
+impl orml_xtokens::Config for Runtime {
+    type AccountIdToLocation = AccountIdToLocation<AccountId>;
+    type Balance = Balance;
+    type BaseXcmWeight = BaseXcmWeight;
+    type CurrencyId = CurrencyId;
+    type CurrencyIdConvert = CurrencyIdToLocation<AsAssetType<AssetId, AssetType, AssetManager>>;
+    type LocationsFilter = Everything;
+    type MaxAssetsForTransfer = MaxAssetsForTransfer;
+    type MinXcmFee = ParachainMinFee;
+    type RateLimiter = ();
+    type RateLimiterId = ();
+    type ReserveProvider = AbsoluteAndRelativeReserve<SelfLocationAbsolute>;
+    type RuntimeEvent = RuntimeEvent;
+    type SelfLocation = SelfLocation;
+    type UniversalLocation = UniversalLocation;
+    type Weigher = XcmWeigher;
+    type XcmExecutor = XcmExecutor<XcmConfig>;
+}
+
+pub struct AssetFeesFilter;
+impl frame_support::traits::Contains<Location> for AssetFeesFilter {
+    fn contains(location: &Location) -> bool {
+        location.parent_count() > 0
+            && location.first_interior() != Erc20XcmBridgePalletLocation::get().first_interior()
+    }
+}
+
+// implement your own business logic for who can add/edit/remove/resume supported assets
+pub type AddSupportedAssetOrigin = EnsureRoot<AccountId>;
+pub type EditSupportedAssetOrigin = EnsureRoot<AccountId>;
+pub type RemoveSupportedAssetOrigin = EnsureRoot<AccountId>;
+pub type ResumeSupportedAssetOrigin = EnsureRoot<AccountId>;
+
+impl pallet_xcm_weight_trader::Config for Runtime {
+    type AccountIdToLocation = AccountIdToLocation<AccountId>;
+    type AddSupportedAssetOrigin = AddSupportedAssetOrigin;
+    type AssetLocationFilter = AssetFeesFilter;
+    type AssetTransactor = AssetTransactors;
+    type Balance = Balance;
+    type EditSupportedAssetOrigin = EditSupportedAssetOrigin;
+    type NativeLocation = SelfReserve;
+    #[cfg(feature = "runtime-benchmarks")]
+    type NotFilteredLocation = RelayLocation;
+    type PauseSupportedAssetOrigin = EditSupportedAssetOrigin;
+    type RemoveSupportedAssetOrigin = RemoveSupportedAssetOrigin;
+    type ResumeSupportedAssetOrigin = ResumeSupportedAssetOrigin;
+    type RuntimeEvent = RuntimeEvent;
+    // TODO: update this when we update benchmarks
+    type WeightInfo = weights::pallet_xcm_weight_trader::WeightInfo<Runtime>;
+    type WeightToFee = <Runtime as pallet_transaction_payment::Config>::WeightToFee;
+    type XcmFeesAccount = TreasuryAccount;
 }
