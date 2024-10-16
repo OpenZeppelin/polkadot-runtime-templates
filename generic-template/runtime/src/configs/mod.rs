@@ -48,7 +48,7 @@ use crate::{
     constants::{
         currency::{deposit, CENTS, EXISTENTIAL_DEPOSIT, GRAND, MICROCENTS},
         AVERAGE_ON_INITIALIZE_RATIO, DAYS, HOURS, MAXIMUM_BLOCK_WEIGHT, MAX_BLOCK_LENGTH,
-        NORMAL_DISPATCH_RATIO, SLOT_DURATION, VERSION,
+        NORMAL_DISPATCH_RATIO, SLOT_DURATION, VERSION, SLOT_DURATION
     },
     types::{
         AccountId, AssetKind, Balance, Beneficiary, Block, BlockNumber,
@@ -513,7 +513,7 @@ impl pallet_aura::Config for Runtime {
     type AuthorityId = AuraId;
     type DisabledValidators = ();
     type MaxAuthorities = MaxAuthorities;
-    type SlotDuration = pallet_aura::MinimumPeriodTimesTwo<Self>;
+    type SlotDuration = SLOT_DURATION;
 }
 
 parameter_types! {
