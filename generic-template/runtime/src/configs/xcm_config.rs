@@ -1,8 +1,8 @@
 use core::marker::PhantomData;
 
 use frame_support::{
-    parameter_types,
     pallet_prelude::Get,
+    parameter_types,
     traits::{ConstU32, Contains, ContainsPair, Everything, Nothing, PalletInfoAccess},
     weights::Weight,
 };
@@ -16,17 +16,16 @@ use polkadot_runtime_common::impls::ToAuthor;
 use scale_info::TypeInfo;
 use sp_core::H160;
 use xcm::latest::prelude::*;
-use xcm_builder::{ Case,
-    AccountId32Aliases, AllowExplicitUnpaidExecutionFrom, AllowTopLevelPaidExecutionFrom,
+use xcm_builder::{
+    AccountId32Aliases, AllowExplicitUnpaidExecutionFrom, AllowTopLevelPaidExecutionFrom, Case,
     DenyReserveTransferToRelayChain, DenyThenTry, EnsureXcmOrigin, FixedWeightBounds,
     FrameTransactionalProcessor, FungibleAdapter, FungiblesAdapter, IsChildSystemParachain,
-    IsConcrete, NoChecking, ParentIsPreset, RelayChainAsNative,
-    SiblingParachainAsNative, SiblingParachainConvertsVia, SignedAccountId32AsNative,
-    SignedToAccountId32, SovereignSignedViaLocation, TakeWeightCredit, TrailingSetTopicAsId,
-    WithComputedOrigin, WithUniqueTopic, XcmFeeManagerFromComponents,
-    XcmFeeToAccount,
+    IsConcrete, NoChecking, ParentIsPreset, RelayChainAsNative, SiblingParachainAsNative,
+    SiblingParachainConvertsVia, SignedAccountId32AsNative, SignedToAccountId32,
+    SovereignSignedViaLocation, TakeWeightCredit, TrailingSetTopicAsId, WithComputedOrigin,
+    WithUniqueTopic, XcmFeeManagerFromComponents, XcmFeeToAccount,
 };
-use xcm_executor::{traits::{ConvertLocation}, XcmExecutor};
+use xcm_executor::{traits::ConvertLocation, XcmExecutor};
 use xcm_primitives::{
     AbsoluteAndRelativeReserve, AccountIdToCurrencyId, AccountIdToLocation, AsAssetType,
 };
@@ -34,11 +33,11 @@ use xcm_primitives::{
 use super::TreasuryAccount;
 use crate::{
     configs::{
-        asset_config::AccountIdAssetIdConversion, weights, Balances, ParachainSystem, Runtime, RuntimeCall, RuntimeEvent, RuntimeOrigin,
-        WeightToFee, XcmpQueue,
+        asset_config::AccountIdAssetIdConversion, weights, AssetType, Balances, ParachainSystem,
+        Runtime, RuntimeCall, RuntimeEvent, RuntimeOrigin, WeightToFee, XcmpQueue,
     },
     types::{AccountId, Balance},
-    AllPalletsWithSystem, Assets, ParachainInfo, PolkadotXcm,
+    AllPalletsWithSystem, AssetManager, Assets, ParachainInfo, PolkadotXcm,
 };
 
 parameter_types! {
@@ -215,7 +214,7 @@ impl xcm_executor::Config for XcmConfig {
     type AssetLocker = ();
     // How to withdraw and deposit an asset.
     type AssetTransactor = AssetTransactors;
-    type AssetTrap = PolakdotXcm;
+    type AssetTrap = PolkadotXcm;
     type Barrier = Barrier;
     type CallDispatcher = RuntimeCall;
     /// When changing this config, keep in mind, that you should collect fees.
@@ -302,8 +301,6 @@ impl cumulus_pallet_xcm::Config for Runtime {
     type XcmExecutor = XcmExecutor<XcmConfig>;
 }
 
-
-// We are not using all of these below atm, but we will need them when configuring `orml_xtokens`
 parameter_types! {
     pub const BaseXcmWeight: Weight = Weight::from_parts(200_000_000u64, 0);
     pub const MaxAssetsForTransfer: usize = 2;
@@ -359,6 +356,16 @@ impl AccountIdToCurrencyId<AccountId, CurrencyId> for Runtime {
         })
     }
 }
+
+parameter_types! {
+    pub PolkadotXcmLocation: Location = Location {
+        parents:0,
+        interior: [
+            PalletInstance(<PolkadotXcm as PalletInfoAccess>::index() as u8) // is using PolkadotXcm as the location for Erc20 assets correct?
+        ].into()
+    };
+}
+
 // How to convert from CurrencyId to Location
 pub struct CurrencyIdToLocation<AssetXConverter>(sp_std::marker::PhantomData<AssetXConverter>);
 impl<AssetXConverter> sp_runtime::traits::Convert<CurrencyId, Option<Location>>
@@ -374,7 +381,7 @@ where
             }
             CurrencyId::ForeignAsset(asset) => AssetXConverter::convert_back(&asset),
             CurrencyId::Erc20 { contract_address } => {
-                let mut location = Erc20XcmBridgePalletLocation::get(); // TODO: if we do not have an alternative, we need to import this pallet from moonbeam
+                let mut location = PolkadotXcmLocation::get();
                 location
                     .push_interior(Junction::AccountKey20 {
                         key: contract_address.0,
@@ -395,7 +402,6 @@ impl ConvertLocation<H160> for LocationToH160 {
             .map(Into::into)
     }
 }
-
 
 impl orml_xtokens::Config for Runtime {
     type AccountIdToLocation = AccountIdToLocation<AccountId>;
@@ -420,7 +426,7 @@ pub struct AssetFeesFilter;
 impl frame_support::traits::Contains<Location> for AssetFeesFilter {
     fn contains(location: &Location) -> bool {
         location.parent_count() > 0
-            && location.first_interior() != Erc20XcmBridgePalletLocation::get().first_interior()
+            && location.first_interior() != PolkadotXcmLocation::get().first_interior()
     }
 }
 
