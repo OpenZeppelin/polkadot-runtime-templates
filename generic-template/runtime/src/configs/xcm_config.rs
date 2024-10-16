@@ -36,7 +36,7 @@ use crate::{
         asset_config::AccountIdAssetIdConversion, weights, AssetType, Balances, ParachainSystem,
         Runtime, RuntimeCall, RuntimeEvent, RuntimeOrigin, WeightToFee, XcmpQueue,
     },
-    types::{AccountId, Balance},
+    types::{AccountId, AssetId, Balance},
     AllPalletsWithSystem, AssetManager, Assets, ParachainInfo, PolkadotXcm,
 };
 
