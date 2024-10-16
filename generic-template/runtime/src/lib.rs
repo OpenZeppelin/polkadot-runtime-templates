@@ -149,6 +149,8 @@ mod runtime {
     pub type Assets = pallet_assets;
     #[runtime::pallet_index(13)]
     pub type Treasury = pallet_treasury;
+    #[runtime::pallet_index(14)]
+    pub type AssetManager = pallet_asset_manager;
 
     // Governance
     #[runtime::pallet_index(15)]
@@ -184,13 +186,9 @@ mod runtime {
     #[runtime::pallet_index(33)]
     pub type MessageQueue = pallet_message_queue;
     #[runtime::pallet_index(34)]
-    pub type XTokens: = orml_xtokens;
+    pub type XTokens = orml_xtokens;
     #[runtime::pallet_index(35)]
     pub type XcmWeightTrader = pallet_xcm_weight_trader;
-
-    // EVM
-    #[runtime::pallet_index(40)]
-    pub type Erc20XcmBridge = pallet_erc20_xcm_bridge;
 }
 
 cumulus_pallet_parachain_system::register_validate_block! {

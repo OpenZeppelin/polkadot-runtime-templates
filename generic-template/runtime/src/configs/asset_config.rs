@@ -28,8 +28,6 @@ parameter_types! {
     pub const RemoveItemsLimit: u32 = 1000;
 }
 
-
-
 // Required for runtime benchmarks
 pallet_assets::runtime_benchmarks_enabled! {
     pub struct BenchmarkHelper;
