@@ -645,7 +645,7 @@ impl_runtime_apis! {
 
             use pallet_xcm::benchmarking::Pallet as PalletXcmExtrinsicsBenchmark;
 
-            use super::*;
+            use crate::*;
 
             let mut list = Vec::<BenchmarkList>::new();
             list_benchmarks!(list, extra);
@@ -662,7 +662,7 @@ impl_runtime_apis! {
             use cumulus_primitives_core::ParaId;
             use frame_system_benchmarking::Pallet as SystemBench;
 
-            use super::{*, types::*, configs::*, constants::currency::CENTS};
+            use crate::{*, types::*, configs::*, constants::currency::CENTS};
 
             impl frame_system_benchmarking::Config for Runtime {
                 fn setup_set_code_requirements(code: &sp_std::vec::Vec<u8>) -> Result<(), BenchmarkError> {
