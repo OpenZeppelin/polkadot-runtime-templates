@@ -10,7 +10,7 @@ pub use asset_config::{AssetType, TransactionByteFee};
 use cumulus_pallet_parachain_system::RelayNumberMonotonicallyIncreases;
 #[cfg(not(feature = "async-backing"))]
 use cumulus_pallet_parachain_system::RelayNumberStrictlyIncreases;
-use cumulus_primitives_core::{AggregateMessageOrigin, ParaId};
+use cumulus_primitives_core::{AggregateMessageOrigin, AssetId, ParaId};
 use frame_support::{
     derive_impl,
     dispatch::DispatchClass,
@@ -81,7 +81,7 @@ use crate::{
     },
     opaque,
     types::{
-        AccountId, AssetId, AssetKind, Balance, Beneficiary, Block, BlockNumber,
+        AccountId, AssetKind, Balance, Beneficiary, Block, BlockNumber,
         CollatorSelectionUpdateOrigin, ConsensusHook, Hash, Nonce,
         PriceForSiblingParachainDelivery, TreasuryPaymaster, XcmFeesToAccount,
     },
