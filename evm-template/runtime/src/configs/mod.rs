@@ -2,10 +2,10 @@ pub mod asset_config;
 pub mod governance;
 pub mod xcm_config;
 
-pub use asset_config::AssetType;
 #[cfg(feature = "runtime-benchmarks")]
 use asset_config::BenchmarkHelper;
 use asset_config::{ApprovalDeposit, AssetAccountDeposit, AssetDeposit};
+pub use asset_config::{AssetType, TransactionByteFee};
 #[cfg(feature = "async-backing")]
 use cumulus_pallet_parachain_system::RelayNumberMonotonicallyIncreases;
 #[cfg(not(feature = "async-backing"))]
@@ -34,9 +34,8 @@ use parachains_common::message_queue::{NarrowOriginToSibling, ParaIdToSibling};
 use parity_scale_codec::{Decode, Encode, MaxEncodedLen};
 use polkadot_runtime_common::{BlockHashCount, SlowAdjustingFeeUpdate};
 use polkadot_runtime_wrappers::{
-    impl_openzeppelin_assets, impl_openzeppelin_consensus, impl_openzeppelin_governance,
-    impl_openzeppelin_system, impl_openzeppelin_xcm, AssetsConfig, ConsensusConfig,
-    GovernanceConfig, SystemConfig, XcmConfig,
+    impl_openzeppelin_consensus, impl_openzeppelin_governance, impl_openzeppelin_system,
+    impl_openzeppelin_xcm, ConsensusConfig, GovernanceConfig, SystemConfig, XcmConfig,
 };
 use scale_info::TypeInfo;
 use sp_consensus_aura::sr25519::AuthorityId as AuraId;
@@ -102,16 +101,6 @@ parameter_types! {
 }
 /// OpenZeppelin configuration
 pub struct OpenZeppelinConfig;
-impl AssetsConfig for OpenZeppelinConfig {
-    type ApprovalDeposit = ApprovalDeposit;
-    type AssetAccountDeposit = AssetAccountDeposit;
-    type AssetDeposit = AssetDeposit;
-    type AssetId = AssetId;
-    #[cfg(feature = "runtime-benchmarks")]
-    type BenchmarkHelper = BenchmarkHelper;
-    type CreateOrigin = AsEnsureOriginWithArg<EnsureSigned<AccountId>>;
-    type ForceOrigin = EnsureRoot<AccountId>;
-}
 impl SystemConfig for OpenZeppelinConfig {
     type AccountId = AccountId;
     type ExistentialDeposit = ExistentialDeposit;
@@ -181,7 +170,6 @@ impl_openzeppelin_system!(OpenZeppelinConfig);
 impl_openzeppelin_consensus!(OpenZeppelinConfig);
 impl_openzeppelin_governance!(OpenZeppelinConfig);
 impl_openzeppelin_xcm!(OpenZeppelinConfig);
-impl_openzeppelin_assets!(OpenZeppelinConfig);
 
 parameter_types! {
     pub const PostBlockAndTxnHashes: PostLogContent = PostLogContent::BlockAndTxnHashes;

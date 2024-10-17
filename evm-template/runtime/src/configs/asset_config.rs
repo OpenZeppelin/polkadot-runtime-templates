@@ -1,8 +1,13 @@
 use frame_support::{
-    dispatch::GetDispatchInfo, parameter_types, traits::AsEnsureOriginWithArg, weights::Weight,
+    dispatch::GetDispatchInfo,
+    parameter_types,
+    traits::AsEnsureOriginWithArg,
+    weights::{ConstantMultiplier, Weight},
 };
 use frame_system::{EnsureRoot, EnsureSigned};
 use parity_scale_codec::{Compact, Decode, Encode};
+use polkadot_runtime_common::SlowAdjustingFeeUpdate;
+use polkadot_runtime_wrappers::{impl_openzeppelin_assets, AssetsConfig};
 use scale_info::TypeInfo;
 use sp_core::H256;
 use sp_runtime::traits::Hash as THash;
@@ -13,10 +18,24 @@ use sp_std::{
 use xcm::latest::Location;
 
 use crate::{
-    constants::currency::{deposit, CENTS, MILLICENTS},
+    configs::OpenZeppelinConfig,
+    constants::currency::{deposit, CENTS, MICROCENTS, MILLICENTS},
     types::{AccountId, AssetId, Balance},
     weights, AssetManager, Assets, Balances, Runtime, RuntimeCall, RuntimeEvent, RuntimeOrigin,
+    WeightToFee,
 };
+
+impl AssetsConfig for OpenZeppelinConfig {
+    type ApprovalDeposit = ApprovalDeposit;
+    type AssetAccountDeposit = AssetAccountDeposit;
+    type AssetDeposit = AssetDeposit;
+    type AssetId = AssetId;
+    #[cfg(feature = "runtime-benchmarks")]
+    type BenchmarkHelper = BenchmarkHelper;
+    type CreateOrigin = AsEnsureOriginWithArg<EnsureSigned<AccountId>>;
+    type ForceOrigin = EnsureRoot<AccountId>;
+}
+impl_openzeppelin_assets!(OpenZeppelinConfig);
 
 parameter_types! {
     pub const AssetDeposit: Balance = 10 * CENTS;
