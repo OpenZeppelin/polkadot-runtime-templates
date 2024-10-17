@@ -31,8 +31,9 @@ use parachains_common::message_queue::{NarrowOriginToSibling, ParaIdToSibling};
 use parity_scale_codec::{Decode, Encode, MaxEncodedLen};
 use polkadot_runtime_common::{BlockHashCount, SlowAdjustingFeeUpdate};
 use polkadot_runtime_wrappers::{
-    impl_openzeppelin_consensus, impl_openzeppelin_governance, impl_openzeppelin_system,
-    impl_openzeppelin_xcm, ConsensusConfig, GovernanceConfig, SystemConfig, XcmConfig,
+    impl_openzeppelin_assets, impl_openzeppelin_consensus, impl_openzeppelin_governance,
+    impl_openzeppelin_system, impl_openzeppelin_xcm, AssetsConfig, ConsensusConfig,
+    GovernanceConfig, SystemConfig, XcmConfig,
 };
 use scale_info::TypeInfo;
 use sp_consensus_aura::sr25519::AuthorityId as AuraId;
@@ -187,61 +188,6 @@ impl pallet_transaction_payment::Config for Runtime {
     type RuntimeEvent = RuntimeEvent;
     type WeightToFee = WeightToFee;
 }
-
-// parameter_types! {
-//     pub MessageQueueServiceWeight: Weight = Perbill::from_percent(35) * RuntimeBlockWeights::get().max_block;
-//     pub const HeapSize: u32 = 64 * 1024;
-//     pub const MaxStale: u32 = 8;
-// }
-
-// impl pallet_message_queue::Config for Runtime {
-//     type HeapSize = HeapSize;
-//     type IdleMaxServiceWeight = MessageQueueServiceWeight;
-//     type MaxStale = MaxStale;
-//     #[cfg(feature = "runtime-benchmarks")]
-//     type MessageProcessor = pallet_message_queue::mock_helpers::NoopMessageProcessor<
-//         cumulus_primitives_core::AggregateMessageOrigin,
-//     >;
-//     #[cfg(not(feature = "runtime-benchmarks"))]
-//     type MessageProcessor = ProcessXcmMessage<
-//         AggregateMessageOrigin,
-//         xcm_executor::XcmExecutor<xcm_config::XcmConfig>,
-//         RuntimeCall,
-//     >;
-//     // The XCMP queue pallet is only ever able to handle the `Sibling(ParaId)` origin:
-//     type QueueChangeHandler = NarrowOriginToSibling<XcmpQueue>;
-//     type QueuePausedQuery = NarrowOriginToSibling<XcmpQueue>;
-//     type RuntimeEvent = RuntimeEvent;
-//     type ServiceWeight = MessageQueueServiceWeight;
-//     type Size = u32;
-//     /// Rerun benchmarks if you are making changes to runtime configuration.
-//     type WeightInfo = weights::pallet_message_queue::WeightInfo<Runtime>;
-// }
-
-// parameter_types! {
-//     pub const MaxInboundSuspended: u32 = 1000;
-//     /// The asset ID for the asset that we use to pay for message delivery fees.
-//     pub FeeAssetId: AssetId = AssetId(RelayLocation::get());
-//     /// The base fee for the message delivery fees. Kusama is based for the reference.
-//     pub const ToSiblingBaseDeliveryFee: u128 = CENTS.saturating_mul(3);
-// }
-
-// impl cumulus_pallet_xcmp_queue::Config for Runtime {
-//     type ChannelInfo = ParachainSystem;
-//     type ControllerOrigin = EnsureRoot<AccountId>;
-//     type ControllerOriginConverter = XcmOriginToTransactDispatchOrigin;
-//     type MaxActiveOutboundChannels = ConstU32<128>;
-//     type MaxInboundSuspended = MaxInboundSuspended;
-//     type MaxPageSize = ConstU32<{ 1 << 16 }>;
-//     /// Ensure that this value is not set to null (or NoPriceForMessageDelivery) to prevent spamming
-//     type PriceForSiblingDelivery = PriceForSiblingParachainDelivery;
-//     type RuntimeEvent = RuntimeEvent;
-//     type VersionWrapper = ();
-//     /// Rerun benchmarks if you are making changes to runtime configuration.
-//     type WeightInfo = weights::cumulus_pallet_xcmp_queue::WeightInfo<Runtime>;
-//     // Enqueue XCMP messages from siblings for later processing.
-//     type XcmpQueue = TransformOrigin<MessageQueue, AggregateMessageOrigin, ParaId, ParaIdToSibling>;
-// }
 
 parameter_types! {
     pub const PostBlockAndTxnHashes: PostLogContent = PostLogContent::BlockAndTxnHashes;
