@@ -664,6 +664,7 @@ impl_runtime_apis! {
 
             use crate::{*, types::*, configs::*, constants::currency::CENTS};
 
+            #[allow(non_local_definitions)]
             impl frame_system_benchmarking::Config for Runtime {
                 fn setup_set_code_requirements(code: &sp_std::vec::Vec<u8>) -> Result<(), BenchmarkError> {
                     ParachainSystem::initialize_for_set_code_benchmark(code.len() as u32);
@@ -692,6 +693,8 @@ impl_runtime_apis! {
             >;
             use pallet_xcm::benchmarking::Pallet as PalletXcmExtrinsicsBenchmark;
             use xcm::latest::prelude::{Asset, AssetId, Assets as AssetList, Fungible, Location, Parachain, Parent, ParentThen};
+
+            #[allow(non_local_definitions)]
             impl pallet_xcm::benchmarking::Config for Runtime {
                 type DeliveryHelper = cumulus_primitives_utility::ToParentDeliveryHelper<
                     xcm_config::XcmConfig,
@@ -736,13 +739,15 @@ impl_runtime_apis! {
                     let asset_type = AssetType::Xcm(location_v3);
                     let local_asset_id: crate::types::AssetId = asset_type.clone().into();
                     let manager_id = AssetManager::account_id();
-                    let _ = Assets::force_create(RuntimeOrigin::root(), local_asset_id.clone().into(), sp_runtime::MultiAddress::Id(manager_id), true, 1);
+                    let _ = Assets::force_create(RuntimeOrigin::root(), local_asset_id.clone().into(), manager_id, true, 1);
                     AssetManager::set_asset_type_asset_id(asset_type.clone(), local_asset_id);
                     asset
                 }
             }
 
             use cumulus_pallet_session_benchmarking::Pallet as SessionBench;
+
+            #[allow(non_local_definitions)]
             impl cumulus_pallet_session_benchmarking::Config for Runtime {}
 
             use frame_support::traits::WhitelistedStorageKeys;
