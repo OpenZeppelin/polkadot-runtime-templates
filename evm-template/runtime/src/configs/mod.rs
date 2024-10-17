@@ -1,20 +1,23 @@
 pub mod asset_config;
-pub use asset_config::AssetType;
 pub mod governance;
 pub mod xcm_config;
 
+pub use asset_config::AssetType;
+#[cfg(feature = "runtime-benchmarks")]
+use asset_config::BenchmarkHelper;
+use asset_config::{ApprovalDeposit, AssetAccountDeposit, AssetDeposit};
 #[cfg(feature = "async-backing")]
 use cumulus_pallet_parachain_system::RelayNumberMonotonicallyIncreases;
 #[cfg(not(feature = "async-backing"))]
 use cumulus_pallet_parachain_system::RelayNumberStrictlyIncreases;
-use cumulus_primitives_core::{AggregateMessageOrigin, AssetId, ParaId};
+use cumulus_primitives_core::{AggregateMessageOrigin, ParaId};
 use frame_support::{
     derive_impl,
     dispatch::DispatchClass,
     parameter_types,
     traits::{
-        ConstU32, ConstU64, Contains, EitherOf, EitherOfDiverse, Everything, FindAuthor,
-        InstanceFilter, Nothing, TransformOrigin,
+        AsEnsureOriginWithArg, ConstU32, ConstU64, Contains, EitherOf, EitherOfDiverse, Everything,
+        FindAuthor, InstanceFilter, Nothing, TransformOrigin,
     },
     weights::{ConstantMultiplier, Weight},
     PalletId,
@@ -44,7 +47,6 @@ use sp_runtime::{
 };
 use sp_std::marker::PhantomData;
 use sp_version::RuntimeVersion;
-// XCM imports
 use xcm::latest::{prelude::*, InteriorLocation, Junction::PalletInstance};
 #[cfg(not(feature = "runtime-benchmarks"))]
 use xcm_builder::ProcessXcmMessage;
@@ -56,6 +58,11 @@ use xcm_builder::{
     RelayChainAsNative, SiblingParachainAsNative, SiblingParachainConvertsVia,
     SignedAccountKey20AsNative, SovereignSignedViaLocation, TakeWeightCredit, TrailingSetTopicAsId,
     UsingComponents, WithComputedOrigin, WithUniqueTopic, XcmFeeManagerFromComponents,
+};
+// XCM imports
+use xcm_config::{
+    AssetTransactors, BalancesPalletLocation, FeeManager, LocalOriginToLocation,
+    LocationToAccountId, XcmOriginToTransactDispatchOrigin,
 };
 use xcm_executor::{
     traits::{FeeReason, JustTry, TransactAsset},
@@ -75,7 +82,7 @@ use crate::{
     },
     opaque,
     types::{
-        AccountId, AssetKind, Balance, Beneficiary, Block, BlockNumber,
+        AccountId, AssetId, AssetKind, Balance, Beneficiary, Block, BlockNumber,
         CollatorSelectionUpdateOrigin, ConsensusHook, Hash, Nonce,
         PriceForSiblingParachainDelivery, TreasuryPaymaster, XcmFeesToAccount,
     },
@@ -95,6 +102,16 @@ parameter_types! {
 }
 /// OpenZeppelin configuration
 pub struct OpenZeppelinConfig;
+impl AssetsConfig for OpenZeppelinConfig {
+    type ApprovalDeposit = ApprovalDeposit;
+    type AssetAccountDeposit = AssetAccountDeposit;
+    type AssetDeposit = AssetDeposit;
+    type AssetId = AssetId;
+    #[cfg(feature = "runtime-benchmarks")]
+    type BenchmarkHelper = BenchmarkHelper;
+    type CreateOrigin = AsEnsureOriginWithArg<EnsureSigned<AccountId>>;
+    type ForceOrigin = EnsureRoot<AccountId>;
+}
 impl SystemConfig for OpenZeppelinConfig {
     type AccountId = AccountId;
     type ExistentialDeposit = ExistentialDeposit;
@@ -143,11 +160,6 @@ parameter_types! {
     pub const MaxStale: u32 = 8;
     pub const MaxInboundSuspended: u32 = 1000;
 }
-// TODO: move to top of file once compiling
-use xcm_config::{
-    AssetTransactors, BalancesPalletLocation, FeeManager, LocalOriginToLocation,
-    LocationToAccountId, XcmOriginToTransactDispatchOrigin,
-};
 impl XcmConfig for OpenZeppelinConfig {
     type AssetTransactors = AssetTransactors;
     type FeeManager = FeeManager;
@@ -169,25 +181,7 @@ impl_openzeppelin_system!(OpenZeppelinConfig);
 impl_openzeppelin_consensus!(OpenZeppelinConfig);
 impl_openzeppelin_governance!(OpenZeppelinConfig);
 impl_openzeppelin_xcm!(OpenZeppelinConfig);
-
-parameter_types! {
-    /// Relay Chain `TransactionByteFee` / 10
-    pub const TransactionByteFee: Balance = 10 * MICROCENTS;
-    pub const OperationalFeeMultiplier: u8 = 5;
-}
-
-impl pallet_transaction_payment::Config for Runtime {
-    /// There are two possible mechanisms available: slow and fast adjusting.
-    /// With slow adjusting fees stay almost constant in short periods of time, changing only in long term.
-    /// It may lead to long inclusion times during spikes, therefore tipping is enabled.
-    /// With fast adjusting fees change rapidly, but fixed for all users at each block (no tipping)
-    type FeeMultiplierUpdate = SlowAdjustingFeeUpdate<Self>;
-    type LengthToFee = ConstantMultiplier<Balance, TransactionByteFee>;
-    type OnChargeTransaction = pallet_transaction_payment::FungibleAdapter<Balances, ()>;
-    type OperationalFeeMultiplier = OperationalFeeMultiplier;
-    type RuntimeEvent = RuntimeEvent;
-    type WeightToFee = WeightToFee;
-}
+impl_openzeppelin_assets!(OpenZeppelinConfig);
 
 parameter_types! {
     pub const PostBlockAndTxnHashes: PostLogContent = PostLogContent::BlockAndTxnHashes;
