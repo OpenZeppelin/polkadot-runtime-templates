@@ -483,10 +483,7 @@ impl pallet_aura::Config for Runtime {
     type AuthorityId = AuraId;
     type DisabledValidators = ();
     type MaxAuthorities = MaxAuthorities;
-    #[cfg(feature = "async-backing")]
     type SlotDuration = ConstU64<SLOT_DURATION>;
-    #[cfg(not(feature = "async-backing"))]
-    type SlotDuration = pallet_aura::MinimumPeriodTimesTwo<Self>;
 }
 
 parameter_types! {
