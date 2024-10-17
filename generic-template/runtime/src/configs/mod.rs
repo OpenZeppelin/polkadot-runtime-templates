@@ -1,4 +1,5 @@
 pub mod governance;
+pub mod xcm_types;
 
 #[cfg(feature = "async-backing")]
 use cumulus_pallet_parachain_system::RelayNumberMonotonicallyIncreases;
@@ -53,6 +54,7 @@ use xcm_builder::{
     XcmFeeToAccount,
 };
 use xcm_executor::XcmExecutor;
+use xcm_types::*;
 
 #[cfg(feature = "runtime-benchmarks")]
 use crate::benchmark::{OpenHrmpChannel, PayWithEnsure};
@@ -143,12 +145,17 @@ parameter_types! {
     pub const MaxInboundSuspended: u32 = 1000;
 }
 impl XcmConfig for OpenZeppelinConfig {
-    type ExecuteXcmOrigin = EnsureXcmOrigin<RuntimeOrigin, LocalOriginToLocation>;
+    type AssetTransactors = AssetTransactors;
+    type FeeManager = FeeManager;
+    type LocalOriginToLocation = LocalOriginToLocation;
+    type LocationToAccountId = LocationToAccountId;
     type MessageQueueHeapSize = HeapSize;
     type MessageQueueMaxStale = MaxStale;
     type MessageQueueServiceWeight = MessageQueueServiceWeight;
-    type SendXcmOrigin = EnsureXcmOrigin<RuntimeOrigin, LocalOriginToLocation>;
+    type Trader =
+        UsingComponents<WeightToFee, RelayLocation, AccountId, Balances, ToAuthor<Runtime>>;
     type XcmAdminOrigin = EnsureRoot<AccountId>;
+    type XcmOriginToTransactDispatchOrigin = XcmOriginToTransactDispatchOrigin;
     type XcmpQueueControllerOrigin = EnsureRoot<AccountId>;
     type XcmpQueueMaxInboundSuspended = MaxInboundSuspended;
 }

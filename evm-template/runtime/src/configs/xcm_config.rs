@@ -192,50 +192,11 @@ parameter_types! {
     pub TreasuryAccount: AccountId = Treasury::account_id();
 }
 
-pub struct XcmConfig;
-impl xcm_executor::Config for XcmConfig {
-    type Aliasers = Nothing;
-    type AssetClaims = PolkadotXcm;
-    type AssetExchanger = ();
-    type AssetLocker = ();
-    // How to withdraw and deposit an asset.
-    type AssetTransactor = AssetTransactors;
-    type AssetTrap = PolkadotXcm;
-    type Barrier = Barrier;
-    type CallDispatcher = RuntimeCall;
-    /// When changing this config, keep in mind, that you should collect fees.
-    type FeeManager = XcmFeeManagerFromComponents<
-        IsChildSystemParachain<primitives::Id>,
-        XcmFeeToAccount<Self::AssetTransactor, AccountId, TreasuryAccount>,
-    >;
-    type HrmpChannelAcceptedHandler = ();
-    type HrmpChannelClosingHandler = ();
-    type HrmpNewChannelOpenRequestHandler = ();
-    /// Please, keep these two configs (`IsReserve` and `IsTeleporter`) mutually exclusive.
-    /// The IsReserve type must be set to specify which <MultiAsset, MultiLocation> pair we trust to deposit reserve assets on our chain. We can also use the unit type () to block ReserveAssetDeposited instructions.
-    /// The IsTeleporter type must be set to specify which <MultiAsset, MultiLocation> pair we trust to teleport assets to our chain. We can also use the unit type () to block ReceiveTeleportedAssets instruction.
-    type IsReserve = NativeAsset;
-    type IsTeleporter = ();
-    type MaxAssetsIntoHolding = MaxAssetsIntoHolding;
-    type MessageExporter = ();
-    type OriginConverter = XcmOriginToTransactDispatchOrigin;
-    type PalletInstancesInfo = AllPalletsWithSystem;
-    type ResponseHandler = PolkadotXcm;
-    type RuntimeCall = RuntimeCall;
-    type SafeCallFilter = Everything;
-    type SubscriptionService = PolkadotXcm;
-    type Trader = (
-        UsingComponents<WeightToFee, BalancesPalletLocation, AccountId, Balances, ()>,
-        xcm_primitives::FirstAssetTrader<AssetType, AssetManager, XcmFeesToAccount>,
-    );
-    type TransactionalProcessor = FrameTransactionalProcessor;
-    type UniversalAliases = Nothing;
-    // Teleporting is disabled.
-    type UniversalLocation = UniversalLocation;
-    type Weigher = FixedWeightBounds<UnitWeightCost, RuntimeCall, MaxInstructions>;
-    type XcmRecorder = PolkadotXcm;
-    type XcmSender = XcmRouter;
-}
+/// When changing this config, keep in mind, that you should collect fees.
+pub type FeeManager = XcmFeeManagerFromComponents<
+    IsChildSystemParachain<primitives::Id>,
+    XcmFeeToAccount<AssetTransactors, AccountId, TreasuryAccount>,
+>;
 
 use frame_support::{pallet_prelude::Get, traits::OriginTrait};
 use sp_runtime::traits::TryConvert;
@@ -271,44 +232,3 @@ pub type XcmRouter = WithUniqueTopic<(
     // ..and XCMP to communicate with the sibling chains.
     XcmpQueue,
 )>;
-
-parameter_types! {
-    pub const MaxLockers: u32 = 8;
-    pub const MaxRemoteLockConsumers: u32 = 0;
-}
-
-impl pallet_xcm::Config for Runtime {
-    type AdminOrigin = EnsureRoot<AccountId>;
-    // ^ Override for AdvertisedXcmVersion default
-    type AdvertisedXcmVersion = pallet_xcm::CurrentXcmVersion;
-    type Currency = Balances;
-    type CurrencyMatcher = ();
-    type ExecuteXcmOrigin = EnsureXcmOrigin<RuntimeOrigin, LocalOriginToLocation>;
-    type MaxLockers = MaxLockers;
-    type MaxRemoteLockConsumers = MaxRemoteLockConsumers;
-    type RemoteLockConsumerIdentifier = ();
-    type RuntimeCall = RuntimeCall;
-    type RuntimeEvent = RuntimeEvent;
-    type RuntimeOrigin = RuntimeOrigin;
-    type SendXcmOrigin = EnsureXcmOrigin<RuntimeOrigin, LocalOriginToLocation>;
-    type SovereignAccountOf = LocationToAccountId;
-    type TrustedLockers = ();
-    type UniversalLocation = UniversalLocation;
-    type Weigher = FixedWeightBounds<UnitWeightCost, RuntimeCall, MaxInstructions>;
-    /// Rerun benchmarks if you are making changes to runtime configuration.
-    type WeightInfo = weights::pallet_xcm::WeightInfo<Runtime>;
-    type XcmExecuteFilter = Nothing;
-    // ^ Disable dispatchable execute on the XCM pallet.
-    // Needs to be `Everything` for local testing.
-    type XcmExecutor = XcmExecutor<XcmConfig>;
-    type XcmReserveTransferFilter = Nothing;
-    type XcmRouter = XcmRouter;
-    type XcmTeleportFilter = Nothing;
-
-    const VERSION_DISCOVERY_QUEUE_SIZE: u32 = 100;
-}
-
-impl cumulus_pallet_xcm::Config for Runtime {
-    type RuntimeEvent = RuntimeEvent;
-    type XcmExecutor = XcmExecutor<XcmConfig>;
-}
