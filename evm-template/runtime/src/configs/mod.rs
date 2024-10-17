@@ -33,7 +33,7 @@ use scale_info::TypeInfo;
 use sp_consensus_aura::sr25519::AuthorityId as AuraId;
 use sp_core::{H160, U256};
 use sp_runtime::{
-    traits::{AccountIdLookup, BlakeTwo256, IdentityLookup},
+    traits::{BlakeTwo256, IdentityLookup},
     ConsensusEngineId, Perbill, Permill, RuntimeDebug,
 };
 use sp_std::marker::PhantomData;

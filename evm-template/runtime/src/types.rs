@@ -9,7 +9,6 @@ use sp_core::ConstU32;
 use sp_runtime::{
     generic,
     traits::{BlakeTwo256, IdentifyAccount, Verify},
-    MultiAddress,
 };
 use xcm::VersionedLocation;
 use xcm_builder::{ConvertedConcreteId, PayOverXcm};
