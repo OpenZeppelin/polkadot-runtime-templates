@@ -18,12 +18,12 @@ use xcm_builder::{
 use xcm_executor::XcmExecutor;
 
 use crate::{
+    configs::TreasuryAccount,
     types::{AccountId, Balance},
-    Balances, PolkadotXcm, RuntimeOrigin,
+    Assets, Balances, PolkadotXcm, RuntimeOrigin,
 };
 
 parameter_types! {
-    // TODO pass
     pub const RelayLocation: Location = Location::parent();
     pub PlaceholderAccount: AccountId = PolkadotXcm::check_account();
     pub const RelayNetwork: Option<NetworkId> = None;
@@ -110,5 +110,5 @@ pub type LocalOriginToLocation = SignedToAccountId32<RuntimeOrigin, AccountId, R
 
 pub type FeeManager = XcmFeeManagerFromComponents<
     IsChildSystemParachain<primitives::Id>,
-    XcmFeeToAccount<Self::AssetTransactor, AccountId, TreasuryAccount>,
+    XcmFeeToAccount<AssetTransactors, AccountId, TreasuryAccount>,
 >;

@@ -1,5 +1,5 @@
 pub mod governance;
-pub mod xcm_types;
+pub mod xcm_config;
 
 #[cfg(feature = "async-backing")]
 use cumulus_pallet_parachain_system::RelayNumberMonotonicallyIncreases;
@@ -53,8 +53,8 @@ use xcm_builder::{
     UsingComponents, WithComputedOrigin, WithUniqueTopic, XcmFeeManagerFromComponents,
     XcmFeeToAccount,
 };
+use xcm_config::*;
 use xcm_executor::XcmExecutor;
-use xcm_types::*;
 
 #[cfg(feature = "runtime-benchmarks")]
 use crate::benchmark::{OpenHrmpChannel, PayWithEnsure};
