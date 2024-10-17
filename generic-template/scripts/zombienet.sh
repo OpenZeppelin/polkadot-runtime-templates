@@ -1,7 +1,7 @@
 #!/bin/bash
 
 ZOMBIENET_V=v1.3.106
-POLKADOT_V=v1.6.0
+POLKADOT_V=stable-2407-01
 
 # Detect the operating system
 case "$(uname -s)" in

@@ -130,7 +130,7 @@ impl pallet_asset_manager::AssetRegistrar<Runtime> for AssetRegistrar {
         Assets::force_create(
             RuntimeOrigin::root(),
             asset.into(),
-            sp_runtime::MultiAddress::Id(AssetManager::account_id()),
+            AssetManager::account_id(),
             is_sufficient,
             min_balance,
         )?;

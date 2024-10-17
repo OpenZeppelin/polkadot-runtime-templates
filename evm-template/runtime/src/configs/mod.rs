@@ -33,7 +33,7 @@ use scale_info::TypeInfo;
 use sp_consensus_aura::sr25519::AuthorityId as AuraId;
 use sp_core::{H160, U256};
 use sp_runtime::{
-    traits::{AccountIdLookup, BlakeTwo256, IdentityLookup},
+    traits::{BlakeTwo256, IdentityLookup},
     ConsensusEngineId, Perbill, Permill, RuntimeDebug,
 };
 use sp_std::marker::PhantomData;
@@ -138,7 +138,7 @@ impl frame_system::Config for Runtime {
     type Hash = Hash;
     /// The lookup mechanism to get account ID from whatever is passed in
     /// dispatchers.
-    type Lookup = AccountIdLookup<AccountId, ()>;
+    type Lookup = sp_runtime::traits::IdentityLookup<AccountId>;
     /// The maximum number of consumers allowed on a single account.
     type MaxConsumers = ConstU32<16>;
     /// The index type for storing how many extrinsics an account has signed.
@@ -483,10 +483,7 @@ impl pallet_aura::Config for Runtime {
     type AuthorityId = AuraId;
     type DisabledValidators = ();
     type MaxAuthorities = MaxAuthorities;
-    #[cfg(feature = "async-backing")]
     type SlotDuration = ConstU64<SLOT_DURATION>;
-    #[cfg(not(feature = "async-backing"))]
-    type SlotDuration = pallet_aura::MinimumPeriodTimesTwo<Self>;
 }
 
 parameter_types! {
