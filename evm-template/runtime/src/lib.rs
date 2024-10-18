@@ -14,7 +14,6 @@ mod types;
 mod weights;
 
 use frame_support::{
-    construct_runtime,
     genesis_builder_helper::{build_state, get_preset},
     traits::OnFinalize,
     weights::{Weight, WeightToFeeCoefficient, WeightToFeeCoefficients, WeightToFeePolynomial},
