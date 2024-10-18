@@ -771,11 +771,11 @@ impl_runtime_apis! {
 
                     let local_asset_id: crate::types::AssetId = asset_type.clone().into();
                     let manager_id = AssetManager::account_id();
-                    let _ = Assets::force_create(RuntimeOrigin::root(), local_asset_id.clone().into(), sp_runtime::MultiAddress::Id(manager_id.clone()), true, 1);
+                    let _ = Assets::force_create(RuntimeOrigin::root(), local_asset_id.clone().into(), manager_id.clone(), true, 1);
                     let _ = Assets::mint(
                         RawOrigin::Signed(manager_id.clone()).into(),
                         local_asset_id.into(),
-                        sp_runtime::MultiAddress::Id(who),
+                        who,
                         InitialTransferAssetAmount::get(),
                     );
                     AssetManager::set_asset_type_asset_id(asset_type.clone(), local_asset_id.into());
