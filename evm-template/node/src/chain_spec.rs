@@ -77,6 +77,7 @@ pub fn development_config(contracts_path: ContractsPath) -> ChainSpec {
     properties.insert("tokenSymbol".into(), "UNIT".into());
     properties.insert("tokenDecimals".into(), 12.into());
     properties.insert("ss58Format".into(), 42.into());
+    properties.insert("isEthereum".into(), true.into());
     // This is very important for us, it lets us track the usage of our templates, and have no downside for the node/runtime. Please do not remove :)
     properties.insert("basedOn".into(), "OpenZeppelin EVM Template".into());
 
@@ -101,25 +102,19 @@ pub fn development_config(contracts_path: ContractsPath) -> ChainSpec {
             (get_account_id_from_seed::<ecdsa::Public>("Bob"), get_collator_keys_from_seed("Bob")),
         ],
         vec![
-            get_account_id_from_seed::<ecdsa::Public>("Alice"),
-            get_account_id_from_seed::<ecdsa::Public>("Bob"),
-            get_account_id_from_seed::<ecdsa::Public>("Charlie"),
-            get_account_id_from_seed::<ecdsa::Public>("Dave"),
-            get_account_id_from_seed::<ecdsa::Public>("Eve"),
-            get_account_id_from_seed::<ecdsa::Public>("Ferdie"),
-            get_account_id_from_seed::<ecdsa::Public>("Alice//stash"),
-            get_account_id_from_seed::<ecdsa::Public>("Bob//stash"),
-            get_account_id_from_seed::<ecdsa::Public>("Charlie//stash"),
-            get_account_id_from_seed::<ecdsa::Public>("Dave//stash"),
-            get_account_id_from_seed::<ecdsa::Public>("Eve//stash"),
-            get_account_id_from_seed::<ecdsa::Public>("Ferdie//stash"),
-            AccountId::from(hex!("33c7c88f2B2Fcb83975fCDB08d2B5bf7eA29FDCE")),
-            AccountId::from(hex!("c02db867898f227416BCB6d97190126A6b04988A")),
+            // Alith, Baltathar, Charleth and Dorothy, Ethan
+            AccountId::from(hex!("f24FF3a9CF04c71Dbc94D0b566f7A27B94566cac")),
+            AccountId::from(hex!("3Cd0A705a2DC65e5b1E1205896BaA2be8A07c6e0")),
+            AccountId::from(hex!("798d4Ba9baf0064Ec19eB4F0a1a45785ae9D6DFc")),
+            AccountId::from(hex!("773539d4Ac0e786233D90A233654ccEE26a613D9")),
+            AccountId::from(hex!("Ff64d3F6efE2317EE2807d223a0Bdc4c0c49dfDB")),
         ],
-        get_account_id_from_seed::<ecdsa::Public>("Alice"),
+        // Alith
+        AccountId::from(hex!("f24FF3a9CF04c71Dbc94D0b566f7A27B94566cac")),
         1000.into(),
         contracts_path,
     ))
+    .with_properties(properties)
     .build()
 }
 
@@ -129,6 +124,7 @@ pub fn local_testnet_config(contracts_path: ContractsPath) -> ChainSpec {
     properties.insert("tokenSymbol".into(), "UNIT".into());
     properties.insert("tokenDecimals".into(), 12.into());
     properties.insert("ss58Format".into(), 42.into());
+    properties.insert("isEthereum".into(), true.into());
 
     #[allow(deprecated)]
     ChainSpec::builder(
@@ -152,20 +148,15 @@ pub fn local_testnet_config(contracts_path: ContractsPath) -> ChainSpec {
             (get_account_id_from_seed::<ecdsa::Public>("Bob"), get_collator_keys_from_seed("Bob")),
         ],
         vec![
-            get_account_id_from_seed::<ecdsa::Public>("Alice"),
-            get_account_id_from_seed::<ecdsa::Public>("Bob"),
-            get_account_id_from_seed::<ecdsa::Public>("Charlie"),
-            get_account_id_from_seed::<ecdsa::Public>("Dave"),
-            get_account_id_from_seed::<ecdsa::Public>("Eve"),
-            get_account_id_from_seed::<ecdsa::Public>("Ferdie"),
-            get_account_id_from_seed::<ecdsa::Public>("Alice//stash"),
-            get_account_id_from_seed::<ecdsa::Public>("Bob//stash"),
-            get_account_id_from_seed::<ecdsa::Public>("Charlie//stash"),
-            get_account_id_from_seed::<ecdsa::Public>("Dave//stash"),
-            get_account_id_from_seed::<ecdsa::Public>("Eve//stash"),
-            get_account_id_from_seed::<ecdsa::Public>("Ferdie//stash"),
+            // Alith, Baltathar, Charleth and Dorothy, Ethan
+            AccountId::from(hex!("f24FF3a9CF04c71Dbc94D0b566f7A27B94566cac")),
+            AccountId::from(hex!("3Cd0A705a2DC65e5b1E1205896BaA2be8A07c6e0")),
+            AccountId::from(hex!("798d4Ba9baf0064Ec19eB4F0a1a45785ae9D6DFc")),
+            AccountId::from(hex!("773539d4Ac0e786233D90A233654ccEE26a613D9")),
+            AccountId::from(hex!("Ff64d3F6efE2317EE2807d223a0Bdc4c0c49dfDB")),
         ],
-        get_account_id_from_seed::<ecdsa::Public>("Alice"),
+        // Alith
+        AccountId::from(hex!("f24FF3a9CF04c71Dbc94D0b566f7A27B94566cac")),
         1000.into(),
         contracts_path,
     ))
