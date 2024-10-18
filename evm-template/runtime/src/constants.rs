@@ -2,7 +2,7 @@ use frame_support::weights::{constants::WEIGHT_REF_TIME_PER_SECOND, Weight};
 use sp_runtime::{create_runtime_str, Perbill};
 use sp_version::RuntimeVersion;
 
-use crate::{apis, types::BlockNumber};
+use crate::types::BlockNumber;
 
 pub mod currency {
     use crate::types::Balance;
@@ -40,7 +40,7 @@ pub const VERSION: RuntimeVersion = RuntimeVersion {
     authoring_version: 1,
     spec_version: 1,
     impl_version: 0,
-    apis: apis::RUNTIME_API_VERSIONS,
+    apis: crate::RUNTIME_API_VERSIONS,
     transaction_version: 1,
     state_version: 1,
 };

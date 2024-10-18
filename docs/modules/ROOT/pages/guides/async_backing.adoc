@@ -16,7 +16,7 @@ cargo build --release --features="async-backing"
 
 == How to test
 
-You can always test it against Rococo (it should already have enabled async backing), but the fastest way is to test against a local relay chain. In our repository you can find a script, a config and a link:https://github.com/OpenZeppelin/polkadot-runtime-templates/tree/main/generic-template/zombienet-config[manual] that will run both relay chain and a parachain. To launch a parachain with a relay chain, you will need to run these commands:
+You can always test it against Paseo (it should already have enabled async backing), but the fastest way is to test against a local relay chain. In our repository you can find a script, a config and a link:https://github.com/OpenZeppelin/polkadot-runtime-templates/tree/main/generic-template/zombienet-config[manual] that will run both relay chain and a parachain. To launch a parachain with a relay chain, you will need to run these commands:
 
 * Get the Polkadot binaries:
 ** If you are using some Linux distro, you can download the binaries:

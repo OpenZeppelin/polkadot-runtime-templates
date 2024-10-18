@@ -9,7 +9,6 @@ use sp_core::ConstU32;
 use sp_runtime::{
     generic,
     traits::{BlakeTwo256, IdentifyAccount, Verify},
-    MultiAddress,
 };
 use xcm::VersionedLocation;
 use xcm_builder::{ConvertedConcreteId, PayOverXcm};
@@ -58,7 +57,7 @@ pub type Hash = sp_core::H256;
 pub type BlockNumber = u32;
 
 /// The address format for describing accounts.
-pub type Address = MultiAddress<AccountId, ()>;
+pub type Address = AccountId;
 
 /// Block header type as expected by this runtime.
 pub type Header = generic::Header<BlockNumber, BlakeTwo256>;

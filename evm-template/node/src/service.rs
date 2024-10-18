@@ -19,9 +19,9 @@ use cumulus_primitives_core::{relay_chain::CollatorPair, ParaId};
 use cumulus_relay_chain_interface::{OverseerHandle, RelayChainInterface};
 // Local Runtime Types
 use evm_runtime_template::{
-    apis::RuntimeApi,
     configs::TransactionConverter,
     opaque::{Block, Hash},
+    RuntimeApi,
 };
 // Substrate Imports
 use frame_benchmarking_cli::SUBSTRATE_REFERENCE_HARDWARE;
