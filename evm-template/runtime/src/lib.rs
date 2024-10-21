@@ -263,7 +263,7 @@ mod runtime {
     pub type BaseFee = pallet_base_fee;
     #[runtime::pallet_index(43)]
     pub type EVMChainId = pallet_evm_chain_id;
-    #[runtime:pallet_index(44)]
+    #[runtime::pallet_index(44)]
     pub type Erc20XcmBridge = pallet_erc20_xcm_bridge;
 }
 
