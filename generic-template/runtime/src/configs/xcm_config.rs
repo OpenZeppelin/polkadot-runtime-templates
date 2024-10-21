@@ -223,11 +223,13 @@ impl pallet_xcm::Config for Runtime {
     type Weigher = FixedWeightBounds<UnitWeightCost, RuntimeCall, MaxInstructions>;
     /// Rerun benchmarks if you are making changes to runtime configuration.
     type WeightInfo = weights::pallet_xcm::WeightInfo<Runtime>;
+    #[cfg(feature = "runtime-benchmarks")]
+    type XcmExecuteFilter = Everything;
+    #[cfg(not(feature = "runtime-benchmarks"))]
     type XcmExecuteFilter = Nothing;
-    // ^ Disable dispatchable execute on the XCM pallet.
     // Needs to be `Everything` for local testing.
     type XcmExecutor = XcmExecutor<XcmConfig>;
-    type XcmReserveTransferFilter = Nothing;
+    type XcmReserveTransferFilter = Everything;
     type XcmRouter = XcmRouter;
     type XcmTeleportFilter = Nothing;
 
