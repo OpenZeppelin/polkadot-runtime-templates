@@ -3041,6 +3041,7 @@ dependencies = [
  "parity-scale-codec",
  "polkadot-parachain-primitives",
  "polkadot-runtime-common",
+ "polkadot-runtime-wrappers",
  "scale-info",
  "smallvec",
  "sp-api",
@@ -9376,6 +9377,16 @@ dependencies = [
  "staging-xcm",
  "staging-xcm-executor",
  "static_assertions",
+]
+
+[[package]]
+name = "polkadot-runtime-wrappers"
+version = "0.0.1"
+dependencies = [
+ "frame-support",
+ "scale-info",
+ "sp-std",
+ "sp-version",
 ]
 
 [[package]]
