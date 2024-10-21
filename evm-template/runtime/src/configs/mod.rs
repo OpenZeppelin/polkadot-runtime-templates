@@ -167,9 +167,16 @@ impl XcmConfig for OpenZeppelinConfig {
     type XcmpQueueControllerOrigin = EnsureRoot<AccountId>;
     type XcmpQueueMaxInboundSuspended = MaxInboundSuspended;
 }
+parameter_types! {
+    pub PrecompilesValue: OpenZeppelinPrecompiles<Runtime> = OpenZeppelinPrecompiles::<_>::new();
+}
 impl EvmConfig for OpenZeppelinConfig {
     type AddressMapping = IdentityAddressMapping;
+    type CallOrigin = EnsureAccountId20;
     type FindAuthor = FindAuthorSession<Aura>;
+    type PrecompilesType = OpenZeppelinPrecompiles<Runtime>;
+    type PrecompilesValue = PrecompilesValue;
+    type WithdrawOrigin = EnsureAccountId20;
 }
 impl_openzeppelin_system!(OpenZeppelinConfig);
 impl_openzeppelin_consensus!(OpenZeppelinConfig);
