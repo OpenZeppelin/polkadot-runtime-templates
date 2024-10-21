@@ -5,11 +5,16 @@ use serde::Deserialize;
 #[serde(tag = "type")]
 #[serde(rename_all = "lowercase")]
 pub enum AbiItem {
+    #[allow(dead_code)]
     Error(Error),
+    #[allow(dead_code)]
     Function(Function),
     Constructor,
+    #[allow(dead_code)]
     Event(Event),
+    #[allow(dead_code)]
     Receive(Receive),
+    #[allow(dead_code)]
     Default(Function),
 }
 

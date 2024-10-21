@@ -2,18 +2,34 @@ use fp_account::EthereumSignature;
 use frame_support::traits::EitherOfDiverse;
 use frame_system::EnsureRoot;
 use pallet_xcm::{EnsureXcm, IsVoiceOfBody};
+use polkadot_runtime_common::impls::{
+    LocatableAssetConverter, VersionedLocatableAsset, VersionedLocationConverter,
+};
+use sp_core::ConstU32;
 use sp_runtime::{
     generic,
     traits::{BlakeTwo256, IdentifyAccount, Verify},
     MultiAddress,
 };
+use xcm::VersionedLocation;
+use xcm_builder::{ConvertedConcreteId, PayOverXcm};
+use xcm_executor::traits::JustTry;
+use xcm_primitives::AsAssetType;
 
+use crate::{
+    configs::{xcm_config, TreasuryInteriorLocation},
+    constants::HOURS,
+    AssetManager, Assets,
+};
 pub use crate::{
-    configs::{xcm_config::RelayLocation, StakingAdminBodyId},
+    configs::{
+        xcm_config::RelayLocation, AssetType, FeeAssetId, StakingAdminBodyId,
+        ToSiblingBaseDeliveryFee, TransactionByteFee, TreasuryAccount,
+    },
     constants::{
         BLOCK_PROCESSING_VELOCITY, RELAY_CHAIN_SLOT_DURATION_MILLIS, UNINCLUDED_SEGMENT_CAPACITY,
     },
-    AllPalletsWithSystem, Runtime, RuntimeCall,
+    AllPalletsWithSystem, Runtime, RuntimeCall, XcmpQueue,
 };
 
 /// Unchecked extrinsic type as expected by this runtime.
@@ -28,6 +44,9 @@ pub type AccountId = <<Signature as Verify>::Signer as IdentifyAccount>::Account
 
 /// Balance of an account.
 pub type Balance = u128;
+
+/// Identifier of an asset
+pub type AssetId = u128;
 
 /// Index of a transaction in the chain.
 pub type Nonce = u32;
@@ -58,6 +77,7 @@ pub type SignedExtra = (
     frame_system::CheckWeight<Runtime>,
     pallet_transaction_payment::ChargeTransactionPayment<Runtime>,
     frame_metadata_hash_extension::CheckMetadataHash<Runtime>,
+    cumulus_primitives_storage_weight_reclaim::StorageWeightReclaim<Runtime>,
 );
 
 /// Executive: handles dispatch to the various modules.
@@ -67,6 +87,14 @@ pub type Executive = frame_executive::Executive<
     frame_system::ChainContext<Runtime>,
     Runtime,
     AllPalletsWithSystem,
+>;
+
+/// Price For Sibling Parachain Delivery
+pub type PriceForSiblingParachainDelivery = polkadot_runtime_common::xcm_sender::ExponentialPrice<
+    FeeAssetId,
+    ToSiblingBaseDeliveryFee,
+    TransactionByteFee,
+    XcmpQueue,
 >;
 
 /// Configures the number of blocks that can be created without submission of validity proof to the relay chain
@@ -82,4 +110,37 @@ pub type ConsensusHook = cumulus_pallet_aura_ext::FixedVelocityConsensusHook<
 pub type CollatorSelectionUpdateOrigin = EitherOfDiverse<
     EnsureRoot<AccountId>,
     EnsureXcm<IsVoiceOfBody<RelayLocation, StakingAdminBodyId>>,
+>;
+
+/// This is the struct that will handle the revenue from xcm fees
+/// We do not burn anything because we want to mimic exactly what
+/// the sovereign account has
+pub type XcmFeesToAccount = xcm_primitives::XcmFeesToAccount<
+    Assets,
+    (
+        ConvertedConcreteId<
+            AssetId,
+            Balance,
+            AsAssetType<AssetId, AssetType, AssetManager>,
+            JustTry,
+        >,
+    ),
+    AccountId,
+    TreasuryAccount,
+>;
+
+/// These aliases are describing the Beneficiary and AssetKind for the Treasury pallet
+pub type Beneficiary = VersionedLocation;
+pub type AssetKind = VersionedLocatableAsset;
+
+/// This is a type that describes how we should transfer bounties from treasury pallet
+pub type TreasuryPaymaster = PayOverXcm<
+    TreasuryInteriorLocation,
+    xcm_config::XcmRouter,
+    crate::PolkadotXcm,
+    ConstU32<{ 6 * HOURS }>,
+    Beneficiary,
+    AssetKind,
+    LocatableAssetConverter,
+    VersionedLocationConverter,
 >;

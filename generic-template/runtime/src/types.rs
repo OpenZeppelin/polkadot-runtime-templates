@@ -1,12 +1,22 @@
 use frame_support::traits::EitherOfDiverse;
 use frame_system::EnsureRoot;
 use pallet_xcm::{EnsureXcm, IsVoiceOfBody};
+use polkadot_runtime_common::impls::{
+    LocatableAssetConverter, VersionedLocatableAsset, VersionedLocationConverter,
+};
+use sp_core::ConstU32;
 use sp_runtime::{
     generic,
     traits::{BlakeTwo256, IdentifyAccount, Verify},
     MultiAddress, MultiSignature,
 };
+use xcm::VersionedLocation;
+use xcm_builder::PayOverXcm;
 
+use crate::{
+    configs::{xcm_config, TreasuryInteriorLocation},
+    constants::HOURS,
+};
 pub use crate::{
     configs::{
         xcm_config::RelayLocation, FeeAssetId, StakingAdminBodyId, ToSiblingBaseDeliveryFee,
@@ -28,6 +38,9 @@ pub type AccountId = <<Signature as Verify>::Signer as IdentifyAccount>::Account
 
 /// Balance of an account.
 pub type Balance = u128;
+
+/// Identifier of an asset
+pub type AssetId = u32;
 
 /// Index of a transaction in the chain.
 pub type Nonce = u32;
@@ -58,6 +71,7 @@ pub type SignedExtra = (
     frame_system::CheckWeight<Runtime>,
     pallet_transaction_payment::ChargeTransactionPayment<Runtime>,
     frame_metadata_hash_extension::CheckMetadataHash<Runtime>,
+    cumulus_primitives_storage_weight_reclaim::StorageWeightReclaim<Runtime>,
 );
 
 /// Unchecked extrinsic type as expected by this runtime.
@@ -73,6 +87,7 @@ pub type Executive = frame_executive::Executive<
     AllPalletsWithSystem,
 >;
 
+/// Price For Sibling Parachain Delivery
 pub type PriceForSiblingParachainDelivery = polkadot_runtime_common::xcm_sender::ExponentialPrice<
     FeeAssetId,
     ToSiblingBaseDeliveryFee,
@@ -93,4 +108,20 @@ pub type ConsensusHook = cumulus_pallet_aura_ext::FixedVelocityConsensusHook<
     RELAY_CHAIN_SLOT_DURATION_MILLIS,
     BLOCK_PROCESSING_VELOCITY,
     UNINCLUDED_SEGMENT_CAPACITY,
+>;
+
+/// These aliases are describing the Beneficiary and AssetKind for the Treasury pallet
+pub type Beneficiary = VersionedLocation;
+pub type AssetKind = VersionedLocatableAsset;
+
+/// This is a type that describes how we should transfer bounties from treasury pallet
+pub type TreasuryPaymaster = PayOverXcm<
+    TreasuryInteriorLocation,
+    xcm_config::XcmRouter,
+    crate::PolkadotXcm,
+    ConstU32<{ 6 * HOURS }>,
+    Beneficiary,
+    AssetKind,
+    LocatableAssetConverter,
+    VersionedLocationConverter,
 >;

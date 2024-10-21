@@ -1,5 +1,5 @@
 use frame_support::{
-    genesis_builder_helper::{build_config, create_default_config},
+    genesis_builder_helper::{build_state, get_preset},
     traits::OnFinalize,
     weights::Weight,
 };
@@ -172,34 +172,41 @@ impl_runtime_apis! {
     }
 
     impl fp_rpc::EthereumRuntimeRPCApi<Block> for Runtime {
+        /// Returns runtime defined pallet_evm::ChainId.
         fn chain_id() -> u64 {
             <Runtime as pallet_evm::Config>::ChainId::get()
         }
 
+        /// Returns pallet_evm::Accounts by address.
         fn account_basic(address: H160) -> EVMAccount {
             let (account, _) = pallet_evm::Pallet::<Runtime>::account_basic(&address);
             account
         }
 
+        /// Returns FixedGasPrice::min_gas_price
         fn gas_price() -> U256 {
             let (gas_price, _) = <Runtime as pallet_evm::Config>::FeeCalculator::min_gas_price();
             gas_price
         }
 
+        /// For a given account address, returns pallet_evm::AccountCodes.
         fn account_code_at(address: H160) -> Vec<u8> {
             pallet_evm::AccountCodes::<Runtime>::get(address)
         }
 
+        /// Returns the converted FindAuthor::find_author authority id.
         fn author() -> H160 {
             <pallet_evm::Pallet<Runtime>>::find_author()
         }
 
+        /// For a given account address and index, returns pallet_evm::AccountStorages.
         fn storage_at(address: H160, index: U256) -> H256 {
             let mut tmp = [0u8; 32];
             index.to_big_endian(&mut tmp);
             pallet_evm::AccountStorages::<Runtime>::get(address, H256::from_slice(&tmp[..]))
         }
 
+        /// Returns a frame_ethereum::call response.
         fn call(
             from: H160,
             to: H160,
@@ -253,6 +260,7 @@ impl_runtime_apis! {
             ).map_err(|err| err.error.into())
         }
 
+        /// Returns a frame_ethereum::create response.
         fn create(
             from: H160,
             data: Vec<u8>,
@@ -303,18 +311,22 @@ impl_runtime_apis! {
             ).map_err(|err| err.error.into())
         }
 
+        /// Return the current transaction status.
         fn current_transaction_statuses() -> Option<Vec<TransactionStatus>> {
             pallet_ethereum::CurrentTransactionStatuses::<Runtime>::get()
         }
 
+        /// Return the current block.
         fn current_block() -> Option<pallet_ethereum::Block> {
             pallet_ethereum::CurrentBlock::<Runtime>::get()
         }
 
+        /// Return the current receipts.
         fn current_receipts() -> Option<Vec<pallet_ethereum::Receipt>> {
             pallet_ethereum::CurrentReceipts::<Runtime>::get()
         }
 
+        /// Return all the current data for a block in a single runtime call.
         fn current_all() -> (
             Option<pallet_ethereum::Block>,
             Option<Vec<pallet_ethereum::Receipt>>,
@@ -327,6 +339,7 @@ impl_runtime_apis! {
             )
         }
 
+        /// Receives a `Vec<OpaqueExtrinsic>` and filters out all the non-ethereum transactions.
         fn extrinsic_filter(
             xts: Vec<<Block as BlockT>::Extrinsic>,
         ) -> Vec<EthereumTransaction> {
@@ -336,12 +349,16 @@ impl_runtime_apis! {
             }).collect::<Vec<EthereumTransaction>>()
         }
 
+        /// Return the elasticity multiplier.
         fn elasticity() -> Option<Permill> {
             Some(pallet_base_fee::Elasticity::<Runtime>::get())
         }
 
+        /// Used to determine if gas limit multiplier for non-transactional calls (eth_call/estimateGas)
+        /// is supported.
         fn gas_limit_multiplier_support() {}
 
+        /// Return the pending block.
         fn pending_block(
             xts: Vec<<Block as BlockT>::Extrinsic>,
         ) -> (Option<pallet_ethereum::Block>, Option<Vec<TransactionStatus>>) {
@@ -356,9 +373,14 @@ impl_runtime_apis! {
                 pallet_ethereum::CurrentTransactionStatuses::<Runtime>::get()
             )
         }
+
+        fn initialize_pending_block(header: &<Block as BlockT>::Header) {
+            Executive::initialize_block(header);
+        }
     }
 
     impl fp_rpc::ConvertTransactionRuntimeApi<Block> for Runtime {
+        /// Converts an ethereum transaction into a transaction suitable for the runtime.
         fn convert_transaction(transaction: EthereumTransaction) -> <Block as BlockT>::Extrinsic {
             UncheckedExtrinsic::new_unsigned(
                 pallet_ethereum::Call::<Runtime>::transact { transaction }.into(),
@@ -416,6 +438,8 @@ impl_runtime_apis! {
             use frame_system_benchmarking::Pallet as SystemBench;
             use cumulus_pallet_session_benchmarking::Pallet as SessionBench;
 
+            use pallet_xcm::benchmarking::Pallet as PalletXcmExtrinsicsBenchmark;
+
             use super::*;
 
             let mut list = Vec::<BenchmarkList>::new();
@@ -429,9 +453,11 @@ impl_runtime_apis! {
             config: frame_benchmarking::BenchmarkConfig
         ) -> Result<Vec<frame_benchmarking::BenchmarkBatch>, sp_runtime::RuntimeString> {
             use frame_benchmarking::{BenchmarkError, Benchmarking, BenchmarkBatch};
+            use frame_support::parameter_types;
+            use cumulus_primitives_core::ParaId;
             use frame_system_benchmarking::Pallet as SystemBench;
 
-            use super::*;
+            use super::{*, types::*, configs::*, constants::currency::CENTS};
 
             impl frame_system_benchmarking::Config for Runtime {
                 fn setup_set_code_requirements(code: &sp_std::vec::Vec<u8>) -> Result<(), BenchmarkError> {
@@ -441,6 +467,169 @@ impl_runtime_apis! {
 
                 fn verify_set_code() {
                     System::assert_last_event(cumulus_pallet_parachain_system::Event::<Runtime>::ValidationFunctionStored.into());
+                }
+            }
+
+            parameter_types! {
+                pub const RandomParaId: ParaId = ParaId::new(43211234);
+                pub ExistentialDepositAsset: Option<Asset> = Some((
+                    RelayLocation::get(),
+                    ExistentialDeposit::get()
+                ).into());
+                /// The base fee for the message delivery fees. Kusama is based for the reference.
+                pub const ToParentBaseDeliveryFee: u128 = CENTS.saturating_mul(3);
+                pub const InitialTransferAssetAmount: u128 = 4001070000100;
+            }
+            pub type PriceForParentDelivery = polkadot_runtime_common::xcm_sender::ExponentialPrice<
+                FeeAssetId,
+                ToParentBaseDeliveryFee,
+                TransactionByteFee,
+                ParachainSystem,
+            >;
+            use pallet_xcm::benchmarking::Pallet as PalletXcmExtrinsicsBenchmark;
+            use xcm::latest::prelude::{Asset, AssetId, Assets as AssetList, Fungible, Location, Parachain, Parent, ParentThen, PalletInstance, GeneralIndex};
+            impl pallet_xcm::benchmarking::Config for Runtime {
+                type DeliveryHelper = cumulus_primitives_utility::ToParentDeliveryHelper<
+                    xcm_config::XcmConfig,
+                    ExistentialDepositAsset,
+                    PriceForParentDelivery,
+                >;
+
+                fn reachable_dest() -> Option<Location> {
+                    Some(Parent.into())
+                }
+
+                fn teleportable_asset_and_dest() -> Option<(Asset, Location)> {
+                    None
+                }
+
+                fn reserve_transferable_asset_and_dest() -> Option<(Asset, Location)> {
+                    use frame_support::traits::PalletInfoAccess;
+                    use xcm_primitives::AssetTypeGetter;
+                    use frame_system::RawOrigin;
+
+                    // set up fee asset
+                    let fee_location = RelayLocation::get();
+                    let who: AccountId = frame_benchmarking::whitelisted_caller();
+
+                    let Some(location_v3) = xcm::v3::Location::try_from(fee_location.clone()).ok() else {
+                        return None;
+                    };
+                    let asset_type = AssetType::Xcm(location_v3);
+
+                    let local_asset_id: crate::types::AssetId = asset_type.clone().into();
+                    let manager_id = AssetManager::account_id();
+                    let _ = Assets::force_create(RuntimeOrigin::root(), local_asset_id.clone().into(), sp_runtime::MultiAddress::Id(manager_id.clone()), true, 1);
+                    let _ = Assets::mint(
+                        RawOrigin::Signed(manager_id.clone()).into(),
+                        local_asset_id.into(),
+                        sp_runtime::MultiAddress::Id(who),
+                        InitialTransferAssetAmount::get(),
+                    );
+                    AssetManager::set_asset_type_asset_id(asset_type.clone(), local_asset_id.into());
+
+                    // open a mock parachain channel
+                    ParachainSystem::open_outbound_hrmp_channel_for_benchmarks_or_tests(
+                        RandomParaId::get().into()
+                    );
+
+                    // set up transfer asset
+                    let initial_asset_amount: u128 = InitialTransferAssetAmount::get();
+                    let (asset_id, _, _) = pallet_assets::benchmarking::create_default_minted_asset::<
+                        Runtime,
+                        ()
+                    >(true, initial_asset_amount);
+
+                    let asset_id_u128: u128 = asset_id.into();
+                    let self_reserve = Location {
+                        parents: 0,
+                        interior: [
+                            PalletInstance(<Assets as PalletInfoAccess>::index() as u8), GeneralIndex(asset_id_u128)
+                        ].into()
+                    };
+
+                    let Some(location_v3) = xcm::v3::Location::try_from(self_reserve.clone()).ok() else {
+                        return None;
+                    };
+                    let asset_type = AssetType::Xcm(location_v3);
+                    AssetManager::set_asset_type_asset_id(asset_type.clone(), asset_id_u128);
+
+                    let asset = Asset {
+                        fun: Fungible(ExistentialDeposit::get()),
+                        id: AssetId(self_reserve.into())
+                    }.into();
+                    Some((
+                        asset,
+                        ParentThen(Parachain(RandomParaId::get().into()).into()).into(),
+                    ))
+                }
+
+                fn set_up_complex_asset_transfer(
+                ) -> Option<(AssetList, u32, Location, Box<dyn FnOnce()>)> {
+                    use frame_support::traits::PalletInfoAccess;
+                    use xcm_primitives::AssetTypeGetter;
+                    // set up local asset
+                    let initial_asset_amount: u128 = 1000000011;
+
+                    let (asset_id, _, _) = pallet_assets::benchmarking::create_default_minted_asset::<
+                        Runtime,
+                        ()
+                    >(true, initial_asset_amount);
+
+                    let asset_id_u128: u128 = asset_id.into();
+
+                    let self_reserve = Location {
+                        parents:0,
+                        interior: [
+                            PalletInstance(<Assets as PalletInfoAccess>::index() as u8), GeneralIndex(asset_id_u128)
+                        ].into()
+                    };
+
+                    let Some(location_v3) = xcm::v3::Location::try_from(self_reserve.clone()).ok() else {
+                        return None;
+                    };
+                    let asset_type = AssetType::Xcm(location_v3);
+                    AssetManager::set_asset_type_asset_id(asset_type.clone(), asset_id_u128);
+
+                    let destination: xcm::v4::Location = Parent.into();
+
+                    // set up fee asset
+                    let fee_amount: u128 = <Runtime as pallet_balances::Config>::ExistentialDeposit::get();
+                    let asset_amount: u128 = 10;
+                    let fee_asset: Asset = (self_reserve.clone(), fee_amount).into();
+                    let transfer_asset: Asset = (self_reserve.clone(), asset_amount).into();
+
+                    let assets: cumulus_primitives_core::Assets = vec![fee_asset.clone(), transfer_asset].into();
+                    let fee_index: u32 = 0;
+
+                    let who = frame_benchmarking::whitelisted_caller();
+
+                    let verify: Box<dyn FnOnce()> = Box::new(move || {
+                        // verify balance after transfer, decreased by
+                        // transferred amount (and delivery fees)
+                        assert!(Assets::balance(asset_id_u128, &who) <= initial_asset_amount - fee_amount);
+                    });
+
+                    Some((assets, fee_index, destination, verify))
+                }
+
+                fn get_asset() -> Asset {
+                    use xcm_primitives::AssetTypeGetter;
+                    let location = Location::parent();
+                    let asset_id = AssetId(location.clone());
+                    let asset = Asset {
+                        id: asset_id.clone(),
+                        fun: Fungible(ExistentialDeposit::get()),
+                    };
+                    let Some(location_v3) = xcm::v3::Location::try_from(location).ok() else {
+                        return asset;
+                    };
+                    let asset_type = AssetType::Xcm(location_v3);
+                    let local_asset_id: crate::types::AssetId = asset_type.clone().into();
+                    let manager_id = AssetManager::account_id();
+                    let _ = Assets::force_create(RuntimeOrigin::root(), local_asset_id.clone().into(), sp_runtime::MultiAddress::Id(manager_id), true, 1);
+                    AssetManager::set_asset_type_asset_id(asset_type.clone(), local_asset_id);
+                    asset
                 }
             }
 
@@ -460,12 +649,16 @@ impl_runtime_apis! {
     }
 
     impl sp_genesis_builder::GenesisBuilder<Block> for Runtime {
-        fn create_default_config() -> Vec<u8> {
-            create_default_config::<RuntimeGenesisConfig>()
+        fn build_state(config: Vec<u8>) -> sp_genesis_builder::Result {
+            build_state::<RuntimeGenesisConfig>(config)
         }
 
-        fn build_config(config: Vec<u8>) -> sp_genesis_builder::Result {
-            build_config::<RuntimeGenesisConfig>(config)
+        fn get_preset(id: &Option<sp_genesis_builder::PresetId>) -> Option<Vec<u8>> {
+            get_preset::<RuntimeGenesisConfig>(id, |_| None)
+        }
+
+        fn preset_names() -> Vec<sp_genesis_builder::PresetId> {
+            Default::default()
         }
     }
 }

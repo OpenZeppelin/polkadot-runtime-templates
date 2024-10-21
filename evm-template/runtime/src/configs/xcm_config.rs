@@ -1,37 +1,45 @@
+use core::marker::PhantomData;
+
 use frame_support::{
     parameter_types,
-    traits::{ConstU32, Contains, Everything, Nothing, PalletInfoAccess},
+    traits::{ConstU32, Contains, ContainsPair, Everything, Nothing, PalletInfoAccess},
     weights::Weight,
 };
 use frame_system::EnsureRoot;
+use orml_xcm_support::MultiNativeAsset;
 use pallet_xcm::XcmPassthrough;
-use polkadot_parachain_primitives::primitives::Sibling;
-use xcm::latest::prelude::*;
+use polkadot_parachain_primitives::primitives::{self, Sibling};
+use xcm::latest::prelude::{Assets as XcmAssets, *};
 use xcm_builder::{
-    AccountKey20Aliases, AllowExplicitUnpaidExecutionFrom, AllowTopLevelPaidExecutionFrom,
-    DenyReserveTransferToRelayChain, DenyThenTry, EnsureXcmOrigin, FixedWeightBounds,
-    FrameTransactionalProcessor, FungibleAdapter, FungiblesAdapter, IsConcrete, NativeAsset,
-    NoChecking, ParentIsPreset, RelayChainAsNative, SiblingParachainAsNative,
-    SiblingParachainConvertsVia, SignedAccountKey20AsNative, SovereignSignedViaLocation,
-    TakeWeightCredit, TrailingSetTopicAsId, UsingComponents, WithComputedOrigin, WithUniqueTopic,
+    AccountKey20Aliases, AllowExplicitUnpaidExecutionFrom, AllowTopLevelPaidExecutionFrom, Case,
+    ConvertedConcreteId, DenyReserveTransferToRelayChain, DenyThenTry, EnsureXcmOrigin,
+    FixedWeightBounds, FrameTransactionalProcessor, FungibleAdapter, FungiblesAdapter, HandleFee,
+    IsChildSystemParachain, IsConcrete, NoChecking, ParentIsPreset, RelayChainAsNative,
+    SiblingParachainAsNative, SiblingParachainConvertsVia, SignedAccountKey20AsNative,
+    SovereignSignedViaLocation, TakeWeightCredit, TrailingSetTopicAsId, UsingComponents,
+    WithComputedOrigin, WithUniqueTopic, XcmFeeManagerFromComponents,
 };
-use xcm_executor::XcmExecutor;
+use xcm_executor::{
+    traits::{FeeReason, JustTry, TransactAsset},
+    XcmExecutor,
+};
+use xcm_primitives::{AbsoluteAndRelativeReserve, AsAssetType};
 
 use crate::{
     configs::{
-        Balances, ParachainSystem, Runtime, RuntimeCall, RuntimeEvent, RuntimeOrigin, WeightToFee,
+        AssetType, ParachainSystem, Runtime, RuntimeCall, RuntimeEvent, RuntimeOrigin, WeightToFee,
         XcmpQueue,
     },
-    types::{AccountId, Balance},
-    AllPalletsWithSystem, Assets, ParachainInfo, PolkadotXcm,
+    types::{AccountId, AssetId, Balance, XcmFeesToAccount},
+    weights, AllPalletsWithSystem, AssetManager, Assets, Balances, ParachainInfo, PolkadotXcm,
+    Treasury,
 };
 
 parameter_types! {
-    pub const RelayLocation: Location = Location::parent();
     pub const RelayNetwork: Option<NetworkId> = None;
-    pub PlaceholderAccount: AccountId = PolkadotXcm::check_account();
     pub AssetsPalletLocation: Location =
         PalletInstance(<Assets as PalletInfoAccess>::index() as u8).into();
+    pub BalancesPalletLocation: Location = PalletInstance(<Balances as PalletInfoAccess>::index() as u8).into();
     pub RelayChainOrigin: RuntimeOrigin = cumulus_pallet_xcm::Origin::Relay.into();
     pub UniversalLocation: InteriorLocation = Parachain(ParachainInfo::parachain_id().into()).into();
 }
@@ -53,12 +61,12 @@ pub type LocationToAccountId = (
     AccountKey20Aliases<RelayNetwork, AccountId>,
 );
 
-/// Means for transacting assets on this chain.
+/// Means for transacting native currency on this chain.
 pub type LocalAssetTransactor = FungibleAdapter<
     // Use this currency:
     Balances,
     // Use this currency when it is a fungible asset matching the given location or name:
-    IsConcrete<RelayLocation>,
+    IsConcrete<BalancesPalletLocation>,
     // Do a simple punn to convert an AccountId20 Location into a native chain account ID:
     LocationToAccountId,
     // Our chain's account ID type (we can't get away without mentioning it explicitly):
@@ -72,16 +80,15 @@ pub type LocalFungiblesTransactor = FungiblesAdapter<
     // Use this fungibles implementation:
     Assets,
     // Use this currency when it is a fungible asset matching the given location or name:
-    TrustBackedAssetsConvertedConcreteId,
+    ConvertedConcreteId<AssetId, Balance, AsAssetType<AssetId, AssetType, AssetManager>, JustTry>,
     // Convert an XCM MultiLocation into a local account id:
     LocationToAccountId,
     // Our chain's account ID type (we can't get away without mentioning it explicitly):
     AccountId,
     // We don't track any teleports of `Assets`.
     NoChecking,
-    // We don't track any teleports of `Assets`, but a placeholder account is provided due to trait
-    // bounds.
-    PlaceholderAccount,
+    // We don't track any teleports.
+    (),
 >;
 
 /// Means for transacting assets on this chain.
@@ -141,6 +148,90 @@ pub type Barrier = TrailingSetTopicAsId<
     >,
 >;
 
+/// A `HandleFee` implementation that simply deposits the fees into a specific on-chain
+/// `ReceiverAccount`.
+///
+/// It reuses the `AssetTransactor` configured on the XCM executor to deposit fee assets. If
+/// the `AssetTransactor` returns an error while calling `deposit_asset`, then a warning will be
+/// logged and the fee burned.
+pub struct XcmFeeToAccount<AssetTransactor, AccountId, ReceiverAccount>(
+    PhantomData<(AssetTransactor, AccountId, ReceiverAccount)>,
+);
+impl<
+        AssetTransactor: TransactAsset,
+        AccountId: Clone + Into<[u8; 20]>,
+        ReceiverAccount: Get<AccountId>,
+    > HandleFee for XcmFeeToAccount<AssetTransactor, AccountId, ReceiverAccount>
+{
+    fn handle_fee(fee: XcmAssets, context: Option<&XcmContext>, _reason: FeeReason) -> XcmAssets {
+        deposit_or_burn_fee::<AssetTransactor, _>(fee, context, ReceiverAccount::get());
+
+        XcmAssets::new()
+    }
+}
+
+pub fn deposit_or_burn_fee<AssetTransactor: TransactAsset, AccountId: Clone + Into<[u8; 20]>>(
+    fee: XcmAssets,
+    context: Option<&XcmContext>,
+    receiver: AccountId,
+) {
+    let dest = AccountKey20 { network: None, key: receiver.into() }.into();
+    for asset in fee.into_inner() {
+        if let Err(e) = AssetTransactor::deposit_asset(&asset, &dest, context) {
+            log::trace!(
+                target: "xcm::fees",
+                "`AssetTransactor::deposit_asset` returned error: {:?}. Burning fee: {:?}. \
+                They might be burned.",
+                e, asset,
+            );
+        }
+    }
+}
+
+/// Matches foreign assets from a given origin.
+/// Foreign assets are assets bridged from other consensus systems. i.e parents > 1.
+pub struct IsBridgedConcreteAssetFrom<Origin>(PhantomData<Origin>);
+impl<Origin> ContainsPair<Asset, Location> for IsBridgedConcreteAssetFrom<Origin>
+where
+    Origin: Get<Location>,
+{
+    fn contains(asset: &Asset, origin: &Location) -> bool {
+        let loc = Origin::get();
+        &loc == origin
+            && matches!(
+                asset,
+                Asset { id: AssetId(Location { parents: 2, .. }), fun: Fungibility::Fungible(_) },
+            )
+    }
+}
+
+parameter_types! {
+    /// Location of Asset Hub
+   pub AssetHubLocation: Location = Location::new(1, [Parachain(1000)]);
+   pub const RelayLocation: Location = Location::parent();
+   pub RelayLocationFilter: AssetFilter = Wild(AllOf {
+       fun: WildFungible,
+       id: xcm::prelude::AssetId(RelayLocation::get()),
+   });
+   pub RelayChainNativeAssetFromAssetHub: (AssetFilter, Location) = (
+       RelayLocationFilter::get(),
+       AssetHubLocation::get()
+   );
+}
+
+type Reserves = (
+    // Assets bridged from different consensus systems held in reserve on Asset Hub.
+    IsBridgedConcreteAssetFrom<AssetHubLocation>,
+    // Relaychain (DOT) from Asset Hub
+    Case<RelayChainNativeAssetFromAssetHub>,
+    // Assets which the reserve is the same as the origin.
+    MultiNativeAsset<AbsoluteAndRelativeReserve<SelfLocationAbsolute>>,
+);
+
+parameter_types! {
+    pub TreasuryAccount: AccountId = Treasury::account_id();
+}
+
 pub struct XcmConfig;
 impl xcm_executor::Config for XcmConfig {
     type Aliasers = Nothing;
@@ -152,11 +243,18 @@ impl xcm_executor::Config for XcmConfig {
     type AssetTrap = PolkadotXcm;
     type Barrier = Barrier;
     type CallDispatcher = RuntimeCall;
-    type FeeManager = ();
+    /// When changing this config, keep in mind, that you should collect fees.
+    type FeeManager = XcmFeeManagerFromComponents<
+        IsChildSystemParachain<primitives::Id>,
+        XcmFeeToAccount<Self::AssetTransactor, AccountId, TreasuryAccount>,
+    >;
     type HrmpChannelAcceptedHandler = ();
     type HrmpChannelClosingHandler = ();
     type HrmpNewChannelOpenRequestHandler = ();
-    type IsReserve = NativeAsset;
+    /// Please, keep these two configs (`IsReserve` and `IsTeleporter`) mutually exclusive.
+    /// The IsReserve type must be set to specify which <MultiAsset, MultiLocation> pair we trust to deposit reserve assets on our chain. We can also use the unit type () to block ReserveAssetDeposited instructions.
+    /// The IsTeleporter type must be set to specify which <MultiAsset, MultiLocation> pair we trust to teleport assets to our chain. We can also use the unit type () to block ReceiveTeleportedAssets instruction.
+    type IsReserve = Reserves;
     type IsTeleporter = ();
     type MaxAssetsIntoHolding = MaxAssetsIntoHolding;
     type MessageExporter = ();
@@ -166,12 +264,16 @@ impl xcm_executor::Config for XcmConfig {
     type RuntimeCall = RuntimeCall;
     type SafeCallFilter = Everything;
     type SubscriptionService = PolkadotXcm;
-    type Trader = UsingComponents<WeightToFee, RelayLocation, AccountId, Balances, ()>;
+    type Trader = (
+        UsingComponents<WeightToFee, BalancesPalletLocation, AccountId, Balances, ()>,
+        xcm_primitives::FirstAssetTrader<AssetType, AssetManager, XcmFeesToAccount>,
+    );
     type TransactionalProcessor = FrameTransactionalProcessor;
     type UniversalAliases = Nothing;
     // Teleporting is disabled.
     type UniversalLocation = UniversalLocation;
     type Weigher = FixedWeightBounds<UnitWeightCost, RuntimeCall, MaxInstructions>;
+    type XcmRecorder = PolkadotXcm;
     type XcmSender = XcmRouter;
 }
 
@@ -223,7 +325,7 @@ impl pallet_xcm::Config for Runtime {
     type CurrencyMatcher = ();
     type ExecuteXcmOrigin = EnsureXcmOrigin<RuntimeOrigin, LocalOriginToLocation>;
     type MaxLockers = MaxLockers;
-    type MaxRemoteLockConsumers = MaxLockers;
+    type MaxRemoteLockConsumers = MaxRemoteLockConsumers;
     type RemoteLockConsumerIdentifier = ();
     type RuntimeCall = RuntimeCall;
     type RuntimeEvent = RuntimeEvent;
@@ -233,14 +335,17 @@ impl pallet_xcm::Config for Runtime {
     type TrustedLockers = ();
     type UniversalLocation = UniversalLocation;
     type Weigher = FixedWeightBounds<UnitWeightCost, RuntimeCall, MaxInstructions>;
-    type WeightInfo = pallet_xcm::TestWeightInfo;
+    /// Rerun benchmarks if you are making changes to runtime configuration.
+    type WeightInfo = weights::pallet_xcm::WeightInfo<Runtime>;
+    #[cfg(feature = "runtime-benchmarks")]
+    type XcmExecuteFilter = Everything;
+    #[cfg(not(feature = "runtime-benchmarks"))]
     type XcmExecuteFilter = Nothing;
-    // ^ Disable dispatchable execute on the XCM pallet.
     // Needs to be `Everything` for local testing.
     type XcmExecutor = XcmExecutor<XcmConfig>;
-    type XcmReserveTransferFilter = Nothing;
+    type XcmReserveTransferFilter = Everything;
     type XcmRouter = XcmRouter;
-    type XcmTeleportFilter = Everything;
+    type XcmTeleportFilter = Nothing;
 
     const VERSION_DISCOVERY_QUEUE_SIZE: u32 = 100;
 }
@@ -248,4 +353,22 @@ impl pallet_xcm::Config for Runtime {
 impl cumulus_pallet_xcm::Config for Runtime {
     type RuntimeEvent = RuntimeEvent;
     type XcmExecutor = XcmExecutor<XcmConfig>;
+}
+
+// We are not using all of these below atm, but we will need them when configuring `orml_xtokens`
+parameter_types! {
+    pub const BaseXcmWeight: Weight = Weight::from_parts(200_000_000u64, 0);
+    pub const MaxAssetsForTransfer: usize = 2;
+
+    // This is how we are going to detect whether the asset is a Reserve asset
+    // This however is the chain part only
+    pub SelfLocation: Location = Location::here();
+    // We need this to be able to catch when someone is trying to execute a non-
+    // cross-chain transfer in xtokens through the absolute path way
+    pub SelfLocationAbsolute: Location = Location {
+        parents:1,
+        interior: [
+            Parachain(ParachainInfo::parachain_id().into())
+        ].into()
+    };
 }

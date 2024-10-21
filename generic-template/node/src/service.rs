@@ -20,7 +20,7 @@ use cumulus_relay_chain_interface::{OverseerHandle, RelayChainInterface};
 // Substrate Imports
 use frame_benchmarking_cli::SUBSTRATE_REFERENCE_HARDWARE;
 // Local Runtime Types
-use parachain_template_runtime::{
+use generic_runtime_template::{
     apis::RuntimeApi,
     opaque::{Block, Hash},
 };
@@ -28,7 +28,6 @@ use sc_client_api::Backend;
 use sc_consensus::ImportQueue;
 use sc_executor::{HeapAllocStrategy, WasmExecutor, DEFAULT_HEAP_ALLOC_STRATEGY};
 use sc_network::NetworkBlock;
-use sc_network_sync::SyncingService;
 use sc_service::{Configuration, PartialComponents, TFullBackend, TFullClient, TaskManager};
 use sc_telemetry::{Telemetry, TelemetryHandle, TelemetryWorker, TelemetryWorkerHandle};
 use sc_transaction_pool_api::OffchainTransactionPoolFactory;
@@ -142,7 +141,11 @@ async fn start_node_impl(
 
     let params = new_partial(&parachain_config)?;
     let (block_import, mut telemetry, telemetry_worker_handle) = params.other;
-    let net_config = sc_network::config::FullNetworkConfiguration::new(&parachain_config.network);
+    let net_config = sc_network::config::FullNetworkConfiguration::<
+        _,
+        _,
+        sc_network::NetworkWorker<Block, Hash>,
+    >::new(&parachain_config.network);
 
     let client = params.client.clone();
     let backend = params.backend.clone();
@@ -191,7 +194,7 @@ async fn start_node_impl(
                 transaction_pool: Some(OffchainTransactionPoolFactory::new(
                     transaction_pool.clone(),
                 )),
-                network_provider: network.clone(),
+                network_provider: Arc::new(network.clone()),
                 is_validator: parachain_config.role.is_authority(),
                 enable_http_requests: false,
                 custom_extensions: move |_| vec![],
@@ -299,7 +302,6 @@ async fn start_node_impl(
             &task_manager,
             relay_chain_interface.clone(),
             transaction_pool,
-            sync_service.clone(),
             params.keystore_container.keystore(),
             relay_chain_slot_duration,
             para_id,
@@ -322,8 +324,6 @@ fn build_import_queue(
     telemetry: Option<TelemetryHandle>,
     task_manager: &TaskManager,
 ) -> Result<sc_consensus::DefaultImportQueue<Block>, sc_service::Error> {
-    let slot_duration = cumulus_client_consensus_aura::slot_duration(&*client)?;
-
     Ok(cumulus_client_consensus_aura::equivocation_import_queue::fully_verifying_import_queue::<
         sp_consensus_aura::sr25519::AuthorityPair,
         _,
@@ -337,7 +337,6 @@ fn build_import_queue(
             let timestamp = sp_timestamp::InherentDataProvider::from_system_time();
             Ok(timestamp)
         },
-        slot_duration,
         &task_manager.spawn_essential_handle(),
         config.prometheus_registry(),
         telemetry,
@@ -353,7 +352,6 @@ fn start_consensus(
     task_manager: &TaskManager,
     relay_chain_interface: Arc<dyn RelayChainInterface>,
     transaction_pool: Arc<sc_transaction_pool::FullPool<Block, ParachainClient>>,
-    sync_oracle: Arc<SyncingService<Block>>,
     keystore: KeystorePtr,
     relay_chain_slot_duration: Duration,
     para_id: ParaId,
@@ -365,11 +363,6 @@ fn start_consensus(
     use cumulus_client_consensus_aura::collators::basic::{self as basic_aura, Params};
     #[cfg(feature = "async-backing")]
     use cumulus_client_consensus_aura::collators::lookahead::{self as aura, Params};
-
-    // NOTE: because we use Aura here explicitly, we can use `CollatorSybilResistance::Resistant`
-    // when starting the network.
-    #[cfg(not(feature = "async-backing"))]
-    let slot_duration = cumulus_client_consensus_aura::slot_duration(&*client)?;
 
     let proposer_factory = sc_basic_authorship::ProposerFactory::with_proof_recording(
         task_manager.spawn_handle(),
@@ -402,13 +395,10 @@ fn start_consensus(
         code_hash_provider: move |block_hash| {
             client.code_at(block_hash).ok().map(ValidationCode).map(|c| c.hash())
         },
-        sync_oracle,
         keystore,
         collator_key,
         para_id,
         overseer_handle,
-        #[cfg(not(feature = "async-backing"))]
-        slot_duration,
         relay_chain_slot_duration,
         proposer,
         collator_service,
@@ -424,15 +414,13 @@ fn start_consensus(
     };
 
     #[cfg(not(feature = "async-backing"))]
-    let fut =
-        basic_aura::run::<Block, sp_consensus_aura::sr25519::AuthorityPair, _, _, _, _, _, _, _>(
-            params,
-        );
+    let fut = basic_aura::run::<Block, sp_consensus_aura::sr25519::AuthorityPair, _, _, _, _, _, _>(
+        params,
+    );
     #[cfg(feature = "async-backing")]
-    let fut =
-        aura::run::<Block, sp_consensus_aura::sr25519::AuthorityPair, _, _, _, _, _, _, _, _, _>(
-            params,
-        );
+    let fut = aura::run::<Block, sp_consensus_aura::sr25519::AuthorityPair, _, _, _, _, _, _, _, _>(
+        params,
+    );
     task_manager.spawn_essential_handle().spawn("aura", None, fut);
 
     Ok(())

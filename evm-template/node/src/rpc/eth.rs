@@ -1,9 +1,9 @@
 use std::{collections::BTreeMap, sync::Arc};
 
 // Frontier
-pub use fc_rpc::{EthBlockDataCacheTask, EthConfig, OverrideHandle};
+pub use fc_rpc::{EthBlockDataCacheTask, EthConfig};
 pub use fc_rpc_core::types::{FeeHistoryCache, FeeHistoryCacheLimit, FilterPool};
-pub use fc_storage::overrides_handle;
+pub use fc_storage::StorageOverride;
 use fp_rpc::{ConvertTransaction, ConvertTransactionRuntimeApi, EthereumRuntimeRPCApi};
 use jsonrpsee::RpcModule;
 // Substrate
@@ -12,7 +12,7 @@ use sc_client_api::{
     client::BlockchainEvents,
     AuxStore, UsageProvider,
 };
-use sc_network::NetworkService;
+use sc_network::service::traits::NetworkService;
 use sc_network_sync::SyncingService;
 use sc_rpc::SubscriptionTaskExecutor;
 use sc_transaction_pool::{ChainApi, Pool};
@@ -40,13 +40,13 @@ pub struct EthDeps<B: BlockT, C, P, A: ChainApi, CT, CIDP> {
     /// Whether to enable dev signer
     pub enable_dev_signer: bool,
     /// Network service
-    pub network: Arc<NetworkService<B, B::Hash>>,
+    pub network: Arc<dyn NetworkService>,
     /// Chain syncing service
     pub sync: Arc<SyncingService<B>>,
     /// Frontier Backend.
     pub frontier_backend: Arc<dyn fc_api::Backend<B>>,
     /// Ethereum data access overrides.
-    pub overrides: Arc<OverrideHandle<B>>,
+    pub overrides: Arc<dyn StorageOverride<B>>,
     /// Cache for Ethereum block data.
     pub block_data_cache: Arc<EthBlockDataCacheTask<B>>,
     /// EthFilterApi pool.

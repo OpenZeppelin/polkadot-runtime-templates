@@ -48,4 +48,4 @@ If you do not want any contract to be predeployed, you can use the `--no-predepl
 
 == Limitations
 
-* Contructors are not executed at the moment. So if your contract needs any initialization, consider deploying it as usual.
+* Constructors are not executed at the moment. So if your contract needs any initialization, consider deploying it as usual.
