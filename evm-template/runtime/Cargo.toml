@@ -96,6 +96,10 @@ pallet-evm-precompile-modexp = { workspace = true }
 pallet-evm-precompile-sha3fips = { workspace = true }
 pallet-evm-precompile-simple = { workspace = true }
 
+# ORML
+orml-xcm-support = { workspace = true }
+
+
 # Moonbeam
 pallet-asset-manager = { workspace = true }
 xcm-primitives = { workspace = true }
