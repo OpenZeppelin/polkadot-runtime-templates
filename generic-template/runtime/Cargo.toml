@@ -8,13 +8,13 @@ repository = { workspace = true }
 version = "2.0.0"
 
 [package.metadata.docs.rs]
-targets = [ "x86_64-unknown-linux-gnu" ]
+targets = ["x86_64-unknown-linux-gnu"]
 
 [dependencies]
 hex-literal = { workspace = true, optional = true }
 log = { workspace = true }
-parity-scale-codec = { workspace = true, features = [ "derive" ] }
-scale-info = { workspace = true, features = [ "derive" ] }
+parity-scale-codec = { workspace = true, features = ["derive"] }
+scale-info = { workspace = true, features = ["derive"] }
 smallvec = { workspace = true }
 
 # Substrate
@@ -81,6 +81,9 @@ pallet-collator-selection = { workspace = true }
 parachain-info = { workspace = true }
 parachains-common = { workspace = true }
 
+# Moonbeam
+pallet-asset-manager = { workspace = true }
+
 [dev-dependencies]
 sp-io = { workspace = true }
 
@@ -88,7 +91,7 @@ sp-io = { workspace = true }
 substrate-wasm-builder = { workspace = true }
 
 [features]
-default = [ "std" ]
+default = ["std"]
 std = [
 	"assets-common/std",
 	"cumulus-pallet-aura-ext/std",
@@ -108,6 +111,7 @@ std = [
 	"frame-system/std",
 	"frame-try-runtime?/std",
 	"log/std",
+	"pallet-asset-manager/std",
 	"pallet-assets/std",
 	"pallet-aura/std",
 	"pallet-authorship/std",
@@ -165,6 +169,7 @@ runtime-benchmarks = [
 	"frame-system-benchmarking/runtime-benchmarks",
 	"frame-system/runtime-benchmarks",
 	"hex-literal",
+	"pallet-asset-manager/runtime-benchmarks",
 	"pallet-assets/runtime-benchmarks",
 	"pallet-balances/runtime-benchmarks",
 	"pallet-collator-selection/runtime-benchmarks",
@@ -198,6 +203,7 @@ try-runtime = [
 	"frame-support/try-runtime",
 	"frame-system/try-runtime",
 	"frame-try-runtime/try-runtime",
+	"pallet-asset-manager/try-runtime",
 	"pallet-assets/try-runtime",
 	"pallet-aura/try-runtime",
 	"pallet-authorship/try-runtime",
@@ -227,4 +233,4 @@ try-runtime = [
 # A feature that should be enabled when the runtime should be built for on-chain
 # deployment. This will disable stuff that shouldn't be part of the on-chain wasm
 # to make it smaller, like logging for example.
-on-chain-release-build = [ "sp-api/disable-logging" ]
+on-chain-release-build = ["sp-api/disable-logging"]
