@@ -500,7 +500,7 @@ impl Reserve for DOTReserveProvider {
         let dot_here = Location::new(1, Here);
         let dot_asset_hub = AssetHubLocation::get();
 
-        if location == &dot_here || location == &dot_asset_hub {
+        if location == &dot_here {
             Some(dot_asset_hub) // Reserve is on AssetHub.
         } else {
             None
