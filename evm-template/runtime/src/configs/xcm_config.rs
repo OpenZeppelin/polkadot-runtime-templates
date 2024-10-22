@@ -416,7 +416,7 @@ impl AccountIdToCurrencyId<AccountId, CurrencyId> for Runtime {
     fn account_to_currency_id(account: AccountId) -> Option<CurrencyId> {
         Some(match account {
             // the self-reserve currency is identified by the pallet-balances address
-            a if a == H160::from_low_u64_be(2050).into() => CurrencyId::SelfReserve,
+            a if a == H160::from_low_u64_be(2050).into() => CurrencyId::SelfReserve, // TODO: `2050` represents the pallet-balances erprecompile address
             // the rest of the currencies, by their corresponding erc20 address
             _ => match Runtime::account_to_asset_id(account) {
                 // We distinguish by prefix, and depending on it we create either
