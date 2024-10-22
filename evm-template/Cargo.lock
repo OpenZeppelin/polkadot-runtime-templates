@@ -3037,6 +3037,7 @@ dependencies = [
  "pallet-utility",
  "pallet-whitelist",
  "pallet-xcm",
+ "pallet-xcm-transactor",
  "parachains-common",
  "parity-scale-codec",
  "polkadot-parachain-primitives",
@@ -6871,6 +6872,7 @@ dependencies = [
  "parity-scale-codec",
  "paste",
  "scale-info",
+ "serde",
  "sp-core",
  "sp-io",
  "sp-runtime",
@@ -6886,6 +6888,7 @@ dependencies = [
  "frame-support",
  "parity-scale-codec",
  "scale-info",
+ "serde",
  "sp-core",
  "sp-io",
  "sp-runtime",
@@ -6933,7 +6936,7 @@ dependencies = [
 [[package]]
 name = "pallet-asset-manager"
 version = "0.1.0"
-source = "git+https://github.com/OpenZeppelin/moonbeam.git?branch=polkadot-stable2407-1#3ed33a712c6968af7a33d970ec4300293c5345b9"
+source = "git+https://github.com/OpenZeppelin/moonbeam.git?branch=polkadot-stable2407-1#fab6e72fbaaeaa065ad983556d09d4c0e8755dfa"
 dependencies = [
  "frame-benchmarking",
  "frame-support",
@@ -8132,6 +8135,29 @@ dependencies = [
  "staging-xcm",
  "staging-xcm-builder",
  "staging-xcm-executor",
+]
+
+[[package]]
+name = "pallet-xcm-transactor"
+version = "0.2.0"
+source = "git+https://github.com/OpenZeppelin/moonbeam.git?branch=polkadot-stable2407-1#fab6e72fbaaeaa065ad983556d09d4c0e8755dfa"
+dependencies = [
+ "cumulus-primitives-core",
+ "frame-benchmarking",
+ "frame-support",
+ "frame-system",
+ "log",
+ "orml-traits",
+ "parity-scale-codec",
+ "scale-info",
+ "serde",
+ "sp-io",
+ "sp-runtime",
+ "sp-std",
+ "staging-xcm",
+ "staging-xcm-builder",
+ "staging-xcm-executor",
+ "xcm-primitives",
 ]
 
 [[package]]
@@ -9941,7 +9967,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "22505a5c94da8e3b7c2996394d1c933236c4d743e81a410bcca4e6989fc066a4"
 dependencies = [
  "bytes",
- "heck 0.5.0",
+ "heck 0.4.1",
  "itertools 0.12.1",
  "log",
  "multimap 0.10.0",
@@ -15781,7 +15807,7 @@ dependencies = [
 [[package]]
 name = "xcm-primitives"
 version = "0.1.1"
-source = "git+https://github.com/OpenZeppelin/moonbeam.git?branch=polkadot-stable2407-1#3ed33a712c6968af7a33d970ec4300293c5345b9"
+source = "git+https://github.com/OpenZeppelin/moonbeam.git?branch=polkadot-stable2407-1#fab6e72fbaaeaa065ad983556d09d4c0e8755dfa"
 dependencies = [
  "cumulus-primitives-core",
  "ethereum",

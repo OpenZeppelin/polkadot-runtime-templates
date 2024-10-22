@@ -165,6 +165,7 @@ orml-xcm-support = { git = "https://github.com/OpenZeppelin/open-runtime-module-
 # Moonbeam
 pallet-asset-manager = { git = "https://github.com/OpenZeppelin/moonbeam.git", branch = "polkadot-stable2407-1", default-features = false }
 xcm-primitives = { git = "https://github.com/OpenZeppelin/moonbeam.git", branch = "polkadot-stable2407-1", default-features = false }
+pallet-xcm-transactor = { git = "https://github.com/OpenZeppelin/moonbeam.git", branch = "polkadot-stable2407-1", default-features = false }
 
 # Fuzzer
 substrate-runtimes-fuzzers = { git = "https://github.com/srlabs/substrate-runtime-fuzzer.git", default-features = false, tag = "polkadot-v1.12.0" }

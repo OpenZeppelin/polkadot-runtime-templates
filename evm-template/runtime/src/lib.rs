@@ -249,6 +249,8 @@ mod runtime {
     pub type CumulusXcm = cumulus_pallet_xcm;
     #[runtime::pallet_index(33)]
     pub type MessageQueue = pallet_message_queue;
+    #[runtime::pallet_index(34)]
+    pub type XcmTransactor = pallet_xcm_transactor;
 
     // EVM
     #[runtime::pallet_index(40)]

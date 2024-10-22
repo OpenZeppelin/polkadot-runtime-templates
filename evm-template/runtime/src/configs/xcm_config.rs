@@ -8,7 +8,10 @@ use frame_support::{
 use frame_system::EnsureRoot;
 use orml_xcm_support::MultiNativeAsset;
 use pallet_xcm::XcmPassthrough;
+use parity_scale_codec::{Decode, Encode};
 use polkadot_parachain_primitives::primitives::{self, Sibling};
+use sp_runtime::{Vec, traits::MaybeEquivalence};
+use scale_info::TypeInfo;
 use xcm::latest::prelude::{Assets as XcmAssets, *};
 use xcm_builder::{
     AccountKey20Aliases, AllowExplicitUnpaidExecutionFrom, AllowTopLevelPaidExecutionFrom, Case,
@@ -23,7 +26,10 @@ use xcm_executor::{
     traits::{FeeReason, JustTry, TransactAsset},
     XcmExecutor,
 };
-use xcm_primitives::{AbsoluteAndRelativeReserve, AsAssetType};
+use xcm_primitives::{
+    AbsoluteAndRelativeReserve, AccountIdToLocation, AsAssetType, UtilityAvailableCalls,
+    UtilityEncodeCall, XcmTransact,
+};
 
 use crate::{
     configs::{
@@ -372,3 +378,123 @@ parameter_types! {
         ].into()
     };
 }
+
+// For now we only allow to transact in the relay, although this might change in the future
+// Transactors just defines the chains in which we allow transactions to be issued through
+// xcm
+#[derive(Clone, Eq, Debug, PartialEq, Ord, PartialOrd, Encode, Decode, TypeInfo)]
+pub enum Transactors {
+    Relay,
+}
+
+// Default for benchmarking
+#[cfg(feature = "runtime-benchmarks")]
+impl Default for Transactors {
+    fn default() -> Self {
+        Transactors::Relay
+    }
+}
+
+impl TryFrom<u8> for Transactors {
+    type Error = ();
+
+    fn try_from(value: u8) -> Result<Self, Self::Error> {
+        match value {
+            0u8 => Ok(Transactors::Relay),
+            _ => Err(()),
+        }
+    }
+}
+
+impl UtilityEncodeCall for Transactors {
+    fn encode_call(self, call: UtilityAvailableCalls) -> Vec<u8> {
+        match self {
+            Transactors::Relay => pallet_xcm_transactor::Pallet::<Runtime>::encode_call(
+                pallet_xcm_transactor::Pallet(sp_std::marker::PhantomData::<Runtime>),
+                call,
+            ),
+        }
+    }
+}
+
+impl XcmTransact for Transactors {
+    fn destination(self) -> Location {
+        match self {
+            Transactors::Relay => Location::parent(),
+        }
+    }
+}
+
+parameter_types! {
+	pub MaxHrmpRelayFee: Asset = (Location::parent(), 1_000_000_000_000u128).into();
+    pub SelfReserve: Location = Location {
+		parents:0,
+		interior: [
+			PalletInstance(<Balances as PalletInfoAccess>::index() as u8)
+		].into()
+	};
+}
+
+impl pallet_xcm_transactor::Config for Runtime {
+    type AccountIdToLocation = AccountIdToLocation<AccountId>;
+    type AssetTransactor = AssetTransactors;
+    type Balance = Balance;
+    type BaseXcmWeight = BaseXcmWeight;
+    // we do not currently differentiate between SelfReserve and ForeignAssets
+    type CurrencyId = AssetId;
+    type CurrencyIdToLocation = AccountIdToLocation<AccountId>;
+    type DerivativeAddressRegistrationOrigin = EnsureRoot<AccountId>;
+    type HrmpManipulatorOrigin = EnsureRoot<AccountId>;
+    type HrmpOpenOrigin = EnsureRoot<AccountId>;
+    type MaxHrmpFee = xcm_builder::Case<MaxHrmpRelayFee>;
+    type ReserveProvider = AbsoluteAndRelativeReserve<SelfLocationAbsolute>;
+    type RuntimeEvent = RuntimeEvent;
+    type SelfLocation = SelfLocation;
+    type SovereignAccountDispatcherOrigin = EnsureRoot<AccountId>;
+    type Transactor = Transactors;
+    type UniversalLocation = UniversalLocation;
+    type Weigher = XcmWeigher;
+    // TODO set
+    type WeightInfo = ();
+    type XcmSender = XcmRouter;
+}
+
+// Our currencyId. We distinguish for now between SelfReserve, and Others, defined by their Id.
+#[derive(Clone, Eq, Debug, PartialEq, Ord, PartialOrd, Encode, Decode, TypeInfo)]
+pub enum CurrencyId {
+	SelfReserve,
+	ForeignAsset(AssetId),
+}
+
+// How to convert from CurrencyId to Location
+pub struct CurrencyIdToLocation<AssetXConverter>(sp_std::marker::PhantomData<AssetXConverter>);
+impl<AssetXConverter> sp_runtime::traits::Convert<CurrencyId, Option<Location>>
+	for CurrencyIdToLocation<AssetXConverter>
+where
+	AssetXConverter: MaybeEquivalence<Location, AssetId>,
+{
+	fn convert(currency: CurrencyId) -> Option<Location> {
+		match currency {
+			CurrencyId::SelfReserve => {
+				let multi: Location = SelfReserve::get();
+				Some(multi)
+			}
+			CurrencyId::ForeignAsset(asset) => AssetXConverter::convert_back(&asset),
+		}
+	}
+}
+
+parameter_types! {
+	/// The amount of weight an XCM operation takes. This is safe overestimate.
+	pub UnitWeightCost: Weight = Weight::from_parts(200_000_000u64, 0);
+	/// Maximum number of instructions in a single XCM fragment. A sanity check against
+	/// weight caculations getting too crazy.
+	pub MaxInstructions: u32 = 100;
+}
+
+/// Xcm Weigher shared between multiple Xcm-related configs.
+pub type XcmWeigher = WeightInfoBounds<
+	weights::XcmWeight<Runtime, RuntimeCall>,
+	RuntimeCall,
+	MaxInstructions,
+>;
