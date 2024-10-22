@@ -11,16 +11,13 @@ use frame_support::{
     derive_impl,
     dispatch::DispatchClass,
     parameter_types,
-    traits::{
-        AsEnsureOriginWithArg, ConstU32, ConstU64, Contains, EitherOfDiverse, InstanceFilter,
-        TransformOrigin,
-    },
+    traits::{ConstU32, ConstU64, Contains, EitherOfDiverse, InstanceFilter, TransformOrigin},
     weights::{ConstantMultiplier, Weight},
     PalletId,
 };
 use frame_system::{
     limits::{BlockLength, BlockWeights},
-    EnsureRoot, EnsureSigned,
+    EnsureRoot,
 };
 pub use governance::origins::pallet_custom_origins;
 use governance::{origins::Treasurer, TreasurySpender};
