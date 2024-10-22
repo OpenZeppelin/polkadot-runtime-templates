@@ -517,9 +517,10 @@ impl Reserve for BridgedAssetReserveProvider {
 
         let asset_hub_reserve = AssetHubLocation::get();
 
-        match location.interior() {
-            X1(arc) if arc.as_ref() == &[GlobalConsensus(Ethereum { chain_id: 1 })] =>
-                Some(asset_hub_reserve), // if the location is ethereum, we use AssetHub as the reserve
+        match location {
+            Location { parents, interior: X1(arc) }
+                if *parents > 1 && matches!(arc.as_ref().first(), Some(GlobalConsensus(_))) =>
+                Some(asset_hub_reserve),
             _ if location == &asset_hub_reserve => Some(asset_hub_reserve), // if the location is AssetHub, we use AssetHub
             _ => None, // Asset doesn't match any known reserve.
         }
