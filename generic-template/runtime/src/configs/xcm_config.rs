@@ -12,9 +12,7 @@ use orml_xcm_support::MultiNativeAsset;
 use pallet_xcm::XcmPassthrough;
 use parity_scale_codec::{Decode, Encode};
 use polkadot_parachain_primitives::primitives::{self, Sibling};
-use polkadot_runtime_common::impls::ToAuthor;
 use scale_info::TypeInfo;
-use sp_core::H160;
 use xcm::latest::prelude::*;
 use xcm_builder::{
     AccountId32Aliases, AllowExplicitUnpaidExecutionFrom, AllowTopLevelPaidExecutionFrom, Case,
@@ -34,7 +32,7 @@ use super::TreasuryAccount;
 use crate::{
     configs::{
         asset_config::AccountIdAssetIdConversion, weights, AssetType, Balances, ParachainSystem,
-        Runtime, RuntimeCall, RuntimeEvent, RuntimeOrigin, WeightToFee, XcmpQueue,
+        Runtime, RuntimeCall, RuntimeEvent, RuntimeOrigin, XcmpQueue,
     },
     types::{AccountId, AssetId, Balance},
     AllPalletsWithSystem, AssetManager, Assets, ParachainInfo, PolkadotXcm,
@@ -335,25 +333,12 @@ pub enum CurrencyId {
     SelfReserve,
     // Assets representing other chains native tokens
     ForeignAsset(AssetId),
-    // Erc20 token
-    Erc20 { contract_address: H160 },
 }
 
 impl AccountIdToCurrencyId<AccountId, CurrencyId> for Runtime {
     fn account_to_currency_id(account: AccountId) -> Option<CurrencyId> {
-        Some(match account {
-            // the self-reserve currency is identified by the pallet-balances address
-            a if a == H160::from_low_u64_be(2050).into() => CurrencyId::SelfReserve,
-            // the rest of the currencies, by their corresponding erc20 address
-            _ => match Runtime::account_to_asset_id(account) {
-                // We distinguish by prefix, and depending on it we create either
-                // Foreign or Local
-                Some((_prefix, asset_id)) => CurrencyId::ForeignAsset(asset_id),
-                // If no known prefix is identified, we consider that it's a "real" erc20 token
-                // (i.e. managed by a real smart contract)
-                None => CurrencyId::Erc20 { contract_address: account.into() },
-            },
-        })
+        Runtime::account_to_asset_id(account)
+            .map(|(_prefix, asset_id)| CurrencyId::ForeignAsset(asset_id))
     }
 }
 
@@ -361,7 +346,7 @@ parameter_types! {
     pub PolkadotXcmLocation: Location = Location {
         parents:0,
         interior: [
-            PalletInstance(<PolkadotXcm as PalletInfoAccess>::index() as u8) // is using PolkadotXcm as the location for Erc20 assets correct?
+            PalletInstance(<PolkadotXcm as PalletInfoAccess>::index() as u8)
         ].into()
     };
 }
@@ -380,26 +365,7 @@ where
                 Some(multi)
             }
             CurrencyId::ForeignAsset(asset) => AssetXConverter::convert_back(&asset),
-            CurrencyId::Erc20 { contract_address } => {
-                let mut location = PolkadotXcmLocation::get();
-                location
-                    .push_interior(Junction::AccountKey20 {
-                        key: contract_address.0,
-                        network: None,
-                    })
-                    .ok();
-                Some(location)
-            }
         }
-    }
-}
-
-/// Wrapper type around `LocationToAccountId` to convert an `AccountId` to type `H160`.
-pub struct LocationToH160;
-impl ConvertLocation<H160> for LocationToH160 {
-    fn convert_location(location: &Location) -> Option<H160> {
-        <LocationToAccountId as ConvertLocation<AccountId>>::convert_location(location)
-            .map(Into::into)
     }
 }
 
