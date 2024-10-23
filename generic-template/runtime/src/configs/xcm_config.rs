@@ -23,10 +23,8 @@ use xcm_builder::{
     SovereignSignedViaLocation, TakeWeightCredit, TrailingSetTopicAsId, WithComputedOrigin,
     WithUniqueTopic, XcmFeeManagerFromComponents, XcmFeeToAccount,
 };
-use xcm_executor::{traits::ConvertLocation, XcmExecutor};
-use xcm_primitives::{
-    AbsoluteAndRelativeReserve, AccountIdToCurrencyId, AccountIdToLocation, AsAssetType,
-};
+use xcm_executor::XcmExecutor;
+use xcm_primitives::{AbsoluteAndRelativeReserve, AccountIdToCurrencyId, AsAssetType};
 
 use super::TreasuryAccount;
 use crate::{
@@ -369,8 +367,15 @@ where
     }
 }
 
+pub struct AccountIdToLocation;
+impl Convert<AccountId, Location> for AccountIdToLocation {
+    fn convert(account: AccountId) -> Location {
+        AccountId32 { network: None, id: account.into() }.into()
+    }
+}
+
 impl orml_xtokens::Config for Runtime {
-    type AccountIdToLocation = AccountIdToLocation<AccountId>;
+    type AccountIdToLocation = AccountIdToLocation;
     type Balance = Balance;
     type BaseXcmWeight = BaseXcmWeight;
     type CurrencyId = CurrencyId;
@@ -403,7 +408,7 @@ pub type RemoveSupportedAssetOrigin = EnsureRoot<AccountId>;
 pub type ResumeSupportedAssetOrigin = EnsureRoot<AccountId>;
 
 impl pallet_xcm_weight_trader::Config for Runtime {
-    type AccountIdToLocation = AccountIdToLocation<AccountId>;
+    type AccountIdToLocation = AccountIdToLocation;
     type AddSupportedAssetOrigin = AddSupportedAssetOrigin;
     type AssetLocationFilter = AssetFeesFilter;
     type AssetTransactor = AssetTransactors;
