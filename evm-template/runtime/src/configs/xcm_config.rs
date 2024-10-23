@@ -496,7 +496,6 @@ impl Reserve for DOTReserveProvider {
     fn reserve(asset: &Asset) -> Option<Location> {
         let AssetId(location) = &asset.id;
 
-        // If the location is `{ parents: 1, location: Here }`
         let dot_here = Location::new(1, Here);
         let dot_asset_hub = AssetHubLocation::get();
 
@@ -521,7 +520,6 @@ impl Reserve for BridgedAssetReserveProvider {
             Location { parents, interior: X1(arc) }
                 if *parents > 1 && matches!(arc.as_ref().first(), Some(GlobalConsensus(_))) =>
                 Some(asset_hub_reserve),
-            _ if location == &asset_hub_reserve => Some(asset_hub_reserve), // if the location is AssetHub, we use AssetHub
             _ => None, // Asset doesn't match any known reserve.
         }
     }
