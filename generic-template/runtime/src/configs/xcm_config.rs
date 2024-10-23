@@ -336,8 +336,12 @@ pub enum CurrencyId {
 
 impl AccountIdToCurrencyId<AccountId, CurrencyId> for Runtime {
     fn account_to_currency_id(account: AccountId) -> Option<CurrencyId> {
-        Runtime::account_to_asset_id(account)
-            .map(|(_prefix, asset_id)| CurrencyId::ForeignAsset(asset_id))
+        if pallet_balances::Account::<Runtime>::contains_key(&account) {
+            Some(CurrencyId::SelfReserve)
+        } else {
+            Runtime::account_to_asset_id(account)
+                .map(|(_prefix, asset_id)| CurrencyId::ForeignAsset(asset_id))
+        }
     }
 }
 
