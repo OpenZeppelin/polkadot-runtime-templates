@@ -13,6 +13,7 @@ use pallet_xcm::XcmPassthrough;
 use parity_scale_codec::{Decode, Encode};
 use polkadot_parachain_primitives::primitives::{self, Sibling};
 use scale_info::TypeInfo;
+use sp_runtime::traits::Convert;
 use xcm::latest::prelude::*;
 use xcm_builder::{
     AccountId32Aliases, AllowExplicitUnpaidExecutionFrom, AllowTopLevelPaidExecutionFrom, Case,

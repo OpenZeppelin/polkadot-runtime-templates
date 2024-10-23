@@ -105,10 +105,10 @@ impl From<AssetType> for AssetId {
     fn from(asset: AssetType) -> AssetId {
         match asset {
             AssetType::Xcm(id) => {
-                let mut result: [u8; 16] = [0u8; 16];
+                let mut result: [u8; 4] = [0u8; 4];
                 let hash: H256 = id.using_encoded(<Runtime as frame_system::Config>::Hashing::hash);
-                result.copy_from_slice(&hash.as_fixed_bytes()[0..16]);
-                u128::from_le_bytes(result)
+                result.copy_from_slice(&hash.as_fixed_bytes()[0..4]);
+                u32::from_le_bytes(result)
             }
         }
     }
@@ -194,7 +194,7 @@ pub trait AccountIdAssetIdConversion<Account, AssetId> {
     fn asset_id_to_account(prefix: &[u8], asset_id: AssetId) -> Account;
 }
 
-const FOREIGN_ASSET_PRECOMPILE_ADDRESS_PREFIX: &[u8] = &[255u8; 4];
+const FOREIGN_ASSET_PRECOMPILE_ADDRESS_PREFIX: &[u8] = &[255u8; 28];
 
 // Instruct how to go from an H160 to an AssetID
 // We just take the lowest 128 bits
@@ -202,12 +202,13 @@ impl AccountIdAssetIdConversion<AccountId, AssetId> for Runtime {
     /// The way to convert an account to assetId is by ensuring that the prefix is 0XFFFFFFFF
     /// and by taking the lowest 128 bits as the assetId
     fn account_to_asset_id(account: AccountId) -> Option<(Vec<u8>, AssetId)> {
-        let h160_account: H160 = account.into(); // should be H256?
-        let mut data = [0u8; 16];
-        let (prefix_part, id_part) = h160_account.as_fixed_bytes().split_at(4);
+        let bytes: [u8; 32] = account.into();
+        let h256_account: H256 = bytes.into(); // should be H256?
+        let mut data = [0u8; 4];
+        let (prefix_part, id_part) = h256_account.as_fixed_bytes().split_at(28);
         if prefix_part == FOREIGN_ASSET_PRECOMPILE_ADDRESS_PREFIX {
             data.copy_from_slice(id_part);
-            let asset_id: AssetId = u128::from_be_bytes(data).into();
+            let asset_id: AssetId = u32::from_be_bytes(data).into();
             Some((prefix_part.to_vec(), asset_id))
         } else {
             None
@@ -216,9 +217,9 @@ impl AccountIdAssetIdConversion<AccountId, AssetId> for Runtime {
 
     // The opposite conversion
     fn asset_id_to_account(prefix: &[u8], asset_id: AssetId) -> AccountId {
-        let mut data = [0u8; 20]; // should be 32?
-        data[0..4].copy_from_slice(prefix);
-        data[4..20].copy_from_slice(&asset_id.to_be_bytes()); // should be 4..32?
+        let mut data = [0u8; 32]; // should be 32?
+        data[0..28].copy_from_slice(prefix);
+        data[28..32].copy_from_slice(&asset_id.to_be_bytes()); // should be 4..32?
         AccountId::from(data)
     }
 }
