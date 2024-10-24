@@ -149,6 +149,8 @@ mod runtime {
     pub type Assets = pallet_assets;
     #[runtime::pallet_index(13)]
     pub type Treasury = pallet_treasury;
+    #[runtime::pallet_index(14)]
+    pub type AssetManager = pallet_asset_manager;
 
     // Governance
     #[runtime::pallet_index(15)]

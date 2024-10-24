@@ -21,6 +21,7 @@ pub mod block_weights;
 pub mod cumulus_pallet_parachain_system;
 pub mod cumulus_pallet_xcmp_queue;
 pub mod extrinsic_weights;
+pub mod pallet_asset_manager;
 pub mod pallet_assets;
 pub mod pallet_balances;
 pub mod pallet_collator_selection;
