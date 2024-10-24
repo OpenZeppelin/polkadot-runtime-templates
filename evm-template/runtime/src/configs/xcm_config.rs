@@ -10,8 +10,8 @@ use orml_xcm_support::MultiNativeAsset;
 use pallet_xcm::XcmPassthrough;
 use parity_scale_codec::{Decode, Encode};
 use polkadot_parachain_primitives::primitives::{self, Sibling};
-use sp_runtime::{Vec, traits::MaybeEquivalence};
 use scale_info::TypeInfo;
+use sp_runtime::{traits::MaybeEquivalence, Vec};
 use xcm::latest::prelude::{Assets as XcmAssets, *};
 use xcm_builder::{
     AccountKey20Aliases, AllowExplicitUnpaidExecutionFrom, AllowTopLevelPaidExecutionFrom, Case,
@@ -426,13 +426,13 @@ impl XcmTransact for Transactors {
 }
 
 parameter_types! {
-	pub MaxHrmpRelayFee: Asset = (Location::parent(), 1_000_000_000_000u128).into();
+    pub MaxHrmpRelayFee: Asset = (Location::parent(), 1_000_000_000_000u128).into();
     pub SelfReserve: Location = Location {
-		parents:0,
-		interior: [
-			PalletInstance(<Balances as PalletInfoAccess>::index() as u8)
-		].into()
-	};
+        parents:0,
+        interior: [
+            PalletInstance(<Balances as PalletInfoAccess>::index() as u8)
+        ].into()
+    };
 }
 
 impl pallet_xcm_transactor::Config for Runtime {
@@ -462,39 +462,28 @@ impl pallet_xcm_transactor::Config for Runtime {
 // Our currencyId. We distinguish for now between SelfReserve, and Others, defined by their Id.
 #[derive(Clone, Eq, Debug, PartialEq, Ord, PartialOrd, Encode, Decode, TypeInfo)]
 pub enum CurrencyId {
-	SelfReserve,
-	ForeignAsset(AssetId),
+    SelfReserve,
+    ForeignAsset(AssetId),
 }
 
 // How to convert from CurrencyId to Location
 pub struct CurrencyIdToLocation<AssetXConverter>(sp_std::marker::PhantomData<AssetXConverter>);
 impl<AssetXConverter> sp_runtime::traits::Convert<CurrencyId, Option<Location>>
-	for CurrencyIdToLocation<AssetXConverter>
+    for CurrencyIdToLocation<AssetXConverter>
 where
-	AssetXConverter: MaybeEquivalence<Location, AssetId>,
+    AssetXConverter: MaybeEquivalence<Location, AssetId>,
 {
-	fn convert(currency: CurrencyId) -> Option<Location> {
-		match currency {
-			CurrencyId::SelfReserve => {
-				let multi: Location = SelfReserve::get();
-				Some(multi)
-			}
-			CurrencyId::ForeignAsset(asset) => AssetXConverter::convert_back(&asset),
-		}
-	}
-}
-
-parameter_types! {
-	/// The amount of weight an XCM operation takes. This is safe overestimate.
-	pub UnitWeightCost: Weight = Weight::from_parts(200_000_000u64, 0);
-	/// Maximum number of instructions in a single XCM fragment. A sanity check against
-	/// weight caculations getting too crazy.
-	pub MaxInstructions: u32 = 100;
+    fn convert(currency: CurrencyId) -> Option<Location> {
+        match currency {
+            CurrencyId::SelfReserve => {
+                let multi: Location = SelfReserve::get();
+                Some(multi)
+            }
+            CurrencyId::ForeignAsset(asset) => AssetXConverter::convert_back(&asset),
+        }
+    }
 }
 
 /// Xcm Weigher shared between multiple Xcm-related configs.
-pub type XcmWeigher = WeightInfoBounds<
-	weights::XcmWeight<Runtime, RuntimeCall>,
-	RuntimeCall,
-	MaxInstructions,
->;
+pub type XcmWeigher =
+    WeightInfoBounds<weights::XcmWeight<Runtime, RuntimeCall>, RuntimeCall, MaxInstructions>;
