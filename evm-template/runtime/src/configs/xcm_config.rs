@@ -536,11 +536,14 @@ impl Reserve for BridgedAssetReserveProvider {
 
         let asset_hub_reserve = AssetHubLocation::get();
 
-        match location {
-            Location { parents, interior: X1(arc) }
-                if *parents > 1 && matches!(arc.as_ref().first(), Some(GlobalConsensus(_))) =>
-                Some(asset_hub_reserve),
-            _ => None, // Asset doesn't match any known reserve.
+        // any asset that has parents > 1 and interior that starts with GlobalConsensus(_) pattern can be considered a bridged asset.
+        if location.parents > 1 {
+            // `split_global` will return an `Err` if the first item is not a `GlobalConsensus`
+            if location.interior.split_global().is_ok() {
+                return Some(asset_hub_reserve);
+            }
+        } else {
+            None
         }
     }
 }
