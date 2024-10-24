@@ -517,7 +517,7 @@ impl Reserve for BridgedAssetReserveProvider {
         //
         // `split_global` will return an `Err` if the first item is not a `GlobalConsensus`
         if location.parents > 1 && location.interior.clone().split_global().is_ok() {
-            return Some(asset_hub_reserve);
+            Some(asset_hub_reserve)
         } else {
             None
         }
