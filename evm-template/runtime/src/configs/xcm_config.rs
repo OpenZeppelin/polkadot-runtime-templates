@@ -13,6 +13,7 @@ use parity_scale_codec::{Decode, Encode};
 use polkadot_parachain_primitives::primitives::{self, Sibling};
 use scale_info::TypeInfo;
 use sp_core::H160;
+use sp_runtime::Vec;
 use xcm::latest::prelude::{Assets as XcmAssets, *};
 use xcm_builder::{
     AccountKey20Aliases, AllowExplicitUnpaidExecutionFrom, AllowTopLevelPaidExecutionFrom, Case,
@@ -27,7 +28,10 @@ use xcm_executor::{
     traits::{ConvertLocation, FeeReason, JustTry, TransactAsset},
     XcmExecutor,
 };
-use xcm_primitives::{AbsoluteAndRelativeReserve, AccountIdToLocation, AsAssetType};
+use xcm_primitives::{
+    AbsoluteAndRelativeReserve, AccountIdToLocation, AsAssetType, UtilityAvailableCalls,
+    UtilityEncodeCall, XcmTransact,
+};
 
 use crate::{
     configs::{
@@ -586,4 +590,79 @@ impl pallet_xcm_weight_trader::Config for Runtime {
     type WeightInfo = weights::pallet_xcm_weight_trader::WeightInfo<Runtime>;
     type WeightToFee = <Runtime as pallet_transaction_payment::Config>::WeightToFee;
     type XcmFeesAccount = TreasuryAccount;
+}
+
+// For now we only allow to transact in the relay, although this might change in the future
+// Transactors just defines the chains in which we allow transactions to be issued through
+// xcm
+#[derive(Clone, Eq, Debug, PartialEq, Ord, PartialOrd, Encode, Decode, TypeInfo)]
+pub enum Transactors {
+    Relay,
+}
+
+// Default for benchmarking
+#[cfg(feature = "runtime-benchmarks")]
+impl Default for Transactors {
+    fn default() -> Self {
+        Transactors::Relay
+    }
+}
+
+impl TryFrom<u8> for Transactors {
+    type Error = ();
+
+    fn try_from(value: u8) -> Result<Self, Self::Error> {
+        match value {
+            0u8 => Ok(Transactors::Relay),
+            _ => Err(()),
+        }
+    }
+}
+
+impl UtilityEncodeCall for Transactors {
+    fn encode_call(self, call: UtilityAvailableCalls) -> Vec<u8> {
+        match self {
+            Transactors::Relay => pallet_xcm_transactor::Pallet::<Runtime>::encode_call(
+                pallet_xcm_transactor::Pallet(sp_std::marker::PhantomData::<Runtime>),
+                call,
+            ),
+        }
+    }
+}
+
+impl XcmTransact for Transactors {
+    fn destination(self) -> Location {
+        match self {
+            Transactors::Relay => Location::parent(),
+        }
+    }
+}
+
+parameter_types! {
+    pub MaxHrmpRelayFee: Asset = (Location::parent(), 1_000_000_000_000u128).into();
+}
+
+// make origin types like his PR
+
+impl pallet_xcm_transactor::Config for Runtime {
+    type AccountIdToLocation = AccountIdToLocation<AccountId>;
+    type AssetTransactor = AssetTransactors;
+    type Balance = Balance;
+    type BaseXcmWeight = BaseXcmWeight;
+    type CurrencyId = CurrencyId;
+    type CurrencyIdToLocation = CurrencyIdToLocation<AsAssetType<AssetId, AssetType, AssetManager>>;
+    type DerivativeAddressRegistrationOrigin = EnsureRoot<AccountId>;
+    type HrmpManipulatorOrigin = EnsureRoot<AccountId>;
+    type HrmpOpenOrigin = EnsureRoot<AccountId>;
+    type MaxHrmpFee = xcm_builder::Case<MaxHrmpRelayFee>;
+    type ReserveProvider = AbsoluteAndRelativeReserve<SelfLocationAbsolute>;
+    type RuntimeEvent = RuntimeEvent;
+    type SelfLocation = SelfLocation;
+    type SovereignAccountDispatcherOrigin = EnsureRoot<AccountId>;
+    type Transactor = Transactors;
+    type UniversalLocation = UniversalLocation;
+    type Weigher = XcmWeigher;
+    // TODO set
+    type WeightInfo = ();
+    type XcmSender = XcmRouter;
 }

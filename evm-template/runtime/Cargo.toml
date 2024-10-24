@@ -104,7 +104,7 @@ pallet-asset-manager = { workspace = true }
 pallet-erc20-xcm-bridge = { workspace = true }
 pallet-xcm-weight-trader = { workspace = true }
 xcm-primitives = { workspace = true }
-
+pallet-xcm-transactor = { workspace = true }
 
 [dev-dependencies]
 sp-io = { workspace = true }
@@ -167,6 +167,7 @@ std = [
 	"pallet-whitelist/std",
 	"pallet-xcm-weight-trader/std",
 	"pallet-xcm/std",
+	"pallet-xcm-transactor/std",
 	"parachain-info/std",
 	"parachains-common/std",
 	"parity-scale-codec/std",
@@ -224,6 +225,7 @@ runtime-benchmarks = [
 	"pallet-whitelist/runtime-benchmarks",
 	"pallet-xcm-weight-trader/runtime-benchmarks",
 	"pallet-xcm/runtime-benchmarks",
+	"pallet-xcm-transactor/runtime-benchmarks",
 	"parachains-common/runtime-benchmarks",
 	"polkadot-parachain-primitives/runtime-benchmarks",
 	"polkadot-runtime-common/runtime-benchmarks",

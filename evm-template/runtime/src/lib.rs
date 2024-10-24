@@ -253,6 +253,8 @@ mod runtime {
     pub type XTokens = orml_xtokens;
     #[runtime::pallet_index(35)]
     pub type XcmWeightTrader = pallet_xcm_weight_trader;
+    #[runtime::pallet_index(36)]
+    pub type XcmTransactor = pallet_xcm_transactor;
 
     // EVM
     #[runtime::pallet_index(40)]
