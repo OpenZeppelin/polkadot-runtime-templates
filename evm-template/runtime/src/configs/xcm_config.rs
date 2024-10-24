@@ -13,9 +13,7 @@ use parity_scale_codec::{Decode, Encode};
 use polkadot_parachain_primitives::primitives::{self, Sibling};
 use scale_info::TypeInfo;
 use sp_core::H160;
-use xcm::{
-    latest::prelude::{Assets as XcmAssets, *},
-};
+use xcm::latest::prelude::{Assets as XcmAssets, *};
 use xcm_builder::{
     AccountKey20Aliases, AllowExplicitUnpaidExecutionFrom, AllowTopLevelPaidExecutionFrom, Case,
     ConvertedConcreteId, DenyReserveTransferToRelayChain, DenyThenTry, EnsureXcmOrigin,
@@ -29,14 +27,11 @@ use xcm_executor::{
     traits::{ConvertLocation, FeeReason, JustTry, TransactAsset},
     XcmExecutor,
 };
-use xcm_primitives::{
-    AbsoluteAndRelativeReserve, AccountIdToLocation, AsAssetType,
-};
+use xcm_primitives::{AbsoluteAndRelativeReserve, AccountIdToLocation, AsAssetType};
 
 use crate::{
     configs::{
-         AssetType, ParachainSystem, Runtime, RuntimeCall,
-        RuntimeEvent, RuntimeOrigin, XcmpQueue,
+        AssetType, ParachainSystem, Runtime, RuntimeCall, RuntimeEvent, RuntimeOrigin, XcmpQueue,
     },
     types::{AccountId, AssetId, Balance},
     weights, AllPalletsWithSystem, AssetManager, Assets, Balances, Erc20XcmBridge, ParachainInfo,
