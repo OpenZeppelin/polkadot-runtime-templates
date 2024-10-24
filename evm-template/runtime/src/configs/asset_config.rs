@@ -33,10 +33,10 @@ pallet_assets::runtime_benchmarks_enabled! {
     pub struct BenchmarkHelper;
     impl<AssetIdParameter> pallet_assets::BenchmarkHelper<AssetIdParameter> for BenchmarkHelper
     where
-        AssetIdParameter: From<u32>,
+        AssetIdParameter: From<u128>,
     {
         fn create_asset_id_parameter(id: u32) -> AssetIdParameter {
-            (id as u32).into()
+            (id as u128).into()
         }
     }
 }
