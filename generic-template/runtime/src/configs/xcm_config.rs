@@ -7,7 +7,7 @@ use frame_support::{
     weights::Weight,
 };
 use frame_system::EnsureRoot;
-use orml_traits::parameter_type_with_key;
+use orml_traits::{location::Reserve, parameter_type_with_key};
 use orml_xcm_support::MultiNativeAsset;
 use pallet_xcm::XcmPassthrough;
 use parity_scale_codec::{Decode, Encode};
@@ -25,12 +25,12 @@ use xcm_builder::{
     WithUniqueTopic, XcmFeeManagerFromComponents, XcmFeeToAccount,
 };
 use xcm_executor::XcmExecutor;
-use xcm_primitives::{AbsoluteAndRelativeReserve, AccountIdToCurrencyId, AsAssetType};
+use xcm_primitives::{AbsoluteAndRelativeReserve, AsAssetType};
 
 use super::TreasuryAccount;
 use crate::{
     configs::{
-        asset_config::AccountIdAssetIdConversion, weights, AssetType, Balances, ParachainSystem,
+        weights, AssetType, Balances, ParachainSystem,
         Runtime, RuntimeCall, RuntimeEvent, RuntimeOrigin, XcmpQueue,
     },
     types::{AccountId, AssetId, Balance},
@@ -334,17 +334,6 @@ pub enum CurrencyId {
     ForeignAsset(AssetId),
 }
 
-impl AccountIdToCurrencyId<AccountId, CurrencyId> for Runtime {
-    fn account_to_currency_id(account: AccountId) -> Option<CurrencyId> {
-        if pallet_balances::Account::<Runtime>::contains_key(&account) {
-            Some(CurrencyId::SelfReserve)
-        } else {
-            Runtime::account_to_asset_id(account)
-                .map(|(_prefix, asset_id)| CurrencyId::ForeignAsset(asset_id))
-        }
-    }
-}
-
 parameter_types! {
     pub PolkadotXcmLocation: Location = Location {
         parents:0,
@@ -379,6 +368,75 @@ impl Convert<AccountId, Location> for AccountIdToLocation {
     }
 }
 
+/// The `DOTReserveProvider` overrides the default reserve location for DOT (Polkadot's native token).
+///
+/// DOT can exist in multiple locations, and this provider ensures that the reserve is correctly set
+/// to the AssetHub parachain.
+///
+/// - **Default Location:** `{ parents: 1, location: Here }`
+/// - **Reserve Location on AssetHub:** `{ parents: 1, location: X1(Parachain(AssetHubParaId)) }`
+///
+/// This provider ensures that if the asset's ID points to the default "Here" location,
+/// it will instead be mapped to the AssetHub parachain.
+pub struct DOTReserveProvider;
+
+impl Reserve for DOTReserveProvider {
+    fn reserve(asset: &Asset) -> Option<Location> {
+        let AssetId(location) = &asset.id;
+
+        let dot_here = Location::new(1, Here);
+        let dot_asset_hub = AssetHubLocation::get();
+
+        if location == &dot_here {
+            Some(dot_asset_hub) // Reserve is on AssetHub.
+        } else {
+            None
+        }
+    }
+}
+
+/// The `BridgedAssetReserveProvider` handles assets that are bridged from external consensus systems
+/// (e.g., Ethereum) and may have multiple valid reserve locations.
+///
+/// Specifically, these bridged assets can have two known reserves:
+/// 1. **Ethereum-based Reserve:**
+///    `{ parents: 1, location: X1(GlobalConsensus(Ethereum{ chain_id: 1 })) }`
+/// 2. **AssetHub Parachain Reserve:**
+///    `{ parents: 1, location: X1(Parachain(AssetHubParaId)) }`
+///
+/// This provider maps the reserve for bridged assets to AssetHub when the asset originates
+/// from a global consensus system, such as Ethereum.
+pub struct BridgedAssetReserveProvider;
+
+impl Reserve for BridgedAssetReserveProvider {
+    fn reserve(asset: &Asset) -> Option<Location> {
+        let AssetId(location) = &asset.id;
+
+        let asset_hub_reserve = AssetHubLocation::get();
+
+        // any asset that has parents > 1 and interior that starts with GlobalConsensus(_) pattern
+        // can be considered a bridged asset.
+        //
+        // `split_global` will return an `Err` if the first item is not a `GlobalConsensus`
+        if location.parents > 1 && location.interior.clone().split_global().is_ok() {
+            Some(asset_hub_reserve)
+        } else {
+            None
+        }
+    }
+}
+
+pub struct ReserveProviders;
+
+impl Reserve for ReserveProviders {
+    fn reserve(asset: &Asset) -> Option<Location> {
+        // Try each provider's reserve method in sequence.
+        DOTReserveProvider::reserve(asset)
+            .or_else(|| BridgedAssetReserveProvider::reserve(asset))
+            .or_else(|| AbsoluteAndRelativeReserve::<SelfLocationAbsolute>::reserve(asset))
+    }
+}
+
 impl orml_xtokens::Config for Runtime {
     type AccountIdToLocation = AccountIdToLocation;
     type Balance = Balance;
@@ -390,7 +448,7 @@ impl orml_xtokens::Config for Runtime {
     type MinXcmFee = ParachainMinFee;
     type RateLimiter = ();
     type RateLimiterId = ();
-    type ReserveProvider = AbsoluteAndRelativeReserve<SelfLocationAbsolute>;
+    type ReserveProvider = ReserveProviders;
     type RuntimeEvent = RuntimeEvent;
     type SelfLocation = SelfLocation;
     type UniversalLocation = UniversalLocation;
