@@ -15,7 +15,6 @@ use scale_info::TypeInfo;
 use sp_core::H160;
 use xcm::{
     latest::prelude::{Assets as XcmAssets, *},
-    opaque::lts::Junctions::X1,
 };
 use xcm_builder::{
     AccountKey20Aliases, AllowExplicitUnpaidExecutionFrom, AllowTopLevelPaidExecutionFrom, Case,
@@ -31,12 +30,12 @@ use xcm_executor::{
     XcmExecutor,
 };
 use xcm_primitives::{
-    AbsoluteAndRelativeReserve, AccountIdToCurrencyId, AccountIdToLocation, AsAssetType,
+    AbsoluteAndRelativeReserve, AccountIdToLocation, AsAssetType,
 };
 
 use crate::{
     configs::{
-        asset_config::AccountIdAssetIdConversion, AssetType, ParachainSystem, Runtime, RuntimeCall,
+         AssetType, ParachainSystem, Runtime, RuntimeCall,
         RuntimeEvent, RuntimeOrigin, XcmpQueue,
     },
     types::{AccountId, AssetId, Balance},
@@ -412,24 +411,6 @@ pub enum CurrencyId {
     Erc20 { contract_address: H160 },
 }
 
-impl AccountIdToCurrencyId<AccountId, CurrencyId> for Runtime {
-    fn account_to_currency_id(account: AccountId) -> Option<CurrencyId> {
-        Some(match account {
-            // pallet_balances only store information about the native token
-            // if the account is found in the balances pallet, it's our native token
-            a if pallet_balances::Account::<Runtime>::contains_key(a) => CurrencyId::SelfReserve,
-            // the rest of the currencies, by their corresponding erc20 address
-            _ => match Runtime::account_to_asset_id(account) {
-                // We distinguish by prefix, and depending on it we create either
-                // Foreign or Local
-                Some((_prefix, asset_id)) => CurrencyId::ForeignAsset(asset_id),
-                // If no known prefix is identified, we consider that it's a "real" erc20 token
-                // (i.e. managed by a real smart contract)
-                None => CurrencyId::Erc20 { contract_address: account.into() },
-            },
-        })
-    }
-}
 // How to convert from CurrencyId to Location
 pub struct CurrencyIdToLocation<AssetXConverter>(sp_std::marker::PhantomData<AssetXConverter>);
 impl<AssetXConverter> sp_runtime::traits::Convert<CurrencyId, Option<Location>>
@@ -536,12 +517,12 @@ impl Reserve for BridgedAssetReserveProvider {
 
         let asset_hub_reserve = AssetHubLocation::get();
 
-        // any asset that has parents > 1 and interior that starts with GlobalConsensus(_) pattern can be considered a bridged asset.
-        if location.parents > 1 {
-            // `split_global` will return an `Err` if the first item is not a `GlobalConsensus`
-            if location.interior.split_global().is_ok() {
-                return Some(asset_hub_reserve);
-            }
+        // any asset that has parents > 1 and interior that starts with GlobalConsensus(_) pattern
+        // can be considered a bridged asset.
+        //
+        // `split_global` will return an `Err` if the first item is not a `GlobalConsensus`
+        if location.parents > 1 && location.interior.clone().split_global().is_ok() {
+            return Some(asset_hub_reserve);
         } else {
             None
         }
