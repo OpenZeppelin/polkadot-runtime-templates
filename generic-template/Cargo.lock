@@ -3659,6 +3659,7 @@ dependencies = [
  "pallet-utility",
  "pallet-whitelist",
  "pallet-xcm",
+ "pallet-xcm-transactor",
  "pallet-xcm-weight-trader",
  "parachains-common",
  "parity-scale-codec",
@@ -7574,6 +7575,29 @@ dependencies = [
  "staging-xcm",
  "staging-xcm-builder",
  "staging-xcm-executor",
+]
+
+[[package]]
+name = "pallet-xcm-transactor"
+version = "0.2.0"
+source = "git+https://github.com/OpenZeppelin/moonbeam.git?branch=polkadot-stable2407-1#fab6e72fbaaeaa065ad983556d09d4c0e8755dfa"
+dependencies = [
+ "cumulus-primitives-core",
+ "frame-benchmarking",
+ "frame-support",
+ "frame-system",
+ "log",
+ "orml-traits",
+ "parity-scale-codec",
+ "scale-info",
+ "serde",
+ "sp-io",
+ "sp-runtime",
+ "sp-std",
+ "staging-xcm",
+ "staging-xcm-builder",
+ "staging-xcm-executor",
+ "xcm-primitives",
 ]
 
 [[package]]
