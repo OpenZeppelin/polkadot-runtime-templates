@@ -415,8 +415,9 @@ pub enum CurrencyId {
 impl AccountIdToCurrencyId<AccountId, CurrencyId> for Runtime {
     fn account_to_currency_id(account: AccountId) -> Option<CurrencyId> {
         Some(match account {
-            // the self-reserve currency is identified by the pallet-balances address
-            a if a == H160::from_low_u64_be(2050).into() => CurrencyId::SelfReserve, // TODO: `2050` represents the pallet-balances erc20 precompile address
+            // pallet_balances only store information about the native token
+            // if the account is found in the balances pallet, it's our native token
+            a if pallet_balances::Account::<Runtime>::contains_key(a) => CurrencyId::SelfReserve,
             // the rest of the currencies, by their corresponding erc20 address
             _ => match Runtime::account_to_asset_id(account) {
                 // We distinguish by prefix, and depending on it we create either
@@ -489,7 +490,16 @@ impl pallet_erc20_xcm_bridge::Config for Runtime {
     type EvmRunner = pallet_evm::runner::stack::Runner<Self>;
 }
 
-/// Provider for the DOT asset reserve.
+/// The `DOTReserveProvider` overrides the default reserve location for DOT (Polkadot's native token).
+///
+/// DOT can exist in multiple locations, and this provider ensures that the reserve is correctly set
+/// to the AssetHub parachain.
+///
+/// - **Default Location:** `{ parents: 1, location: Here }`
+/// - **Reserve Location on AssetHub:** `{ parents: 1, location: X1(Parachain(AssetHubParaId)) }`
+///
+/// This provider ensures that if the asset's ID points to the default "Here" location,
+/// it will instead be mapped to the AssetHub parachain.
 pub struct DOTReserveProvider;
 
 impl Reserve for DOTReserveProvider {
@@ -507,7 +517,17 @@ impl Reserve for DOTReserveProvider {
     }
 }
 
-/// Provider for bridged assets' reserve.
+/// The `BridgedAssetReserveProvider` handles assets that are bridged from external consensus systems
+/// (e.g., Ethereum) and may have multiple valid reserve locations.
+///
+/// Specifically, these bridged assets can have two known reserves:
+/// 1. **Ethereum-based Reserve:**
+///    `{ parents: 1, location: X1(GlobalConsensus(Ethereum{ chain_id: 1 })) }`
+/// 2. **AssetHub Parachain Reserve:**
+///    `{ parents: 1, location: X1(Parachain(AssetHubParaId)) }`
+///
+/// This provider maps the reserve for bridged assets to AssetHub when the asset originates
+/// from a global consensus system, such as Ethereum.
 pub struct BridgedAssetReserveProvider;
 
 impl Reserve for BridgedAssetReserveProvider {
