@@ -421,7 +421,7 @@ where
             }
             CurrencyId::ForeignAsset(asset) => AssetXConverter::convert_back(&asset),
             CurrencyId::Erc20 { contract_address } => {
-                let mut location = Erc20XcmBridgePalletLocation::get(); // TODO: if we do not have an alternative, we need to import this pallet from moonbeam
+                let mut location = Erc20XcmBridgePalletLocation::get();
                 location
                     .push_interior(Junction::AccountKey20 {
                         key: contract_address.0,
