@@ -669,3 +669,34 @@ impl pallet_xcm_transactor::Config for Runtime {
     type WeightInfo = weights::pallet_xcm_transactor::WeightInfo<Runtime>;
     type XcmSender = XcmRouter;
 }
+
+#[cfg(feature = "runtime-benchmarks")]
+mod testing {
+    use xcm_builder::V4V3LocationConverter;
+
+    use super::*;
+
+    /// This From exists for benchmarking purposes. It has the potential side-effect of calling
+    /// AssetManager::set_asset_type_asset_id() and should NOT be used in any production code.
+    impl From<Location> for CurrencyId {
+        fn from(location: Location) -> CurrencyId {
+            use xcm_primitives::AssetTypeGetter;
+
+            // If it does not exist, for benchmarking purposes, we create the association
+            let asset_id = if let Some(asset_id) =
+                AsAssetType::<AssetId, AssetType, AssetManager>::convert_location(&location)
+            {
+                asset_id
+            } else {
+                let asset_type = AssetType::Xcm(
+                    V4V3LocationConverter::convert(&location).expect("convert to v3"),
+                );
+                let asset_id: AssetId = asset_type.clone().into();
+                AssetManager::set_asset_type_asset_id(asset_type, asset_id);
+                asset_id
+            };
+
+            CurrencyId::ForeignAsset(asset_id)
+        }
+    }
+}
