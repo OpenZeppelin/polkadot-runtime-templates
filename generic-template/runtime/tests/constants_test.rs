@@ -21,8 +21,8 @@ mod constant_tests {
 mod runtime_tests {
     use frame_support::{pallet_prelude::Weight, traits::TypedGet, PalletId};
     use generic_runtime_template::{
-        configs::*,
-        constants::{asset_config::*, currency::*, *},
+        configs::{asset_config::*, *},
+        constants::{currency::*, *},
         *,
     };
     use sp_runtime::create_runtime_str;
