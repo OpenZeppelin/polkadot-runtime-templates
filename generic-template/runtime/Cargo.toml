@@ -239,6 +239,7 @@ try-runtime = [
 	"pallet-treasury/try-runtime",
 	"pallet-utility/try-runtime",
 	"pallet-whitelist/try-runtime",
+	"pallet-xcm-transactor/try-runtime",
 	"pallet-xcm-weight-trader/try-runtime",
 	"pallet-xcm/try-runtime",
 	"parachain-info/try-runtime",
