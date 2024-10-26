@@ -22,7 +22,7 @@ mod runtime_tests {
     use frame_support::{pallet_prelude::Weight, traits::TypedGet, PalletId};
     use generic_runtime_template::{
         configs::*,
-        constants::{currency::*, *},
+        constants::{asset_config::*, currency::*, *},
         *,
     };
     use sp_runtime::create_runtime_str;
