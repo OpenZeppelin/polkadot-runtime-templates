@@ -672,6 +672,7 @@ impl pallet_xcm_transactor::Config for Runtime {
 
 #[cfg(feature = "runtime-benchmarks")]
 mod testing {
+    use sp_runtime::traits::MaybeEquivalence;
     use xcm_builder::WithLatestLocationConverter;
 
     use super::*;
