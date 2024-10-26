@@ -672,7 +672,7 @@ impl pallet_xcm_transactor::Config for Runtime {
 
 #[cfg(feature = "runtime-benchmarks")]
 mod testing {
-    use xcm_builder::V4V3LocationConverter;
+    use xcm_builder::WithLatestLocationConverter;
 
     use super::*;
 
@@ -689,7 +689,7 @@ mod testing {
                 asset_id
             } else {
                 let asset_type = AssetType::Xcm(
-                    V4V3LocationConverter::convert(&location).expect("convert to v3"),
+                    WithLatestLocationConverter::convert(&location).expect("convert to v3"),
                 );
                 let asset_id: AssetId = asset_type.clone().into();
                 AssetManager::set_asset_type_asset_id(asset_type, asset_id);
