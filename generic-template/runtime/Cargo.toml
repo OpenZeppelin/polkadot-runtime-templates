@@ -255,6 +255,4 @@ on-chain-release-build = ["sp-api/disable-logging"]
 
 async-backing = []
 
-default = ["std"]
-
 metadata-hash = ["substrate-wasm-builder/metadata-hash"]
