@@ -542,7 +542,11 @@ parameter_types! {
     pub MaxHrmpRelayFee: Asset = (Location::parent(), 1_000_000_000_000u128).into();
 }
 
-// TODO: make origin types
+// implement your own business logic for who can manage and use xcm-transactor
+pub type DerivativeAddressRegistrationOrigin = EnsureRoot<AccountId>;
+pub type HrmpManipulatorOrigin = EnsureRoot<AccountId>;
+pub type HrmpOpenOrigin = EnsureRoot<AccountId>;
+pub type SovereignAccountDispatcherOrigin = EnsureRoot<AccountId>;
 
 impl pallet_xcm_transactor::Config for Runtime {
     type AccountIdToLocation = AccountIdToLocation;
@@ -551,18 +555,17 @@ impl pallet_xcm_transactor::Config for Runtime {
     type BaseXcmWeight = BaseXcmWeight;
     type CurrencyId = CurrencyId;
     type CurrencyIdToLocation = CurrencyIdToLocation<AsAssetType<AssetId, AssetType, AssetManager>>;
-    type DerivativeAddressRegistrationOrigin = EnsureRoot<AccountId>;
-    type HrmpManipulatorOrigin = EnsureRoot<AccountId>;
-    type HrmpOpenOrigin = EnsureRoot<AccountId>;
+    type DerivativeAddressRegistrationOrigin = DerivativeAddressRegistrationOrigin;
+    type HrmpManipulatorOrigin = HrmpManipulatorOrigin;
+    type HrmpOpenOrigin = HrmpOpenOrigin;
     type MaxHrmpFee = xcm_builder::Case<MaxHrmpRelayFee>;
     type ReserveProvider = AbsoluteAndRelativeReserve<SelfLocationAbsolute>;
     type RuntimeEvent = RuntimeEvent;
     type SelfLocation = SelfLocation;
-    type SovereignAccountDispatcherOrigin = EnsureRoot<AccountId>;
+    type SovereignAccountDispatcherOrigin = SovereignAccountDispatcherOrigin;
     type Transactor = Transactors;
     type UniversalLocation = UniversalLocation;
     type Weigher = XcmWeigher;
-    // TODO set
-    type WeightInfo = ();
+    type WeightInfo = weights::pallet_xcm_transactor::WeightInfo<Runtime>;
     type XcmSender = XcmRouter;
 }
