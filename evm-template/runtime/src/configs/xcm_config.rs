@@ -219,7 +219,7 @@ parameter_types! {
    );
 }
 
-type Reserves = (
+pub type Reserves = (
     // Assets bridged from different consensus systems held in reserve on Asset Hub.
     IsBridgedConcreteAssetFrom<AssetHubLocation>,
     // Relaychain (DOT) from Asset Hub

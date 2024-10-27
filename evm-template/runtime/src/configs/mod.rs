@@ -42,7 +42,7 @@ use scale_info::TypeInfo;
 use sp_consensus_aura::sr25519::AuthorityId as AuraId;
 use sp_core::{H160, U256};
 use sp_runtime::{
-    traits::{AccountIdLookup, BlakeTwo256, IdentityLookup},
+    traits::{BlakeTwo256, IdentityLookup},
     ConsensusEngineId, Perbill, Permill, RuntimeDebug,
 };
 use sp_std::marker::PhantomData;
@@ -62,7 +62,7 @@ use xcm_builder::{
 // XCM imports
 use xcm_config::{
     AssetTransactors, BalancesPalletLocation, FeeManager, LocalOriginToLocation,
-    LocationToAccountId, XcmOriginToTransactDispatchOrigin,
+    LocationToAccountId, Reserves, XcmOriginToTransactDispatchOrigin,
 };
 use xcm_executor::{
     traits::{FeeReason, JustTry, TransactAsset},
@@ -72,13 +72,11 @@ use xcm_primitives::AsAssetType;
 
 #[cfg(feature = "runtime-benchmarks")]
 use crate::benchmark::{OpenHrmpChannel, PayWithEnsure};
-#[cfg(feature = "async-backing")]
-use crate::constants::SLOT_DURATION;
 use crate::{
     constants::{
         currency::{deposit, CENTS, EXISTENTIAL_DEPOSIT, GRAND, MICROCENTS},
         AVERAGE_ON_INITIALIZE_RATIO, DAYS, HOURS, MAXIMUM_BLOCK_WEIGHT, MAX_BLOCK_LENGTH,
-        NORMAL_DISPATCH_RATIO, VERSION, WEIGHT_PER_GAS,
+        NORMAL_DISPATCH_RATIO, SLOT_DURATION, VERSION, WEIGHT_PER_GAS,
     },
     opaque,
     types::{
@@ -105,6 +103,7 @@ pub struct OpenZeppelinConfig;
 impl SystemConfig for OpenZeppelinConfig {
     type AccountId = AccountId;
     type ExistentialDeposit = ExistentialDeposit;
+    type Lookup = IdentityLookup<AccountId>;
     type PreimageOrigin = EnsureRoot<AccountId>;
     type SS58Prefix = SS58Prefix;
     type ScheduleOrigin = EnsureRoot<AccountId>;
@@ -158,6 +157,7 @@ impl XcmConfig for OpenZeppelinConfig {
     type MessageQueueHeapSize = HeapSize;
     type MessageQueueMaxStale = MaxStale;
     type MessageQueueServiceWeight = MessageQueueServiceWeight;
+    type Reserves = Reserves;
     type Trader = (
         UsingComponents<WeightToFee, BalancesPalletLocation, AccountId, Balances, ()>,
         xcm_primitives::FirstAssetTrader<AssetType, AssetManager, XcmFeesToAccount>,

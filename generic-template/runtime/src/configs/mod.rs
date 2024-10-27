@@ -1,3 +1,4 @@
+pub mod asset_config;
 pub mod governance;
 pub mod xcm_config;
 
@@ -36,7 +37,7 @@ use polkadot_runtime_wrappers::{
 use scale_info::TypeInfo;
 use sp_consensus_aura::sr25519::AuthorityId as AuraId;
 use sp_runtime::{
-    traits::{AccountIdLookup, BlakeTwo256, IdentityLookup},
+    traits::{AccountIdLookup, BlakeTwo256},
     Perbill, Permill, RuntimeDebug,
 };
 use sp_version::RuntimeVersion;
@@ -62,7 +63,7 @@ use crate::{
     constants::{
         currency::{deposit, CENTS, EXISTENTIAL_DEPOSIT, GRAND, MICROCENTS},
         AVERAGE_ON_INITIALIZE_RATIO, DAYS, HOURS, MAXIMUM_BLOCK_WEIGHT, MAX_BLOCK_LENGTH,
-        NORMAL_DISPATCH_RATIO, VERSION,
+        NORMAL_DISPATCH_RATIO, SLOT_DURATION, VERSION,
     },
     types::{
         AccountId, AssetKind, Balance, Beneficiary, Block, BlockNumber,
@@ -87,6 +88,7 @@ pub struct OpenZeppelinConfig;
 impl SystemConfig for OpenZeppelinConfig {
     type AccountId = AccountId;
     type ExistentialDeposit = ExistentialDeposit;
+    type Lookup = AccountIdLookup<AccountId, ()>;
     type PreimageOrigin = EnsureRoot<AccountId>;
     type SS58Prefix = SS58Prefix;
     type ScheduleOrigin = EnsureRoot<AccountId>;
@@ -153,6 +155,7 @@ impl XcmConfig for OpenZeppelinConfig {
     type MessageQueueHeapSize = HeapSize;
     type MessageQueueMaxStale = MaxStale;
     type MessageQueueServiceWeight = MessageQueueServiceWeight;
+    type Reserves = NativeAsset;
     type Trader =
         UsingComponents<WeightToFee, RelayLocation, AccountId, Balances, ToAuthor<Runtime>>;
     type XcmAdminOrigin = EnsureRoot<AccountId>;

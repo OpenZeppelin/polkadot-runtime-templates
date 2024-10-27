@@ -54,7 +54,7 @@ impl WeightToFeePolynomial for WeightToFee {
     type Balance = Balance;
 
     fn polynomial() -> WeightToFeeCoefficients<Self::Balance> {
-        // in Rococo, extrinsic base weight (smallest non-zero weight) is mapped to 1
+        // in Paseo, extrinsic base weight (smallest non-zero weight) is mapped to 1
         // MILLIUNIT: in our template, we map to 1/10 of that, or 1/10 MILLIUNIT
         let p = MILLICENTS / P_FACTOR;
         let q = Q_FACTOR * Balance::from(ExtrinsicBaseWeight::get().ref_time());
@@ -149,6 +149,8 @@ mod runtime {
     pub type Assets = pallet_assets;
     #[runtime::pallet_index(13)]
     pub type Treasury = pallet_treasury;
+    #[runtime::pallet_index(14)]
+    pub type AssetManager = pallet_asset_manager;
 
     // Governance
     #[runtime::pallet_index(15)]

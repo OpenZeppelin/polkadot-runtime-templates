@@ -7,7 +7,7 @@
 In this tutorial, we will demonstrate how to deploy your parachain using Zombienet, and test the functionalities of your parachain.
 
 Below are the main steps of this demo:
-. Deploy our parachain against the locally simulated rococo testnet by Zombienet.
+. Deploy our parachain against the locally simulated Paseo testnet by Zombienet.
 . Deploy a Solidity smart contract on our parachain.
 . Successfully invoke the Solidity smart contract deployed on our parachain.
 
@@ -25,7 +25,7 @@ cd evm-template
 +
 ```rust
 [relaychain]
-chain = "rococo-local"
+chain = "paseo-local"
 default_command = "./bin-v1.6.0/polkadot"
 
 [[relaychain.nodes]]
@@ -162,11 +162,10 @@ image::zombie-chain-spec.png[Zombie Chain Spec]
     --rpc-port 8844 \
     -- \
     --execution wasm \
-    --chain /var/folders/...{redacted}.../rococo-local.json \
+    --chain /var/folders/...{redacted}.../paseo-local.json \
     --port 30343 \
     --rpc-port 9977
 ```
-
 
 . your node should be running without any problem, and should see block production in your node terminal!
 +
@@ -221,15 +220,16 @@ import { Web3 } from "web3";
 const web3 = new Web3("ws://127.0.0.1:8844");
 
 console.log("Balance:");
-web3.eth.getBalance("0xe04cc55ebee1cbce552f250e85c57b70b2e2625b").then(console.log);
+// this is the address of `Alith` in our chainspec
+web3.eth.getBalance("0xf24FF3a9CF04c71Dbc94D0b566f7A27B94566cac").then(console.log);
 
 let raw = await web3.eth.accounts.signTransaction({
     gas: 21000,
     gasPrice: 10000000000,
-    from: "0xe04cc55ebee1cbce552f250e85c57b70b2e2625b",
-    to: "0x7c98a1801f0B28dF559bCd828fc67Bd6ab558074",
+    from: "0xf24FF3a9CF04c71Dbc94D0b566f7A27B94566cac", // Alith's address
+    to: "0x7c98a1801f0B28dF559bCd828fc67Bd6ab558074", // Baltathar's address
     value: '100000000000000000'
-}, "0xcb6df9de1efca7a3998a8ead4e02159d5fa99c3e0d4fd6432667390bb4726854");
+}, "0x5fb92d6e98884f76de468fa3f6278f8807c48bebc13595d45af5bdc4da702133"); // Alith's private key
 
 let res = await web3.eth.sendSignedTransaction(raw.rawTransaction);
 console.log("Transaction details:");
@@ -289,13 +289,13 @@ export var MyAbi = [
 node sanity_check.js
 ```
 
-. open a terminal instance where the current directory has the `HelloWorld.sol` file, and run:
+. open a terminal instance where the current directory has the `HelloWorld.sol` file, and run the below command to deploy the contract with Alith's private key:
 +
 ```solidity
-forge create --rpc-url http://localhost:8844 --private-key 0xcb6df9de1efca7a3998a8ead4e02159d5fa99c3e0d4fd6432667390bb4726854 HelloWorld.sol:HelloWorld
+forge create --rpc-url http://localhost:9933 --private-key 0x5fb92d6e98884f76de468fa3f6278f8807c48bebc13595d45af5bdc4da702133 HelloWorld.sol:HelloWorld
 ```
 +
-* don’t forget to copy the address this contract deployed to!
+* don’t forget to copy the address this contract deployed to (shown in the output of the command)!
 
 
 
