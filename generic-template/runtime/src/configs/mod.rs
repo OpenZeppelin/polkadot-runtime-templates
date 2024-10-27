@@ -98,19 +98,6 @@ impl ConsensusConfig for OpenZeppelinConfig {
     type CollatorSelectionUpdateOrigin = CollatorSelectionUpdateOrigin;
 }
 parameter_types! {
-    pub const AssetDeposit: Balance = 10 * CENTS;
-    pub const AssetAccountDeposit: Balance = deposit(1, 16);
-    pub const ApprovalDeposit: Balance = EXISTENTIAL_DEPOSIT;
-}
-impl AssetsConfig for OpenZeppelinConfig {
-    type ApprovalDeposit = ApprovalDeposit;
-    type AssetAccountDeposit = AssetAccountDeposit;
-    type AssetDeposit = AssetDeposit;
-    type AssetId = u32;
-    type CreateOrigin = AsEnsureOriginWithArg<EnsureSigned<AccountId>>;
-    type ForceOrigin = EnsureRoot<AccountId>;
-}
-parameter_types! {
     pub const AlarmInterval: BlockNumber = 1;
     pub const SubmissionDeposit: Balance = 3 * CENTS;
     pub const UndecidingTimeout: BlockNumber = 14 * DAYS;
@@ -165,6 +152,5 @@ impl XcmConfig for OpenZeppelinConfig {
 }
 impl_openzeppelin_system!(OpenZeppelinConfig);
 impl_openzeppelin_consensus!(OpenZeppelinConfig);
-impl_openzeppelin_assets!(OpenZeppelinConfig);
 impl_openzeppelin_governance!(OpenZeppelinConfig);
 impl_openzeppelin_xcm!(OpenZeppelinConfig);

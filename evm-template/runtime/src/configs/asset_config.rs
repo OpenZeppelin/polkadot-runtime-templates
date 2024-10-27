@@ -30,10 +30,12 @@ impl AssetsConfig for OpenZeppelinConfig {
     type AssetAccountDeposit = AssetAccountDeposit;
     type AssetDeposit = AssetDeposit;
     type AssetId = AssetId;
+    type AssetType = AssetType;
     #[cfg(feature = "runtime-benchmarks")]
     type BenchmarkHelper = BenchmarkHelper;
     type CreateOrigin = AsEnsureOriginWithArg<EnsureSigned<AccountId>>;
     type ForceOrigin = EnsureRoot<AccountId>;
+    type ForeignAssetModifierOrigin = EnsureRoot<AccountId>;
 }
 impl_openzeppelin_assets!(OpenZeppelinConfig);
 
@@ -102,75 +104,4 @@ impl From<AssetType> for AssetId {
             }
         }
     }
-}
-
-// We instruct how to register the Assets
-// In this case, we tell it to Create an Asset in pallet-assets
-pub struct AssetRegistrar;
-use frame_support::{pallet_prelude::DispatchResult, transactional};
-
-impl pallet_asset_manager::AssetRegistrar<Runtime> for AssetRegistrar {
-    #[transactional]
-    fn create_foreign_asset(
-        asset: AssetId,
-        min_balance: Balance,
-        metadata: AssetRegistrarMetadata,
-        is_sufficient: bool,
-    ) -> DispatchResult {
-        Assets::force_create(
-            RuntimeOrigin::root(),
-            asset.into(),
-            AssetManager::account_id(),
-            is_sufficient,
-            min_balance,
-        )?;
-
-        // Lastly, the metadata
-        Assets::force_set_metadata(
-            RuntimeOrigin::root(),
-            asset.into(),
-            metadata.name,
-            metadata.symbol,
-            metadata.decimals,
-            metadata.is_frozen,
-        )
-    }
-
-    #[transactional]
-    fn destroy_foreign_asset(asset: AssetId) -> DispatchResult {
-        // Mark the asset as destroying
-        Assets::start_destroy(RuntimeOrigin::root(), asset.into())
-    }
-
-    fn destroy_asset_dispatch_info_weight(asset: AssetId) -> Weight {
-        // For us both of them (Foreign and Local) have the same annotated weight for a given
-        // witness
-        // We need to take the dispatch info from the destroy call, which is already annotated in
-        // the assets pallet
-
-        // This is the dispatch info of destroy
-        RuntimeCall::Assets(pallet_assets::Call::<Runtime>::start_destroy { id: asset.into() })
-            .get_dispatch_info()
-            .weight
-    }
-}
-
-#[derive(Clone, Default, Eq, Debug, PartialEq, Ord, PartialOrd, Encode, Decode, TypeInfo)]
-pub struct AssetRegistrarMetadata {
-    pub name: Vec<u8>,
-    pub symbol: Vec<u8>,
-    pub decimals: u8,
-    pub is_frozen: bool,
-}
-
-impl pallet_asset_manager::Config for Runtime {
-    type AssetId = AssetId;
-    type AssetRegistrar = AssetRegistrar;
-    type AssetRegistrarMetadata = AssetRegistrarMetadata;
-    type Balance = Balance;
-    type ForeignAssetModifierOrigin = EnsureRoot<AccountId>;
-    type ForeignAssetType = AssetType;
-    type RuntimeEvent = RuntimeEvent;
-    /// Rerun benchmarks if you are making changes to runtime configuration.
-    type WeightInfo = weights::pallet_asset_manager::WeightInfo<Runtime>;
 }
