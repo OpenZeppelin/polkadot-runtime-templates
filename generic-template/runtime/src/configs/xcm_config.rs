@@ -574,6 +574,7 @@ impl pallet_xcm_transactor::Config for Runtime {
 mod testing {
     use sp_runtime::traits::MaybeEquivalence;
     use xcm_builder::WithLatestLocationConverter;
+    use xcm_executor::traits::ConvertLocation;
 
     use super::*;
 
