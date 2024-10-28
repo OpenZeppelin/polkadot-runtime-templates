@@ -107,6 +107,7 @@ polkadot-runtime-common = { git = "https://github.com/paritytech/polkadot-sdk", 
 xcm = { package = "staging-xcm", git = "https://github.com/paritytech/polkadot-sdk", default-features = false, tag = "polkadot-stable2407-1" }
 xcm-builder = { package = "staging-xcm-builder", git = "https://github.com/paritytech/polkadot-sdk", default-features = false, tag = "polkadot-stable2407-1" }
 xcm-executor = { package = "staging-xcm-executor", git = "https://github.com/paritytech/polkadot-sdk", default-features = false, tag = "polkadot-stable2407-1" }
+xcm-simulator = { git = "https://github.com/paritytech/polkadot-sdk", tag = "polkadot-stable2407-1" }
 
 # Cumulus
 assets-common = { git = "https://github.com/paritytech/polkadot-sdk", default-features = false, tag = "polkadot-stable2407-1" }
