@@ -65,7 +65,6 @@ polkadot-runtime-common = { workspace = true }
 xcm = { workspace = true }
 xcm-builder = { workspace = true }
 xcm-executor = { workspace = true }
-xcm-simulator = { workspace = true }
 
 # Cumulus
 assets-common = { workspace = true }
@@ -109,6 +108,7 @@ xcm-primitives = { workspace = true }
 
 [dev-dependencies]
 sp-io = { workspace = true }
+xcm-simulator = { workspace = true }
 
 [build-dependencies]
 substrate-wasm-builder = { workspace = true }

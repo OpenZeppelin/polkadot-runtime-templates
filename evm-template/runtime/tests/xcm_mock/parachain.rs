@@ -253,7 +253,7 @@ pub type XcmBarrier = (
     AllowKnownQueryResponses<PolkadotXcm>,
     WithComputedOrigin<
         (
-            // If the message is one that immediately attemps to pay for execution, then allow it.
+            // If the message is one that immediately attempts to pay for execution, then allow it.
             AllowTopLevelPaidExecutionFrom<Everything>,
             // Subscriptions for version tracking are OK.
             AllowSubscriptionsFrom<Everything>,
@@ -680,7 +680,7 @@ parameter_types! {
 
 impl pallet_xcm::Config for Runtime {
     type AdminOrigin = frame_system::EnsureRoot<AccountId>;
-    // We use a custom one to test runtime ugprades
+    // We use a custom one to test runtime upgrades
     type AdvertisedXcmVersion = XcmVersioner;
     type Currency = Balances;
     type CurrencyMatcher = IsConcrete<MatcherLocation>;
@@ -1001,7 +1001,7 @@ impl pallet_proxy::Config for Runtime {
 pub struct EthereumXcmEnsureProxy;
 impl xcm_primitives::EnsureProxy<AccountId> for EthereumXcmEnsureProxy {
     fn ensure_ok(delegator: AccountId, delegatee: AccountId) -> Result<(), &'static str> {
-        // The EVM implicitely contains an Any proxy, so we only allow for "Any" proxies
+        // The EVM implicitly contains an Any proxy, so we only allow for "Any" proxies
         let def: pallet_proxy::ProxyDefinition<AccountId, ProxyType, BlockNumber> =
             pallet_proxy::Pallet::<Runtime>::find_proxy(
                 &delegator,
