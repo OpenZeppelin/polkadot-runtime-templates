@@ -15,7 +15,8 @@ use xcm_builder::PayOverXcm;
 
 pub use crate::{
     configs::{
-        FeeAssetId, RelayLocation, StakingAdminBodyId, ToSiblingBaseDeliveryFee, TransactionByteFee,
+        asset_config::TransactionByteFee, xcm_config::RelayLocation, FeeAssetId,
+        StakingAdminBodyId, ToSiblingBaseDeliveryFee,
     },
     constants::{
         BLOCK_PROCESSING_VELOCITY, RELAY_CHAIN_SLOT_DURATION_MILLIS, UNINCLUDED_SEGMENT_CAPACITY,

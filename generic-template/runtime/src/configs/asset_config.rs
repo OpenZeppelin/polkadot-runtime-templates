@@ -1,8 +1,12 @@
 use frame_support::{
-    dispatch::GetDispatchInfo, parameter_types, traits::AsEnsureOriginWithArg, weights::Weight,
+    dispatch::GetDispatchInfo,
+    parameter_types,
+    traits::AsEnsureOriginWithArg,
+    weights::{ConstantMultiplier, Weight},
 };
 use frame_system::{EnsureRoot, EnsureSigned};
-use parity_scale_codec::{Compact, Decode, Encode};
+use parity_scale_codec::{Decode, Encode};
+use polkadot_runtime_common::SlowAdjustingFeeUpdate;
 use polkadot_runtime_wrappers::{impl_openzeppelin_assets, AssetsConfig};
 use scale_info::TypeInfo;
 use sp_core::H256;
@@ -14,9 +18,11 @@ use sp_std::{
 use xcm::latest::Location;
 
 use crate::{
-    constants::currency::{deposit, CENTS, MILLICENTS},
+    configs::OpenZeppelinConfig,
+    constants::currency::{deposit, CENTS, EXISTENTIAL_DEPOSIT, MICROCENTS},
     types::{AccountId, AssetId, Balance},
     weights, AssetManager, Assets, Balances, Runtime, RuntimeCall, RuntimeEvent, RuntimeOrigin,
+    WeightToFee,
 };
 
 parameter_types! {
@@ -29,10 +35,13 @@ impl AssetsConfig for OpenZeppelinConfig {
     type AssetAccountDeposit = AssetAccountDeposit;
     type AssetDeposit = AssetDeposit;
     type AssetId = AssetId;
+    type AssetRegistrar = AssetRegistrar;
+    type AssetRegistrarMetadata = AssetRegistrarMetadata;
     type AssetType = AssetType;
     type CreateOrigin = AsEnsureOriginWithArg<EnsureSigned<AccountId>>;
     type ForceOrigin = EnsureRoot<AccountId>;
     type ForeignAssetModifierOrigin = EnsureRoot<AccountId>;
+    type WeightToFee = WeightToFee;
 }
 impl_openzeppelin_assets!(OpenZeppelinConfig);
 
@@ -119,5 +128,64 @@ impl AccountIdAssetIdConversion<AccountId, AssetId> for Runtime {
         data[0..28].copy_from_slice(prefix);
         data[28..32].copy_from_slice(&asset_id.to_be_bytes());
         AccountId::from(data)
+    }
+}
+
+#[derive(Clone, Default, Eq, Debug, PartialEq, Ord, PartialOrd, Encode, Decode, TypeInfo)]
+pub struct AssetRegistrarMetadata {
+    pub name: Vec<u8>,
+    pub symbol: Vec<u8>,
+    pub decimals: u8,
+    pub is_frozen: bool,
+}
+
+// We instruct how to register the Assets
+// In this case, we tell it to Create an Asset in pallet-assets
+pub struct AssetRegistrar;
+use frame_support::{pallet_prelude::DispatchResult, transactional};
+
+impl pallet_asset_manager::AssetRegistrar<Runtime> for AssetRegistrar {
+    #[transactional]
+    fn create_foreign_asset(
+        asset: AssetId,
+        min_balance: Balance,
+        metadata: AssetRegistrarMetadata,
+        is_sufficient: bool,
+    ) -> DispatchResult {
+        Assets::force_create(
+            RuntimeOrigin::root(),
+            asset.into(),
+            sp_runtime::MultiAddress::Id(AssetManager::account_id()),
+            is_sufficient,
+            min_balance,
+        )?;
+
+        // Lastly, the metadata
+        Assets::force_set_metadata(
+            RuntimeOrigin::root(),
+            asset.into(),
+            metadata.name,
+            metadata.symbol,
+            metadata.decimals,
+            metadata.is_frozen,
+        )
+    }
+
+    #[transactional]
+    fn destroy_foreign_asset(asset: AssetId) -> DispatchResult {
+        // Mark the asset as destroying
+        Assets::start_destroy(RuntimeOrigin::root(), asset.into())
+    }
+
+    fn destroy_asset_dispatch_info_weight(asset: AssetId) -> Weight {
+        // For us both of them (Foreign and Local) have the same annotated weight for a given
+        // witness
+        // We need to take the dispatch info from the destroy call, which is already annotated in
+        // the assets pallet
+
+        // This is the dispatch info of destroy
+        RuntimeCall::Assets(pallet_assets::Call::<Runtime>::start_destroy { id: asset.into() })
+            .get_dispatch_info()
+            .weight
     }
 }

@@ -10,7 +10,7 @@ use evm_runtime_template::{
 };
 use frame_support::{
     dispatch::GetDispatchInfo,
-    traits::{IntegrityTest, TryState, TryStateSelect},
+    traits::{Get, IntegrityTest, TryState, TryStateSelect},
     weights::{constants::WEIGHT_REF_TIME_PER_SECOND, Weight},
 };
 use frame_system::Account;
@@ -262,7 +262,9 @@ fn recursive_call_filter(call: &RuntimeCall, origin: usize) -> bool {
         ) => false,
         RuntimeCall::CollatorSelection(
             pallet_collator_selection::Call::set_desired_candidates { max },
-        ) => *max < <Runtime as pallet_collator_selection::Config>::MaxCandidates::get(),
+        ) =>
+            *max < <<Runtime as pallet_collator_selection::Config>::MaxCandidates as Get<u32>>::get(
+            ),
         RuntimeCall::Balances(pallet_balances::Call::force_adjust_total_issuance { .. }) => false,
 
         _ => true,

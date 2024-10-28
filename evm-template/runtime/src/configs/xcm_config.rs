@@ -2,37 +2,28 @@ use core::marker::PhantomData;
 
 use frame_support::{
     parameter_types,
-    traits::{ConstU32, Contains, ContainsPair, Everything, Nothing, PalletInfoAccess},
+    traits::{ConstU32, Contains, ContainsPair, Everything, PalletInfoAccess},
     weights::Weight,
 };
-use frame_system::EnsureRoot;
 use orml_xcm_support::MultiNativeAsset;
 use pallet_xcm::XcmPassthrough;
 use polkadot_parachain_primitives::primitives::{self, Sibling};
 use xcm::latest::prelude::{Assets as XcmAssets, *};
 use xcm_builder::{
     AccountKey20Aliases, AllowExplicitUnpaidExecutionFrom, AllowTopLevelPaidExecutionFrom, Case,
-    ConvertedConcreteId, DenyReserveTransferToRelayChain, DenyThenTry, EnsureXcmOrigin,
-    FixedWeightBounds, FrameTransactionalProcessor, FungibleAdapter, FungiblesAdapter, HandleFee,
-    IsChildSystemParachain, IsConcrete, NoChecking, ParentIsPreset, RelayChainAsNative,
-    SiblingParachainAsNative, SiblingParachainConvertsVia, SignedAccountKey20AsNative,
-    SovereignSignedViaLocation, TakeWeightCredit, TrailingSetTopicAsId, UsingComponents,
+    ConvertedConcreteId, DenyReserveTransferToRelayChain, DenyThenTry, FungibleAdapter,
+    FungiblesAdapter, HandleFee, IsChildSystemParachain, IsConcrete, NoChecking, ParentIsPreset,
+    RelayChainAsNative, SiblingParachainAsNative, SiblingParachainConvertsVia,
+    SignedAccountKey20AsNative, SovereignSignedViaLocation, TakeWeightCredit, TrailingSetTopicAsId,
     WithComputedOrigin, WithUniqueTopic, XcmFeeManagerFromComponents,
 };
-use xcm_executor::{
-    traits::{FeeReason, JustTry, TransactAsset},
-    XcmExecutor,
-};
+use xcm_executor::traits::{FeeReason, JustTry, TransactAsset};
 use xcm_primitives::{AbsoluteAndRelativeReserve, AsAssetType};
 
 use crate::{
-    configs::{
-        AssetType, ParachainSystem, Runtime, RuntimeCall, RuntimeEvent, RuntimeOrigin, WeightToFee,
-        XcmpQueue,
-    },
-    types::{AccountId, AssetId, Balance, XcmFeesToAccount},
-    weights, AllPalletsWithSystem, AssetManager, Assets, Balances, ParachainInfo, PolkadotXcm,
-    Treasury,
+    configs::{AssetType, ParachainSystem, RuntimeOrigin, XcmpQueue},
+    types::{AccountId, AssetId, Balance},
+    AssetManager, Assets, Balances, ParachainInfo, Treasury,
 };
 
 parameter_types! {
