@@ -9603,6 +9603,7 @@ checksum = "bb6f170a4041d50a0ce04b0d2e14916d6ca863ea2e422689a5b694395d299ffe"
 dependencies = [
  "libc",
  "librocksdb-sys",
+]
 
 [[package]]
 name = "route-recognizer"
