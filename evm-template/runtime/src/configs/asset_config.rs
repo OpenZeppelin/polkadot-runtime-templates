@@ -4,7 +4,7 @@ use frame_support::{
 use frame_system::{EnsureRoot, EnsureSigned};
 use parity_scale_codec::{Compact, Decode, Encode};
 use scale_info::TypeInfo;
-use sp_core::H256;
+use sp_core::{H160, H256};
 use sp_runtime::traits::Hash as THash;
 use sp_std::{
     convert::{From, Into},
@@ -183,4 +183,42 @@ impl pallet_asset_manager::Config for Runtime {
     type RuntimeEvent = RuntimeEvent;
     /// Rerun benchmarks if you are making changes to runtime configuration.
     type WeightInfo = weights::pallet_asset_manager::WeightInfo<Runtime>;
+}
+
+/// This trait ensure we can convert AccountIds to AssetIds.
+pub trait AccountIdAssetIdConversion<Account, AssetId> {
+    // Get assetId and prefix from account
+    fn account_to_asset_id(account: Account) -> Option<(Vec<u8>, AssetId)>;
+
+    // Get AccountId from AssetId and prefix
+    fn asset_id_to_account(prefix: &[u8], asset_id: AssetId) -> Account;
+}
+
+const FOREIGN_ASSET_PRECOMPILE_ADDRESS_PREFIX: &[u8] = &[255u8; 4];
+
+// Instruct how to go from an H160 to an AssetID
+// We just take the lowest 128 bits
+impl AccountIdAssetIdConversion<AccountId, AssetId> for Runtime {
+    /// The way to convert an account to assetId is by ensuring that the prefix is 0XFFFFFFFF
+    /// and by taking the lowest 128 bits as the assetId
+    fn account_to_asset_id(account: AccountId) -> Option<(Vec<u8>, AssetId)> {
+        let h160_account: H160 = account.into();
+        let mut data = [0u8; 16];
+        let (prefix_part, id_part) = h160_account.as_fixed_bytes().split_at(4);
+        if prefix_part == FOREIGN_ASSET_PRECOMPILE_ADDRESS_PREFIX {
+            data.copy_from_slice(id_part);
+            let asset_id: AssetId = u128::from_be_bytes(data);
+            Some((prefix_part.to_vec(), asset_id))
+        } else {
+            None
+        }
+    }
+
+    // The opposite conversion
+    fn asset_id_to_account(prefix: &[u8], asset_id: AssetId) -> AccountId {
+        let mut data = [0u8; 20];
+        data[0..4].copy_from_slice(prefix);
+        data[4..20].copy_from_slice(&asset_id.to_be_bytes());
+        AccountId::from(data)
+    }
 }

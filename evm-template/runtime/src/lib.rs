@@ -262,6 +262,10 @@ mod runtime {
     pub type CumulusXcm = cumulus_pallet_xcm;
     #[runtime::pallet_index(33)]
     pub type MessageQueue = pallet_message_queue;
+    #[runtime::pallet_index(34)]
+    pub type XTokens = orml_xtokens;
+    #[runtime::pallet_index(35)]
+    pub type XcmWeightTrader = pallet_xcm_weight_trader;
 
     // EVM
     #[runtime::pallet_index(40)]
@@ -272,6 +276,8 @@ mod runtime {
     pub type BaseFee = pallet_base_fee;
     #[runtime::pallet_index(43)]
     pub type EVMChainId = pallet_evm_chain_id;
+    #[runtime::pallet_index(44)]
+    pub type Erc20XcmBridge = pallet_erc20_xcm_bridge;
 }
 
 cumulus_pallet_parachain_system::register_validate_block! {
