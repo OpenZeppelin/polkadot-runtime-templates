@@ -31,6 +31,7 @@ smallvec = "1.11.0"
 frame-benchmarking = { git = "https://github.com/paritytech/polkadot-sdk", default-features = false, tag = "polkadot-stable2407-1" }
 frame-benchmarking-cli = { git = "https://github.com/paritytech/polkadot-sdk", default-features = false, tag = "polkadot-stable2407-1" }
 frame-executive = { git = "https://github.com/paritytech/polkadot-sdk", default-features = false, tag = "polkadot-stable2407-1" }
+frame-metadata-hash-extension = { git = "https://github.com/paritytech/polkadot-sdk", default-features = false, tag = "polkadot-stable2407-1" }
 frame-support = { git = "https://github.com/paritytech/polkadot-sdk", default-features = false, tag = "polkadot-stable2407-1" }
 frame-system = { git = "https://github.com/paritytech/polkadot-sdk", default-features = false, tag = "polkadot-stable2407-1" }
 frame-system-benchmarking = { git = "https://github.com/paritytech/polkadot-sdk", default-features = false, tag = "polkadot-stable2407-1" }
@@ -170,6 +171,7 @@ pallet-erc20-xcm-bridge = { git = "https://github.com/OpenZeppelin/moonbeam.git"
 pallet-xcm-transactor = { git = "https://github.com/OpenZeppelin/moonbeam.git", branch = "polkadot-stable2407-1", default-features = false }
 pallet-xcm-weight-trader = { git = "https://github.com/OpenZeppelin/moonbeam.git", branch = "polkadot-stable2407-1", default-features = false }
 xcm-primitives = { git = "https://github.com/OpenZeppelin/moonbeam.git", branch = "polkadot-stable2407-1", default-features = false }
+
 
 # Fuzzer
 substrate-runtimes-fuzzers = { git = "https://github.com/srlabs/substrate-runtime-fuzzer.git", default-features = false, tag = "polkadot-v1.12.0" }

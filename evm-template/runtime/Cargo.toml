@@ -20,6 +20,7 @@ smallvec = { workspace = true }
 # Substrate
 frame-benchmarking = { workspace = true, optional = true }
 frame-executive = { workspace = true }
+frame-metadata-hash-extension = { workspace = true }
 frame-support = { workspace = true }
 frame-system = { workspace = true }
 frame-system-benchmarking = { workspace = true, optional = true }
@@ -106,6 +107,7 @@ pallet-xcm-transactor = { workspace = true }
 pallet-xcm-weight-trader = { workspace = true }
 xcm-primitives = { workspace = true }
 
+
 [dev-dependencies]
 sp-io = { workspace = true }
 
@@ -132,6 +134,7 @@ std = [
 	"fp-self-contained/std",
 	"frame-benchmarking?/std",
 	"frame-executive/std",
+	"frame-metadata-hash-extension/std",
 	"frame-support/std",
 	"frame-system-benchmarking?/std",
 	"frame-system-rpc-runtime-api/std",
@@ -193,7 +196,7 @@ std = [
 	"xcm/std",
 ]
 async-backing = []
-
+metadata-hash = [ "substrate-wasm-builder/metadata-hash" ]
 runtime-benchmarks = [
 	"assets-common/runtime-benchmarks",
 	"cumulus-pallet-parachain-system/runtime-benchmarks",
