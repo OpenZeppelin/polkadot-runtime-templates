@@ -40,7 +40,7 @@ mod runtime_tests {
                 authoring_version: 1,
                 spec_version: 1,
                 impl_version: 0,
-                apis: evm_runtime_template::apis::RUNTIME_API_VERSIONS,
+                apis: evm_runtime_template::RUNTIME_API_VERSIONS,
                 transaction_version: 1,
                 state_version: 1,
             }

@@ -1,3 +1,4 @@
+pub mod asset_config;
 pub mod governance;
 pub mod xcm_config;
 
@@ -10,16 +11,13 @@ use frame_support::{
     derive_impl,
     dispatch::DispatchClass,
     parameter_types,
-    traits::{
-        AsEnsureOriginWithArg, ConstU32, ConstU64, Contains, EitherOfDiverse, InstanceFilter,
-        TransformOrigin,
-    },
+    traits::{ConstU32, ConstU64, Contains, EitherOfDiverse, InstanceFilter, TransformOrigin},
     weights::{ConstantMultiplier, Weight},
     PalletId,
 };
 use frame_system::{
     limits::{BlockLength, BlockWeights},
-    EnsureRoot, EnsureSigned,
+    EnsureRoot,
 };
 pub use governance::origins::pallet_custom_origins;
 use governance::{origins::Treasurer, TreasurySpender};
@@ -48,7 +46,7 @@ use crate::{
     constants::{
         currency::{deposit, CENTS, EXISTENTIAL_DEPOSIT, GRAND, MICROCENTS},
         AVERAGE_ON_INITIALIZE_RATIO, DAYS, HOURS, MAXIMUM_BLOCK_WEIGHT, MAX_BLOCK_LENGTH,
-        NORMAL_DISPATCH_RATIO, VERSION,
+        NORMAL_DISPATCH_RATIO, SLOT_DURATION, VERSION,
     },
     types::{
         AccountId, AssetKind, Balance, Beneficiary, Block, BlockNumber,
@@ -310,40 +308,6 @@ impl pallet_balances::Config for Runtime {
 }
 
 parameter_types! {
-    pub const AssetDeposit: Balance = 10 * CENTS;
-    pub const AssetAccountDeposit: Balance = deposit(1, 16);
-    pub const ApprovalDeposit: Balance = EXISTENTIAL_DEPOSIT;
-    pub const StringLimit: u32 = 50;
-    pub const MetadataDepositBase: Balance = deposit(1, 68);
-    pub const MetadataDepositPerByte: Balance = deposit(0, 1);
-    pub const RemoveItemsLimit: u32 = 1000;
-}
-
-impl pallet_assets::Config for Runtime {
-    type ApprovalDeposit = ApprovalDeposit;
-    type AssetAccountDeposit = AssetAccountDeposit;
-    type AssetDeposit = AssetDeposit;
-    type AssetId = crate::types::AssetId;
-    type AssetIdParameter = parity_scale_codec::Compact<crate::types::AssetId>;
-    type Balance = Balance;
-    #[cfg(feature = "runtime-benchmarks")]
-    type BenchmarkHelper = ();
-    type CallbackHandle = ();
-    type CreateOrigin = AsEnsureOriginWithArg<EnsureSigned<AccountId>>;
-    type Currency = Balances;
-    type Extra = ();
-    type ForceOrigin = EnsureRoot<AccountId>;
-    type Freezer = ();
-    type MetadataDepositBase = MetadataDepositBase;
-    type MetadataDepositPerByte = MetadataDepositPerByte;
-    type RemoveItemsLimit = RemoveItemsLimit;
-    type RuntimeEvent = RuntimeEvent;
-    type StringLimit = StringLimit;
-    /// Rerun benchmarks if you are making changes to runtime configuration.
-    type WeightInfo = weights::pallet_assets::WeightInfo<Runtime>;
-}
-
-parameter_types! {
     /// Relay Chain `TransactionByteFee` / 10
     pub const TransactionByteFee: Balance = 10 * MICROCENTS;
     pub const OperationalFeeMultiplier: u8 = 5;
@@ -512,7 +476,7 @@ impl pallet_aura::Config for Runtime {
     type AuthorityId = AuraId;
     type DisabledValidators = ();
     type MaxAuthorities = MaxAuthorities;
-    type SlotDuration = pallet_aura::MinimumPeriodTimesTwo<Self>;
+    type SlotDuration = ConstU64<SLOT_DURATION>;
 }
 
 parameter_types! {
