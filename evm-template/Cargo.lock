@@ -3000,6 +3000,7 @@ dependencies = [
  "fp-self-contained",
  "frame-benchmarking",
  "frame-executive",
+ "frame-metadata-hash-extension",
  "frame-support",
  "frame-system",
  "frame-system-benchmarking",
@@ -3007,6 +3008,7 @@ dependencies = [
  "frame-try-runtime",
  "hex-literal",
  "log",
+ "openzeppelin-polkadot-wrappers",
  "orml-xcm-support",
  "pallet-asset-manager",
  "pallet-assets",
@@ -3041,7 +3043,6 @@ dependencies = [
  "parity-scale-codec",
  "polkadot-parachain-primitives",
  "polkadot-runtime-common",
- "openzeppelin-polkadot-wrappers",
  "scale-info",
  "smallvec",
  "sp-api",
@@ -6054,6 +6055,20 @@ dependencies = [
 ]
 
 [[package]]
+name = "merkleized-metadata"
+version = "0.1.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "f313fcff1d2a4bcaa2deeaa00bf7530d77d5f7bd0467a117dde2e29a75a7a17a"
+dependencies = [
+ "array-bytes",
+ "blake3",
+ "frame-metadata",
+ "parity-scale-codec",
+ "scale-decode",
+ "scale-info",
+]
+
+[[package]]
 name = "merlin"
 version = "3.0.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -6810,6 +6825,17 @@ dependencies = [
  "openssl-src",
  "pkg-config",
  "vcpkg",
+]
+
+[[package]]
+name = "openzeppelin-polkadot-wrappers"
+version = "0.0.1"
+source = "git+https://github.com/OpenZeppelin/polkadot-runtime-wrappers.git?branch=amar-oz-system-wrapper-poc#a00c75d7bff5a745130312b6a62ecbfd962d9cbc"
+dependencies = [
+ "frame-support",
+ "scale-info",
+ "sp-std",
+ "sp-version",
 ]
 
 [[package]]
@@ -9377,16 +9403,6 @@ dependencies = [
  "staging-xcm",
  "staging-xcm-executor",
  "static_assertions",
-]
-
-[[package]]
-name = "openzeppelin-polkadot-wrappers"
-version = "0.0.1"
-dependencies = [
- "frame-support",
- "scale-info",
- "sp-std",
- "sp-version",
 ]
 
 [[package]]
@@ -12095,6 +12111,29 @@ dependencies = [
 ]
 
 [[package]]
+name = "scale-bits"
+version = "0.6.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "e57b1e7f6b65ed1f04e79a85a57d755ad56d76fdf1e9bddcc9ae14f71fcdcf54"
+dependencies = [
+ "parity-scale-codec",
+ "scale-type-resolver",
+]
+
+[[package]]
+name = "scale-decode"
+version = "0.13.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "e98f3262c250d90e700bb802eb704e1f841e03331c2eb815e46516c4edbf5b27"
+dependencies = [
+ "derive_more",
+ "parity-scale-codec",
+ "scale-bits",
+ "scale-type-resolver",
+ "smallvec",
+]
+
+[[package]]
 name = "scale-info"
 version = "2.11.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -12119,6 +12158,12 @@ dependencies = [
  "quote",
  "syn 1.0.109",
 ]
+
+[[package]]
+name = "scale-type-resolver"
+version = "0.2.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "f0cded6518aa0bd6c1be2b88ac81bf7044992f0f154bfbabd5ad34f43512abcb"
 
 [[package]]
 name = "schannel"
@@ -13896,13 +13941,22 @@ name = "substrate-wasm-builder"
 version = "24.0.0"
 source = "git+https://github.com/paritytech/polkadot-sdk?tag=polkadot-stable2407-1#16b0fd09d9e9281c20ee0c1d8b87d011e3e3454e"
 dependencies = [
+ "array-bytes",
  "build-helper",
  "cargo_metadata",
  "console",
  "filetime",
+ "frame-metadata",
+ "merkleized-metadata",
+ "parity-scale-codec",
  "parity-wasm",
  "polkavm-linker",
+ "sc-executor",
+ "sp-core",
+ "sp-io",
  "sp-maybe-compressed-blob",
+ "sp-tracing",
+ "sp-version",
  "strum 0.26.3",
  "tempfile",
  "toml 0.8.19",
