@@ -6830,7 +6830,7 @@ dependencies = [
 [[package]]
 name = "openzeppelin-polkadot-wrappers"
 version = "0.0.1"
-source = "git+https://github.com/OpenZeppelin/polkadot-runtime-wrappers.git?branch=amar-oz-system-wrapper-poc#a00c75d7bff5a745130312b6a62ecbfd962d9cbc"
+source = "git+https://github.com/OpenZeppelin/polkadot-runtime-wrappers.git?rev=b2ad305#b2ad305c293161a29a5a81f0623bc79c83cf04d0"
 dependencies = [
  "frame-support",
  "scale-info",

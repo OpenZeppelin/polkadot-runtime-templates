@@ -12,8 +12,8 @@ use frame_support::{
     dispatch::DispatchClass,
     parameter_types,
     traits::{
-        ConstU32, ConstU64, Contains, EitherOf, EitherOfDiverse, Everything, InstanceFilter,
-        Nothing, TransformOrigin,
+        ConstU32, ConstU64, Contains, EitherOf, EitherOfDiverse, Everything, Nothing,
+        TransformOrigin,
     },
     weights::Weight,
     PalletId,
@@ -29,13 +29,11 @@ use openzeppelin_polkadot_wrappers::{
     impl_openzeppelin_xcm, ConsensusConfig, GovernanceConfig, SystemConfig, XcmConfig,
 };
 use parachains_common::message_queue::{NarrowOriginToSibling, ParaIdToSibling};
-use parity_scale_codec::{Decode, Encode, MaxEncodedLen};
 use polkadot_runtime_common::{impls::ToAuthor, BlockHashCount};
-use scale_info::TypeInfo;
 use sp_consensus_aura::sr25519::AuthorityId as AuraId;
 use sp_runtime::{
     traits::{AccountIdLookup, BlakeTwo256, IdentityLookup},
-    Perbill, RuntimeDebug,
+    Perbill,
 };
 use sp_version::RuntimeVersion;
 use xcm::latest::{prelude::*, InteriorLocation, Junction::PalletInstance};
@@ -61,7 +59,7 @@ use crate::{
     types::{
         AccountId, AssetKind, Balance, Beneficiary, Block, BlockNumber,
         CollatorSelectionUpdateOrigin, ConsensusHook, Hash, Nonce,
-        PriceForSiblingParachainDelivery, TreasuryPaymaster,
+        PriceForSiblingParachainDelivery, ProxyType, TreasuryPaymaster,
     },
     weights::{self, BlockExecutionWeight, ExtrinsicBaseWeight, RocksDbWeight},
     AllPalletsWithSystem, Aura, Balances, CollatorSelection, MessageQueue, OriginCaller,
@@ -83,6 +81,7 @@ impl SystemConfig for OpenZeppelinRuntime {
     type ExistentialDeposit = ExistentialDeposit;
     type Lookup = AccountIdLookup<AccountId, ()>;
     type PreimageOrigin = EnsureRoot<AccountId>;
+    type ProxyType = ProxyType;
     type SS58Prefix = SS58Prefix;
     type ScheduleOrigin = EnsureRoot<AccountId>;
     type Version = Version;

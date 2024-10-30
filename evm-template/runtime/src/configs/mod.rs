@@ -13,8 +13,8 @@ use frame_support::{
     dispatch::DispatchClass,
     parameter_types,
     traits::{
-        ConstU32, ConstU64, Contains, EitherOf, EitherOfDiverse, Everything, FindAuthor,
-        InstanceFilter, Nothing, TransformOrigin,
+        ConstU32, ConstU64, Contains, EitherOf, EitherOfDiverse, Everything, FindAuthor, Nothing,
+        TransformOrigin,
     },
     weights::Weight,
     PalletId,
@@ -33,14 +33,13 @@ use openzeppelin_polkadot_wrappers::{
 use pallet_ethereum::PostLogContent;
 use pallet_evm::{EVMCurrencyAdapter, EnsureAccountId20, IdentityAddressMapping};
 use parachains_common::message_queue::{NarrowOriginToSibling, ParaIdToSibling};
-use parity_scale_codec::{Decode, Encode, MaxEncodedLen};
+use parity_scale_codec::{Decode, Encode};
 use polkadot_runtime_common::BlockHashCount;
-use scale_info::TypeInfo;
 use sp_consensus_aura::sr25519::AuthorityId as AuraId;
 use sp_core::{H160, U256};
 use sp_runtime::{
     traits::{BlakeTwo256, IdentityLookup},
-    ConsensusEngineId, Perbill, Permill, RuntimeDebug,
+    ConsensusEngineId, Perbill, Permill,
 };
 use sp_std::marker::PhantomData;
 use sp_version::RuntimeVersion;
@@ -71,7 +70,7 @@ use crate::{
     types::{
         AccountId, AssetKind, Balance, Beneficiary, Block, BlockNumber,
         CollatorSelectionUpdateOrigin, ConsensusHook, Hash, Nonce,
-        PriceForSiblingParachainDelivery, TreasuryPaymaster, XcmFeesToAccount,
+        PriceForSiblingParachainDelivery, ProxyType, TreasuryPaymaster, XcmFeesToAccount,
     },
     weights::{self, BlockExecutionWeight, ExtrinsicBaseWeight, RocksDbWeight},
     AllPalletsWithSystem, AssetManager, Aura, Balances, BaseFee, CollatorSelection, EVMChainId,
@@ -94,6 +93,7 @@ impl SystemConfig for OpenZeppelinRuntime {
     type ExistentialDeposit = ExistentialDeposit;
     type Lookup = IdentityLookup<AccountId>;
     type PreimageOrigin = EnsureRoot<AccountId>;
+    type ProxyType = ProxyType;
     type SS58Prefix = SS58Prefix;
     type ScheduleOrigin = EnsureRoot<AccountId>;
     type Version = Version;

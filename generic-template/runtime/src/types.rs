@@ -1,14 +1,16 @@
-use frame_support::traits::EitherOfDiverse;
+use frame_support::traits::{EitherOfDiverse, InstanceFilter};
 use frame_system::EnsureRoot;
 use pallet_xcm::{EnsureXcm, IsVoiceOfBody};
+use parity_scale_codec::{Decode, Encode, MaxEncodedLen};
 use polkadot_runtime_common::impls::{
     LocatableAssetConverter, VersionedLocatableAsset, VersionedLocationConverter,
 };
+use scale_info::TypeInfo;
 use sp_core::ConstU32;
 use sp_runtime::{
     generic,
     traits::{BlakeTwo256, IdentifyAccount, Verify},
-    MultiAddress, MultiSignature,
+    MultiAddress, MultiSignature, RuntimeDebug,
 };
 use xcm::VersionedLocation;
 use xcm_builder::PayOverXcm;
@@ -125,3 +127,48 @@ pub type TreasuryPaymaster = PayOverXcm<
     LocatableAssetConverter,
     VersionedLocationConverter,
 >;
+
+/// The type used to represent the kinds of proxying allowed.
+/// If you are adding new pallets, consider adding new ProxyType variant
+#[derive(
+    Copy,
+    Clone,
+    Decode,
+    Default,
+    Encode,
+    Eq,
+    MaxEncodedLen,
+    Ord,
+    PartialEq,
+    PartialOrd,
+    RuntimeDebug,
+    TypeInfo,
+)]
+pub enum ProxyType {
+    /// Allows to proxy all calls
+    #[default]
+    Any,
+    /// Allows all non-transfer calls
+    NonTransfer,
+    /// Allows to finish the proxy
+    CancelProxy,
+    /// Allows to operate with collators list (invulnerables, candidates, etc.)
+    Collator,
+}
+
+impl InstanceFilter<RuntimeCall> for ProxyType {
+    fn filter(&self, c: &RuntimeCall) -> bool {
+        match self {
+            ProxyType::Any => true,
+            ProxyType::NonTransfer => !matches!(c, RuntimeCall::Balances { .. }),
+            ProxyType::CancelProxy => matches!(
+                c,
+                RuntimeCall::Proxy(pallet_proxy::Call::reject_announcement { .. })
+                    | RuntimeCall::Multisig { .. }
+            ),
+            ProxyType::Collator => {
+                matches!(c, RuntimeCall::CollatorSelection { .. } | RuntimeCall::Multisig { .. })
+            }
+        }
+    }
+}
