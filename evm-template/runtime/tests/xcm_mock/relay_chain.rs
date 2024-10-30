@@ -6,7 +6,7 @@ use frame_support::{
     weights::{Weight, WeightMeter},
 };
 use frame_system::pallet_prelude::BlockNumberFor;
-use polkadot_parachain::primitives::Id as ParaId;
+use polkadot_parachain_primitives::primitives::Id as ParaId;
 use polkadot_runtime_parachains::{
     configuration, dmp, hrmp,
     inclusion::{AggregateMessageOrigin, UmpQueueId},

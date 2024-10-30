@@ -1,6 +1,7 @@
 //! Parachain runtime mock.
 
 use cumulus_primitives_core::relay_chain::HrmpChannelId;
+pub use evm_runtime_template::configs::asset_config::AssetType;
 use frame_support::{
     construct_runtime,
     dispatch::GetDispatchInfo,
@@ -12,15 +13,14 @@ use frame_support::{
     PalletId,
 };
 use frame_system::{pallet_prelude::BlockNumberFor, EnsureNever, EnsureRoot};
-pub use moonbase_runtime::xcm_config::AssetType;
-#[cfg(feature = "runtime-benchmarks")]
-use moonbeam_runtime_common::benchmarking::BenchmarkHelper as ArgumentsBenchmarkHelper;
+// #[cfg(feature = "runtime-benchmarks")]
+// use benchmarking::BenchmarkHelper as ArgumentsBenchmarkHelper;
 use orml_traits::parameter_type_with_key;
 use pallet_ethereum::PostLogContent;
 use pallet_xcm::migration::v1::VersionUncheckedMigrateToV1;
 use parity_scale_codec::{Decode, Encode, MaxEncodedLen};
 use polkadot_core_primitives::BlockNumber as RelayBlockNumber;
-use polkadot_parachain::primitives::{Id as ParaId, Sibling};
+use polkadot_parachain_primitives::primitives::{Id as ParaId, Sibling};
 use scale_info::TypeInfo;
 use sp_core::H256;
 use sp_runtime::{
@@ -51,7 +51,7 @@ use xcm_simulator::{
     XcmpMessageHandlerT as XcmpMessageHandler,
 };
 
-pub type AccountId = moonbeam_core_primitives::AccountId;
+pub type AccountId = AccountId;
 pub type Balance = u128;
 pub type AssetId = u128;
 pub type BlockNumber = BlockNumberFor<Runtime>;
@@ -315,7 +315,6 @@ parameter_types! {
 use frame_system::RawOrigin;
 use sp_runtime::{traits::PostDispatchInfoOf, DispatchErrorWithPostInfo};
 use xcm_executor::traits::CallDispatcher;
-moonbeam_runtime_common::impl_moonbeam_xcm_call!();
 
 pub struct XcmConfig;
 impl Config for XcmConfig {
@@ -326,7 +325,8 @@ impl Config for XcmConfig {
     type AssetTransactor = AssetTransactors;
     type AssetTrap = PolkadotXcm;
     type Barrier = XcmBarrier;
-    type CallDispatcher = MoonbeamCall;
+    type CallDispatcher = ();
+    //TODO
     type FeeManager = ();
     type IsReserve = orml_xcm_support::MultiNativeAsset<
         xcm_primitives::AbsoluteAndRelativeReserve<SelfLocationAbsolute>,
@@ -958,8 +958,6 @@ pub enum ProxyType {
     Any = 1,
 }
 
-impl pallet_evm_precompile_proxy::EvmProxyCallFilter for ProxyType {}
-
 impl InstanceFilter<RuntimeCall> for ProxyType {
     fn filter(&self, _c: &RuntimeCall) -> bool {
         match self {
@@ -1015,15 +1013,6 @@ impl xcm_primitives::EnsureProxy<AccountId> for EthereumXcmEnsureProxy {
     }
 }
 
-impl pallet_ethereum_xcm::Config for Runtime {
-    type ControllerOrigin = EnsureRoot<AccountId>;
-    type EnsureProxy = EthereumXcmEnsureProxy;
-    type InvalidEvmTransactionError = pallet_ethereum::InvalidTransactionWrapper;
-    type ReservedXcmpWeight = ReservedXcmpWeight;
-    type ValidatedTransaction = pallet_ethereum::ValidatedTransaction<Self>;
-    type XcmEthereumOrigin = pallet_ethereum_xcm::EnsureXcmEthereumTransaction;
-}
-
 type Block = frame_system::mocking::MockBlockU32<Runtime>;
 
 construct_runtime!(
@@ -1045,7 +1034,6 @@ construct_runtime!(
         Timestamp: pallet_timestamp,
         EVM: pallet_evm,
         Ethereum: pallet_ethereum,
-        EthereumXcm: pallet_ethereum_xcm,
     }
 );
 

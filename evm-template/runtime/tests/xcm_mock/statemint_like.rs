@@ -7,7 +7,7 @@ use frame_support::{
 };
 use frame_system::{EnsureRoot, EnsureSigned};
 use polkadot_core_primitives::BlockNumber as RelayBlockNumber;
-use polkadot_parachain::primitives::{Id as ParaId, Sibling};
+use polkadot_parachain_primitives::primitives::{Id as ParaId, Sibling};
 use sp_core::H256;
 use sp_runtime::{
     traits::{ConstU32, Hash, IdentityLookup},
