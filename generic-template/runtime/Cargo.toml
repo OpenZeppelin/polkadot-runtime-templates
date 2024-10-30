@@ -17,7 +17,7 @@ parity-scale-codec = { workspace = true, features = [ "derive" ] }
 scale-info = { workspace = true, features = [ "derive" ] }
 smallvec = { workspace = true }
 
-polkadot-runtime-wrappers = { workspace = true }
+openzeppelin-polkadot-wrappers = { workspace = true }
 
 # Substrate
 frame-benchmarking = { workspace = true, optional = true }
@@ -142,7 +142,7 @@ std = [
 	"parity-scale-codec/std",
 	"polkadot-parachain-primitives/std",
 	"polkadot-runtime-common/std",
-	"polkadot-runtime-wrappers/std",
+	"openzeppelin-polkadot-wrappers/std",
 	"scale-info/std",
 	"sp-api/std",
 	"sp-arithmetic/std",

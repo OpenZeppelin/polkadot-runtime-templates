@@ -24,13 +24,13 @@ use frame_system::{
 };
 pub use governance::origins::pallet_custom_origins;
 use governance::{origins::Treasurer, tracks, Spender, WhitelistedCaller};
-use parachains_common::message_queue::{NarrowOriginToSibling, ParaIdToSibling};
-use parity_scale_codec::{Decode, Encode, MaxEncodedLen};
-use polkadot_runtime_common::{impls::ToAuthor, BlockHashCount};
-use polkadot_runtime_wrappers::{
+use openzeppelin_polkadot_wrappers::{
     impl_openzeppelin_consensus, impl_openzeppelin_governance, impl_openzeppelin_system,
     impl_openzeppelin_xcm, ConsensusConfig, GovernanceConfig, SystemConfig, XcmConfig,
 };
+use parachains_common::message_queue::{NarrowOriginToSibling, ParaIdToSibling};
+use parity_scale_codec::{Decode, Encode, MaxEncodedLen};
+use polkadot_runtime_common::{impls::ToAuthor, BlockHashCount};
 use scale_info::TypeInfo;
 use sp_consensus_aura::sr25519::AuthorityId as AuraId;
 use sp_runtime::{
@@ -77,8 +77,8 @@ parameter_types! {
     pub const Version: RuntimeVersion = VERSION;
 }
 /// OpenZeppelin configuration
-pub struct OpenZeppelinConfig;
-impl SystemConfig for OpenZeppelinConfig {
+pub struct OpenZeppelinRuntime;
+impl SystemConfig for OpenZeppelinRuntime {
     type AccountId = AccountId;
     type ExistentialDeposit = ExistentialDeposit;
     type Lookup = AccountIdLookup<AccountId, ()>;
@@ -87,7 +87,7 @@ impl SystemConfig for OpenZeppelinConfig {
     type ScheduleOrigin = EnsureRoot<AccountId>;
     type Version = Version;
 }
-impl ConsensusConfig for OpenZeppelinConfig {
+impl ConsensusConfig for OpenZeppelinRuntime {
     type CollatorSelectionUpdateOrigin = CollatorSelectionUpdateOrigin;
 }
 parameter_types! {
@@ -103,7 +103,7 @@ parameter_types! {
     // pallet instance (which sits at index 13).
     pub TreasuryInteriorLocation: InteriorLocation = PalletInstance(13).into();
 }
-impl GovernanceConfig for OpenZeppelinConfig {
+impl GovernanceConfig for OpenZeppelinRuntime {
     type ConvictionVoteLockingPeriod = VoteLockingPeriod;
     type DispatchWhitelistedOrigin = EitherOf<EnsureRoot<AccountId>, WhitelistedCaller>;
     type ReferendaAlarmInterval = AlarmInterval;
@@ -127,7 +127,7 @@ parameter_types! {
     pub const MaxStale: u32 = 8;
     pub const MaxInboundSuspended: u32 = 1000;
 }
-impl XcmConfig for OpenZeppelinConfig {
+impl XcmConfig for OpenZeppelinRuntime {
     type AssetTransactors = AssetTransactors;
     type FeeManager = FeeManager;
     type LocalOriginToLocation = LocalOriginToLocation;
@@ -143,7 +143,7 @@ impl XcmConfig for OpenZeppelinConfig {
     type XcmpQueueControllerOrigin = EnsureRoot<AccountId>;
     type XcmpQueueMaxInboundSuspended = MaxInboundSuspended;
 }
-impl_openzeppelin_system!(OpenZeppelinConfig);
-impl_openzeppelin_consensus!(OpenZeppelinConfig);
-impl_openzeppelin_governance!(OpenZeppelinConfig);
-impl_openzeppelin_xcm!(OpenZeppelinConfig);
+impl_openzeppelin_system!(OpenZeppelinRuntime);
+impl_openzeppelin_consensus!(OpenZeppelinRuntime);
+impl_openzeppelin_governance!(OpenZeppelinRuntime);
+impl_openzeppelin_xcm!(OpenZeppelinRuntime);

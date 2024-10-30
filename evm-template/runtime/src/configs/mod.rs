@@ -25,16 +25,16 @@ use frame_system::{
 };
 pub use governance::origins::pallet_custom_origins;
 use governance::{origins::Treasurer, tracks, Spender, WhitelistedCaller};
+use openzeppelin_polkadot_wrappers::{
+    impl_openzeppelin_consensus, impl_openzeppelin_evm, impl_openzeppelin_governance,
+    impl_openzeppelin_system, impl_openzeppelin_xcm, ConsensusConfig, EvmConfig, GovernanceConfig,
+    SystemConfig, XcmConfig,
+};
 use pallet_ethereum::PostLogContent;
 use pallet_evm::{EVMCurrencyAdapter, EnsureAccountId20, IdentityAddressMapping};
 use parachains_common::message_queue::{NarrowOriginToSibling, ParaIdToSibling};
 use parity_scale_codec::{Decode, Encode, MaxEncodedLen};
 use polkadot_runtime_common::BlockHashCount;
-use polkadot_runtime_wrappers::{
-    impl_openzeppelin_consensus, impl_openzeppelin_evm, impl_openzeppelin_governance,
-    impl_openzeppelin_system, impl_openzeppelin_xcm, ConsensusConfig, EvmConfig, GovernanceConfig,
-    SystemConfig, XcmConfig,
-};
 use scale_info::TypeInfo;
 use sp_consensus_aura::sr25519::AuthorityId as AuraId;
 use sp_core::{H160, U256};
@@ -89,8 +89,8 @@ parameter_types! {
     pub const SS58Prefix: u16 = 42;
 }
 /// OpenZeppelin configuration
-pub struct OpenZeppelinConfig;
-impl SystemConfig for OpenZeppelinConfig {
+pub struct OpenZeppelinRuntime;
+impl SystemConfig for OpenZeppelinRuntime {
     type AccountId = AccountId;
     type ExistentialDeposit = ExistentialDeposit;
     type Lookup = IdentityLookup<AccountId>;
@@ -99,7 +99,7 @@ impl SystemConfig for OpenZeppelinConfig {
     type ScheduleOrigin = EnsureRoot<AccountId>;
     type Version = Version;
 }
-impl ConsensusConfig for OpenZeppelinConfig {
+impl ConsensusConfig for OpenZeppelinRuntime {
     type CollatorSelectionUpdateOrigin = CollatorSelectionUpdateOrigin;
 }
 parameter_types! {
@@ -115,7 +115,7 @@ parameter_types! {
     // pallet instance (which sits at index 13).
     pub TreasuryInteriorLocation: InteriorLocation = PalletInstance(13).into();
 }
-impl GovernanceConfig for OpenZeppelinConfig {
+impl GovernanceConfig for OpenZeppelinRuntime {
     type ConvictionVoteLockingPeriod = VoteLockingPeriod;
     type DispatchWhitelistedOrigin = EitherOf<EnsureRoot<AccountId>, WhitelistedCaller>;
     type ReferendaAlarmInterval = AlarmInterval;
@@ -139,7 +139,7 @@ parameter_types! {
     pub const MaxStale: u32 = 8;
     pub const MaxInboundSuspended: u32 = 1000;
 }
-impl XcmConfig for OpenZeppelinConfig {
+impl XcmConfig for OpenZeppelinRuntime {
     type AssetTransactors = AssetTransactors;
     type FeeManager = FeeManager;
     type LocalOriginToLocation = LocalOriginToLocation;
@@ -160,7 +160,7 @@ impl XcmConfig for OpenZeppelinConfig {
 parameter_types! {
     pub PrecompilesValue: OpenZeppelinPrecompiles<Runtime> = OpenZeppelinPrecompiles::<_>::new();
 }
-impl EvmConfig for OpenZeppelinConfig {
+impl EvmConfig for OpenZeppelinRuntime {
     type AddressMapping = IdentityAddressMapping;
     type CallOrigin = EnsureAccountId20;
     type FindAuthor = FindAuthorSession<Aura>;
@@ -168,11 +168,11 @@ impl EvmConfig for OpenZeppelinConfig {
     type PrecompilesValue = PrecompilesValue;
     type WithdrawOrigin = EnsureAccountId20;
 }
-impl_openzeppelin_system!(OpenZeppelinConfig);
-impl_openzeppelin_consensus!(OpenZeppelinConfig);
-impl_openzeppelin_governance!(OpenZeppelinConfig);
-impl_openzeppelin_xcm!(OpenZeppelinConfig);
-impl_openzeppelin_evm!(OpenZeppelinConfig);
+impl_openzeppelin_system!(OpenZeppelinRuntime);
+impl_openzeppelin_consensus!(OpenZeppelinRuntime);
+impl_openzeppelin_governance!(OpenZeppelinRuntime);
+impl_openzeppelin_xcm!(OpenZeppelinRuntime);
+impl_openzeppelin_evm!(OpenZeppelinRuntime);
 
 pub struct FindAuthorSession<F>(PhantomData<F>);
 impl<F: FindAuthor<u32>> FindAuthor<H160> for FindAuthorSession<F> {
