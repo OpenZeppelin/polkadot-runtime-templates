@@ -76,7 +76,7 @@ parameter_types! {
     pub const SS58Prefix: u16 = 42;
     pub const Version: RuntimeVersion = VERSION;
 }
-/// OpenZeppelin configuration
+// OpenZeppelin runtime wrappers configuration
 pub struct OpenZeppelinRuntime;
 impl SystemConfig for OpenZeppelinRuntime {
     type AccountId = AccountId;

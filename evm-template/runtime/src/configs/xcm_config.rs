@@ -223,7 +223,7 @@ parameter_types! {
     pub TreasuryAccount: AccountId = Treasury::account_id();
 }
 
-/// When changing this config, keep in mind, that you should collect fees.
+/// If you change this config, keep in mind that you should define how you collect fees.
 pub type FeeManager = XcmFeeManagerFromComponents<
     IsChildSystemParachain<primitives::Id>,
     XcmFeeToAccount<AssetTransactors, AccountId, TreasuryAccount>,

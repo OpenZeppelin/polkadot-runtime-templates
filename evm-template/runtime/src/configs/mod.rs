@@ -53,7 +53,6 @@ use xcm_builder::{
     FrameTransactionalProcessor, TakeWeightCredit, TrailingSetTopicAsId, UsingComponents,
     WithComputedOrigin, WithUniqueTopic,
 };
-// XCM imports
 use xcm_config::{
     AssetTransactors, BalancesPalletLocation, FeeManager, LocalOriginToLocation,
     LocationToAccountId, Reserves, XcmOriginToTransactDispatchOrigin,
@@ -88,7 +87,7 @@ parameter_types! {
     // generic substrate prefix. For more info, see: [Polkadot Accounts In-Depth](https://wiki.polkadot.network/docs/learn-account-advanced#:~:text=The%20address%20format%20used%20in,belonging%20to%20a%20specific%20network)
     pub const SS58Prefix: u16 = 42;
 }
-/// OpenZeppelin configuration
+// OpenZeppelin runtime wrappers configuration
 pub struct OpenZeppelinRuntime;
 impl SystemConfig for OpenZeppelinRuntime {
     type AccountId = AccountId;

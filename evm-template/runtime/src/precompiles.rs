@@ -35,7 +35,7 @@ where
             a if a == hash(3) => Some(Ripemd160::execute(handle)),
             a if a == hash(4) => Some(Identity::execute(handle)),
             a if a == hash(5) => Some(Modexp::execute(handle)),
-            // Non-Frontier specific nor Ethereum precompiles :
+            // Frontier precompiles :
             a if a == hash(1024) => Some(Sha3FIPS256::execute(handle)),
             a if a == hash(1025) => Some(ECRecoverPublicKey::execute(handle)),
             _ => None,
