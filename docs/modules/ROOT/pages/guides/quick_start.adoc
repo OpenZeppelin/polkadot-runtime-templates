@@ -46,7 +46,7 @@ We use the `generic-template-node` executable throughout all the commands since 
 ** Edit the chainspec:
 
 *** Update `name`, `id` and `protocolId` to unique values.
-*** Change `relay_chain` from `paseo-local` to `paseo`.
+*** Change `relay_chain` from `rococo-local` to `paseo`.
 *** Change `para_id` and `parachainInfo.parachainId` from `1000` to the previously saved parachain id.
 
 ** Generate a raw chainspec with this command:
