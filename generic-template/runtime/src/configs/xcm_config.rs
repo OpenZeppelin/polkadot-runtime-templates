@@ -30,8 +30,8 @@ use xcm_primitives::{AbsoluteAndRelativeReserve, AsAssetType};
 use super::TreasuryAccount;
 use crate::{
     configs::{
-        weights, AssetType, Balances, ParachainSystem,
-        Runtime, RuntimeCall, RuntimeEvent, RuntimeOrigin, XcmpQueue,
+        weights, AssetType, Balances, ParachainSystem, Runtime, RuntimeCall, RuntimeEvent,
+        RuntimeOrigin, XcmpQueue,
     },
     types::{AccountId, AssetId, Balance},
     AllPalletsWithSystem, AssetManager, Assets, ParachainInfo, PolkadotXcm,
