@@ -25,7 +25,7 @@ cd evm-template
 +
 ```rust
 [relaychain]
-chain = "paseo-local"
+chain = "rococo-local"
 default_command = "./bin-v1.6.0/polkadot"
 
 [[relaychain.nodes]]
@@ -162,7 +162,7 @@ image::zombie-chain-spec.png[Zombie Chain Spec]
     --rpc-port 8844 \
     -- \
     --execution wasm \
-    --chain /var/folders/...{redacted}.../paseo-local.json \
+    --chain /var/folders/...{redacted}.../rococo-local.json \
     --port 30343 \
     --rpc-port 9977
 ```

@@ -77,7 +77,7 @@ zombienet_build() {
 zombienet_devnet() {
   zombienet_init
   cargo build --release
-  echo "spawning paseo-local relay chain plus devnet as a parachain..."
+  echo "spawning rococo-local relay chain plus devnet as a parachain..."
   local dir=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
   ./$ZOMBIENET_BIN spawn "$dir/../zombienet-config/devnet.toml" -p native
 }
@@ -88,7 +88,7 @@ print_help() {
   echo ""
   echo "$ ./zombienet.sh init         # fetches zombienet and polkadot executables"
   echo "$ ./zombienet.sh build        # builds polkadot executables from source"
-  echo "$ ./zombienet.sh devnet       # spawns a paseo-local relay chain plus parachain devnet-local as a parachain"
+  echo "$ ./zombienet.sh devnet       # spawns a rococo-local relay chain plus parachain devnet-local as a parachain"
 }
 
 SUBCOMMAND=$1

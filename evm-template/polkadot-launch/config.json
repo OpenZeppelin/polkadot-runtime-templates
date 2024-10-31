@@ -1,7 +1,7 @@
 {
 	"relaychain": {
 		"bin": "../../polkadot/target/release/polkadot",
-		"chain": "paseo-local",
+		"chain": "rococo-local",
 		"nodes": [
 			{
 				"name": "alice",
@@ -34,6 +34,5 @@
 			]
 		}
 	],
-	"types": {
-	}
+	"types": {}
 }
