@@ -8,13 +8,13 @@ repository = { workspace = true }
 version = "2.0.0"
 
 [package.metadata.docs.rs]
-targets = ["x86_64-unknown-linux-gnu"]
+targets = [ "x86_64-unknown-linux-gnu" ]
 
 [dependencies]
 hex-literal = { workspace = true, optional = true }
 log = { workspace = true }
-parity-scale-codec = { workspace = true, features = ["derive"] }
-scale-info = { workspace = true, features = ["derive"] }
+parity-scale-codec = { workspace = true, features = [ "derive" ] }
+scale-info = { workspace = true, features = [ "derive" ] }
 smallvec = { workspace = true }
 
 # Substrate
@@ -246,10 +246,10 @@ try-runtime = [
 # A feature that should be enabled when the runtime should be built for on-chain
 # deployment. This will disable stuff that shouldn't be part of the on-chain wasm
 # to make it smaller, like logging for example.
-on-chain-release-build = ["sp-api/disable-logging"]
+on-chain-release-build = [ "sp-api/disable-logging" ]
 
 async-backing = []
 
-default = ["std"]
+default = [ "std" ]
 
-metadata-hash = ["substrate-wasm-builder/metadata-hash"]
+metadata-hash = [ "substrate-wasm-builder/metadata-hash" ]
