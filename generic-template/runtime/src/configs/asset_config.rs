@@ -181,12 +181,12 @@ pub trait AccountIdAssetIdConversion<Account, AssetId> {
     fn asset_id_to_account(prefix: &[u8], asset_id: AssetId) -> Account;
 }
 
+// needs to be 28 bytes due to `data` is 4 bytes
 const FOREIGN_ASSET_PRECOMPILE_ADDRESS_PREFIX: &[u8] = &[255u8; 28];
 
 // Instruct how to go from an H256 to an AssetID
 impl AccountIdAssetIdConversion<AccountId, AssetId> for Runtime {
     /// The way to convert an account to assetId is by ensuring that the prefix is 0XFFFFFFFF
-    /// and by taking the lowest 128 bits as the assetId
     fn account_to_asset_id(account: AccountId) -> Option<(Vec<u8>, AssetId)> {
         let bytes: [u8; 32] = account.into();
         let h256_account: H256 = bytes.into();
@@ -194,6 +194,7 @@ impl AccountIdAssetIdConversion<AccountId, AssetId> for Runtime {
         let (prefix_part, id_part) = h256_account.as_fixed_bytes().split_at(28);
         if prefix_part == FOREIGN_ASSET_PRECOMPILE_ADDRESS_PREFIX {
             data.copy_from_slice(id_part);
+            // we use `data` to create a u32 -> data needs to be 4 bytes
             let asset_id: AssetId = u32::from_be_bytes(data);
             Some((prefix_part.to_vec(), asset_id))
         } else {

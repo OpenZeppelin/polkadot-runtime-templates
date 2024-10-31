@@ -1,4 +1,5 @@
 pub mod asset_config;
+pub use asset_config::AssetType;
 pub mod governance;
 pub mod xcm_config;
 
