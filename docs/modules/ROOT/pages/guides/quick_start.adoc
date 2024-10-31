@@ -4,19 +4,12 @@
 
 = Quick start
 
+This guide will help you deploy your own parachain on the link:https://github.com/paseo-network[Paseo] testnet.
+
+== Prerequisites
 * Begin by visiting our link:https://github.com/OpenZeppelin/polkadot-runtime-templates[repository]. You can fork it, or simply clone it to your local directory.
 ```bash
 git clone git@github.com:OpenZeppelin/polkadot-runtime-templates.git
-```
-
-* Move to the directory of the template you want to use. We will use the `generic runtime template` for this tutorial, but it is the same for the same applies to the xref:runtimes/evm.adoc[EVM Runtime Template].
-```bash
-cd generic-template
-```
-
-* Build a release version of the runtime and node:
-```bash
-cargo build --release
 ```
 
 * Receive some `PSO` from the link:https://paritytech.github.io/polkadot-testnet-faucet/[Paseo faucet]
@@ -29,6 +22,19 @@ cargo build --release
 ** Click the `+ ParaId` button
 ** Save the `parachain id` for the further usage.
 ** Click `Submit` and `Sign and Submit`.
+
+== Creating the chain spec
+The chain spec is the collection of information that describes a Substrate-based blockchain network.
+
+* Move to the directory of the template you want to use. We will use the `generic runtime template` for this tutorial,but the same applies to the xref:runtimes/evm.adoc[EVM Runtime Template].
+```bash
+cd generic-template
+```
+
+* Build a release version of the runtime and node:
+```bash
+cargo build --release
+```
 
 * Generate and customize a chainspec:
 
@@ -47,13 +53,16 @@ We use the `generic-template-node` executable throughout all the commands since 
 
 *** Update `name`, `id` and `protocolId` to unique values.
 *** Change `relay_chain` from `rococo-local` to `paseo`.
-*** Change `para_id` and `parachainInfo.parachainId` from `1000` to the previously saved parachain id.
+*** Change `para_id` and `parachainInfo.parachainId` from `1000` to the parachain id you reserved.
 
 ** Generate a raw chainspec with this command:
 +
 ```bash
 ./target/release/generic-template-node build-spec --chain plain-parachain-chainspec.json --disable-default-bootnode --raw > raw-parachain-chainspec.json
 ```
+
+== Running the nodes
+Now it's time to run the collator nodes.
 
 * Run two nodes and wait until it syncs with the Paseo relay chain. This can take a fairly long time(up to 2 days), so we can use the `fast-unsafe` flag to make the process faster since we are on a testnet(~ 3 hours). `fast` downloads the blocks without executing the transactions, and `unsafe` skips downloading the state proofs(which we are ok with since it is a testnet).
 +
@@ -63,7 +72,7 @@ We use the `generic-template-node` executable throughout all the commands since 
     --collator \
     --force-authoring \
     --chain raw-parachain-chainspec.json \
-    --base-path <path to datadir> \
+    --base-path ./data \
     --port 40333 \
     --rpc-port 8844 \
     -- \
@@ -80,7 +89,7 @@ We use the `generic-template-node` executable throughout all the commands since 
     --collator \
     --force-authoring \
     --chain raw-parachain-chainspec.json \
-    --base-path <path to datadir> \
+    --base-path ./data \
     --port 40333 \
     --rpc-port 8845 \
     -- \
@@ -90,7 +99,7 @@ We use the `generic-template-node` executable throughout all the commands since 
     --rpc-port 9977 \
     --sync fast-unsafe
 ```
-** `<path to datadir>` is where the downloaded chain state will be stored. It can be any folder on your computer.
+
 ** `<path to the Paseo chainspec>` is where your Paseo chainspec is stored. You can download this file from the link:https://github.com/paritytech/polkadot-sdk/blob/release-polkadot-v1.10.0/polkadot/node/service/chain-specs/paseo.json[official Polkadot sdk repository].
 
 * Register a parathread:
@@ -98,29 +107,32 @@ We use the `generic-template-node` executable throughout all the commands since 
 ** Generate a genesis state:
 +
 ```bash
-./target/release/generic-template-node export-genesis-state --chain raw-parachain-chainspec.json para-<paraId>-genesis-state
+./target/release/generic-template-node export-genesis-state --chain raw-parachain-chainspec.json para-<parachainId>-genesis-state
 ```
 ** Generate a genesis wasm:
 +
 ```bash
-./target/release/generic-template-node export-genesis-wasm --chain raw-parachain-chainspec.json para-<paraId>-wasm
+./target/release/generic-template-node export-genesis-wasm --chain raw-parachain-chainspec.json para-<parachainId>-wasm
 ```
 ** Go to link:https://polkadot.js.org/apps[PolkadotJS]. Check that it points to Paseo testnet.
 ** Go to `Network` > `Parachains`.
 ** Go to `Parathreads` tab.
 ** Click the `+ ParaThread` button.
-** Insert `para-<paraId>-wasm` to `code` field.
-** Insert `para-<paraId>-genesis-state` to `initial state` field.
+** Insert `para-<parachainId>-wasm` to `code` field.
+** Insert `para-<parachainId>-genesis-state` to `initial state` field.
 ** Click `Submit` and `Sign and Submit`.
 
-* When a parachain gets synced with a relaychain, you may start producing blocks as a parathread:
-** Create some transaction with a PolkadotJS pointing to your parachain setup.
-** With a PolkadotJS pointing to Paseo go to `Developer` > `Extrinsics`.
-** Submit an extrinsic `onDemandAssignmentProvider.placeOrderAllowDeath` or `onDemandAssignmentProvider.placeOrderKeepAlive`:
-*** `maxAmount` should be not less than 10_000_000 and it is amount of 0.00001 PAS. It is an amount of PAS paid for the block.
-*** `paraId` should be set to your parachain id.
-*** Click `Submit` and `Sign and Submit`.
-** In some time your parathread will produce a block and in one of the next blocks of Paseo there will be an inclusion of this block
+== Testing your parachain
+
+When a parachain gets synced with the relaychain, you may start producing blocks as a parathread:
+
+* Create some transaction with PolkadotJS pointing to your parachain setup.
+* With PolkadotJS pointing to Paseo go to `Developer` > `Extrinsics`.
+* Submit an extrinsic `onDemandAssignmentProvider.placeOrderAllowDeath` or `onDemandAssignmentProvider.placeOrderKeepAlive`:
+** `maxAmount` should be not less than 10_000_000.
+** `paraId` should be set to your parachain id.
+** Click `Submit` and `Sign and Submit`.
+After a short period, your parathread will produce a block. This block will then be included in one of the subsequent Paseo relay chain blocks.
 
 == What's next?
 
