@@ -28,6 +28,19 @@ parameter_types! {
     pub const RemoveItemsLimit: u32 = 1000;
 }
 
+// Required for runtime benchmarks
+pallet_assets::runtime_benchmarks_enabled! {
+    pub struct BenchmarkHelper;
+    impl<AssetIdParameter> pallet_assets::BenchmarkHelper<AssetIdParameter> for BenchmarkHelper
+    where
+        AssetIdParameter: From<u32>,
+    {
+        fn create_asset_id_parameter(id: u32) -> AssetIdParameter {
+            (id as u32).into()
+        }
+    }
+}
+
 // Foreign assets
 impl pallet_assets::Config for Runtime {
     type ApprovalDeposit = ApprovalDeposit;
@@ -37,7 +50,7 @@ impl pallet_assets::Config for Runtime {
     type AssetIdParameter = Compact<AssetId>;
     type Balance = Balance;
     #[cfg(feature = "runtime-benchmarks")]
-    type BenchmarkHelper = ();
+    type BenchmarkHelper = BenchmarkHelper;
     type CallbackHandle = ();
     type CreateOrigin = AsEnsureOriginWithArg<EnsureSigned<AccountId>>;
     type Currency = Balances;

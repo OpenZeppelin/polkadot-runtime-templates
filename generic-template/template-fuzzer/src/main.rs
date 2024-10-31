@@ -60,6 +60,7 @@ fn generate_genesis(accounts: &[AccountId]) -> Storage {
         transaction_payment: Default::default(),
         sudo: SudoConfig { key: Some(root) },
         treasury: Default::default(),
+        ..Default::default()
     }
     .build_storage()
     .unwrap()
