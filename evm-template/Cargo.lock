@@ -3000,6 +3000,7 @@ dependencies = [
  "fp-self-contained",
  "frame-benchmarking",
  "frame-executive",
+ "frame-metadata-hash-extension",
  "frame-support",
  "frame-system",
  "frame-system-benchmarking",
@@ -3007,6 +3008,9 @@ dependencies = [
  "frame-try-runtime",
  "hex-literal",
  "log",
+ "orml-traits",
+ "orml-xcm-support",
+ "orml-xtokens",
  "pallet-asset-manager",
  "pallet-assets",
  "pallet-aura",
@@ -3015,6 +3019,7 @@ dependencies = [
  "pallet-base-fee",
  "pallet-collator-selection",
  "pallet-conviction-voting",
+ "pallet-erc20-xcm-bridge",
  "pallet-ethereum",
  "pallet-evm",
  "pallet-evm-chain-id",
@@ -3036,6 +3041,8 @@ dependencies = [
  "pallet-utility",
  "pallet-whitelist",
  "pallet-xcm",
+ "pallet-xcm-transactor",
+ "pallet-xcm-weight-trader",
  "parachains-common",
  "parity-scale-codec",
  "polkadot-parachain-primitives",
@@ -3066,7 +3073,7 @@ dependencies = [
 
 [[package]]
 name = "evm-template-node"
-version = "1.0.0"
+version = "2.0.0"
 dependencies = [
  "clap",
  "color-print",
@@ -6052,6 +6059,20 @@ dependencies = [
 ]
 
 [[package]]
+name = "merkleized-metadata"
+version = "0.1.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "f313fcff1d2a4bcaa2deeaa00bf7530d77d5f7bd0467a117dde2e29a75a7a17a"
+dependencies = [
+ "array-bytes",
+ "blake3",
+ "frame-metadata",
+ "parity-scale-codec",
+ "scale-decode",
+ "scale-info",
+]
+
+[[package]]
 name = "merlin"
 version = "3.0.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -6861,7 +6882,7 @@ dependencies = [
 [[package]]
 name = "orml-traits"
 version = "0.10.0"
-source = "git+https://github.com/openzeppelin/open-runtime-module-library?branch=polkadot-stable2407-1#aafe9077c9ec61dd8b3a42e899ef8353b2b050c0"
+source = "git+https://github.com/OpenZeppelin/open-runtime-module-library?branch=polkadot-stable2407-1#aafe9077c9ec61dd8b3a42e899ef8353b2b050c0"
 dependencies = [
  "frame-support",
  "impl-trait-for-tuples",
@@ -6870,6 +6891,7 @@ dependencies = [
  "parity-scale-codec",
  "paste",
  "scale-info",
+ "serde",
  "sp-core",
  "sp-io",
  "sp-runtime",
@@ -6880,15 +6902,51 @@ dependencies = [
 [[package]]
 name = "orml-utilities"
 version = "0.10.0"
-source = "git+https://github.com/openzeppelin/open-runtime-module-library?branch=polkadot-stable2407-1#aafe9077c9ec61dd8b3a42e899ef8353b2b050c0"
+source = "git+https://github.com/OpenZeppelin/open-runtime-module-library?branch=polkadot-stable2407-1#aafe9077c9ec61dd8b3a42e899ef8353b2b050c0"
 dependencies = [
  "frame-support",
  "parity-scale-codec",
  "scale-info",
+ "serde",
  "sp-core",
  "sp-io",
  "sp-runtime",
  "sp-std",
+]
+
+[[package]]
+name = "orml-xcm-support"
+version = "0.10.0"
+source = "git+https://github.com/OpenZeppelin/open-runtime-module-library?branch=polkadot-stable2407-1#aafe9077c9ec61dd8b3a42e899ef8353b2b050c0"
+dependencies = [
+ "frame-support",
+ "orml-traits",
+ "parity-scale-codec",
+ "sp-runtime",
+ "sp-std",
+ "staging-xcm",
+ "staging-xcm-executor",
+]
+
+[[package]]
+name = "orml-xtokens"
+version = "0.10.0"
+source = "git+https://github.com/OpenZeppelin/open-runtime-module-library?branch=polkadot-stable2407-1#aafe9077c9ec61dd8b3a42e899ef8353b2b050c0"
+dependencies = [
+ "frame-support",
+ "frame-system",
+ "log",
+ "orml-traits",
+ "orml-xcm-support",
+ "pallet-xcm",
+ "parity-scale-codec",
+ "scale-info",
+ "serde",
+ "sp-io",
+ "sp-runtime",
+ "sp-std",
+ "staging-xcm",
+ "staging-xcm-executor",
 ]
 
 [[package]]
@@ -6918,7 +6976,7 @@ dependencies = [
 [[package]]
 name = "pallet-asset-manager"
 version = "0.1.0"
-source = "git+https://github.com/OpenZeppelin/moonbeam.git?branch=polkadot-stable2407-1#3ed33a712c6968af7a33d970ec4300293c5345b9"
+source = "git+https://github.com/OpenZeppelin/moonbeam.git?branch=polkadot-stable2407-1#fab6e72fbaaeaa065ad983556d09d4c0e8755dfa"
 dependencies = [
  "frame-benchmarking",
  "frame-support",
@@ -7326,6 +7384,28 @@ dependencies = [
  "sp-npos-elections",
  "sp-runtime",
  "sp-staking",
+]
+
+[[package]]
+name = "pallet-erc20-xcm-bridge"
+version = "1.0.0"
+source = "git+https://github.com/OpenZeppelin/moonbeam.git?branch=polkadot-stable2407-1#fab6e72fbaaeaa065ad983556d09d4c0e8755dfa"
+dependencies = [
+ "environmental",
+ "ethereum-types",
+ "fp-evm",
+ "frame-support",
+ "frame-system",
+ "log",
+ "pallet-evm",
+ "parity-scale-codec",
+ "scale-info",
+ "serde",
+ "sp-core",
+ "sp-runtime",
+ "sp-std",
+ "staging-xcm",
+ "staging-xcm-executor",
 ]
 
 [[package]]
@@ -8117,6 +8197,50 @@ dependencies = [
  "staging-xcm",
  "staging-xcm-builder",
  "staging-xcm-executor",
+]
+
+[[package]]
+name = "pallet-xcm-transactor"
+version = "0.2.0"
+source = "git+https://github.com/OpenZeppelin/moonbeam.git?branch=polkadot-stable2407-1#fab6e72fbaaeaa065ad983556d09d4c0e8755dfa"
+dependencies = [
+ "cumulus-primitives-core",
+ "frame-benchmarking",
+ "frame-support",
+ "frame-system",
+ "log",
+ "orml-traits",
+ "parity-scale-codec",
+ "scale-info",
+ "serde",
+ "sp-io",
+ "sp-runtime",
+ "sp-std",
+ "staging-xcm",
+ "staging-xcm-builder",
+ "staging-xcm-executor",
+ "xcm-primitives",
+]
+
+[[package]]
+name = "pallet-xcm-weight-trader"
+version = "0.1.0"
+source = "git+https://github.com/OpenZeppelin/moonbeam.git?branch=polkadot-stable2407-1#fab6e72fbaaeaa065ad983556d09d4c0e8755dfa"
+dependencies = [
+ "frame-benchmarking",
+ "frame-support",
+ "frame-system",
+ "log",
+ "pallet-balances",
+ "parity-scale-codec",
+ "scale-info",
+ "sp-core",
+ "sp-io",
+ "sp-runtime",
+ "sp-std",
+ "staging-xcm",
+ "staging-xcm-executor",
+ "xcm-runtime-apis",
 ]
 
 [[package]]
@@ -9926,7 +10050,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "22505a5c94da8e3b7c2996394d1c933236c4d743e81a410bcca4e6989fc066a4"
 dependencies = [
  "bytes",
- "heck 0.5.0",
+ "heck 0.4.1",
  "itertools 0.12.1",
  "log",
  "multimap 0.10.0",
@@ -12069,6 +12193,29 @@ dependencies = [
 ]
 
 [[package]]
+name = "scale-bits"
+version = "0.6.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "e57b1e7f6b65ed1f04e79a85a57d755ad56d76fdf1e9bddcc9ae14f71fcdcf54"
+dependencies = [
+ "parity-scale-codec",
+ "scale-type-resolver",
+]
+
+[[package]]
+name = "scale-decode"
+version = "0.13.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "e98f3262c250d90e700bb802eb704e1f841e03331c2eb815e46516c4edbf5b27"
+dependencies = [
+ "derive_more",
+ "parity-scale-codec",
+ "scale-bits",
+ "scale-type-resolver",
+ "smallvec",
+]
+
+[[package]]
 name = "scale-info"
 version = "2.11.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -12093,6 +12240,12 @@ dependencies = [
  "quote",
  "syn 1.0.109",
 ]
+
+[[package]]
+name = "scale-type-resolver"
+version = "0.2.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "f0cded6518aa0bd6c1be2b88ac81bf7044992f0f154bfbabd5ad34f43512abcb"
 
 [[package]]
 name = "schannel"
@@ -13870,13 +14023,22 @@ name = "substrate-wasm-builder"
 version = "24.0.0"
 source = "git+https://github.com/paritytech/polkadot-sdk?tag=polkadot-stable2407-1#16b0fd09d9e9281c20ee0c1d8b87d011e3e3454e"
 dependencies = [
+ "array-bytes",
  "build-helper",
  "cargo_metadata",
  "console",
  "filetime",
+ "frame-metadata",
+ "merkleized-metadata",
+ "parity-scale-codec",
  "parity-wasm",
  "polkavm-linker",
+ "sc-executor",
+ "sp-core",
+ "sp-io",
  "sp-maybe-compressed-blob",
+ "sp-tracing",
+ "sp-version",
  "strum 0.26.3",
  "tempfile",
  "toml 0.8.19",
@@ -15766,7 +15928,7 @@ dependencies = [
 [[package]]
 name = "xcm-primitives"
 version = "0.1.1"
-source = "git+https://github.com/OpenZeppelin/moonbeam.git?branch=polkadot-stable2407-1#3ed33a712c6968af7a33d970ec4300293c5345b9"
+source = "git+https://github.com/OpenZeppelin/moonbeam.git?branch=polkadot-stable2407-1#fab6e72fbaaeaa065ad983556d09d4c0e8755dfa"
 dependencies = [
  "cumulus-primitives-core",
  "ethereum",

@@ -3,14 +3,14 @@
 
 = Polkadot Parachain Runtimes
 
-A collection of runtimes that describe parachains with different purposes.
+A collection of secure runtime templates to build parachains more easily on Polkadot.
 
-=== Runtimes
+== Runtimes
 * xref:runtimes/generic.adoc[Generic Runtime Template]
 * xref:runtimes/evm.adoc[EVM Runtime Template]
 
 
-=== A Couple of Good Starting Places
+== Where to get started
 * xref:guides/quick_start.adoc[Quick Start]: a generic parachain runtime that works out of the box. It has all the must have features, and allows further customization based on your project's needs. Generic Runtime Template also serves as the base for our other runtime templates.
 * xref:guides/testing_with_zombienet.adoc[Testing with Zombienet]: a more opinionated parachain runtime template that maximizes Ethereum compatibility by using `AccountId20` and configures a local EVM instance. You can easily migrate/deploy Solidity Smart Contracts to this one.
 

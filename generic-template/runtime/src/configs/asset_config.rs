@@ -208,7 +208,7 @@ impl AccountIdAssetIdConversion<AccountId, AssetId> for Runtime {
         if prefix_part == FOREIGN_ASSET_PRECOMPILE_ADDRESS_PREFIX {
             data.copy_from_slice(id_part);
             // we use `data` to create a u32 -> data needs to be 4 bytes
-            let asset_id: AssetId = u32::from_be_bytes(data).into();
+            let asset_id: AssetId = u32::from_be_bytes(data);
             Some((prefix_part.to_vec(), asset_id))
         } else {
             None

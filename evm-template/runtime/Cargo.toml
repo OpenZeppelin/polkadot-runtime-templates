@@ -20,6 +20,7 @@ smallvec = { workspace = true }
 # Substrate
 frame-benchmarking = { workspace = true, optional = true }
 frame-executive = { workspace = true }
+frame-metadata-hash-extension = { workspace = true }
 frame-support = { workspace = true }
 frame-system = { workspace = true }
 frame-system-benchmarking = { workspace = true, optional = true }
@@ -94,9 +95,18 @@ pallet-evm-precompile-modexp = { workspace = true }
 pallet-evm-precompile-sha3fips = { workspace = true }
 pallet-evm-precompile-simple = { workspace = true }
 
+# ORML
+orml-traits = { workspace = true }
+orml-xcm-support = { workspace = true }
+orml-xtokens = { workspace = true }
+
 # Moonbeam
 pallet-asset-manager = { workspace = true }
+pallet-erc20-xcm-bridge = { workspace = true }
+pallet-xcm-transactor = { workspace = true }
+pallet-xcm-weight-trader = { workspace = true }
 xcm-primitives = { workspace = true }
+
 
 [dev-dependencies]
 sp-io = { workspace = true }
@@ -124,12 +134,14 @@ std = [
 	"fp-self-contained/std",
 	"frame-benchmarking?/std",
 	"frame-executive/std",
+	"frame-metadata-hash-extension/std",
 	"frame-support/std",
 	"frame-system-benchmarking?/std",
 	"frame-system-rpc-runtime-api/std",
 	"frame-system/std",
 	"frame-try-runtime?/std",
 	"log/std",
+	"orml-xtokens/std",
 	"pallet-asset-manager/std",
 	"pallet-assets/std",
 	"pallet-aura/std",
@@ -138,6 +150,7 @@ std = [
 	"pallet-base-fee/std",
 	"pallet-collator-selection/std",
 	"pallet-conviction-voting/std",
+	"pallet-erc20-xcm-bridge/std",
 	"pallet-ethereum/std",
 	"pallet-evm-chain-id/std",
 	"pallet-evm/std",
@@ -155,6 +168,8 @@ std = [
 	"pallet-treasury/std",
 	"pallet-utility/std",
 	"pallet-whitelist/std",
+	"pallet-xcm-transactor/std",
+	"pallet-xcm-weight-trader/std",
 	"pallet-xcm/std",
 	"parachain-info/std",
 	"parachains-common/std",
@@ -181,7 +196,7 @@ std = [
 	"xcm/std",
 ]
 async-backing = []
-
+metadata-hash = [ "substrate-wasm-builder/metadata-hash" ]
 runtime-benchmarks = [
 	"assets-common/runtime-benchmarks",
 	"cumulus-pallet-parachain-system/runtime-benchmarks",
@@ -211,6 +226,8 @@ runtime-benchmarks = [
 	"pallet-treasury/runtime-benchmarks",
 	"pallet-utility/runtime-benchmarks",
 	"pallet-whitelist/runtime-benchmarks",
+	"pallet-xcm-transactor/runtime-benchmarks",
+	"pallet-xcm-weight-trader/runtime-benchmarks",
 	"pallet-xcm/runtime-benchmarks",
 	"parachains-common/runtime-benchmarks",
 	"polkadot-parachain-primitives/runtime-benchmarks",
@@ -230,6 +247,7 @@ try-runtime = [
 	"frame-support/try-runtime",
 	"frame-system/try-runtime",
 	"frame-try-runtime/try-runtime",
+	"orml-xtokens/try-runtime",
 	"pallet-asset-manager/try-runtime",
 	"pallet-assets/try-runtime",
 	"pallet-aura/try-runtime",
@@ -238,6 +256,7 @@ try-runtime = [
 	"pallet-base-fee/try-runtime",
 	"pallet-collator-selection/try-runtime",
 	"pallet-conviction-voting/try-runtime",
+	"pallet-erc20-xcm-bridge/try-runtime",
 	"pallet-ethereum/try-runtime",
 	"pallet-evm-chain-id/try-runtime",
 	"pallet-message-queue/try-runtime",
@@ -254,6 +273,8 @@ try-runtime = [
 	"pallet-treasury/try-runtime",
 	"pallet-utility/try-runtime",
 	"pallet-whitelist/try-runtime",
+	"pallet-xcm-transactor/try-runtime",
+	"pallet-xcm-weight-trader/try-runtime",
 	"pallet-xcm/try-runtime",
 	"parachain-info/try-runtime",
 	"polkadot-runtime-common/try-runtime",

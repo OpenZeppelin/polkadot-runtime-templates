@@ -9,22 +9,18 @@ use sp_core::ConstU32;
 use sp_runtime::{
     generic,
     traits::{BlakeTwo256, IdentifyAccount, Verify},
-    MultiAddress,
 };
 use xcm::VersionedLocation;
-use xcm_builder::{ConvertedConcreteId, PayOverXcm};
-use xcm_executor::traits::JustTry;
-use xcm_primitives::AsAssetType;
+use xcm_builder::PayOverXcm;
 
 use crate::{
     configs::{xcm_config, TreasuryInteriorLocation},
     constants::HOURS,
-    AssetManager, Assets,
 };
 pub use crate::{
     configs::{
-        xcm_config::RelayLocation, AssetType, FeeAssetId, StakingAdminBodyId,
-        ToSiblingBaseDeliveryFee, TransactionByteFee, TreasuryAccount,
+        xcm_config::RelayLocation, FeeAssetId, StakingAdminBodyId, ToSiblingBaseDeliveryFee,
+        TransactionByteFee,
     },
     constants::{
         BLOCK_PROCESSING_VELOCITY, RELAY_CHAIN_SLOT_DURATION_MILLIS, UNINCLUDED_SEGMENT_CAPACITY,
@@ -58,7 +54,7 @@ pub type Hash = sp_core::H256;
 pub type BlockNumber = u32;
 
 /// The address format for describing accounts.
-pub type Address = MultiAddress<AccountId, ()>;
+pub type Address = AccountId;
 
 /// Block header type as expected by this runtime.
 pub type Header = generic::Header<BlockNumber, BlakeTwo256>;
@@ -76,6 +72,7 @@ pub type SignedExtra = (
     frame_system::CheckNonce<Runtime>,
     frame_system::CheckWeight<Runtime>,
     pallet_transaction_payment::ChargeTransactionPayment<Runtime>,
+    frame_metadata_hash_extension::CheckMetadataHash<Runtime>,
     cumulus_primitives_storage_weight_reclaim::StorageWeightReclaim<Runtime>,
 );
 
@@ -109,23 +106,6 @@ pub type ConsensusHook = cumulus_pallet_aura_ext::FixedVelocityConsensusHook<
 pub type CollatorSelectionUpdateOrigin = EitherOfDiverse<
     EnsureRoot<AccountId>,
     EnsureXcm<IsVoiceOfBody<RelayLocation, StakingAdminBodyId>>,
->;
-
-/// This is the struct that will handle the revenue from xcm fees
-/// We do not burn anything because we want to mimic exactly what
-/// the sovereign account has
-pub type XcmFeesToAccount = xcm_primitives::XcmFeesToAccount<
-    Assets,
-    (
-        ConvertedConcreteId<
-            AssetId,
-            Balance,
-            AsAssetType<AssetId, AssetType, AssetManager>,
-            JustTry,
-        >,
-    ),
-    AccountId,
-    TreasuryAccount,
 >;
 
 /// These aliases are describing the Beneficiary and AssetKind for the Treasury pallet

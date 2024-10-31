@@ -1,7 +1,7 @@
 #!/bin/bash
 
 ZOMBIENET_V=v1.3.106
-POLKADOT_V=v1.6.0
+POLKADOT_V=stable2407-1
 
 # Detect the operating system
 case "$(uname -s)" in
@@ -45,7 +45,7 @@ build_polkadot() {
   pushd /tmp
     git clone https://github.com/paritytech/polkadot-sdk.git
     pushd polkadot-sdk
-      git checkout release-polkadot-$POLKADOT_V
+      git checkout polkadot-$POLKADOT_V
       echo "building polkadot executable..."
       cargo build --release --features fast-runtime
       cp target/release/polkadot "$CWD/$BIN_DIR"
@@ -55,26 +55,11 @@ build_polkadot() {
   popd
 }
 
-fetch_polkadot() {
-  echo "fetching from polkadot repository..."
-  echo $BIN_DIR
-  mkdir -p "$BIN_DIR"
-  pushd "$BIN_DIR"
-    wget https://github.com/paritytech/polkadot-sdk/releases/download/polkadot-$POLKADOT_V/polkadot
-    wget https://github.com/paritytech/polkadot-sdk/releases/download/polkadot-$POLKADOT_V/polkadot-execute-worker
-    wget https://github.com/paritytech/polkadot-sdk/releases/download/polkadot-$POLKADOT_V/polkadot-prepare-worker
-    chmod +x *
-  popd
-}
-
 zombienet_init() {
   if [ ! -f $ZOMBIENET_BIN ]; then
     echo "fetching zombienet executable..."
     curl -LO https://github.com/paritytech/zombienet/releases/download/$ZOMBIENET_V/$ZOMBIENET_BIN
     chmod +x $ZOMBIENET_BIN
-  fi
-  if [ ! -f $BIN_DIR/polkadot ]; then
-    fetch_polkadot
   fi
 }
 
@@ -92,7 +77,7 @@ zombienet_build() {
 zombienet_devnet() {
   zombienet_init
   cargo build --release
-  echo "spawning rococo-local relay chain plus devnet as a parachain..."
+  echo "spawning paseo-local relay chain plus devnet as a parachain..."
   local dir=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
   ./$ZOMBIENET_BIN spawn "$dir/../zombienet-config/devnet.toml" -p native
 }
@@ -103,7 +88,7 @@ print_help() {
   echo ""
   echo "$ ./zombienet.sh init         # fetches zombienet and polkadot executables"
   echo "$ ./zombienet.sh build        # builds polkadot executables from source"
-  echo "$ ./zombienet.sh devnet       # spawns a rococo-local relay chain plus parachain devnet-local as a parachain"
+  echo "$ ./zombienet.sh devnet       # spawns a paseo-local relay chain plus parachain devnet-local as a parachain"
 }
 
 SUBCOMMAND=$1

@@ -2,46 +2,63 @@ use core::marker::PhantomData;
 
 use frame_support::{
     parameter_types,
-    traits::{ConstU32, Contains, Everything, Nothing, PalletInfoAccess},
+    traits::{ConstU32, Contains, ContainsPair, Everything, Nothing, PalletInfoAccess},
     weights::Weight,
 };
 use frame_system::EnsureRoot;
+use orml_traits::{location::Reserve, parameter_type_with_key};
+use orml_xcm_support::MultiNativeAsset;
 use pallet_xcm::XcmPassthrough;
+use parity_scale_codec::{Decode, Encode};
 use polkadot_parachain_primitives::primitives::{self, Sibling};
+use scale_info::TypeInfo;
+use sp_core::H160;
+use sp_runtime::Vec;
 use xcm::latest::prelude::{Assets as XcmAssets, *};
 use xcm_builder::{
-    AccountKey20Aliases, AllowExplicitUnpaidExecutionFrom, AllowTopLevelPaidExecutionFrom,
+    AccountKey20Aliases, AllowExplicitUnpaidExecutionFrom, AllowTopLevelPaidExecutionFrom, Case,
     ConvertedConcreteId, DenyReserveTransferToRelayChain, DenyThenTry, EnsureXcmOrigin,
     FixedWeightBounds, FrameTransactionalProcessor, FungibleAdapter, FungiblesAdapter, HandleFee,
-    IsChildSystemParachain, IsConcrete, NativeAsset, NoChecking, ParentIsPreset,
-    RelayChainAsNative, SiblingParachainAsNative, SiblingParachainConvertsVia,
-    SignedAccountKey20AsNative, SovereignSignedViaLocation, TakeWeightCredit, TrailingSetTopicAsId,
-    UsingComponents, WithComputedOrigin, WithUniqueTopic, XcmFeeManagerFromComponents,
+    IsChildSystemParachain, IsConcrete, NoChecking, ParentIsPreset, RelayChainAsNative,
+    SiblingParachainAsNative, SiblingParachainConvertsVia, SignedAccountKey20AsNative,
+    SovereignSignedViaLocation, TakeWeightCredit, TrailingSetTopicAsId, WithComputedOrigin,
+    WithUniqueTopic, XcmFeeManagerFromComponents,
 };
 use xcm_executor::{
-    traits::{FeeReason, JustTry, TransactAsset},
+    traits::{ConvertLocation, FeeReason, JustTry, TransactAsset},
     XcmExecutor,
 };
-use xcm_primitives::AsAssetType;
+use xcm_primitives::{
+    AbsoluteAndRelativeReserve, AccountIdToLocation, AsAssetType, UtilityAvailableCalls,
+    UtilityEncodeCall, XcmTransact,
+};
 
 use crate::{
     configs::{
-        AssetType, ParachainSystem, Runtime, RuntimeCall, RuntimeEvent, RuntimeOrigin, WeightToFee,
-        XcmpQueue,
+        AssetType, ParachainSystem, Runtime, RuntimeCall, RuntimeEvent, RuntimeOrigin, XcmpQueue,
     },
-    types::{AccountId, AssetId, Balance, XcmFeesToAccount},
-    weights, AllPalletsWithSystem, AssetManager, Assets, Balances, ParachainInfo, PolkadotXcm,
-    Treasury,
+    types::{AccountId, AssetId, Balance},
+    weights, AllPalletsWithSystem, AssetManager, Assets, Balances, Erc20XcmBridge, ParachainInfo,
+    PolkadotXcm, Treasury,
 };
 
 parameter_types! {
-    pub const RelayLocation: Location = Location::parent();
     pub const RelayNetwork: Option<NetworkId> = None;
     pub AssetsPalletLocation: Location =
         PalletInstance(<Assets as PalletInfoAccess>::index() as u8).into();
     pub BalancesPalletLocation: Location = PalletInstance(<Balances as PalletInfoAccess>::index() as u8).into();
     pub RelayChainOrigin: RuntimeOrigin = cumulus_pallet_xcm::Origin::Relay.into();
     pub UniversalLocation: InteriorLocation = Parachain(ParachainInfo::parachain_id().into()).into();
+        // Self Reserve location, defines the multilocation identifiying the self-reserve currency
+    // This is used to match it also against our Balances pallet when we receive such
+    // a Location: (Self Balances pallet index)
+    // We use the RELATIVE multilocation
+    pub SelfReserve: Location = Location {
+        parents:0,
+        interior: [
+            PalletInstance(<Balances as PalletInfoAccess>::index() as u8)
+        ].into()
+    };
 }
 
 /// `AssetId/Balancer` converter for `TrustBackedAssets`
@@ -188,9 +205,51 @@ pub fn deposit_or_burn_fee<AssetTransactor: TransactAsset, AccountId: Clone + In
     }
 }
 
+/// Matches foreign assets from a given origin.
+/// Foreign assets are assets bridged from other consensus systems. i.e parents > 1.
+pub struct IsBridgedConcreteAssetFrom<Origin>(PhantomData<Origin>);
+impl<Origin> ContainsPair<Asset, Location> for IsBridgedConcreteAssetFrom<Origin>
+where
+    Origin: Get<Location>,
+{
+    fn contains(asset: &Asset, origin: &Location) -> bool {
+        let loc = Origin::get();
+        &loc == origin
+            && matches!(
+                asset,
+                Asset { id: AssetId(Location { parents: 2, .. }), fun: Fungibility::Fungible(_) },
+            )
+    }
+}
+
+parameter_types! {
+    /// Location of Asset Hub
+   pub AssetHubLocation: Location = Location::new(1, [Parachain(1000)]);
+   pub const RelayLocation: Location = Location::parent();
+   pub RelayLocationFilter: AssetFilter = Wild(AllOf {
+       fun: WildFungible,
+       id: xcm::prelude::AssetId(RelayLocation::get()),
+   });
+   pub RelayChainNativeAssetFromAssetHub: (AssetFilter, Location) = (
+       RelayLocationFilter::get(),
+       AssetHubLocation::get()
+   );
+}
+
+type Reserves = (
+    // Assets bridged from different consensus systems held in reserve on Asset Hub.
+    IsBridgedConcreteAssetFrom<AssetHubLocation>,
+    // Relaychain (DOT) from Asset Hub
+    Case<RelayChainNativeAssetFromAssetHub>,
+    // Assets which the reserve is the same as the origin.
+    MultiNativeAsset<AbsoluteAndRelativeReserve<SelfLocationAbsolute>>,
+);
+
 parameter_types! {
     pub TreasuryAccount: AccountId = Treasury::account_id();
 }
+
+pub type XcmWeigher = FixedWeightBounds<UnitWeightCost, RuntimeCall, MaxInstructions>;
 
 pub struct XcmConfig;
 impl xcm_executor::Config for XcmConfig {
@@ -200,7 +259,7 @@ impl xcm_executor::Config for XcmConfig {
     type AssetLocker = ();
     // How to withdraw and deposit an asset.
     type AssetTransactor = AssetTransactors;
-    type AssetTrap = PolkadotXcm;
+    type AssetTrap = pallet_erc20_xcm_bridge::AssetTrapWrapper<PolkadotXcm, Runtime>;
     type Barrier = Barrier;
     type CallDispatcher = RuntimeCall;
     /// When changing this config, keep in mind, that you should collect fees.
@@ -214,7 +273,7 @@ impl xcm_executor::Config for XcmConfig {
     /// Please, keep these two configs (`IsReserve` and `IsTeleporter`) mutually exclusive.
     /// The IsReserve type must be set to specify which <MultiAsset, MultiLocation> pair we trust to deposit reserve assets on our chain. We can also use the unit type () to block ReserveAssetDeposited instructions.
     /// The IsTeleporter type must be set to specify which <MultiAsset, MultiLocation> pair we trust to teleport assets to our chain. We can also use the unit type () to block ReceiveTeleportedAssets instruction.
-    type IsReserve = NativeAsset;
+    type IsReserve = Reserves;
     type IsTeleporter = ();
     type MaxAssetsIntoHolding = MaxAssetsIntoHolding;
     type MessageExporter = ();
@@ -224,15 +283,12 @@ impl xcm_executor::Config for XcmConfig {
     type RuntimeCall = RuntimeCall;
     type SafeCallFilter = Everything;
     type SubscriptionService = PolkadotXcm;
-    type Trader = (
-        UsingComponents<WeightToFee, BalancesPalletLocation, AccountId, Balances, ()>,
-        xcm_primitives::FirstAssetTrader<AssetType, AssetManager, XcmFeesToAccount>,
-    );
+    type Trader = pallet_xcm_weight_trader::Trader<Runtime>;
     type TransactionalProcessor = FrameTransactionalProcessor;
     type UniversalAliases = Nothing;
     // Teleporting is disabled.
     type UniversalLocation = UniversalLocation;
-    type Weigher = FixedWeightBounds<UnitWeightCost, RuntimeCall, MaxInstructions>;
+    type Weigher = XcmWeigher;
     type XcmRecorder = PolkadotXcm;
     type XcmSender = XcmRouter;
 }
@@ -294,7 +350,7 @@ impl pallet_xcm::Config for Runtime {
     type SovereignAccountOf = LocationToAccountId;
     type TrustedLockers = ();
     type UniversalLocation = UniversalLocation;
-    type Weigher = FixedWeightBounds<UnitWeightCost, RuntimeCall, MaxInstructions>;
+    type Weigher = XcmWeigher;
     /// Rerun benchmarks if you are making changes to runtime configuration.
     type WeightInfo = weights::pallet_xcm::WeightInfo<Runtime>;
     #[cfg(feature = "runtime-benchmarks")]
@@ -313,4 +369,335 @@ impl pallet_xcm::Config for Runtime {
 impl cumulus_pallet_xcm::Config for Runtime {
     type RuntimeEvent = RuntimeEvent;
     type XcmExecutor = XcmExecutor<XcmConfig>;
+}
+
+// We are not using all of these below atm, but we will need them when configuring `orml_xtokens`
+parameter_types! {
+    pub const BaseXcmWeight: Weight = Weight::from_parts(200_000_000u64, 0);
+    pub const MaxAssetsForTransfer: usize = 2;
+
+    // This is how we are going to detect whether the asset is a Reserve asset
+    // This however is the chain part only
+    pub SelfLocation: Location = Location::here();
+    // We need this to be able to catch when someone is trying to execute a non-
+    // cross-chain transfer in xtokens through the absolute path way
+    pub SelfLocationAbsolute: Location = Location {
+        parents:1,
+        interior: [
+            Parachain(ParachainInfo::parachain_id().into())
+        ].into()
+    };
+}
+
+parameter_type_with_key! {
+    pub ParachainMinFee: |location: Location| -> Option<u128> {
+        match (location.parents, location.first_interior()) {
+            // Polkadot AssetHub fee
+            (1, Some(Parachain(1000u32))) => Some(50_000_000u128),
+            _ => None,
+        }
+    };
+}
+
+// Our currencyId. We distinguish for now between SelfReserve, and Others, defined by their Id.
+#[derive(Clone, Eq, Debug, PartialEq, Ord, PartialOrd, Encode, Decode, TypeInfo)]
+pub enum CurrencyId {
+    // Our native token
+    SelfReserve,
+    // Assets representing other chains native tokens
+    ForeignAsset(AssetId),
+    // Erc20 token
+    Erc20 { contract_address: H160 },
+}
+
+// How to convert from CurrencyId to Location
+pub struct CurrencyIdToLocation<AssetXConverter>(sp_std::marker::PhantomData<AssetXConverter>);
+impl<AssetXConverter> sp_runtime::traits::Convert<CurrencyId, Option<Location>>
+    for CurrencyIdToLocation<AssetXConverter>
+where
+    AssetXConverter: sp_runtime::traits::MaybeEquivalence<Location, AssetId>,
+{
+    fn convert(currency: CurrencyId) -> Option<Location> {
+        match currency {
+            CurrencyId::SelfReserve => {
+                let multi: Location = SelfReserve::get();
+                Some(multi)
+            }
+            CurrencyId::ForeignAsset(asset) => AssetXConverter::convert_back(&asset),
+            CurrencyId::Erc20 { contract_address } => {
+                let mut location = Erc20XcmBridgePalletLocation::get();
+                location
+                    .push_interior(Junction::AccountKey20 {
+                        key: contract_address.0,
+                        network: None,
+                    })
+                    .ok();
+                Some(location)
+            }
+        }
+    }
+}
+
+/// Wrapper type around `LocationToAccountId` to convert an `AccountId` to type `H160`.
+pub struct LocationToH160;
+impl ConvertLocation<H160> for LocationToH160 {
+    fn convert_location(location: &Location) -> Option<H160> {
+        <LocationToAccountId as ConvertLocation<AccountId>>::convert_location(location)
+            .map(Into::into)
+    }
+}
+
+parameter_types! {
+    // This is the relative view of erc20 assets.
+    // Identified by this prefix + AccountKey20(contractAddress)
+    // We use the RELATIVE multilocation
+    pub Erc20XcmBridgePalletLocation: Location = Location {
+        parents:0,
+        interior: [
+            PalletInstance(<Erc20XcmBridge as PalletInfoAccess>::index() as u8)
+        ].into()
+    };
+
+    // To be able to support almost all erc20 implementations,
+    // we provide a sufficiently high gas limit.
+    pub Erc20XcmBridgeTransferGasLimit: u64 = 800_000;
+}
+
+impl pallet_erc20_xcm_bridge::Config for Runtime {
+    type AccountIdConverter = LocationToH160;
+    type Erc20MultilocationPrefix = Erc20XcmBridgePalletLocation;
+    type Erc20TransferGasLimit = Erc20XcmBridgeTransferGasLimit;
+    type EvmRunner = pallet_evm::runner::stack::Runner<Self>;
+}
+
+/// The `DOTReserveProvider` overrides the default reserve location for DOT (Polkadot's native token).
+///
+/// DOT can exist in multiple locations, and this provider ensures that the reserve is correctly set
+/// to the AssetHub parachain.
+///
+/// - **Default Location:** `{ parents: 1, location: Here }`
+/// - **Reserve Location on AssetHub:** `{ parents: 1, location: X1(Parachain(AssetHubParaId)) }`
+///
+/// This provider ensures that if the asset's ID points to the default "Here" location,
+/// it will instead be mapped to the AssetHub parachain.
+pub struct DOTReserveProvider;
+
+impl Reserve for DOTReserveProvider {
+    fn reserve(asset: &Asset) -> Option<Location> {
+        let AssetId(location) = &asset.id;
+
+        let dot_here = Location::new(1, Here);
+        let dot_asset_hub = AssetHubLocation::get();
+
+        if location == &dot_here {
+            Some(dot_asset_hub) // Reserve is on AssetHub.
+        } else {
+            None
+        }
+    }
+}
+
+/// The `BridgedAssetReserveProvider` handles assets that are bridged from external consensus systems
+/// (e.g., Ethereum) and may have multiple valid reserve locations.
+///
+/// Specifically, these bridged assets can have two known reserves:
+/// 1. **Ethereum-based Reserve:**
+///    `{ parents: 1, location: X1(GlobalConsensus(Ethereum{ chain_id: 1 })) }`
+/// 2. **AssetHub Parachain Reserve:**
+///    `{ parents: 1, location: X1(Parachain(AssetHubParaId)) }`
+///
+/// This provider maps the reserve for bridged assets to AssetHub when the asset originates
+/// from a global consensus system, such as Ethereum.
+pub struct BridgedAssetReserveProvider;
+
+impl Reserve for BridgedAssetReserveProvider {
+    fn reserve(asset: &Asset) -> Option<Location> {
+        let AssetId(location) = &asset.id;
+
+        let asset_hub_reserve = AssetHubLocation::get();
+
+        // any asset that has parents > 1 and interior that starts with GlobalConsensus(_) pattern
+        // can be considered a bridged asset.
+        //
+        // `split_global` will return an `Err` if the first item is not a `GlobalConsensus`
+        if location.parents > 1 && location.interior.clone().split_global().is_ok() {
+            Some(asset_hub_reserve)
+        } else {
+            None
+        }
+    }
+}
+
+pub struct ReserveProviders;
+
+impl Reserve for ReserveProviders {
+    fn reserve(asset: &Asset) -> Option<Location> {
+        // Try each provider's reserve method in sequence.
+        DOTReserveProvider::reserve(asset)
+            .or_else(|| BridgedAssetReserveProvider::reserve(asset))
+            .or_else(|| AbsoluteAndRelativeReserve::<SelfLocationAbsolute>::reserve(asset))
+    }
+}
+
+impl orml_xtokens::Config for Runtime {
+    type AccountIdToLocation = AccountIdToLocation<AccountId>;
+    type Balance = Balance;
+    type BaseXcmWeight = BaseXcmWeight;
+    type CurrencyId = CurrencyId;
+    type CurrencyIdConvert = CurrencyIdToLocation<AsAssetType<AssetId, AssetType, AssetManager>>;
+    type LocationsFilter = Everything;
+    type MaxAssetsForTransfer = MaxAssetsForTransfer;
+    type MinXcmFee = ParachainMinFee;
+    type RateLimiter = ();
+    type RateLimiterId = ();
+    type ReserveProvider = ReserveProviders;
+    type RuntimeEvent = RuntimeEvent;
+    type SelfLocation = SelfLocation;
+    type UniversalLocation = UniversalLocation;
+    type Weigher = XcmWeigher;
+    type XcmExecutor = XcmExecutor<XcmConfig>;
+}
+
+pub struct AssetFeesFilter;
+impl frame_support::traits::Contains<Location> for AssetFeesFilter {
+    fn contains(location: &Location) -> bool {
+        location.parent_count() > 0
+            && location.first_interior() != Erc20XcmBridgePalletLocation::get().first_interior()
+    }
+}
+
+// implement your own business logic for who can add/edit/remove/resume supported assets
+pub type AddSupportedAssetOrigin = EnsureRoot<AccountId>;
+pub type EditSupportedAssetOrigin = EnsureRoot<AccountId>;
+pub type RemoveSupportedAssetOrigin = EnsureRoot<AccountId>;
+pub type ResumeSupportedAssetOrigin = EnsureRoot<AccountId>;
+
+impl pallet_xcm_weight_trader::Config for Runtime {
+    type AccountIdToLocation = AccountIdToLocation<AccountId>;
+    type AddSupportedAssetOrigin = AddSupportedAssetOrigin;
+    type AssetLocationFilter = AssetFeesFilter;
+    type AssetTransactor = AssetTransactors;
+    type Balance = Balance;
+    type EditSupportedAssetOrigin = EditSupportedAssetOrigin;
+    type NativeLocation = SelfReserve;
+    #[cfg(feature = "runtime-benchmarks")]
+    type NotFilteredLocation = RelayLocation;
+    type PauseSupportedAssetOrigin = EditSupportedAssetOrigin;
+    type RemoveSupportedAssetOrigin = RemoveSupportedAssetOrigin;
+    type ResumeSupportedAssetOrigin = ResumeSupportedAssetOrigin;
+    type RuntimeEvent = RuntimeEvent;
+    // TODO: update this when we update benchmarks
+    type WeightInfo = weights::pallet_xcm_weight_trader::WeightInfo<Runtime>;
+    type WeightToFee = <Runtime as pallet_transaction_payment::Config>::WeightToFee;
+    type XcmFeesAccount = TreasuryAccount;
+}
+
+// For now we only allow to transact in the relay, although this might change in the future
+// Transactors just defines the chains in which we allow transactions to be issued through
+// xcm
+#[derive(Clone, Eq, Debug, PartialEq, Ord, PartialOrd, Encode, Decode, TypeInfo)]
+pub enum Transactors {
+    Relay,
+}
+
+// Default for benchmarking
+#[cfg(feature = "runtime-benchmarks")]
+impl Default for Transactors {
+    fn default() -> Self {
+        Transactors::Relay
+    }
+}
+
+impl TryFrom<u8> for Transactors {
+    type Error = ();
+
+    fn try_from(value: u8) -> Result<Self, Self::Error> {
+        match value {
+            0u8 => Ok(Transactors::Relay),
+            _ => Err(()),
+        }
+    }
+}
+
+impl UtilityEncodeCall for Transactors {
+    fn encode_call(self, call: UtilityAvailableCalls) -> Vec<u8> {
+        match self {
+            Transactors::Relay => pallet_xcm_transactor::Pallet::<Runtime>::encode_call(
+                pallet_xcm_transactor::Pallet(sp_std::marker::PhantomData::<Runtime>),
+                call,
+            ),
+        }
+    }
+}
+
+impl XcmTransact for Transactors {
+    fn destination(self) -> Location {
+        match self {
+            Transactors::Relay => Location::parent(),
+        }
+    }
+}
+
+parameter_types! {
+    pub MaxHrmpRelayFee: Asset = (Location::parent(), 1_000_000_000_000u128).into();
+}
+
+// implement your own business logic for who can manage and use xcm-transactor
+pub type DerivativeAddressRegistrationOrigin = EnsureRoot<AccountId>;
+pub type HrmpManipulatorOrigin = EnsureRoot<AccountId>;
+pub type HrmpOpenOrigin = EnsureRoot<AccountId>;
+pub type SovereignAccountDispatcherOrigin = EnsureRoot<AccountId>;
+
+impl pallet_xcm_transactor::Config for Runtime {
+    type AccountIdToLocation = AccountIdToLocation<AccountId>;
+    type AssetTransactor = AssetTransactors;
+    type Balance = Balance;
+    type BaseXcmWeight = BaseXcmWeight;
+    type CurrencyId = CurrencyId;
+    type CurrencyIdToLocation = CurrencyIdToLocation<AsAssetType<AssetId, AssetType, AssetManager>>;
+    type DerivativeAddressRegistrationOrigin = DerivativeAddressRegistrationOrigin;
+    type HrmpManipulatorOrigin = HrmpManipulatorOrigin;
+    type HrmpOpenOrigin = HrmpOpenOrigin;
+    type MaxHrmpFee = xcm_builder::Case<MaxHrmpRelayFee>;
+    type ReserveProvider = AbsoluteAndRelativeReserve<SelfLocationAbsolute>;
+    type RuntimeEvent = RuntimeEvent;
+    type SelfLocation = SelfLocation;
+    type SovereignAccountDispatcherOrigin = SovereignAccountDispatcherOrigin;
+    type Transactor = Transactors;
+    type UniversalLocation = UniversalLocation;
+    type Weigher = XcmWeigher;
+    type WeightInfo = weights::pallet_xcm_transactor::WeightInfo<Runtime>;
+    type XcmSender = XcmRouter;
+}
+
+#[cfg(feature = "runtime-benchmarks")]
+mod testing {
+    use sp_runtime::traits::MaybeEquivalence;
+    use xcm_builder::WithLatestLocationConverter;
+
+    use super::*;
+
+    /// This From exists for benchmarking purposes. It has the potential side-effect of calling
+    /// AssetManager::set_asset_type_asset_id() and should NOT be used in any production code.
+    impl From<Location> for CurrencyId {
+        fn from(location: Location) -> CurrencyId {
+            use xcm_primitives::AssetTypeGetter;
+
+            // If it does not exist, for benchmarking purposes, we create the association
+            let asset_id = if let Some(asset_id) =
+                AsAssetType::<AssetId, AssetType, AssetManager>::convert_location(&location)
+            {
+                asset_id
+            } else {
+                let asset_type = AssetType::Xcm(
+                    WithLatestLocationConverter::convert(&location).expect("convert to v3"),
+                );
+                let asset_id: AssetId = asset_type.clone().into();
+                AssetManager::set_asset_type_asset_id(asset_type, asset_id);
+                asset_id
+            };
+
+            CurrencyId::ForeignAsset(asset_id)
+        }
+    }
 }
