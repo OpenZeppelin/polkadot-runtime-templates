@@ -25,29 +25,6 @@ use crate::{
     WeightToFee,
 };
 
-impl AssetsConfig for OpenZeppelinRuntime {
-    type ApprovalDeposit = ApprovalDeposit;
-    type AssetAccountDeposit = AssetAccountDeposit;
-    type AssetDeposit = AssetDeposit;
-    type AssetId = AssetId;
-    type AssetRegistrar = AssetRegistrar;
-    type AssetRegistrarMetadata = AssetRegistrarMetadata;
-    type AssetType = AssetType;
-    #[cfg(feature = "runtime-benchmarks")]
-    type BenchmarkHelper = BenchmarkHelper;
-    type CreateOrigin = AsEnsureOriginWithArg<EnsureSigned<AccountId>>;
-    type ForceOrigin = EnsureRoot<AccountId>;
-    type ForeignAssetModifierOrigin = EnsureRoot<AccountId>;
-    type WeightToFee = WeightToFee;
-}
-impl_openzeppelin_assets!(OpenZeppelinRuntime);
-
-parameter_types! {
-    pub const AssetDeposit: Balance = 10 * CENTS;
-    pub const AssetAccountDeposit: Balance = deposit(1, 16);
-    pub const ApprovalDeposit: Balance = MILLICENTS;
-}
-
 // Required for runtime benchmarks
 pallet_assets::runtime_benchmarks_enabled! {
     pub struct BenchmarkHelper;

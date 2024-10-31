@@ -2,21 +2,21 @@ pub mod asset_config;
 pub mod governance;
 pub mod xcm_config;
 
-pub use asset_config::{AssetType, TransactionByteFee};
+pub use asset_config::{AssetRegistrar, AssetRegistrarMetadata, AssetType};
 #[cfg(feature = "async-backing")]
 use cumulus_pallet_parachain_system::RelayNumberMonotonicallyIncreases;
 #[cfg(not(feature = "async-backing"))]
 use cumulus_pallet_parachain_system::RelayNumberStrictlyIncreases;
-use cumulus_primitives_core::{AggregateMessageOrigin, AssetId, ParaId};
+use cumulus_primitives_core::{AggregateMessageOrigin, ParaId};
 use frame_support::{
     derive_impl,
     dispatch::DispatchClass,
     parameter_types,
     traits::{
-        ConstU32, ConstU64, Contains, EitherOf, EitherOfDiverse, Everything, FindAuthor, Nothing,
-        TransformOrigin,
+        AsEnsureOriginWithArg, ConstU128, ConstU16, ConstU32, ConstU64, Contains, EitherOf,
+        EitherOfDiverse, Everything, FindAuthor, Nothing, TransformOrigin,
     },
-    weights::Weight,
+    weights::{ConstantMultiplier, Weight},
     PalletId,
 };
 use frame_system::{
@@ -26,15 +26,15 @@ use frame_system::{
 pub use governance::origins::pallet_custom_origins;
 use governance::{origins::Treasurer, tracks, Spender, WhitelistedCaller};
 use openzeppelin_polkadot_wrappers::{
-    impl_openzeppelin_consensus, impl_openzeppelin_evm, impl_openzeppelin_governance,
-    impl_openzeppelin_system, impl_openzeppelin_xcm, ConsensusConfig, EvmConfig, GovernanceConfig,
-    SystemConfig, XcmConfig,
+    impl_openzeppelin_assets, impl_openzeppelin_consensus, impl_openzeppelin_evm,
+    impl_openzeppelin_governance, impl_openzeppelin_system, impl_openzeppelin_xcm, AssetsConfig,
+    ConsensusConfig, EvmConfig, GovernanceConfig, SystemConfig, XcmConfig,
 };
 use pallet_ethereum::PostLogContent;
 use pallet_evm::{EVMCurrencyAdapter, EnsureAccountId20, IdentityAddressMapping};
 use parachains_common::message_queue::{NarrowOriginToSibling, ParaIdToSibling};
 use parity_scale_codec::{Decode, Encode};
-use polkadot_runtime_common::BlockHashCount;
+use polkadot_runtime_common::{BlockHashCount, SlowAdjustingFeeUpdate};
 use sp_consensus_aura::sr25519::AuthorityId as AuraId;
 use sp_core::{H160, U256};
 use sp_runtime::{
@@ -42,7 +42,6 @@ use sp_runtime::{
     ConsensusEngineId, Perbill, Permill,
 };
 use sp_std::marker::PhantomData;
-use sp_version::RuntimeVersion;
 use xcm::latest::{prelude::*, InteriorLocation, Junction::PalletInstance};
 #[cfg(not(feature = "runtime-benchmarks"))]
 use xcm_builder::ProcessXcmMessage;
@@ -62,15 +61,15 @@ use xcm_executor::XcmExecutor;
 use crate::benchmark::{OpenHrmpChannel, PayWithEnsure};
 use crate::{
     constants::{
-        currency::{deposit, CENTS, EXISTENTIAL_DEPOSIT},
+        currency::{deposit, CENTS, EXISTENTIAL_DEPOSIT, MICROCENTS, MILLICENTS},
         AVERAGE_ON_INITIALIZE_RATIO, DAYS, HOURS, MAXIMUM_BLOCK_WEIGHT, MAX_BLOCK_LENGTH,
         NORMAL_DISPATCH_RATIO, VERSION, WEIGHT_PER_GAS,
     },
     opaque,
     types::{
-        AccountId, AssetKind, Balance, Beneficiary, Block, BlockNumber,
+        AccountId, AssetId, AssetKind, Balance, Beneficiary, Block, BlockNumber,
         CollatorSelectionUpdateOrigin, ConsensusHook, Hash, Nonce,
-        PriceForSiblingParachainDelivery, ProxyType, TreasuryPaymaster, XcmFeesToAccount,
+        PriceForSiblingParachainDelivery, ProxyType, TreasuryPaymaster, Version, XcmFeesToAccount,
     },
     weights::{self, BlockExecutionWeight, ExtrinsicBaseWeight, RocksDbWeight},
     AllPalletsWithSystem, AssetManager, Aura, Balances, BaseFee, CollatorSelection, EVMChainId,
@@ -80,21 +79,15 @@ use crate::{
     SessionKeys, System, Timestamp, Treasury, UncheckedExtrinsic, WeightToFee, XcmpQueue,
 };
 
-parameter_types! {
-    pub const ExistentialDeposit: Balance = EXISTENTIAL_DEPOSIT;
-    pub const Version: RuntimeVersion = VERSION;
-    // generic substrate prefix. For more info, see: [Polkadot Accounts In-Depth](https://wiki.polkadot.network/docs/learn-account-advanced#:~:text=The%20address%20format%20used%20in,belonging%20to%20a%20specific%20network)
-    pub const SS58Prefix: u16 = 42;
-}
 // OpenZeppelin runtime wrappers configuration
 pub struct OpenZeppelinRuntime;
 impl SystemConfig for OpenZeppelinRuntime {
     type AccountId = AccountId;
-    type ExistentialDeposit = ExistentialDeposit;
+    type ExistentialDeposit = ConstU128<EXISTENTIAL_DEPOSIT>;
     type Lookup = IdentityLookup<AccountId>;
     type PreimageOrigin = EnsureRoot<AccountId>;
     type ProxyType = ProxyType;
-    type SS58Prefix = SS58Prefix;
+    type SS58Prefix = ConstU16<42>;
     type ScheduleOrigin = EnsureRoot<AccountId>;
     type Version = Version;
 }
@@ -115,21 +108,21 @@ parameter_types! {
     pub TreasuryInteriorLocation: InteriorLocation = PalletInstance(13).into();
 }
 impl GovernanceConfig for OpenZeppelinRuntime {
-    type ConvictionVoteLockingPeriod = VoteLockingPeriod;
+    type ConvictionVoteLockingPeriod = ConstU32<{ 7 * DAYS }>;
     type DispatchWhitelistedOrigin = EitherOf<EnsureRoot<AccountId>, WhitelistedCaller>;
-    type ReferendaAlarmInterval = AlarmInterval;
+    type ReferendaAlarmInterval = ConstU32<1>;
     type ReferendaCancelOrigin = EnsureRoot<AccountId>;
     type ReferendaKillOrigin = EnsureRoot<AccountId>;
     type ReferendaSlash = Treasury;
-    type ReferendaSubmissionDeposit = SubmissionDeposit;
+    type ReferendaSubmissionDeposit = ConstU128<{ 3 * CENTS }>;
     type ReferendaSubmitOrigin = EnsureSigned<AccountId>;
-    type ReferendaUndecidingTimeout = UndecidingTimeout;
+    type ReferendaUndecidingTimeout = ConstU32<{ 14 * DAYS }>;
     type TreasuryInteriorLocation = TreasuryInteriorLocation;
     type TreasuryPalletId = TreasuryPalletId;
-    type TreasuryPayoutSpendPeriod = PayoutSpendPeriod;
+    type TreasuryPayoutSpendPeriod = ConstU32<{ 30 * DAYS }>;
     type TreasuryRejectOrigin = EitherOfDiverse<EnsureRoot<AccountId>, Treasurer>;
     type TreasurySpendOrigin = TreasurySpender;
-    type TreasurySpendPeriod = SpendPeriod;
+    type TreasurySpendPeriod = ConstU32<{ 6 * DAYS }>;
     type WhitelistOrigin = EnsureRoot<AccountId>;
 }
 parameter_types! {
@@ -167,6 +160,27 @@ impl EvmConfig for OpenZeppelinRuntime {
     type PrecompilesValue = PrecompilesValue;
     type WithdrawOrigin = EnsureAccountId20;
 }
+parameter_types! {
+    pub const AssetDeposit: Balance = 10 * CENTS;
+    pub const AssetAccountDeposit: Balance = deposit(1, 16);
+    pub const ApprovalDeposit: Balance = MILLICENTS;
+}
+impl AssetsConfig for OpenZeppelinRuntime {
+    type ApprovalDeposit = ApprovalDeposit;
+    type AssetAccountDeposit = AssetAccountDeposit;
+    type AssetDeposit = AssetDeposit;
+    type AssetId = AssetId;
+    type AssetRegistrar = AssetRegistrar;
+    type AssetRegistrarMetadata = AssetRegistrarMetadata;
+    type AssetType = AssetType;
+    #[cfg(feature = "runtime-benchmarks")]
+    type BenchmarkHelper = BenchmarkHelper;
+    type CreateOrigin = AsEnsureOriginWithArg<EnsureSigned<AccountId>>;
+    type ForceOrigin = EnsureRoot<AccountId>;
+    type ForeignAssetModifierOrigin = EnsureRoot<AccountId>;
+    type WeightToFee = WeightToFee;
+}
+impl_openzeppelin_assets!(OpenZeppelinRuntime);
 impl_openzeppelin_system!(OpenZeppelinRuntime);
 impl_openzeppelin_consensus!(OpenZeppelinRuntime);
 impl_openzeppelin_governance!(OpenZeppelinRuntime);

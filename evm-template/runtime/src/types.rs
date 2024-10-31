@@ -13,6 +13,7 @@ use sp_runtime::{
     traits::{BlakeTwo256, IdentifyAccount, Verify},
     RuntimeDebug,
 };
+use sp_version::RuntimeVersion;
 use xcm::VersionedLocation;
 use xcm_builder::{ConvertedConcreteId, PayOverXcm};
 use xcm_executor::traits::JustTry;
@@ -190,4 +191,9 @@ impl InstanceFilter<RuntimeCall> for ProxyType {
             }
         }
     }
+}
+
+// Getter types used in OpenZeppelinRuntime configuration
+parameter_types! {
+    pub const Version: RuntimeVersion = VERSION;
 }

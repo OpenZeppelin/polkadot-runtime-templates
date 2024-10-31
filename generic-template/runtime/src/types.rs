@@ -183,7 +183,7 @@ impl InstanceFilter<RuntimeCall> for ProxyType {
     }
 }
 
-// Generated Getter types used in OpenZeppelinRuntime configuration
+// Getter types used in OpenZeppelinRuntime configuration
 parameter_types! {
     pub const Version: RuntimeVersion = VERSION;
     pub const TreasuryPalletId: PalletId = PalletId(*b"py/trsry");
