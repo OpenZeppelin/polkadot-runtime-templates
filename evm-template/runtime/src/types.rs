@@ -1,5 +1,10 @@
 use fp_account::EthereumSignature;
-use frame_support::traits::{EitherOfDiverse, InstanceFilter};
+use frame_support::{
+    parameter_types,
+    traits::{EitherOfDiverse, InstanceFilter},
+    weights::Weight,
+    PalletId,
+};
 use frame_system::EnsureRoot;
 use pallet_xcm::{EnsureXcm, IsVoiceOfBody};
 use parity_scale_codec::{Decode, Encode, MaxEncodedLen};
@@ -11,28 +16,29 @@ use sp_core::ConstU32;
 use sp_runtime::{
     generic,
     traits::{BlakeTwo256, IdentifyAccount, Verify},
-    RuntimeDebug,
+    Perbill, RuntimeDebug,
 };
 use sp_version::RuntimeVersion;
-use xcm::VersionedLocation;
+use xcm::{
+    latest::{InteriorLocation, Junction::PalletInstance},
+    VersionedLocation,
+};
 use xcm_builder::{ConvertedConcreteId, PayOverXcm};
 use xcm_executor::traits::JustTry;
 use xcm_primitives::AsAssetType;
 
-use crate::{
-    configs::{xcm_config, TreasuryInteriorLocation},
-    constants::HOURS,
-    AssetManager, Assets,
-};
+use crate::{configs::xcm_config, constants::HOURS, AssetManager, Assets};
 pub use crate::{
     configs::{
         xcm_config::RelayLocation, AssetType, FeeAssetId, StakingAdminBodyId,
-        ToSiblingBaseDeliveryFee, TransactionByteFee, TreasuryAccount,
+        ToSiblingBaseDeliveryFee, TransactionByteFee,
     },
     constants::{
         BLOCK_PROCESSING_VELOCITY, RELAY_CHAIN_SLOT_DURATION_MILLIS, UNINCLUDED_SEGMENT_CAPACITY,
+        VERSION,
     },
-    AllPalletsWithSystem, Runtime, RuntimeCall, XcmpQueue,
+    AllPalletsWithSystem, OpenZeppelinPrecompiles, Runtime, RuntimeBlockWeights, RuntimeCall,
+    Treasury, XcmpQueue,
 };
 
 /// Unchecked extrinsic type as expected by this runtime.
@@ -196,4 +202,11 @@ impl InstanceFilter<RuntimeCall> for ProxyType {
 // Getter types used in OpenZeppelinRuntime configuration
 parameter_types! {
     pub const Version: RuntimeVersion = VERSION;
+    pub const TreasuryPalletId: PalletId = PalletId(*b"py/trsry");
+    pub TreasuryAccount: AccountId = Treasury::account_id();
+    // The asset's interior location for the paying account. This is the Treasury
+    // pallet instance (which sits at index 13).
+    pub TreasuryInteriorLocation: InteriorLocation = PalletInstance(13).into();
+    pub MessageQueueServiceWeight: Weight = Perbill::from_percent(35) * RuntimeBlockWeights::get().max_block;
+    pub PrecompilesValue: OpenZeppelinPrecompiles<Runtime> = OpenZeppelinPrecompiles::<_>::new();
 }

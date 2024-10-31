@@ -42,7 +42,7 @@ use sp_runtime::{
     ConsensusEngineId, Perbill, Permill,
 };
 use sp_std::marker::PhantomData;
-use xcm::latest::{prelude::*, InteriorLocation, Junction::PalletInstance};
+use xcm::latest::{prelude::*, InteriorLocation};
 #[cfg(not(feature = "runtime-benchmarks"))]
 use xcm_builder::ProcessXcmMessage;
 use xcm_builder::{
@@ -63,13 +63,14 @@ use crate::{
     constants::{
         currency::{deposit, CENTS, EXISTENTIAL_DEPOSIT, MICROCENTS, MILLICENTS},
         AVERAGE_ON_INITIALIZE_RATIO, DAYS, HOURS, MAXIMUM_BLOCK_WEIGHT, MAX_BLOCK_LENGTH,
-        NORMAL_DISPATCH_RATIO, VERSION, WEIGHT_PER_GAS,
+        NORMAL_DISPATCH_RATIO, WEIGHT_PER_GAS,
     },
     opaque,
     types::{
         AccountId, AssetId, AssetKind, Balance, Beneficiary, Block, BlockNumber,
-        CollatorSelectionUpdateOrigin, ConsensusHook, Hash, Nonce,
-        PriceForSiblingParachainDelivery, ProxyType, TreasuryPaymaster, Version, XcmFeesToAccount,
+        CollatorSelectionUpdateOrigin, ConsensusHook, Hash, MessageQueueServiceWeight, Nonce,
+        PrecompilesValue, PriceForSiblingParachainDelivery, ProxyType, TreasuryInteriorLocation,
+        TreasuryPalletId, TreasuryPaymaster, Version, XcmFeesToAccount,
     },
     weights::{self, BlockExecutionWeight, ExtrinsicBaseWeight, RocksDbWeight},
     AllPalletsWithSystem, AssetManager, Aura, Balances, BaseFee, CollatorSelection, EVMChainId,
@@ -94,19 +95,6 @@ impl SystemConfig for OpenZeppelinRuntime {
 impl ConsensusConfig for OpenZeppelinRuntime {
     type CollatorSelectionUpdateOrigin = CollatorSelectionUpdateOrigin;
 }
-parameter_types! {
-    pub const AlarmInterval: BlockNumber = 1;
-    pub const SubmissionDeposit: Balance = 3 * CENTS;
-    pub const UndecidingTimeout: BlockNumber = 14 * DAYS;
-    pub const SpendPeriod: BlockNumber = 6 * DAYS;
-    pub const PayoutSpendPeriod: BlockNumber = 30 * DAYS;
-    pub const VoteLockingPeriod: BlockNumber = 7 * DAYS;
-    pub const TreasuryPalletId: PalletId = PalletId(*b"py/trsry");
-    pub TreasuryAccount: AccountId = Treasury::account_id();
-    // The asset's interior location for the paying account. This is the Treasury
-    // pallet instance (which sits at index 13).
-    pub TreasuryInteriorLocation: InteriorLocation = PalletInstance(13).into();
-}
 impl GovernanceConfig for OpenZeppelinRuntime {
     type ConvictionVoteLockingPeriod = ConstU32<{ 7 * DAYS }>;
     type DispatchWhitelistedOrigin = EitherOf<EnsureRoot<AccountId>, WhitelistedCaller>;
@@ -125,19 +113,13 @@ impl GovernanceConfig for OpenZeppelinRuntime {
     type TreasurySpendPeriod = ConstU32<{ 6 * DAYS }>;
     type WhitelistOrigin = EnsureRoot<AccountId>;
 }
-parameter_types! {
-    pub MessageQueueServiceWeight: Weight = Perbill::from_percent(35) * RuntimeBlockWeights::get().max_block;
-    pub const HeapSize: u32 = 64 * 1024;
-    pub const MaxStale: u32 = 8;
-    pub const MaxInboundSuspended: u32 = 1000;
-}
 impl XcmConfig for OpenZeppelinRuntime {
     type AssetTransactors = AssetTransactors;
     type FeeManager = FeeManager;
     type LocalOriginToLocation = LocalOriginToLocation;
     type LocationToAccountId = LocationToAccountId;
-    type MessageQueueHeapSize = HeapSize;
-    type MessageQueueMaxStale = MaxStale;
+    type MessageQueueHeapSize = ConstU32<{ 64 * 1024 }>;
+    type MessageQueueMaxStale = ConstU32<8>;
     type MessageQueueServiceWeight = MessageQueueServiceWeight;
     type Reserves = Reserves;
     type Trader = (
@@ -147,10 +129,7 @@ impl XcmConfig for OpenZeppelinRuntime {
     type XcmAdminOrigin = EnsureRoot<AccountId>;
     type XcmOriginToTransactDispatchOrigin = XcmOriginToTransactDispatchOrigin;
     type XcmpQueueControllerOrigin = EnsureRoot<AccountId>;
-    type XcmpQueueMaxInboundSuspended = MaxInboundSuspended;
-}
-parameter_types! {
-    pub PrecompilesValue: OpenZeppelinPrecompiles<Runtime> = OpenZeppelinPrecompiles::<_>::new();
+    type XcmpQueueMaxInboundSuspended = ConstU32<1000>;
 }
 impl EvmConfig for OpenZeppelinRuntime {
     type AddressMapping = IdentityAddressMapping;
@@ -160,15 +139,10 @@ impl EvmConfig for OpenZeppelinRuntime {
     type PrecompilesValue = PrecompilesValue;
     type WithdrawOrigin = EnsureAccountId20;
 }
-parameter_types! {
-    pub const AssetDeposit: Balance = 10 * CENTS;
-    pub const AssetAccountDeposit: Balance = deposit(1, 16);
-    pub const ApprovalDeposit: Balance = MILLICENTS;
-}
 impl AssetsConfig for OpenZeppelinRuntime {
-    type ApprovalDeposit = ApprovalDeposit;
-    type AssetAccountDeposit = AssetAccountDeposit;
-    type AssetDeposit = AssetDeposit;
+    type ApprovalDeposit = ConstU128<MILLICENTS>;
+    type AssetAccountDeposit = ConstU128<{ deposit(1, 16) }>;
+    type AssetDeposit = ConstU128<{ 10 * CENTS }>;
     type AssetId = AssetId;
     type AssetRegistrar = AssetRegistrar;
     type AssetRegistrarMetadata = AssetRegistrarMetadata;
