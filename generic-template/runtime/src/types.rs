@@ -1,4 +1,9 @@
-use frame_support::traits::{EitherOfDiverse, InstanceFilter};
+use frame_support::{
+    parameter_types,
+    traits::{EitherOfDiverse, InstanceFilter},
+    weights::Weight,
+    PalletId,
+};
 use frame_system::EnsureRoot;
 use pallet_xcm::{EnsureXcm, IsVoiceOfBody};
 use parity_scale_codec::{Decode, Encode, MaxEncodedLen};
@@ -10,24 +15,29 @@ use sp_core::ConstU32;
 use sp_runtime::{
     generic,
     traits::{BlakeTwo256, IdentifyAccount, Verify},
-    MultiAddress, MultiSignature, RuntimeDebug,
+    MultiAddress, MultiSignature, Perbill, RuntimeDebug,
 };
-use xcm::VersionedLocation;
+use sp_version::RuntimeVersion;
+use xcm::{
+    latest::{InteriorLocation, Junction::PalletInstance},
+    VersionedLocation,
+};
 use xcm_builder::PayOverXcm;
 
+use crate::{
+    configs::XcmRouter,
+    constants::{HOURS, VERSION},
+    Treasury,
+};
 pub use crate::{
     configs::{
-        asset_config::TransactionByteFee, xcm_config::RelayLocation, FeeAssetId,
-        StakingAdminBodyId, ToSiblingBaseDeliveryFee,
+        xcm_config::RelayLocation, FeeAssetId, StakingAdminBodyId, ToSiblingBaseDeliveryFee,
+        TransactionByteFee,
     },
     constants::{
         BLOCK_PROCESSING_VELOCITY, RELAY_CHAIN_SLOT_DURATION_MILLIS, UNINCLUDED_SEGMENT_CAPACITY,
     },
-    AllPalletsWithSystem, Runtime, RuntimeCall, XcmpQueue,
-};
-use crate::{
-    configs::{TreasuryInteriorLocation, XcmRouter},
-    constants::HOURS,
+    AllPalletsWithSystem, Runtime, RuntimeBlockWeights, RuntimeCall, XcmpQueue,
 };
 
 /// Alias to 512-bit hash when used in the context of a transaction signature on
@@ -171,4 +181,15 @@ impl InstanceFilter<RuntimeCall> for ProxyType {
             }
         }
     }
+}
+
+// Generated Getter types used in OpenZeppelinRuntime configuration
+parameter_types! {
+    pub const Version: RuntimeVersion = VERSION;
+    pub const TreasuryPalletId: PalletId = PalletId(*b"py/trsry");
+    pub TreasuryAccount: AccountId = Treasury::account_id();
+    // The asset's interior location for the paying account. This is the Treasury
+    // pallet instance (which sits at index 13).
+    pub TreasuryInteriorLocation: InteriorLocation = PalletInstance(13).into();
+    pub MessageQueueServiceWeight: Weight = Perbill::from_percent(35) * RuntimeBlockWeights::get().max_block;
 }

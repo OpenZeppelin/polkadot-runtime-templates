@@ -1,13 +1,5 @@
-use frame_support::{
-    dispatch::GetDispatchInfo,
-    parameter_types,
-    traits::AsEnsureOriginWithArg,
-    weights::{ConstantMultiplier, Weight},
-};
-use frame_system::{EnsureRoot, EnsureSigned};
-use openzeppelin_polkadot_wrappers::{impl_openzeppelin_assets, AssetsConfig};
+use frame_support::{dispatch::GetDispatchInfo, weights::Weight};
 use parity_scale_codec::{Decode, Encode};
-use polkadot_runtime_common::SlowAdjustingFeeUpdate;
 use scale_info::TypeInfo;
 use sp_core::H256;
 use sp_runtime::traits::Hash as THash;
@@ -18,32 +10,9 @@ use sp_std::{
 use xcm::latest::Location;
 
 use crate::{
-    configs::OpenZeppelinRuntime,
-    constants::currency::{deposit, CENTS, EXISTENTIAL_DEPOSIT, MICROCENTS},
     types::{AccountId, AssetId, Balance},
-    weights, AssetManager, Assets, Balances, Runtime, RuntimeCall, RuntimeEvent, RuntimeOrigin,
-    WeightToFee,
+    AssetManager, Assets, Runtime, RuntimeCall, RuntimeOrigin,
 };
-
-parameter_types! {
-    pub const AssetDeposit: Balance = 10 * CENTS;
-    pub const AssetAccountDeposit: Balance = deposit(1, 16);
-    pub const ApprovalDeposit: Balance = EXISTENTIAL_DEPOSIT;
-}
-impl AssetsConfig for OpenZeppelinRuntime {
-    type ApprovalDeposit = ApprovalDeposit;
-    type AssetAccountDeposit = AssetAccountDeposit;
-    type AssetDeposit = AssetDeposit;
-    type AssetId = AssetId;
-    type AssetRegistrar = AssetRegistrar;
-    type AssetRegistrarMetadata = AssetRegistrarMetadata;
-    type AssetType = AssetType;
-    type CreateOrigin = AsEnsureOriginWithArg<EnsureSigned<AccountId>>;
-    type ForceOrigin = EnsureRoot<AccountId>;
-    type ForeignAssetModifierOrigin = EnsureRoot<AccountId>;
-    type WeightToFee = WeightToFee;
-}
-impl_openzeppelin_assets!(OpenZeppelinRuntime);
 
 // Our AssetType. For now we only handle Xcm Assets
 #[derive(Clone, Eq, Debug, PartialEq, Ord, PartialOrd, Encode, Decode, TypeInfo)]

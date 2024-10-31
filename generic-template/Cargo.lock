@@ -6342,8 +6342,8 @@ dependencies = [
 [[package]]
 name = "openzeppelin-polkadot-wrappers"
 version = "0.0.1"
-source = "git+https://github.com/OpenZeppelin/polkadot-runtime-wrappers.git?rev=b2ad305#b2ad305c293161a29a5a81f0623bc79c83cf04d0"
 dependencies = [
+ "cumulus-primitives-core",
  "frame-support",
  "scale-info",
  "sp-std",
