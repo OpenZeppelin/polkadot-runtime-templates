@@ -105,8 +105,8 @@ pub fn native_version() -> NativeVersion {
     NativeVersion { runtime_version: VERSION, can_author_with: Default::default() }
 }
 
-use openzeppelin_procedural::construct_openzeppelin_runtime;
-#[construct_openzeppelin_runtime]
+use openzeppelin_procedural::openzeppelin_construct_runtime;
+#[openzeppelin_construct_runtime]
 mod runtime {
     #[abstraction]
     struct System;

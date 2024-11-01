@@ -18,6 +18,7 @@ scale-info = { workspace = true, features = [ "derive" ] }
 smallvec = { workspace = true }
 
 openzeppelin-polkadot-wrappers = { workspace = true }
+openzeppelin-procedural = { workspace = true }
 
 # Substrate
 frame-benchmarking = { workspace = true, optional = true }

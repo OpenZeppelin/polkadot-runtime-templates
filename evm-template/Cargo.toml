@@ -29,6 +29,7 @@ smallvec = "1.11.0"
 
 # TODO: update to release
 openzeppelin-polkadot-wrappers = { path = "../../polkadot-runtime-wrappers", default-features = false }
+openzeppelin-procedural = { path = "../../polkadot-runtime-wrappers/procedural", default-features = false }
 
 # Substrate
 frame-benchmarking = { git = "https://github.com/paritytech/polkadot-sdk", default-features = false, tag = "polkadot-stable2407-1" }
