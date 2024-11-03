@@ -23,18 +23,14 @@ use xcm::{
     latest::{InteriorLocation, Junction::PalletInstance},
     VersionedLocation,
 };
-use xcm_builder::{ConvertedConcreteId, PayOverXcm};
-use xcm_executor::traits::JustTry;
-use xcm_primitives::AsAssetType;
+use xcm_builder::PayOverXcm;
 
 use crate::{
     configs::{
-        asset_config::AssetType,
         xcm_config::{self, RelayLocation},
         FeeAssetId, StakingAdminBodyId, ToSiblingBaseDeliveryFee, TransactionByteFee,
     },
     constants::HOURS,
-    AssetManager, Assets,
 };
 pub use crate::{
     constants::{

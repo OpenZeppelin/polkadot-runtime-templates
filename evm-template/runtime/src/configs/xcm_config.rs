@@ -5,7 +5,6 @@ use frame_support::{
     traits::{ConstU32, Contains, ContainsPair, Everything, PalletInfoAccess},
     weights::Weight,
 };
-use frame_system::EnsureRoot;
 use orml_traits::{location::Reserve, parameter_type_with_key};
 use orml_xcm_support::MultiNativeAsset;
 use pallet_xcm::XcmPassthrough;
@@ -17,29 +16,21 @@ use sp_runtime::Vec;
 use xcm::latest::prelude::{Assets as XcmAssets, *};
 use xcm_builder::{
     AccountKey20Aliases, AllowExplicitUnpaidExecutionFrom, AllowTopLevelPaidExecutionFrom, Case,
-    ConvertedConcreteId, DenyReserveTransferToRelayChain, DenyThenTry, EnsureXcmOrigin,
-    FixedWeightBounds, FrameTransactionalProcessor, FungibleAdapter, FungiblesAdapter, HandleFee,
-    IsChildSystemParachain, IsConcrete, NoChecking, ParentIsPreset, RelayChainAsNative,
-    SiblingParachainAsNative, SiblingParachainConvertsVia, SignedAccountKey20AsNative,
-    SovereignSignedViaLocation, TakeWeightCredit, TrailingSetTopicAsId, WithComputedOrigin,
-    WithUniqueTopic, XcmFeeManagerFromComponents,
+    ConvertedConcreteId, DenyReserveTransferToRelayChain, DenyThenTry, FixedWeightBounds,
+    FungibleAdapter, FungiblesAdapter, HandleFee, IsChildSystemParachain, IsConcrete, NoChecking,
+    ParentIsPreset, RelayChainAsNative, SiblingParachainAsNative, SiblingParachainConvertsVia,
+    SignedAccountKey20AsNative, SovereignSignedViaLocation, TakeWeightCredit, TrailingSetTopicAsId,
+    WithComputedOrigin, WithUniqueTopic, XcmFeeManagerFromComponents,
 };
-use xcm_executor::{
-    traits::{ConvertLocation, FeeReason, JustTry, TransactAsset},
-    XcmExecutor,
-};
+use xcm_executor::traits::{ConvertLocation, FeeReason, JustTry, TransactAsset};
 use xcm_primitives::{
-    AbsoluteAndRelativeReserve, AccountIdToLocation, AsAssetType, UtilityAvailableCalls,
-    UtilityEncodeCall, XcmTransact,
+    AbsoluteAndRelativeReserve, AsAssetType, UtilityAvailableCalls, UtilityEncodeCall, XcmTransact,
 };
 
 use crate::{
-    configs::{
-        AssetType, ParachainSystem, Runtime, RuntimeCall, RuntimeEvent, RuntimeOrigin, XcmpQueue,
-    },
+    configs::{AssetType, ParachainSystem, Runtime, RuntimeCall, RuntimeOrigin, XcmpQueue},
     types::{AccountId, AssetId, Balance},
-    weights, AllPalletsWithSystem, AssetManager, Assets, Balances, Erc20XcmBridge, ParachainInfo,
-    PolkadotXcm, Treasury,
+    AssetManager, Assets, Balances, Erc20XcmBridge, ParachainInfo, Treasury,
 };
 
 parameter_types! {
