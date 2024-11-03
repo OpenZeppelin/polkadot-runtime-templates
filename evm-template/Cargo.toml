@@ -164,11 +164,17 @@ pallet-evm-precompile-sha3fips = { git = "https://github.com/OpenZeppelin/fronti
 pallet-evm-precompile-simple = { git = "https://github.com/OpenZeppelin/frontier", branch = "polkadot-stable2407-1", default-features = false }
 
 # ORML
+orml-traits = { git = "https://github.com/OpenZeppelin/open-runtime-module-library", branch = "polkadot-stable2407-1", default-features = false }
 orml-xcm-support = { git = "https://github.com/OpenZeppelin/open-runtime-module-library", branch = "polkadot-stable2407-1", default-features = false }
+orml-xtokens = { git = "https://github.com/OpenZeppelin/open-runtime-module-library", branch = "polkadot-stable2407-1", default-features = false }
 
 # Moonbeam
 pallet-asset-manager = { git = "https://github.com/OpenZeppelin/moonbeam.git", branch = "polkadot-stable2407-1", default-features = false }
+pallet-erc20-xcm-bridge = { git = "https://github.com/OpenZeppelin/moonbeam.git", branch = "polkadot-stable2407-1", default-features = false }
+pallet-xcm-transactor = { git = "https://github.com/OpenZeppelin/moonbeam.git", branch = "polkadot-stable2407-1", default-features = false }
+pallet-xcm-weight-trader = { git = "https://github.com/OpenZeppelin/moonbeam.git", branch = "polkadot-stable2407-1", default-features = false }
 xcm-primitives = { git = "https://github.com/OpenZeppelin/moonbeam.git", branch = "polkadot-stable2407-1", default-features = false }
+
 
 # Fuzzer
 substrate-runtimes-fuzzers = { git = "https://github.com/srlabs/substrate-runtime-fuzzer.git", default-features = false, tag = "polkadot-v1.12.0" }

@@ -66,6 +66,7 @@ fn generate_genesis(accounts: &[AccountId]) -> Storage {
         },
         evm: Default::default(),
         ethereum: Default::default(),
+        ..Default::default()
     }
     .build_storage()
     .unwrap()

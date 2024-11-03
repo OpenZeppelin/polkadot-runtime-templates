@@ -1,28 +1,60 @@
-//! XCM types
-use frame_support::{pallet_prelude::PalletInfoAccess, parameter_types};
+use core::marker::PhantomData;
+
+use frame_support::{
+    parameter_types,
+    traits::{ConstU32, Contains, ContainsPair, Everything, Get, Nothing, PalletInfoAccess},
+    weights::Weight,
+};
+use frame_system::EnsureRoot;
+use orml_traits::{location::Reserve, parameter_type_with_key};
+use orml_xcm_support::MultiNativeAsset;
 use pallet_xcm::XcmPassthrough;
+use parity_scale_codec::{Decode, Encode};
 use polkadot_parachain_primitives::primitives::{self, Sibling};
+use scale_info::TypeInfo;
+use sp_runtime::{traits::Convert, Vec};
 use xcm::latest::{prelude::*, Junction::PalletInstance};
 use xcm_builder::{
-    AccountId32Aliases, FungibleAdapter, FungiblesAdapter, IsChildSystemParachain, IsConcrete,
-    NoChecking, ParentIsPreset, RelayChainAsNative, SiblingParachainAsNative,
+    AccountId32Aliases, AllowExplicitUnpaidExecutionFrom, AllowTopLevelPaidExecutionFrom, Case,
+    DenyReserveTransferToRelayChain, DenyThenTry, EnsureXcmOrigin, FixedWeightBounds,
+    FrameTransactionalProcessor, FungibleAdapter, FungiblesAdapter, IsChildSystemParachain,
+    IsConcrete, NoChecking, ParentIsPreset, RelayChainAsNative, SiblingParachainAsNative,
     SiblingParachainConvertsVia, SignedAccountId32AsNative, SignedToAccountId32,
-    SovereignSignedViaLocation, XcmFeeManagerFromComponents, XcmFeeToAccount,
+    SovereignSignedViaLocation, TakeWeightCredit, TrailingSetTopicAsId, WithComputedOrigin,
+    WithUniqueTopic, XcmFeeManagerFromComponents, XcmFeeToAccount,
+};
+use xcm_executor::XcmExecutor;
+use xcm_primitives::{
+    AbsoluteAndRelativeReserve, AsAssetType, UtilityAvailableCalls, UtilityEncodeCall, XcmTransact,
 };
 
 use crate::{
-    configs::TreasuryAccount,
-    types::{AccountId, Balance},
-    Assets, Balances, PolkadotXcm, RuntimeOrigin,
+    configs::{
+        weights, AssetType, MaxInstructions, ParachainSystem, Runtime, RuntimeCall, RuntimeEvent,
+        UnitWeightCost, XcmpQueue,
+    },
+    types::{AccountId, AssetId, Balance, TreasuryAccount},
+    AllPalletsWithSystem, AssetManager, Assets, Balances, ParachainInfo, PolkadotXcm,
+    RuntimeOrigin,
 };
 
 parameter_types! {
-    pub const RelayLocation: Location = Location::parent();
     pub PlaceholderAccount: AccountId = PolkadotXcm::check_account();
     pub const RelayNetwork: Option<NetworkId> = None;
     pub RelayChainOrigin: RuntimeOrigin = cumulus_pallet_xcm::Origin::Relay.into();
     pub AssetsPalletLocation: Location =
         PalletInstance(<Assets as PalletInfoAccess>::index() as u8).into();
+    pub UniversalLocation: InteriorLocation = Parachain(ParachainInfo::parachain_id().into()).into();
+    // Self Reserve location, defines the multilocation identifiying the self-reserve currency
+    // This is used to match it also against our Balances pallet when we receive such
+    // a Location: (Self Balances pallet index)
+    // We use the RELATIVE multilocation
+    pub SelfReserve: Location = Location {
+        parents:0,
+        interior: [
+            PalletInstance(<Balances as PalletInfoAccess>::index() as u8)
+        ].into()
+    };
 }
 
 /// Type for specifying how a `Location` can be converted into an
@@ -98,10 +130,296 @@ pub type XcmOriginToTransactDispatchOrigin = (
     XcmPassthrough<RuntimeOrigin>,
 );
 
-/// No local origins on this chain are allowed to dispatch XCM sends/executions.
-pub type LocalOriginToLocation = SignedToAccountId32<RuntimeOrigin, AccountId, RelayNetwork>;
-
 pub type FeeManager = XcmFeeManagerFromComponents<
     IsChildSystemParachain<primitives::Id>,
     XcmFeeToAccount<AssetTransactors, AccountId, TreasuryAccount>,
 >;
+
+/// Matches foreign assets from a given origin.
+/// Foreign assets are assets bridged from other consensus systems. i.e parents > 1.
+pub struct IsBridgedConcreteAssetFrom<Origin>(PhantomData<Origin>);
+impl<Origin> ContainsPair<Asset, Location> for IsBridgedConcreteAssetFrom<Origin>
+where
+    Origin: Get<Location>,
+{
+    fn contains(asset: &Asset, origin: &Location) -> bool {
+        let loc = Origin::get();
+        &loc == origin
+            && matches!(
+                asset,
+                Asset { id: AssetId(Location { parents: 2, .. }), fun: Fungibility::Fungible(_) },
+            )
+    }
+}
+
+parameter_types! {
+    /// Location of Asset Hub
+   pub AssetHubLocation: Location = Location::new(1, [Parachain(1000)]);
+   pub const RelayLocation: Location = Location::parent();
+   pub RelayLocationFilter: AssetFilter = Wild(AllOf {
+       fun: WildFungible,
+       id: xcm::prelude::AssetId(RelayLocation::get()),
+   });
+   pub RelayChainNativeAssetFromAssetHub: (AssetFilter, Location) = (
+       RelayLocationFilter::get(),
+       AssetHubLocation::get()
+   );
+}
+
+pub type Reserves = (
+    // Assets bridged from different consensus systems held in reserve on Asset Hub.
+    IsBridgedConcreteAssetFrom<AssetHubLocation>,
+    // Relaychain (DOT) from Asset Hub
+    Case<RelayChainNativeAssetFromAssetHub>,
+    // Assets which the reserve is the same as the origin.
+    MultiNativeAsset<AbsoluteAndRelativeReserve<SelfLocationAbsolute>>,
+);
+
+pub type XcmWeigher = FixedWeightBounds<UnitWeightCost, RuntimeCall, MaxInstructions>;
+
+/// No local origins on this chain are allowed to dispatch XCM sends/executions.
+pub type LocalOriginToLocation = SignedToAccountId32<RuntimeOrigin, AccountId, RelayNetwork>;
+
+/// The means for routing XCM messages which are not for local execution into
+/// the right message queues.
+pub type XcmRouter = WithUniqueTopic<(
+    // Two routers - use UMP to communicate with the relay chain:
+    cumulus_primitives_utility::ParentAsUmp<ParachainSystem, (), ()>,
+    // ..and XCMP to communicate with the sibling chains.
+    XcmpQueue,
+)>;
+
+parameter_types! {
+    pub const MaxLockers: u32 = 8;
+    pub const MaxRemoteLockConsumers: u32 = 0;
+}
+
+parameter_types! {
+    pub const BaseXcmWeight: Weight = Weight::from_parts(200_000_000u64, 0);
+    pub const MaxAssetsForTransfer: usize = 2;
+
+    // This is how we are going to detect whether the asset is a Reserve asset
+    // This however is the chain part only
+    pub SelfLocation: Location = Location::here();
+    // We need this to be able to catch when someone is trying to execute a non-
+    // cross-chain transfer in xtokens through the absolute path way
+    pub SelfLocationAbsolute: Location = Location {
+        parents:1,
+        interior: [
+            Parachain(ParachainInfo::parachain_id().into())
+        ].into()
+    };
+}
+
+parameter_type_with_key! {
+    pub ParachainMinFee: |location: Location| -> Option<u128> {
+        match (location.parents, location.first_interior()) {
+            // Polkadot AssetHub fee
+            (1, Some(Parachain(1000u32))) => Some(50_000_000u128),
+            _ => None,
+        }
+    };
+}
+
+// Our currencyId. We distinguish for now between SelfReserve, and Others, defined by their Id.
+#[derive(Clone, Eq, Debug, PartialEq, Ord, PartialOrd, Encode, Decode, TypeInfo)]
+pub enum CurrencyId {
+    // Our native token
+    SelfReserve,
+    // Assets representing other chains native tokens
+    ForeignAsset(AssetId),
+}
+
+parameter_types! {
+    pub PolkadotXcmLocation: Location = Location {
+        parents:0,
+        interior: [
+            PalletInstance(<PolkadotXcm as PalletInfoAccess>::index() as u8)
+        ].into()
+    };
+}
+
+// How to convert from CurrencyId to Location
+pub struct CurrencyIdToLocation<AssetXConverter>(sp_std::marker::PhantomData<AssetXConverter>);
+impl<AssetXConverter> sp_runtime::traits::Convert<CurrencyId, Option<Location>>
+    for CurrencyIdToLocation<AssetXConverter>
+where
+    AssetXConverter: sp_runtime::traits::MaybeEquivalence<Location, AssetId>,
+{
+    fn convert(currency: CurrencyId) -> Option<Location> {
+        match currency {
+            CurrencyId::SelfReserve => {
+                let multi: Location = SelfReserve::get();
+                Some(multi)
+            }
+            CurrencyId::ForeignAsset(asset) => AssetXConverter::convert_back(&asset),
+        }
+    }
+}
+
+pub struct AccountIdToLocation;
+impl Convert<AccountId, Location> for AccountIdToLocation {
+    fn convert(account: AccountId) -> Location {
+        AccountId32 { network: None, id: account.into() }.into()
+    }
+}
+
+/// The `DOTReserveProvider` overrides the default reserve location for DOT (Polkadot's native token).
+///
+/// DOT can exist in multiple locations, and this provider ensures that the reserve is correctly set
+/// to the AssetHub parachain.
+///
+/// - **Default Location:** `{ parents: 1, location: Here }`
+/// - **Reserve Location on AssetHub:** `{ parents: 1, location: X1(Parachain(AssetHubParaId)) }`
+///
+/// This provider ensures that if the asset's ID points to the default "Here" location,
+/// it will instead be mapped to the AssetHub parachain.
+pub struct DOTReserveProvider;
+
+impl Reserve for DOTReserveProvider {
+    fn reserve(asset: &Asset) -> Option<Location> {
+        let AssetId(location) = &asset.id;
+
+        let dot_here = Location::new(1, Here);
+        let dot_asset_hub = AssetHubLocation::get();
+
+        if location == &dot_here {
+            Some(dot_asset_hub) // Reserve is on AssetHub.
+        } else {
+            None
+        }
+    }
+}
+
+/// The `BridgedAssetReserveProvider` handles assets that are bridged from external consensus systems
+/// (e.g., Ethereum) and may have multiple valid reserve locations.
+///
+/// Specifically, these bridged assets can have two known reserves:
+/// 1. **Ethereum-based Reserve:**
+///    `{ parents: 1, location: X1(GlobalConsensus(Ethereum{ chain_id: 1 })) }`
+/// 2. **AssetHub Parachain Reserve:**
+///    `{ parents: 1, location: X1(Parachain(AssetHubParaId)) }`
+///
+/// This provider maps the reserve for bridged assets to AssetHub when the asset originates
+/// from a global consensus system, such as Ethereum.
+pub struct BridgedAssetReserveProvider;
+
+impl Reserve for BridgedAssetReserveProvider {
+    fn reserve(asset: &Asset) -> Option<Location> {
+        let AssetId(location) = &asset.id;
+
+        let asset_hub_reserve = AssetHubLocation::get();
+
+        // any asset that has parents > 1 and interior that starts with GlobalConsensus(_) pattern
+        // can be considered a bridged asset.
+        //
+        // `split_global` will return an `Err` if the first item is not a `GlobalConsensus`
+        if location.parents > 1 && location.interior.clone().split_global().is_ok() {
+            Some(asset_hub_reserve)
+        } else {
+            None
+        }
+    }
+}
+
+pub struct ReserveProviders;
+
+impl Reserve for ReserveProviders {
+    fn reserve(asset: &Asset) -> Option<Location> {
+        // Try each provider's reserve method in sequence.
+        DOTReserveProvider::reserve(asset)
+            .or_else(|| BridgedAssetReserveProvider::reserve(asset))
+            .or_else(|| AbsoluteAndRelativeReserve::<SelfLocationAbsolute>::reserve(asset))
+    }
+}
+
+pub struct AssetFeesFilter;
+impl frame_support::traits::Contains<Location> for AssetFeesFilter {
+    fn contains(location: &Location) -> bool {
+        location.parent_count() > 0
+            && location.first_interior() != PolkadotXcmLocation::get().first_interior()
+    }
+}
+
+// For now we only allow to transact in the relay, although this might change in the future
+// Transactors just defines the chains in which we allow transactions to be issued through
+// xcm
+#[derive(Clone, Eq, Debug, PartialEq, Ord, PartialOrd, Encode, Decode, TypeInfo)]
+pub enum Transactors {
+    Relay,
+}
+
+// Default for benchmarking
+#[cfg(feature = "runtime-benchmarks")]
+impl Default for Transactors {
+    fn default() -> Self {
+        Transactors::Relay
+    }
+}
+
+impl TryFrom<u8> for Transactors {
+    type Error = ();
+
+    fn try_from(value: u8) -> Result<Self, Self::Error> {
+        match value {
+            0u8 => Ok(Transactors::Relay),
+            _ => Err(()),
+        }
+    }
+}
+
+impl UtilityEncodeCall for Transactors {
+    fn encode_call(self, call: UtilityAvailableCalls) -> Vec<u8> {
+        match self {
+            Transactors::Relay => pallet_xcm_transactor::Pallet::<Runtime>::encode_call(
+                pallet_xcm_transactor::Pallet(sp_std::marker::PhantomData::<Runtime>),
+                call,
+            ),
+        }
+    }
+}
+
+impl XcmTransact for Transactors {
+    fn destination(self) -> Location {
+        match self {
+            Transactors::Relay => Location::parent(),
+        }
+    }
+}
+
+parameter_types! {
+    pub MaxHrmpRelayFee: Asset = (Location::parent(), 1_000_000_000_000u128).into();
+}
+
+#[cfg(feature = "runtime-benchmarks")]
+mod testing {
+    use sp_runtime::traits::MaybeEquivalence;
+    use xcm_builder::WithLatestLocationConverter;
+    use xcm_executor::traits::ConvertLocation;
+
+    use super::*;
+
+    /// This From exists for benchmarking purposes. It has the potential side-effect of calling
+    /// AssetManager::set_asset_type_asset_id() and should NOT be used in any production code.
+    impl From<Location> for CurrencyId {
+        fn from(location: Location) -> CurrencyId {
+            use xcm_primitives::AssetTypeGetter;
+
+            // If it does not exist, for benchmarking purposes, we create the association
+            let asset_id = if let Some(asset_id) =
+                AsAssetType::<AssetId, AssetType, AssetManager>::convert_location(&location)
+            {
+                asset_id
+            } else {
+                let asset_type = AssetType::Xcm(
+                    WithLatestLocationConverter::convert(&location).expect("convert to v3"),
+                );
+                let asset_id: AssetId = asset_type.clone().into();
+                AssetManager::set_asset_type_asset_id(asset_type, asset_id);
+                asset_id
+            };
+
+            CurrencyId::ForeignAsset(asset_id)
+        }
+    }
+}

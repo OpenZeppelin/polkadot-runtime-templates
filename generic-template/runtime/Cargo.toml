@@ -86,6 +86,14 @@ parachains-common = { workspace = true }
 
 # Moonbeam
 pallet-asset-manager = { workspace = true }
+pallet-xcm-transactor = { workspace = true }
+pallet-xcm-weight-trader = { workspace = true }
+xcm-primitives = { workspace = true }
+
+# ORML
+orml-traits = { workspace = true }
+orml-xcm-support = { workspace = true }
+orml-xtokens = { workspace = true }
 
 [dev-dependencies]
 sp-io = { workspace = true }
@@ -94,7 +102,6 @@ sp-io = { workspace = true }
 substrate-wasm-builder = { workspace = true }
 
 [features]
-default = [ "std" ]
 std = [
 	"assets-common/std",
 	"cumulus-pallet-aura-ext/std",
@@ -115,6 +122,7 @@ std = [
 	"frame-system/std",
 	"frame-try-runtime?/std",
 	"log/std",
+	"orml-xtokens/std",
 	"pallet-asset-manager/std",
 	"pallet-assets/std",
 	"pallet-aura/std",
@@ -136,6 +144,8 @@ std = [
 	"pallet-treasury/std",
 	"pallet-utility/std",
 	"pallet-whitelist/std",
+	"pallet-xcm-transactor/std",
+	"pallet-xcm-weight-trader/std",
 	"pallet-xcm/std",
 	"parachain-info/std",
 	"parachains-common/std",
@@ -159,10 +169,10 @@ std = [
 	"sp-version/std",
 	"xcm-builder/std",
 	"xcm-executor/std",
+	"xcm-primitives/std",
 	"xcm/std",
 ]
-async-backing = []
-metadata-hash = [ "substrate-wasm-builder/metadata-hash" ]
+
 runtime-benchmarks = [
 	"assets-common/runtime-benchmarks",
 	"cumulus-pallet-parachain-system/runtime-benchmarks",
@@ -190,6 +200,8 @@ runtime-benchmarks = [
 	"pallet-treasury/runtime-benchmarks",
 	"pallet-utility/runtime-benchmarks",
 	"pallet-whitelist/runtime-benchmarks",
+	"pallet-xcm-transactor/runtime-benchmarks",
+	"pallet-xcm-weight-trader/runtime-benchmarks",
 	"pallet-xcm/runtime-benchmarks",
 	"parachains-common/runtime-benchmarks",
 	"polkadot-parachain-primitives/runtime-benchmarks",
@@ -208,6 +220,7 @@ try-runtime = [
 	"frame-support/try-runtime",
 	"frame-system/try-runtime",
 	"frame-try-runtime/try-runtime",
+	"orml-xtokens/try-runtime",
 	"pallet-asset-manager/try-runtime",
 	"pallet-assets/try-runtime",
 	"pallet-aura/try-runtime",
@@ -229,6 +242,8 @@ try-runtime = [
 	"pallet-treasury/try-runtime",
 	"pallet-utility/try-runtime",
 	"pallet-whitelist/try-runtime",
+	"pallet-xcm-transactor/try-runtime",
+	"pallet-xcm-weight-trader/try-runtime",
 	"pallet-xcm/try-runtime",
 	"parachain-info/try-runtime",
 	"polkadot-runtime-common/try-runtime",
@@ -239,3 +254,9 @@ try-runtime = [
 # deployment. This will disable stuff that shouldn't be part of the on-chain wasm
 # to make it smaller, like logging for example.
 on-chain-release-build = [ "sp-api/disable-logging" ]
+
+async-backing = []
+
+default = [ "std" ]
+
+metadata-hash = [ "substrate-wasm-builder/metadata-hash" ]

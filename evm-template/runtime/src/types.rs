@@ -27,11 +27,10 @@ use xcm_builder::{ConvertedConcreteId, PayOverXcm};
 use xcm_executor::traits::JustTry;
 use xcm_primitives::AsAssetType;
 
-use crate::{configs::xcm_config, constants::HOURS, AssetManager, Assets};
 pub use crate::{
     configs::{
-        xcm_config::RelayLocation, AssetType, FeeAssetId, StakingAdminBodyId,
-        ToSiblingBaseDeliveryFee, TransactionByteFee,
+        xcm_config::RelayLocation, FeeAssetId, StakingAdminBodyId, ToSiblingBaseDeliveryFee,
+        TransactionByteFee,
     },
     constants::{
         BLOCK_PROCESSING_VELOCITY, RELAY_CHAIN_SLOT_DURATION_MILLIS, UNINCLUDED_SEGMENT_CAPACITY,
@@ -39,6 +38,15 @@ pub use crate::{
     },
     AllPalletsWithSystem, OpenZeppelinPrecompiles, Runtime, RuntimeBlockWeights, RuntimeCall,
     Treasury, XcmpQueue,
+};
+use crate::{
+    configs::{
+        xcm_config::{self, RelayLocation},
+        AssetType, FeeAssetId, StakingAdminBodyId, ToSiblingBaseDeliveryFee, TransactionByteFee,
+        TreasuryInteriorLocation,
+    },
+    constants::HOURS,
+    AssetManager, Assets,
 };
 
 /// Unchecked extrinsic type as expected by this runtime.
@@ -119,23 +127,6 @@ pub type ConsensusHook = cumulus_pallet_aura_ext::FixedVelocityConsensusHook<
 pub type CollatorSelectionUpdateOrigin = EitherOfDiverse<
     EnsureRoot<AccountId>,
     EnsureXcm<IsVoiceOfBody<RelayLocation, StakingAdminBodyId>>,
->;
-
-/// This is the struct that will handle the revenue from xcm fees
-/// We do not burn anything because we want to mimic exactly what
-/// the sovereign account has
-pub type XcmFeesToAccount = xcm_primitives::XcmFeesToAccount<
-    Assets,
-    (
-        ConvertedConcreteId<
-            AssetId,
-            Balance,
-            AsAssetType<AssetId, AssetType, AssetManager>,
-            JustTry,
-        >,
-    ),
-    AccountId,
-    TreasuryAccount,
 >;
 
 /// These aliases are describing the Beneficiary and AssetKind for the Treasury pallet

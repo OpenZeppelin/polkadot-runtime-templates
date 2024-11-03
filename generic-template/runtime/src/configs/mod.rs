@@ -1,8 +1,9 @@
 pub mod asset_config;
+pub use asset_config::AssetType;
 pub mod governance;
 pub mod xcm_config;
 
-use asset_config::{AssetRegistrar, AssetRegistrarMetadata, AssetType};
+use asset_config::*;
 #[cfg(feature = "async-backing")]
 use cumulus_pallet_parachain_system::RelayNumberMonotonicallyIncreases;
 #[cfg(not(feature = "async-backing"))]
@@ -48,6 +49,7 @@ use xcm_builder::{
 };
 use xcm_config::*;
 use xcm_executor::XcmExecutor;
+use xcm_primitives::{AbsoluteAndRelativeReserve, AsAssetType};
 
 #[cfg(feature = "runtime-benchmarks")]
 use crate::benchmark::{OpenHrmpChannel, PayWithEnsure};
@@ -64,10 +66,10 @@ use crate::{
         TreasuryPalletId, TreasuryPaymaster, Version,
     },
     weights::{self, BlockExecutionWeight, ExtrinsicBaseWeight, RocksDbWeight},
-    AllPalletsWithSystem, Aura, Balances, CollatorSelection, MessageQueue, OriginCaller,
-    PalletInfo, ParachainInfo, ParachainSystem, PolkadotXcm, Preimage, Referenda, Runtime,
-    RuntimeCall, RuntimeEvent, RuntimeFreezeReason, RuntimeHoldReason, RuntimeOrigin, RuntimeTask,
-    Scheduler, Session, SessionKeys, System, Treasury, WeightToFee, XcmpQueue,
+    AllPalletsWithSystem, AssetManager, Aura, Balances, CollatorSelection, MessageQueue,
+    OriginCaller, PalletInfo, ParachainInfo, ParachainSystem, PolkadotXcm, Preimage, Referenda,
+    Runtime, RuntimeCall, RuntimeEvent, RuntimeFreezeReason, RuntimeHoldReason, RuntimeOrigin,
+    RuntimeTask, Scheduler, Session, SessionKeys, System, Treasury, WeightToFee, XcmpQueue,
 };
 
 // OpenZeppelin runtime wrappers configuration
@@ -104,20 +106,48 @@ impl GovernanceConfig for OpenZeppelinRuntime {
     type WhitelistOrigin = EnsureRoot<AccountId>;
 }
 impl XcmConfig for OpenZeppelinRuntime {
+    type AccountIdToLocation = AccountIdToLocation;
+    type AddSupportedAssetOrigin = EnsureRoot<AccountId>;
+    type AssetFeesFilter = AssetFeesFilter;
     type AssetTransactors = AssetTransactors;
+    type BaseXcmWeight = BaseXcmWeight;
+    type CurrencyId = CurrencyId;
+    type CurrencyIdToLocation = CurrencyIdToLocation<AsAssetType<AssetId, AssetType, AssetManager>>;
+    type DerivativeAddressRegistrationOrigin = EnsureRoot<AccountId>;
+    type EditSupportedAssetOrigin = EnsureRoot<AccountId>;
     type FeeManager = FeeManager;
+    type HrmpManipulatorOrigin = EnsureRoot<AccountId>;
+    type HrmpOpenOrigin = EnsureRoot<AccountId>;
     type LocalOriginToLocation = LocalOriginToLocation;
     type LocationToAccountId = LocationToAccountId;
+    type MaxAssetsForTransfer = MaxAssetsForTransfer;
+    type MaxHrmpRelayFee = MaxHrmpRelayFee;
     type MessageQueueHeapSize = ConstU32<{ 64 * 1024 }>;
     type MessageQueueMaxStale = ConstU32<8>;
     type MessageQueueServiceWeight = MessageQueueServiceWeight;
-    type Reserves = NativeAsset;
+    type ParachainMinFee = ParachainMinFee;
+    type PauseSupportedAssetOrigin = EnsureRoot<AccountId>;
+    type RelayLocation = RelayLocation;
+    type RemoveSupportedAssetOrigin = EnsureRoot<AccountId>;
+    type Reserves = Reserves;
+    type ResumeSupportedAssetOrigin = EnsureRoot<AccountId>;
+    type SelfLocation = SelfLocation;
+    type SelfReserve = SelfReserve;
+    type SovereignAccountDispatcherOrigin = EnsureRoot<AccountId>;
     type Trader =
         UsingComponents<WeightToFee, RelayLocation, AccountId, Balances, ToAuthor<Runtime>>;
+    type TransactorReserveProvider = AbsoluteAndRelativeReserve<SelfLocationAbsolute>;
+    type Transactors = Transactors;
+    type UniversalLocation = UniversalLocation;
+    type WeightToFee = WeightToFee;
     type XcmAdminOrigin = EnsureRoot<AccountId>;
+    type XcmFeesAccount = TreasuryAccount;
     type XcmOriginToTransactDispatchOrigin = XcmOriginToTransactDispatchOrigin;
+    type XcmSender = XcmRouter;
+    type XcmWeigher = XcmWeigher;
     type XcmpQueueControllerOrigin = EnsureRoot<AccountId>;
     type XcmpQueueMaxInboundSuspended = ConstU32<1000>;
+    type XtokensReserveProviders = ReserveProviders;
 }
 impl AssetsConfig for OpenZeppelinRuntime {
     type ApprovalDeposit = ConstU128<EXISTENTIAL_DEPOSIT>;

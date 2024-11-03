@@ -40,6 +40,8 @@ pub mod pallet_treasury;
 pub mod pallet_utility;
 pub mod pallet_whitelist;
 pub mod pallet_xcm;
+pub mod pallet_xcm_transactor;
+pub mod pallet_xcm_weight_trader;
 pub mod paritydb_weights;
 pub mod rocksdb_weights;
 pub use block_weights::constants::BlockExecutionWeight;

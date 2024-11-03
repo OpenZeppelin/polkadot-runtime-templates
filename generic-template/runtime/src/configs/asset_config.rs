@@ -8,6 +8,7 @@ use sp_std::{
     prelude::*,
 };
 use xcm::latest::Location;
+use xcm_primitives::AsAssetType;
 
 use crate::{
     types::{AccountId, AssetId, Balance},
