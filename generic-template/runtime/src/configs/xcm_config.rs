@@ -2,10 +2,9 @@ use core::marker::PhantomData;
 
 use frame_support::{
     parameter_types,
-    traits::{ConstU32, Contains, ContainsPair, Everything, Get, Nothing, PalletInfoAccess},
+    traits::{ContainsPair, Get, PalletInfoAccess},
     weights::Weight,
 };
-use frame_system::EnsureRoot;
 use orml_traits::{location::Reserve, parameter_type_with_key};
 use orml_xcm_support::MultiNativeAsset;
 use pallet_xcm::XcmPassthrough;
@@ -15,27 +14,20 @@ use scale_info::TypeInfo;
 use sp_runtime::{traits::Convert, Vec};
 use xcm::latest::{prelude::*, Junction::PalletInstance};
 use xcm_builder::{
-    AccountId32Aliases, AllowExplicitUnpaidExecutionFrom, AllowTopLevelPaidExecutionFrom, Case,
-    DenyReserveTransferToRelayChain, DenyThenTry, EnsureXcmOrigin, FixedWeightBounds,
-    FrameTransactionalProcessor, FungibleAdapter, FungiblesAdapter, IsChildSystemParachain,
-    IsConcrete, NoChecking, ParentIsPreset, RelayChainAsNative, SiblingParachainAsNative,
-    SiblingParachainConvertsVia, SignedAccountId32AsNative, SignedToAccountId32,
-    SovereignSignedViaLocation, TakeWeightCredit, TrailingSetTopicAsId, WithComputedOrigin,
-    WithUniqueTopic, XcmFeeManagerFromComponents, XcmFeeToAccount,
+    AccountId32Aliases, Case, FixedWeightBounds, FungibleAdapter, FungiblesAdapter,
+    IsChildSystemParachain, IsConcrete, NoChecking, ParentIsPreset, RelayChainAsNative,
+    SiblingParachainAsNative, SiblingParachainConvertsVia, SignedAccountId32AsNative,
+    SignedToAccountId32, SovereignSignedViaLocation, WithUniqueTopic, XcmFeeManagerFromComponents,
+    XcmFeeToAccount,
 };
-use xcm_executor::XcmExecutor;
 use xcm_primitives::{
-    AbsoluteAndRelativeReserve, AsAssetType, UtilityAvailableCalls, UtilityEncodeCall, XcmTransact,
+    AbsoluteAndRelativeReserve, UtilityAvailableCalls, UtilityEncodeCall, XcmTransact,
 };
 
 use crate::{
-    configs::{
-        weights, AssetType, MaxInstructions, ParachainSystem, Runtime, RuntimeCall, RuntimeEvent,
-        UnitWeightCost, XcmpQueue,
-    },
+    configs::{MaxInstructions, ParachainSystem, Runtime, RuntimeCall, UnitWeightCost, XcmpQueue},
     types::{AccountId, AssetId, Balance, TreasuryAccount},
-    AllPalletsWithSystem, AssetManager, Assets, Balances, ParachainInfo, PolkadotXcm,
-    RuntimeOrigin,
+    Assets, Balances, ParachainInfo, PolkadotXcm, RuntimeOrigin,
 };
 
 parameter_types! {

@@ -32,7 +32,7 @@ use openzeppelin_polkadot_wrappers::{
     GovernanceConfig, SystemConfig, XcmConfig,
 };
 use parachains_common::message_queue::{NarrowOriginToSibling, ParaIdToSibling};
-use polkadot_runtime_common::{impls::ToAuthor, BlockHashCount, SlowAdjustingFeeUpdate};
+use polkadot_runtime_common::{BlockHashCount, SlowAdjustingFeeUpdate};
 use sp_consensus_aura::sr25519::AuthorityId as AuraId;
 use sp_runtime::{
     traits::{AccountIdLookup, BlakeTwo256, IdentityLookup},
@@ -44,8 +44,8 @@ use xcm_builder::ProcessXcmMessage;
 use xcm_builder::{
     AllowExplicitUnpaidExecutionFrom, AllowTopLevelPaidExecutionFrom,
     DenyReserveTransferToRelayChain, DenyThenTry, EnsureXcmOrigin, FixedWeightBounds,
-    FrameTransactionalProcessor, NativeAsset, TakeWeightCredit, TrailingSetTopicAsId,
-    UsingComponents, WithComputedOrigin, WithUniqueTopic,
+    FrameTransactionalProcessor, TakeWeightCredit, TrailingSetTopicAsId, WithComputedOrigin,
+    WithUniqueTopic,
 };
 use xcm_config::*;
 use xcm_executor::XcmExecutor;
