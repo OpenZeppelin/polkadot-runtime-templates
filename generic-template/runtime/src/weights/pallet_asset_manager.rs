@@ -56,8 +56,7 @@ impl<T: frame_system::Config> pallet_asset_manager::WeightInfo for WeightInfo<T>
 	/// Proof: `AssetManager::AssetIdType` (`max_values`: None, `max_size`: None, mode: `Measured`)
 	/// Storage: `AssetManager::AssetTypeId` (r:0 w:2)
 	/// Proof: `AssetManager::AssetTypeId` (`max_values`: None, `max_size`: None, mode: `Measured`)
-	/// The range of component `x` is `[5, 100]`.
-	fn change_existing_asset_type(x: u32, ) -> Weight {
+	fn change_existing_asset_type() -> Weight {
 		// Proof Size summary in bytes:
 		//  Measured:  `429 + x * (4 ±0)`
 		//  Estimated: `3870 + x * (5 ±0)`
@@ -65,17 +64,16 @@ impl<T: frame_system::Config> pallet_asset_manager::WeightInfo for WeightInfo<T>
 		Weight::from_parts(25_957_100, 0)
 			.saturating_add(Weight::from_parts(0, 3870))
 			// Standard Error: 2_899
-			.saturating_add(Weight::from_parts(93_865, 0).saturating_mul(x.into()))
+			.saturating_add(Weight::from_parts(93_865, 0))
 			.saturating_add(T::DbWeight::get().reads(1))
 			.saturating_add(T::DbWeight::get().writes(3))
-			.saturating_add(Weight::from_parts(0, 5).saturating_mul(x.into()))
+			.saturating_add(Weight::from_parts(0, 5))
 	}
 	/// Storage: `AssetManager::AssetIdType` (r:1 w:1)
 	/// Proof: `AssetManager::AssetIdType` (`max_values`: None, `max_size`: None, mode: `Measured`)
 	/// Storage: `AssetManager::AssetTypeId` (r:0 w:1)
 	/// Proof: `AssetManager::AssetTypeId` (`max_values`: None, `max_size`: None, mode: `Measured`)
-	/// The range of component `x` is `[5, 100]`.
-	fn remove_existing_asset_type(x: u32, ) -> Weight {
+	fn remove_existing_asset_type() -> Weight {
 		// Proof Size summary in bytes:
 		//  Measured:  `429 + x * (4 ±0)`
 		//  Estimated: `3870 + x * (5 ±0)`
@@ -83,9 +81,9 @@ impl<T: frame_system::Config> pallet_asset_manager::WeightInfo for WeightInfo<T>
 		Weight::from_parts(23_110_928, 0)
 			.saturating_add(Weight::from_parts(0, 3870))
 			// Standard Error: 2_937
-			.saturating_add(Weight::from_parts(89_796, 0).saturating_mul(x.into()))
+			.saturating_add(Weight::from_parts(89_796, 0))
 			.saturating_add(T::DbWeight::get().reads(1))
 			.saturating_add(T::DbWeight::get().writes(2))
-			.saturating_add(Weight::from_parts(0, 5).saturating_mul(x.into()))
+			.saturating_add(Weight::from_parts(0, 5))
 	}
 }
