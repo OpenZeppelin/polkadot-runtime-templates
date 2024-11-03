@@ -13,6 +13,7 @@ frame_benchmarking::define_benchmarks!(
     [pallet_utility, Utility]
     [pallet_multisig, Multisig]
     [pallet_xcm, PalletXcmExtrinsicsBenchmark::<Runtime>]
+    [pallet_asset_manager, AssetManager]
     [pallet_referenda, Referenda]
     [pallet_scheduler, Scheduler]
     [pallet_preimage, Preimage]
@@ -20,6 +21,7 @@ frame_benchmarking::define_benchmarks!(
     [pallet_conviction_voting, ConvictionVoting]
     [pallet_whitelist, Whitelist]
     [pallet_xcm_transactor, XcmTransactor]
+    [pallet_xcm_weight_trader, XcmWeightTrader]
 );
 
 use cumulus_primitives_core::{ChannelStatus, GetChannelInfo};
