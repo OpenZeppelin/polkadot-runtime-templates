@@ -2,7 +2,7 @@ pub mod asset_config;
 pub mod governance;
 pub mod xcm_config;
 
-pub use asset_config::{AssetRegistrar, AssetRegistrarMetadata, AssetType};
+use asset_config::*;
 #[cfg(feature = "async-backing")]
 use cumulus_pallet_parachain_system::RelayNumberMonotonicallyIncreases;
 #[cfg(not(feature = "async-backing"))]
@@ -51,11 +51,9 @@ use xcm_builder::{
     FrameTransactionalProcessor, TakeWeightCredit, TrailingSetTopicAsId, UsingComponents,
     WithComputedOrigin, WithUniqueTopic,
 };
-use xcm_config::{
-    AssetTransactors, BalancesPalletLocation, FeeManager, LocalOriginToLocation,
-    LocationToAccountId, Reserves, XcmOriginToTransactDispatchOrigin,
-};
+use xcm_config::*;
 use xcm_executor::XcmExecutor;
+use xcm_primitives::{AbsoluteAndRelativeReserve, AccountIdToLocation, AsAssetType};
 
 #[cfg(feature = "runtime-benchmarks")]
 use crate::benchmark::{OpenHrmpChannel, PayWithEnsure};
@@ -70,7 +68,7 @@ use crate::{
         AccountId, AssetId, AssetKind, Balance, Beneficiary, Block, BlockNumber,
         CollatorSelectionUpdateOrigin, ConsensusHook, Hash, MessageQueueServiceWeight, Nonce,
         PrecompilesValue, PriceForSiblingParachainDelivery, ProxyType, TreasuryInteriorLocation,
-        TreasuryPalletId, TreasuryPaymaster, Version, XcmFeesToAccount,
+        TreasuryPalletId, TreasuryPaymaster, Version,
     },
     weights::{self, BlockExecutionWeight, ExtrinsicBaseWeight, RocksDbWeight},
     AllPalletsWithSystem, AssetManager, Aura, Balances, BaseFee, CollatorSelection, EVMChainId,
@@ -114,50 +112,47 @@ impl GovernanceConfig for OpenZeppelinRuntime {
     type WhitelistOrigin = EnsureRoot<AccountId>;
 }
 impl XcmConfig for OpenZeppelinRuntime {
-    type AccountIdToLocation;
+    type AccountIdToLocation = AccountIdToLocation<AccountId>;
     type AddSupportedAssetOrigin = EnsureRoot<AccountId>;
-    type AssetFeesFilter;
+    type AssetFeesFilter = AssetFeesFilter;
     type AssetTransactors = AssetTransactors;
-    type BaseXcmWeight;
-    type CurrencyId;
-    type CurrencyIdToLocation;
-    type DerivativeAddressRegistrationOrigin;
-    type EditSupportedAssetOrigin;
+    type BaseXcmWeight = BaseXcmWeight;
+    type CurrencyId = CurrencyId;
+    type CurrencyIdToLocation = CurrencyIdToLocation<AsAssetType<AssetId, AssetType, AssetManager>>;
+    type DerivativeAddressRegistrationOrigin = EnsureRoot<AccountId>;
+    type EditSupportedAssetOrigin = EnsureRoot<AccountId>;
     type FeeManager = FeeManager;
     type HrmpManipulatorOrigin = EnsureRoot<AccountId>;
     type HrmpOpenOrigin = EnsureRoot<AccountId>;
     type LocalOriginToLocation = LocalOriginToLocation;
     type LocationToAccountId = LocationToAccountId;
-    type MaxAssetsForTransfer;
-    type MaxHrmpRelayFee;
+    type MaxAssetsForTransfer = MaxAssetsForTransfer;
+    type MaxHrmpRelayFee = MaxHrmpRelayFee;
     type MessageQueueHeapSize = ConstU32<{ 64 * 1024 }>;
     type MessageQueueMaxStale = ConstU32<8>;
     type MessageQueueServiceWeight = MessageQueueServiceWeight;
-    type ParachainMinFee;
+    type ParachainMinFee = ParachainMinFee;
     type PauseSupportedAssetOrigin = EnsureRoot<AccountId>;
-    type RelayLocation;
+    type RelayLocation = RelayLocation;
     type RemoveSupportedAssetOrigin = EnsureRoot<AccountId>;
-    type ReserveProvider;
-    type ReserveProviders;
     type Reserves = Reserves;
     type ResumeSupportedAssetOrigin = EnsureRoot<AccountId>;
-    type SelfLocation;
-    type SelfReserve;
-    type SovereignAccountDispatcherOrigin;
-    type Trader = (
-        UsingComponents<WeightToFee, BalancesPalletLocation, AccountId, Balances, ()>,
-        xcm_primitives::FirstAssetTrader<AssetType, AssetManager, XcmFeesToAccount>,
-    );
-    type Transactors;
-    type UniversalLocation;
-    type WeightToFee;
+    type SelfLocation = SelfLocation;
+    type SelfReserve = SelfReserve;
+    type SovereignAccountDispatcherOrigin = EnsureRoot<AccountId>;
+    type Trader = pallet_xcm_weight_trader::Trader<Runtime>;
+    type TransactorReserveProvider = AbsoluteAndRelativeReserve<SelfLocationAbsolute>;
+    type Transactors = Transactors;
+    type UniversalLocation = UniversalLocation;
+    type WeightToFee = WeightToFee;
     type XcmAdminOrigin = EnsureRoot<AccountId>;
-    type XcmFeesAccount;
+    type XcmFeesAccount = TreasuryAccount;
     type XcmOriginToTransactDispatchOrigin = XcmOriginToTransactDispatchOrigin;
-    type XcmSender;
-    type XcmWeigher;
+    type XcmSender = XcmRouter;
+    type XcmWeigher = XcmWeigher;
     type XcmpQueueControllerOrigin = EnsureRoot<AccountId>;
     type XcmpQueueMaxInboundSuspended = ConstU32<1000>;
+    type XtokensReserveProviders = ReserveProviders;
 }
 impl EvmConfig for OpenZeppelinRuntime {
     type AddressMapping = IdentityAddressMapping;

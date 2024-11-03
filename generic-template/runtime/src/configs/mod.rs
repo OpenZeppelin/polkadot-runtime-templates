@@ -134,8 +134,7 @@ impl XcmConfig for OpenZeppelinRuntime {
     type SelfLocation = SelfLocation;
     type SelfReserve = SelfReserve;
     type SovereignAccountDispatcherOrigin = EnsureRoot<AccountId>;
-    type Trader =
-        UsingComponents<WeightToFee, RelayLocation, AccountId, Balances, ToAuthor<Runtime>>;
+    type Trader = pallet_xcm_weight_trader::Trader<Runtime>;
     type TransactorReserveProvider = AbsoluteAndRelativeReserve<SelfLocationAbsolute>;
     type Transactors = Transactors;
     type UniversalLocation = UniversalLocation;

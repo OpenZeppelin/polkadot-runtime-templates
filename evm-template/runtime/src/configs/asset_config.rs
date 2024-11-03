@@ -10,7 +10,7 @@ use sp_std::{
 use xcm::latest::Location;
 
 use crate::{
-    types::{AssetId, Balance},
+    types::{AccountId, AssetId, Balance},
     AssetManager, Assets, Runtime, RuntimeCall, RuntimeOrigin,
 };
 

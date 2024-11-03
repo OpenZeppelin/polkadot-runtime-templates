@@ -27,26 +27,22 @@ use xcm_builder::{ConvertedConcreteId, PayOverXcm};
 use xcm_executor::traits::JustTry;
 use xcm_primitives::AsAssetType;
 
-pub use crate::{
+use crate::{
     configs::{
-        xcm_config::RelayLocation, FeeAssetId, StakingAdminBodyId, ToSiblingBaseDeliveryFee,
-        TransactionByteFee,
+        asset_config::AssetType,
+        xcm_config::{self, RelayLocation},
+        FeeAssetId, StakingAdminBodyId, ToSiblingBaseDeliveryFee, TransactionByteFee,
     },
+    constants::HOURS,
+    AssetManager, Assets,
+};
+pub use crate::{
     constants::{
         BLOCK_PROCESSING_VELOCITY, RELAY_CHAIN_SLOT_DURATION_MILLIS, UNINCLUDED_SEGMENT_CAPACITY,
         VERSION,
     },
     AllPalletsWithSystem, OpenZeppelinPrecompiles, Runtime, RuntimeBlockWeights, RuntimeCall,
     Treasury, XcmpQueue,
-};
-use crate::{
-    configs::{
-        xcm_config::{self, RelayLocation},
-        AssetType, FeeAssetId, StakingAdminBodyId, ToSiblingBaseDeliveryFee, TransactionByteFee,
-        TreasuryInteriorLocation,
-    },
-    constants::HOURS,
-    AssetManager, Assets,
 };
 
 /// Unchecked extrinsic type as expected by this runtime.
