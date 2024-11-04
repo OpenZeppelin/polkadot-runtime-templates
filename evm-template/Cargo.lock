@@ -6834,7 +6834,7 @@ dependencies = [
 
 [[package]]
 name = "openzeppelin-polkadot-wrappers"
-version = "0.0.1"
+version = "0.1.0"
 dependencies = [
  "cumulus-primitives-core",
  "frame-support",

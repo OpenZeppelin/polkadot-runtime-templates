@@ -374,13 +374,6 @@ parameter_types! {
     pub Erc20XcmBridgeTransferGasLimit: u64 = 800_000;
 }
 
-impl pallet_erc20_xcm_bridge::Config for Runtime {
-    type AccountIdConverter = LocationToH160;
-    type Erc20MultilocationPrefix = Erc20XcmBridgePalletLocation;
-    type Erc20TransferGasLimit = Erc20XcmBridgeTransferGasLimit;
-    type EvmRunner = pallet_evm::runner::stack::Runner<Self>;
-}
-
 /// The `DOTReserveProvider` overrides the default reserve location for DOT (Polkadot's native token).
 ///
 /// DOT can exist in multiple locations, and this provider ensures that the reserve is correctly set

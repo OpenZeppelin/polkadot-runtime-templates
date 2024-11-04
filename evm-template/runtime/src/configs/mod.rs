@@ -157,6 +157,7 @@ impl XcmConfig for OpenZeppelinRuntime {
 impl EvmConfig for OpenZeppelinRuntime {
     type AddressMapping = IdentityAddressMapping;
     type CallOrigin = EnsureAccountId20;
+    type Erc20XcmBridgeTransferGasLimit = Erc20XcmBridgeTransferGasLimit;
     type FindAuthor = FindAuthorSession<Aura>;
     type PrecompilesType = OpenZeppelinPrecompiles<Runtime>;
     type PrecompilesValue = PrecompilesValue;
