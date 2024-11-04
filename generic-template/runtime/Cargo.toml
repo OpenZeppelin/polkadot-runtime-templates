@@ -18,6 +18,7 @@ scale-info = { workspace = true, features = [ "derive" ] }
 smallvec = { workspace = true }
 
 openzeppelin-polkadot-wrappers = { workspace = true }
+openzeppelin-polkadot-wrappers-proc = { workspace = true }
 
 # Substrate
 frame-benchmarking = { workspace = true, optional = true }
@@ -255,7 +256,7 @@ try-runtime = [
 # to make it smaller, like logging for example.
 on-chain-release-build = [ "sp-api/disable-logging" ]
 
-async-backing = []
+async-backing = [ "openzeppelin-polkadot-wrappers-proc/async-backing" ]
 
 default = [ "std" ]
 

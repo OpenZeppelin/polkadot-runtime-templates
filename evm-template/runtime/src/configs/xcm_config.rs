@@ -28,9 +28,12 @@ use xcm_primitives::{
 };
 
 use crate::{
-    configs::{AssetType, ParachainSystem, Runtime, RuntimeCall, RuntimeOrigin, XcmpQueue},
+    configs::{
+        AssetType, Erc20XcmBridgePalletLocation, ParachainSystem, Runtime, RuntimeCall,
+        RuntimeOrigin, XcmpQueue,
+    },
     types::{AccountId, AssetId, Balance},
-    AssetManager, Assets, Balances, Erc20XcmBridge, ParachainInfo, Treasury,
+    AssetManager, Assets, Balances, ParachainInfo, Treasury,
 };
 
 parameter_types! {
@@ -356,22 +359,6 @@ impl ConvertLocation<H160> for LocationToH160 {
         <LocationToAccountId as ConvertLocation<AccountId>>::convert_location(location)
             .map(Into::into)
     }
-}
-
-parameter_types! {
-    // This is the relative view of erc20 assets.
-    // Identified by this prefix + AccountKey20(contractAddress)
-    // We use the RELATIVE multilocation
-    pub Erc20XcmBridgePalletLocation: Location = Location {
-        parents:0,
-        interior: [
-            PalletInstance(<Erc20XcmBridge as PalletInfoAccess>::index() as u8)
-        ].into()
-    };
-
-    // To be able to support almost all erc20 implementations,
-    // we provide a sufficiently high gas limit.
-    pub Erc20XcmBridgeTransferGasLimit: u64 = 800_000;
 }
 
 /// The `DOTReserveProvider` overrides the default reserve location for DOT (Polkadot's native token).

@@ -395,7 +395,9 @@ mod testing {
     /// AssetManager::set_asset_type_asset_id() and should NOT be used in any production code.
     impl From<Location> for CurrencyId {
         fn from(location: Location) -> CurrencyId {
-            use xcm_primitives::AssetTypeGetter;
+            use xcm_primitives::{AsAssetType, AssetTypeGetter};
+
+            use crate::{configs::asset_config::AssetType, AssetManager};
 
             // If it does not exist, for benchmarking purposes, we create the association
             let asset_id = if let Some(asset_id) =
