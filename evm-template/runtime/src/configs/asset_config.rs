@@ -1,8 +1,5 @@
-use frame_support::{
-    dispatch::GetDispatchInfo, parameter_types, traits::AsEnsureOriginWithArg, weights::Weight,
-};
-use frame_system::{EnsureRoot, EnsureSigned};
-use parity_scale_codec::{Compact, Decode, Encode};
+use frame_support::{dispatch::GetDispatchInfo, weights::Weight};
+use parity_scale_codec::{Decode, Encode};
 use scale_info::TypeInfo;
 use sp_core::{H160, H256};
 use sp_runtime::traits::Hash as THash;
@@ -13,20 +10,9 @@ use sp_std::{
 use xcm::latest::Location;
 
 use crate::{
-    constants::currency::{deposit, CENTS, MILLICENTS},
     types::{AccountId, AssetId, Balance},
-    weights, AssetManager, Assets, Balances, Runtime, RuntimeCall, RuntimeEvent, RuntimeOrigin,
+    AssetManager, Assets, Runtime, RuntimeCall, RuntimeOrigin,
 };
-
-parameter_types! {
-    pub const AssetDeposit: Balance = 10 * CENTS;
-    pub const AssetAccountDeposit: Balance = deposit(1, 16);
-    pub const ApprovalDeposit: Balance = MILLICENTS;
-    pub const StringLimit: u32 = 50;
-    pub const MetadataDepositBase: Balance = deposit(1, 68);
-    pub const MetadataDepositPerByte: Balance = deposit(0, 1);
-    pub const RemoveItemsLimit: u32 = 1000;
-}
 
 // Required for runtime benchmarks
 pallet_assets::runtime_benchmarks_enabled! {
@@ -39,31 +25,6 @@ pallet_assets::runtime_benchmarks_enabled! {
             (id as u128).into()
         }
     }
-}
-
-// Foreign assets
-impl pallet_assets::Config for Runtime {
-    type ApprovalDeposit = ApprovalDeposit;
-    type AssetAccountDeposit = AssetAccountDeposit;
-    type AssetDeposit = AssetDeposit;
-    type AssetId = AssetId;
-    type AssetIdParameter = Compact<AssetId>;
-    type Balance = Balance;
-    #[cfg(feature = "runtime-benchmarks")]
-    type BenchmarkHelper = BenchmarkHelper;
-    type CallbackHandle = ();
-    type CreateOrigin = AsEnsureOriginWithArg<EnsureSigned<AccountId>>;
-    type Currency = Balances;
-    type Extra = ();
-    type ForceOrigin = EnsureRoot<AccountId>;
-    type Freezer = ();
-    type MetadataDepositBase = MetadataDepositBase;
-    type MetadataDepositPerByte = MetadataDepositPerByte;
-    type RemoveItemsLimit = RemoveItemsLimit;
-    type RuntimeEvent = RuntimeEvent;
-    type StringLimit = StringLimit;
-    /// Rerun benchmarks if you are making changes to runtime configuration.
-    type WeightInfo = weights::pallet_assets::WeightInfo<Runtime>;
 }
 
 // Our AssetType. For now we only handle Xcm Assets
@@ -112,6 +73,14 @@ impl From<AssetType> for AssetId {
             }
         }
     }
+}
+
+#[derive(Clone, Default, Eq, Debug, PartialEq, Ord, PartialOrd, Encode, Decode, TypeInfo)]
+pub struct AssetRegistrarMetadata {
+    pub name: Vec<u8>,
+    pub symbol: Vec<u8>,
+    pub decimals: u8,
+    pub is_frozen: bool,
 }
 
 // We instruct how to register the Assets
@@ -163,26 +132,6 @@ impl pallet_asset_manager::AssetRegistrar<Runtime> for AssetRegistrar {
             .get_dispatch_info()
             .weight
     }
-}
-
-#[derive(Clone, Default, Eq, Debug, PartialEq, Ord, PartialOrd, Encode, Decode, TypeInfo)]
-pub struct AssetRegistrarMetadata {
-    pub name: Vec<u8>,
-    pub symbol: Vec<u8>,
-    pub decimals: u8,
-    pub is_frozen: bool,
-}
-
-impl pallet_asset_manager::Config for Runtime {
-    type AssetId = AssetId;
-    type AssetRegistrar = AssetRegistrar;
-    type AssetRegistrarMetadata = AssetRegistrarMetadata;
-    type Balance = Balance;
-    type ForeignAssetModifierOrigin = EnsureRoot<AccountId>;
-    type ForeignAssetType = AssetType;
-    type RuntimeEvent = RuntimeEvent;
-    /// Rerun benchmarks if you are making changes to runtime configuration.
-    type WeightInfo = weights::pallet_asset_manager::WeightInfo<Runtime>;
 }
 
 /// This trait ensure we can convert AccountIds to AssetIds.

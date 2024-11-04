@@ -17,6 +17,8 @@ parity-scale-codec = { workspace = true, features = [ "derive" ] }
 scale-info = { workspace = true, features = [ "derive" ] }
 smallvec = { workspace = true }
 
+openzeppelin-polkadot-wrappers = { workspace = true }
+
 # Substrate
 frame-benchmarking = { workspace = true, optional = true }
 frame-executive = { workspace = true }
@@ -141,6 +143,7 @@ std = [
 	"frame-system/std",
 	"frame-try-runtime?/std",
 	"log/std",
+	"openzeppelin-polkadot-wrappers/std",
 	"orml-xtokens/std",
 	"pallet-asset-manager/std",
 	"pallet-assets/std",

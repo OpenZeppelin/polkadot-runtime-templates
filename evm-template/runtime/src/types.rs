@@ -1,31 +1,44 @@
 use fp_account::EthereumSignature;
-use frame_support::traits::EitherOfDiverse;
+use frame_support::{
+    parameter_types,
+    traits::{EitherOfDiverse, InstanceFilter},
+    weights::Weight,
+    PalletId,
+};
 use frame_system::EnsureRoot;
 use pallet_xcm::{EnsureXcm, IsVoiceOfBody};
+use parity_scale_codec::{Decode, Encode, MaxEncodedLen};
 use polkadot_runtime_common::impls::{
     LocatableAssetConverter, VersionedLocatableAsset, VersionedLocationConverter,
 };
+use scale_info::TypeInfo;
 use sp_core::ConstU32;
 use sp_runtime::{
     generic,
     traits::{BlakeTwo256, IdentifyAccount, Verify},
+    Perbill, RuntimeDebug,
 };
-use xcm::VersionedLocation;
+use sp_version::RuntimeVersion;
+use xcm::{
+    latest::{InteriorLocation, Junction::PalletInstance},
+    VersionedLocation,
+};
 use xcm_builder::PayOverXcm;
 
 use crate::{
-    configs::{xcm_config, TreasuryInteriorLocation},
+    configs::{
+        xcm_config::{self, RelayLocation},
+        FeeAssetId, StakingAdminBodyId, ToSiblingBaseDeliveryFee, TransactionByteFee,
+    },
     constants::HOURS,
 };
 pub use crate::{
-    configs::{
-        xcm_config::RelayLocation, FeeAssetId, StakingAdminBodyId, ToSiblingBaseDeliveryFee,
-        TransactionByteFee,
-    },
     constants::{
         BLOCK_PROCESSING_VELOCITY, RELAY_CHAIN_SLOT_DURATION_MILLIS, UNINCLUDED_SEGMENT_CAPACITY,
+        VERSION,
     },
-    AllPalletsWithSystem, Runtime, RuntimeCall, XcmpQueue,
+    AllPalletsWithSystem, OpenZeppelinPrecompiles, Runtime, RuntimeBlockWeights, RuntimeCall,
+    Treasury, XcmpQueue,
 };
 
 /// Unchecked extrinsic type as expected by this runtime.
@@ -123,3 +136,60 @@ pub type TreasuryPaymaster = PayOverXcm<
     LocatableAssetConverter,
     VersionedLocationConverter,
 >;
+
+/// The type used to represent the kinds of proxying allowed.
+/// If you are adding new pallets, consider adding new ProxyType variant
+#[derive(
+    Copy,
+    Clone,
+    Decode,
+    Default,
+    Encode,
+    Eq,
+    MaxEncodedLen,
+    Ord,
+    PartialEq,
+    PartialOrd,
+    RuntimeDebug,
+    TypeInfo,
+)]
+pub enum ProxyType {
+    /// Allows to proxy all calls
+    #[default]
+    Any,
+    /// Allows all non-transfer calls
+    NonTransfer,
+    /// Allows to finish the proxy
+    CancelProxy,
+    /// Allows to operate with collators list (invulnerables, candidates, etc.)
+    Collator,
+}
+
+impl InstanceFilter<RuntimeCall> for ProxyType {
+    fn filter(&self, c: &RuntimeCall) -> bool {
+        match self {
+            ProxyType::Any => true,
+            ProxyType::NonTransfer => !matches!(c, RuntimeCall::Balances { .. }),
+            ProxyType::CancelProxy => matches!(
+                c,
+                RuntimeCall::Proxy(pallet_proxy::Call::reject_announcement { .. })
+                    | RuntimeCall::Multisig { .. }
+            ),
+            ProxyType::Collator => {
+                matches!(c, RuntimeCall::CollatorSelection { .. } | RuntimeCall::Multisig { .. })
+            }
+        }
+    }
+}
+
+// Getter types used in OpenZeppelinRuntime configuration
+parameter_types! {
+    pub const Version: RuntimeVersion = VERSION;
+    pub const TreasuryPalletId: PalletId = PalletId(*b"py/trsry");
+    pub TreasuryAccount: AccountId = Treasury::account_id();
+    // The asset's interior location for the paying account. This is the Treasury
+    // pallet instance (which sits at index 13).
+    pub TreasuryInteriorLocation: InteriorLocation = PalletInstance(13).into();
+    pub MessageQueueServiceWeight: Weight = Perbill::from_percent(35) * RuntimeBlockWeights::get().max_block;
+    pub PrecompilesValue: OpenZeppelinPrecompiles<Runtime> = OpenZeppelinPrecompiles::<_>::new();
+}

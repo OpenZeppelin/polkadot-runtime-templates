@@ -3635,6 +3635,7 @@ dependencies = [
  "frame-try-runtime",
  "hex-literal",
  "log",
+ "openzeppelin-polkadot-wrappers",
  "orml-traits",
  "orml-xcm-support",
  "orml-xtokens",
@@ -6342,6 +6343,18 @@ dependencies = [
  "openssl-src",
  "pkg-config",
  "vcpkg",
+]
+
+[[package]]
+name = "openzeppelin-polkadot-wrappers"
+version = "0.1.0"
+source = "git+http://github.com/openzeppelin/polkadot-runtime-wrappers?tag=v0.1-rc1#92a8d332b70202b5699106aefb6a42fe1b896794"
+dependencies = [
+ "cumulus-primitives-core",
+ "frame-support",
+ "scale-info",
+ "sp-std",
+ "sp-version",
 ]
 
 [[package]]
