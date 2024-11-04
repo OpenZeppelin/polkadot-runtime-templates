@@ -245,7 +245,6 @@ impl_runtime_apis! {
                     System::assert_last_event(cumulus_pallet_parachain_system::Event::<Runtime>::ValidationFunctionStored.into());
                 }
             }
-
             parameter_types! {
                 pub const RandomParaId: ParaId = ParaId::new(43211234);
                 pub ExistentialDepositAsset: Option<Asset> = Some((
@@ -254,6 +253,7 @@ impl_runtime_apis! {
                 ).into());
                 /// The base fee for the message delivery fees. Kusama is based for the reference.
                 pub const ToParentBaseDeliveryFee: u128 = CENTS.saturating_mul(3);
+                pub const InitialTransferAssetAmount: u128 = 4001070000100;
             }
             pub type PriceForParentDelivery = polkadot_runtime_common::xcm_sender::ExponentialPrice<
                 FeeAssetId,
@@ -282,6 +282,30 @@ impl_runtime_apis! {
 
                 fn reserve_transferable_asset_and_dest() -> Option<(Asset, Location)> {
                     use frame_support::traits::PalletInfoAccess;
+                    use xcm_primitives::AssetTypeGetter;
+                    use frame_system::RawOrigin;
+
+                    // set up fee asset
+                    let fee_location = RelayLocation::get();
+                    let who: AccountId = frame_benchmarking::whitelisted_caller();
+
+                    let Some(location_v3) = xcm::v3::Location::try_from(fee_location.clone()).ok() else {
+                        return None;
+                    };
+                    let asset_type = AssetType::Xcm(location_v3);
+
+                    let local_asset_id: crate::types::AssetId = asset_type.clone().into();
+                    let manager_id = AssetManager::account_id();
+                    let _ = Assets::force_create(RuntimeOrigin::root(), local_asset_id.clone().into(), Address::from(manager_id.clone()), true, 1);
+                    let _ = Assets::mint(
+                        RawOrigin::Signed(manager_id.clone()).into(),
+                        local_asset_id.into(),
+                        Address::from(who),
+                        InitialTransferAssetAmount::get(),
+                    );
+                    AssetManager::set_asset_type_asset_id(asset_type.clone(), local_asset_id.into());
+
+                    // open a mock parachain channel
                     ParachainSystem::open_outbound_hrmp_channel_for_benchmarks_or_tests(
                         RandomParaId::get().into()
                     );
@@ -289,23 +313,34 @@ impl_runtime_apis! {
                     let who = frame_benchmarking::whitelisted_caller();
                     let _ =
                         <Balances as frame_support::traits::Currency<_>>::make_free_balance_be(&who, balance);
-
-                    let asset_amount: u128 = 10u128;
-                    let initial_asset_amount: u128 = asset_amount * 10;
-
+                    // set up transfer asset
+                    let initial_asset_amount: u128 = InitialTransferAssetAmount::get();
                     let (asset_id, _, _) = pallet_assets::benchmarking::create_default_minted_asset::<
                         Runtime,
                         ()
                     >(true, initial_asset_amount);
 
-                    let asset_id_u32: u32 = asset_id.into();
+                    let local_asset_id: u32 = asset_id.into();
+                    let asset_id_u128: u128 = local_asset_id.into();
+                    let self_reserve = Location {
+                        parents: 0,
+                        interior: [
+                            PalletInstance(<Assets as PalletInfoAccess>::index() as u8), GeneralIndex(asset_id_u128)
+                        ].into()
+                    };
 
-                    let location = Location {parents: 0, interior: (PalletInstance(<Assets as PalletInfoAccess>::index() as u8), GeneralIndex(asset_id_u32 as u128)).into()};
+                    let Some(location_v3) = xcm::v3::Location::try_from(self_reserve.clone()).ok() else {
+                        return None;
+                    };
+                    let asset_type = AssetType::Xcm(location_v3);
+                    AssetManager::set_asset_type_asset_id(asset_type.clone(), local_asset_id);
+
+                    let asset = Asset {
+                        fun: Fungible(ExistentialDeposit::get()),
+                        id: AssetId(self_reserve.into())
+                    }.into();
                     Some((
-                        Asset {
-                            fun: Fungible(ExistentialDeposit::get()),
-                            id: AssetId(location.into())
-                        }.into(),
+                        asset,
                         ParentThen(Parachain(RandomParaId::get().into()).into()).into(),
                     ))
                 }
@@ -313,55 +348,70 @@ impl_runtime_apis! {
                 fn set_up_complex_asset_transfer(
                 ) -> Option<(AssetList, u32, Location, Box<dyn FnOnce()>)> {
                     use frame_support::traits::PalletInfoAccess;
+                    use xcm_primitives::AssetTypeGetter;
                     // set up local asset
-                    let asset_amount: u128 = 10u128;
                     let initial_asset_amount: u128 = 1000000011;
+
                     let (asset_id, _, _) = pallet_assets::benchmarking::create_default_minted_asset::<
                         Runtime,
                         ()
                     >(true, initial_asset_amount);
-                    let asset_id_u32: u32 = asset_id.into();
+
+                    let local_asset_id: u32 = asset_id.into();
+                    let asset_id_u128: u128 = local_asset_id.into();
 
                     let self_reserve = Location {
                         parents:0,
                         interior: [
-                            PalletInstance(<Assets as PalletInfoAccess>::index() as u8), GeneralIndex(asset_id_u32 as u128)
+                            PalletInstance(<Assets as PalletInfoAccess>::index() as u8), GeneralIndex(asset_id_u128)
                         ].into()
                     };
 
+                    let Some(location_v3) = xcm::v3::Location::try_from(self_reserve.clone()).ok() else {
+                        return None;
+                    };
+                    let asset_type = AssetType::Xcm(location_v3);
+                    AssetManager::set_asset_type_asset_id(asset_type.clone(), local_asset_id);
+
                     let destination: xcm::v4::Location = Parent.into();
 
+                    // set up fee asset
                     let fee_amount: u128 = <Runtime as pallet_balances::Config>::ExistentialDeposit::get();
+                    let asset_amount: u128 = 10;
                     let fee_asset: Asset = (self_reserve.clone(), fee_amount).into();
-
-                    // Give some multiple of transferred amount
-                    let balance = fee_amount * 1000;
-                    let who = frame_benchmarking::whitelisted_caller();
-                    let _ =
-                        <Balances as frame_support::traits::Currency<_>>::make_free_balance_be(&who, balance);
-
-                    // verify initial balance
-                    assert_eq!(Balances::free_balance(&who), balance);
                     let transfer_asset: Asset = (self_reserve.clone(), asset_amount).into();
 
                     let assets: cumulus_primitives_core::Assets = vec![fee_asset.clone(), transfer_asset].into();
                     let fee_index: u32 = 0;
 
+                    let who = frame_benchmarking::whitelisted_caller();
+
                     let verify: Box<dyn FnOnce()> = Box::new(move || {
                         // verify balance after transfer, decreased by
                         // transferred amount (and delivery fees)
-                        assert!(Assets::balance(asset_id_u32, &who) <= initial_asset_amount - fee_amount);
+                        assert!(Assets::balance(local_asset_id, &who) <= initial_asset_amount - fee_amount);
                     });
 
                     Some((assets, fee_index, destination, verify))
                 }
 
                 fn get_asset() -> Asset {
-                    use frame_support::traits::PalletInfoAccess;
-                    Asset {
-                        id: AssetId((Location {parents: 0, interior: (PalletInstance(<Assets as PalletInfoAccess>::index() as u8), GeneralIndex(1)).into()}).into()),
+                    use xcm_primitives::AssetTypeGetter;
+                    let location = Location::parent();
+                    let asset_id = AssetId(location.clone());
+                    let asset = Asset {
+                        id: asset_id.clone(),
                         fun: Fungible(ExistentialDeposit::get()),
-                    }
+                    };
+                    let Some(location_v3) = xcm::v3::Location::try_from(location).ok() else {
+                        return asset;
+                    };
+                    let asset_type = AssetType::Xcm(location_v3);
+                    let local_asset_id: crate::types::AssetId = asset_type.clone().into();
+                    let manager_id = AssetManager::account_id();
+                    let _ = Assets::force_create(RuntimeOrigin::root(), local_asset_id.clone().into(), Address::from(manager_id), true, 1);
+                    AssetManager::set_asset_type_asset_id(asset_type.clone(), local_asset_id);
+                    asset
                 }
             }
 
