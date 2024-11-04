@@ -72,7 +72,7 @@ use crate::{
     },
     weights::{self, BlockExecutionWeight, ExtrinsicBaseWeight, RocksDbWeight},
     AllPalletsWithSystem, AssetManager, Aura, Balances, BaseFee, CollatorSelection, EVMChainId,
-    MessageQueue, OpenZeppelinPrecompiles, OriginCaller, PalletInfo, ParachainInfo,
+    Erc20XcmBridge, MessageQueue, OpenZeppelinPrecompiles, OriginCaller, PalletInfo, ParachainInfo,
     ParachainSystem, PolkadotXcm, Preimage, Referenda, Runtime, RuntimeCall, RuntimeEvent,
     RuntimeFreezeReason, RuntimeHoldReason, RuntimeOrigin, RuntimeTask, Scheduler, Session,
     SessionKeys, System, Timestamp, Treasury, UncheckedExtrinsic, WeightToFee, XcmpQueue,
@@ -159,6 +159,7 @@ impl EvmConfig for OpenZeppelinRuntime {
     type CallOrigin = EnsureAccountId20;
     type Erc20XcmBridgeTransferGasLimit = Erc20XcmBridgeTransferGasLimit;
     type FindAuthor = FindAuthorSession<Aura>;
+    type LocationToH160 = LocationToH160;
     type PrecompilesType = OpenZeppelinPrecompiles<Runtime>;
     type PrecompilesValue = PrecompilesValue;
     type WithdrawOrigin = EnsureAccountId20;
