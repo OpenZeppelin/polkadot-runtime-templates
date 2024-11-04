@@ -5,7 +5,7 @@ use crate::constants::currency::{CENTS, EXISTENTIAL_DEPOSIT};
 #[cfg(not(feature = "async-backing"))]
 use crate::Aura;
 #[cfg(feature = "async-backing")]
-use crate::{constants::SLOT_DURATION, types::ConsensusHook};
+use crate::{constants::SLOT_DURATION, types::ConsensusHook, configs::XcmExecutorConfig};
 use crate::{
     constants::VERSION,
     types::{AccountId, Balance, Block, Executive, Nonce},
@@ -53,8 +53,6 @@ mod apis {
 
     #[abstraction]
     mod benchmarks {
-        use crate::configs::XcmExecutorConfig;
-
         type AllPalletsWithSystem = AllPalletsWithSystem;
         type Assets = Assets;
         type AssetManager = AssetManager;
