@@ -22,6 +22,7 @@ frame_benchmarking::define_benchmarks!(
     [pallet_whitelist, Whitelist]
     [pallet_referenda, Referenda]
     [pallet_xcm_transactor, XcmTransactor]
+    [pallet_xcm_weight_trader, XcmWeightTrader]
 );
 
 use cumulus_primitives_core::{ChannelStatus, GetChannelInfo};
