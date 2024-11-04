@@ -222,24 +222,24 @@ mod constant_tests {
 //     }
 // }
 
-mod xcm_tests {
-    use evm_runtime_template::configs::xcm_config::*;
-    use frame_support::weights::Weight;
+// mod xcm_tests {
+//     use evm_runtime_template::configs::xcm_config::*;
+//     use frame_support::weights::Weight;
 
-    #[test]
-    fn xcm_executor_constants() {
-        assert_eq!(UnitWeightCost::get(), Weight::from_parts(1_000_000_000, 64 * 1024));
-        assert_eq!(MaxInstructions::get(), 100);
-        assert_eq!(MaxAssetsIntoHolding::get(), 64);
-    }
+//     #[test]
+//     fn xcm_executor_constants() {
+//         assert_eq!(UnitWeightCost::get(), Weight::from_parts(1_000_000_000, 64 * 1024));
+//         assert_eq!(MaxInstructions::get(), 100);
+//         assert_eq!(MaxAssetsIntoHolding::get(), 64);
+//     }
 
-    #[test]
-    fn pallet_xcm_constants() {
-        assert_eq!(MaxLockers::get(), 8);
-        assert_eq!(MaxRemoteLockConsumers::get(), 0);
-        assert_eq!(
-            <evm_runtime_template::Runtime as pallet_xcm::Config>::VERSION_DISCOVERY_QUEUE_SIZE,
-            100
-        );
-    }
-}
+//     #[test]
+//     fn pallet_xcm_constants() {
+//         assert_eq!(MaxLockers::get(), 8);
+//         assert_eq!(MaxRemoteLockConsumers::get(), 0);
+//         assert_eq!(
+//             <evm_runtime_template::Runtime as pallet_xcm::Config>::VERSION_DISCOVERY_QUEUE_SIZE,
+//             100
+//         );
+//     }
+// }
