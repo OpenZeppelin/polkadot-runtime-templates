@@ -21,11 +21,11 @@ mod constant_tests {
 mod runtime_tests {
     use frame_support::{pallet_prelude::Weight, traits::TypedGet, PalletId};
     use generic_runtime_template::{
-        configs::{asset_config::*, *},
+        configs,
         constants::{currency::*, *},
-        *,
+        BlockNumber, Runtime,
     };
-    use sp_runtime::create_runtime_str;
+    use sp_runtime::{create_runtime_str, Perbill};
     use sp_version::RuntimeVersion;
     use xcm::latest::prelude::BodyId;
 
@@ -102,100 +102,126 @@ mod runtime_tests {
 
         assert_eq!(MAX_BLOCK_LENGTH, 5 * 1024 * 1024);
 
-        assert_eq!(SS58Prefix::get(), 42);
+        assert_eq!(<Runtime as frame_system::Config>::SS58Prefix::get(), 42);
 
         assert_eq!(<Runtime as frame_system::Config>::MaxConsumers::get(), 16);
     }
 
     #[test]
     fn proxy_constants() {
-        assert_eq!(MaxProxies::get(), 32);
+        assert_eq!(<Runtime as pallet_proxy::Config>::MaxProxies::get(), 32);
 
-        assert_eq!(MaxPending::get(), 32);
+        assert_eq!(<Runtime as pallet_proxy::Config>::MaxPending::get(), 32);
 
-        assert_eq!(ProxyDepositBase::get(), deposit(1, 40));
+        assert_eq!(<Runtime as pallet_proxy::Config>::ProxyDepositBase::get(), deposit(1, 40));
 
-        assert_eq!(AnnouncementDepositBase::get(), deposit(1, 48));
+        assert_eq!(
+            <Runtime as pallet_proxy::Config>::AnnouncementDepositBase::get(),
+            deposit(1, 48)
+        );
 
-        assert_eq!(ProxyDepositFactor::get(), deposit(0, 33));
+        assert_eq!(<Runtime as pallet_proxy::Config>::ProxyDepositFactor::get(), deposit(0, 33));
 
-        assert_eq!(AnnouncementDepositFactor::get(), deposit(0, 66));
+        assert_eq!(
+            <Runtime as pallet_proxy::Config>::AnnouncementDepositFactor::get(),
+            deposit(0, 66)
+        );
     }
 
     #[test]
     fn balances_constants() {
-        assert_eq!(MaxFreezes::get(), 0);
+        assert_eq!(<Runtime as pallet_balances::Config>::MaxFreezes::get(), 0);
 
-        assert_eq!(MaxLocks::get(), 50);
+        assert_eq!(<Runtime as pallet_balances::Config>::MaxLocks::get(), 50);
 
-        assert_eq!(MaxReserves::get(), 50);
+        assert_eq!(<Runtime as pallet_balances::Config>::MaxReserves::get(), 50);
     }
 
     #[test]
     fn assets_constants() {
-        assert_eq!(AssetDeposit::get(), 10 * CENTS);
+        assert_eq!(<Runtime as pallet_assets::Config>::AssetDeposit::get(), 10 * CENTS);
 
-        assert_eq!(AssetAccountDeposit::get(), deposit(1, 16));
+        // TODO: uncomment once patch is merged and updated RC is released and pointed to in deps
+        //assert_eq!(<Runtime as pallet_assets::Config>::AssetAccountDeposit::get(), deposit(1, 16));
+        assert_eq!(
+            <Runtime as pallet_assets::Config>::AssetAccountDeposit::get(),
+            EXISTENTIAL_DEPOSIT
+        );
 
-        assert_eq!(ApprovalDeposit::get(), EXISTENTIAL_DEPOSIT);
+        assert_eq!(<Runtime as pallet_assets::Config>::ApprovalDeposit::get(), EXISTENTIAL_DEPOSIT);
 
-        assert_eq!(StringLimit::get(), 50);
+        assert_eq!(<Runtime as pallet_assets::Config>::StringLimit::get(), 50);
 
-        assert_eq!(MetadataDepositBase::get(), deposit(1, 68));
+        assert_eq!(<Runtime as pallet_assets::Config>::MetadataDepositBase::get(), deposit(1, 68));
 
-        assert_eq!(MetadataDepositPerByte::get(), deposit(0, 1));
+        assert_eq!(
+            <Runtime as pallet_assets::Config>::MetadataDepositPerByte::get(),
+            deposit(0, 1)
+        );
 
-        assert_eq!(RemoveItemsLimit::get(), 1000);
+        assert_eq!(<Runtime as pallet_assets::Config>::RemoveItemsLimit::get(), 1000);
     }
 
     #[test]
     fn transaction_payment_constants() {
-        assert_eq!(TransactionByteFee::get(), 10 * MICROCENTS);
+        assert_eq!(configs::TransactionByteFee::get(), 10 * MICROCENTS);
 
-        assert_eq!(OperationalFeeMultiplier::get(), 5);
+        assert_eq!(
+            <Runtime as pallet_transaction_payment::Config>::OperationalFeeMultiplier::get(),
+            5
+        );
     }
 
     #[test]
     fn cumulus_pallet_parachain_system_constants() {
-        assert_eq!(ReservedXcmpWeight::get(), MAXIMUM_BLOCK_WEIGHT.saturating_div(4));
+        assert_eq!(
+            <Runtime as cumulus_pallet_parachain_system::Config>::ReservedXcmpWeight::get(),
+            MAXIMUM_BLOCK_WEIGHT.saturating_div(4)
+        );
 
-        assert_eq!(ReservedDmpWeight::get(), MAXIMUM_BLOCK_WEIGHT.saturating_div(4));
+        assert_eq!(
+            <Runtime as cumulus_pallet_parachain_system::Config>::ReservedDmpWeight::get(),
+            MAXIMUM_BLOCK_WEIGHT.saturating_div(4)
+        );
     }
 
     #[test]
     fn message_queue_constants() {
-        assert_eq!(HeapSize::get(), 64 * 1024);
-        assert_eq!(MaxStale::get(), 8);
+        assert_eq!(<Runtime as pallet_message_queue::Config>::HeapSize::get(), 64 * 1024);
+        assert_eq!(<Runtime as pallet_message_queue::Config>::MaxStale::get(), 8);
     }
 
     #[test]
     fn cumulus_pallet_xcmp_queue_constants() {
-        assert_eq!(MaxInboundSuspended::get(), 1000);
+        assert_eq!(
+            <Runtime as cumulus_pallet_xcmp_queue::Config>::MaxInboundSuspended::get(),
+            1000
+        );
     }
 
     #[test]
     fn multisig_constants() {
-        assert_eq!(DepositBase::get(), deposit(1, 88));
+        assert_eq!(<Runtime as pallet_multisig::Config>::DepositBase::get(), deposit(1, 88));
 
-        assert_eq!(DepositFactor::get(), deposit(0, 32));
+        assert_eq!(<Runtime as pallet_multisig::Config>::DepositFactor::get(), deposit(0, 32));
 
-        assert_eq!(MaxSignatories::get(), 100);
+        assert_eq!(<Runtime as pallet_multisig::Config>::MaxSignatories::get(), 100);
     }
 
     #[test]
     fn session_constants() {
-        assert_eq!(Period::get(), 6 * HOURS);
+        assert_eq!(configs::Period::get(), 6 * HOURS);
 
-        assert_eq!(Offset::get(), 0);
+        assert_eq!(configs::Offset::get(), 0);
     }
 
     #[test]
     #[allow(clippy::assertions_on_constants)]
     fn aura_constants() {
         #[cfg(not(feature = "async-backing"))]
-        assert!(!AllowMultipleBlocksPerSlot::get());
+        assert!(!<Runtime as pallet_aura::Config>::AllowMultipleBlocksPerSlot::get());
         #[cfg(feature = "async-backing")]
-        assert!(AllowMultipleBlocksPerSlot::get());
+        assert!(<Runtime as pallet_aura::Config>::AllowMultipleBlocksPerSlot::get());
 
         assert_eq!(<Runtime as pallet_aura::Config>::MaxAuthorities::get(), 100_000);
     }
@@ -206,11 +232,14 @@ mod runtime_tests {
             core::str::from_utf8(&id.0).unwrap_or_default().to_string()
         };
 
-        assert_eq!(pallet_id_to_string(PotId::get()), pallet_id_to_string(PalletId(*b"PotStake")));
+        assert_eq!(
+            pallet_id_to_string(<Runtime as pallet_collator_selection::Config>::PotId::get()),
+            pallet_id_to_string(PalletId(*b"PotStake"))
+        );
 
-        assert_eq!(SessionLength::get(), 6 * HOURS);
+        assert_eq!(configs::Period::get(), 6 * HOURS);
 
-        assert_eq!(StakingAdminBodyId::get(), BodyId::Defense);
+        assert_eq!(configs::StakingAdminBodyId::get(), BodyId::Defense);
 
         assert_eq!(<Runtime as pallet_collator_selection::Config>::MaxCandidates::get(), 100);
 
@@ -222,22 +251,19 @@ mod runtime_tests {
 
 mod xcm_tests {
     use frame_support::weights::Weight;
-    use generic_runtime_template::configs::*;
+    use generic_runtime_template::{configs, Runtime};
 
     #[test]
     fn xcm_executor_constants() {
-        assert_eq!(UnitWeightCost::get(), Weight::from_parts(1_000_000_000, 64 * 1024));
-        assert_eq!(MaxInstructions::get(), 100);
-        assert_eq!(MaxAssetsIntoHolding::get(), 64);
+        assert_eq!(configs::UnitWeightCost::get(), Weight::from_parts(1_000_000_000, 64 * 1024));
+        assert_eq!(configs::MaxInstructions::get(), 100);
+        assert_eq!(configs::MaxAssetsIntoHolding::get(), 64);
     }
 
     #[test]
     fn pallet_xcm_constants() {
-        assert_eq!(MaxLockers::get(), 8);
-        assert_eq!(MaxRemoteLockConsumers::get(), 0);
-        assert_eq!(
-            <generic_runtime_template::Runtime as pallet_xcm::Config>::VERSION_DISCOVERY_QUEUE_SIZE,
-            100
-        );
+        assert_eq!(<Runtime as pallet_xcm::Config>::MaxLockers::get(), 8);
+        assert_eq!(<Runtime as pallet_xcm::Config>::MaxRemoteLockConsumers::get(), 0);
+        assert_eq!(<Runtime as pallet_xcm::Config>::VERSION_DISCOVERY_QUEUE_SIZE, 100);
     }
 }
