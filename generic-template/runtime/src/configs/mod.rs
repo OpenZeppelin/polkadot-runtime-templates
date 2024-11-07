@@ -95,9 +95,15 @@ impl SystemConfig for OpenZeppelinRuntime {
     type ProxyType = ProxyType;
     type SS58Prefix = ConstU16<42>;
     type ScheduleOrigin = EnsureRoot<AccountId>;
+    #[cfg(feature = "tanssi")]
     type OnTimestampSet = ();
+    #[cfg(not(feature = "tanssi"))]
+    type OnTimestampSet = Aura;
     type Version = Version;
+    #[cfg(feature = "tanssi")]
     type ConsensusHook = ExpectParentIncluded;
+    #[cfg(not(feature = "tanssi"))]
+    type ConsensusHook = ConsensusHook;
 }
 #[cfg(not(feature = "tanssi"))]
 impl ConsensusConfig for OpenZeppelinRuntime {

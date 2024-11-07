@@ -120,7 +120,7 @@ pub type PriceForSiblingParachainDelivery = polkadot_runtime_common::xcm_sender:
 >;
 
 /// Configures the number of blocks that can be created without submission of validity proof to the relay chain
-#[cfg(all(not(feature = "tanssi"), feature = "async-backing"))]
+#[cfg(not(feature = "tanssi"))]
 pub type ConsensusHook = cumulus_pallet_aura_ext::FixedVelocityConsensusHook<
     Runtime,
     RELAY_CHAIN_SLOT_DURATION_MILLIS,
