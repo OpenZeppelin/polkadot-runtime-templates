@@ -3703,6 +3703,7 @@ dependencies = [
  "parity-scale-codec",
  "polkadot-parachain-primitives",
  "polkadot-runtime-common",
+ "polkadot-runtime-parachains",
  "scale-info",
  "smallvec",
  "sp-api",
@@ -3725,6 +3726,7 @@ dependencies = [
  "staging-xcm-executor",
  "substrate-wasm-builder",
  "xcm-primitives",
+ "xcm-simulator",
 ]
 
 [[package]]
@@ -15306,6 +15308,28 @@ dependencies = [
  "sp-api",
  "sp-weights",
  "staging-xcm",
+ "staging-xcm-executor",
+]
+
+[[package]]
+name = "xcm-simulator"
+version = "16.0.0"
+source = "git+https://github.com/paritytech/polkadot-sdk?tag=polkadot-stable2407-1#16b0fd09d9e9281c20ee0c1d8b87d011e3e3454e"
+dependencies = [
+ "frame-support",
+ "frame-system",
+ "parity-scale-codec",
+ "paste",
+ "polkadot-core-primitives",
+ "polkadot-parachain-primitives",
+ "polkadot-primitives",
+ "polkadot-runtime-parachains",
+ "scale-info",
+ "sp-io",
+ "sp-runtime",
+ "sp-std",
+ "staging-xcm",
+ "staging-xcm-builder",
  "staging-xcm-executor",
 ]
 

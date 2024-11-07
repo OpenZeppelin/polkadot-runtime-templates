@@ -98,6 +98,8 @@ orml-xtokens = { workspace = true }
 
 [dev-dependencies]
 sp-io = { workspace = true }
+xcm-simulator = { workspace = true }
+polkadot-runtime-parachains = { workspace = true }
 
 [build-dependencies]
 substrate-wasm-builder = { workspace = true }
