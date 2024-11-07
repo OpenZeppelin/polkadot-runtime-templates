@@ -9,8 +9,8 @@ use crate::{configs::XcmExecutorConfig, constants::SLOT_DURATION, types::Consens
 use crate::{
     constants::VERSION,
     types::{AccountId, Balance, Block, Executive, Nonce},
-    InherentDataExt, ParachainSystem, Runtime, RuntimeCall, RuntimeGenesisConfig, SessionKeys,
-    System, TransactionPayment,
+    InherentDataExt, ParachainSystem, Runtime, RuntimeBlockWeights, RuntimeCall,
+    RuntimeGenesisConfig, SessionKeys, System, TransactionPayment,
 };
 
 #[cfg(feature = "runtime-benchmarks")]
