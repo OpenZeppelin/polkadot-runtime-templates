@@ -19,7 +19,7 @@ cd generic-template
 cargo build --release
 ```
 
-* Receive some `PSO` from the link:https://paritytech.github.io/polkadot-testnet-faucet/[Paseo faucet]
+* Receive some `PAS` from the link:https://paritytech.github.io/polkadot-testnet-faucet/[Paseo faucet]
 
 * Reserve a ParaId on Paseo:
 
