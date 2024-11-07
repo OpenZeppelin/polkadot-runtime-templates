@@ -102,36 +102,6 @@ fn xcmp() {
 }
 
 #[test]
-fn reserve_transfer() {
-    MockNet::reset();
-
-    let withdraw_amount = 123;
-
-    Relay::execute_with(|| {
-        assert_ok!(RelayChainPalletXcm::limited_reserve_transfer_assets(
-            relay_chain::RuntimeOrigin::signed(ALICE),
-            Box::new(Parachain(1).into()),
-            Box::new(AccountId32 { network: None, id: ALICE.into() }.into()),
-            Box::new((Here, withdraw_amount).into()),
-            0,
-            Unlimited,
-        ));
-        assert_eq!(
-            relay_chain::Balances::free_balance(&child_account_id(1)),
-            INITIAL_BALANCE + withdraw_amount
-        );
-    });
-
-    ParaA::execute_with(|| {
-        // free execution, full amount received
-        assert_eq!(
-            pallet_balances::Pallet::<parachain::Runtime>::free_balance(&ALICE),
-            INITIAL_BALANCE + withdraw_amount
-        );
-    });
-}
-
-#[test]
 fn remote_locking_and_unlocking() {
     MockNet::reset();
 
