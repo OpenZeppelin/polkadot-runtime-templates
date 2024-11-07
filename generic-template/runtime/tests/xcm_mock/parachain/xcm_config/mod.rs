@@ -28,7 +28,6 @@ impl xcm_executor::Config for XcmConfig {
     type HrmpChannelClosingHandler = ();
     type HrmpNewChannelOpenRequestHandler = ();
     type IsReserve = ();
-    // TODO like runtime
     type IsTeleporter = ();
     type MaxAssetsIntoHolding = constants::MaxAssetsIntoHolding;
     type MessageExporter = ();
@@ -41,7 +40,6 @@ impl xcm_executor::Config for XcmConfig {
     type Trader = FixedRateOfFungible<constants::KsmPerSecondPerByte, ()>;
     type TransactionalProcessor = FrameTransactionalProcessor;
     type UniversalAliases = Nothing;
-    // TODO like runtime
     type UniversalLocation = constants::UniversalLocation;
     type Weigher = weigher::Weigher;
     type XcmRecorder = PolkadotXcm;
