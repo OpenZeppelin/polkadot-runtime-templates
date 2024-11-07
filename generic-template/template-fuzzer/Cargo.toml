@@ -45,6 +45,7 @@ cumulus-test-relay-sproof-builder = { workspace = true }
 
 [features]
 default = [ "std", "try-runtime" ]
+tanssi = []
 std = [
 	"frame-support/std",
 	"generic-runtime-template/std",

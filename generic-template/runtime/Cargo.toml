@@ -59,6 +59,12 @@ sp-std = { workspace = true }
 sp-transaction-pool = { workspace = true }
 sp-version = { workspace = true }
 
+pallet-aura = { workspace = true }
+pallet-authorship = { workspace = true }
+pallet-session = { workspace = true }
+cumulus-pallet-aura-ext = { workspace = true }
+pallet-collator-selection = { workspace = true }
+
 # Polkadot
 pallet-xcm = { workspace = true }
 polkadot-parachain-primitives = { workspace = true }
@@ -126,6 +132,11 @@ std = [
 	"log/std",
 	"openzeppelin-polkadot-wrappers/std",
 	"orml-xtokens/std",
+	"pallet-aura/std",
+	"pallet-session/std",
+	"pallet-authorship/std",
+	"pallet-collator-selection/std",
+	"cumulus-pallet-aura-ext/std",
 	"pallet-asset-manager/std",
 	"pallet-assets/std",
 	"pallet-balances/std",
@@ -249,6 +260,9 @@ try-runtime = [
 	"sp-runtime/try-runtime",
 	"pallet-author-inherent/try-runtime",
 	"pallet-cc-authorities-noting/try-runtime",
+	"pallet-aura/try-runtime",
+	"cumulus-pallet-aura-ext/try-runtime",
+	"pallet-collator-selection/try-runtime",
 	"nimbus-primitives/try-runtime",
 ]
 
@@ -262,3 +276,5 @@ async-backing = ["openzeppelin-polkadot-wrappers-proc/async-backing"]
 default = ["std"]
 
 metadata-hash = ["substrate-wasm-builder/metadata-hash"]
+
+tanssi = []

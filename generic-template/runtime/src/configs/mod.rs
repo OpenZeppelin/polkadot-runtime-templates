@@ -4,11 +4,15 @@ pub mod governance;
 pub mod xcm_config;
 
 use asset_config::*;
+use cumulus_pallet_parachain_system::ExpectParentIncluded;
 #[cfg(feature = "async-backing")]
 use cumulus_pallet_parachain_system::RelayNumberMonotonicallyIncreases;
 #[cfg(not(feature = "async-backing"))]
 use cumulus_pallet_parachain_system::RelayNumberStrictlyIncreases;
 use cumulus_primitives_core::{AggregateMessageOrigin, ParaId};
+
+#[cfg(not(feature = "tanssi"))]
+use frame_support::PalletId;
 use frame_support::{
     derive_impl,
     dispatch::DispatchClass,
@@ -18,7 +22,6 @@ use frame_support::{
         EitherOfDiverse, Everything, Nothing, TransformOrigin,
     },
     weights::{ConstantMultiplier, Weight},
-    PalletId,
 };
 use frame_system::{
     limits::{BlockLength, BlockWeights},
@@ -27,12 +30,19 @@ use frame_system::{
 pub use governance::origins::pallet_custom_origins;
 use governance::{origins::Treasurer, tracks, Spender, WhitelistedCaller};
 use openzeppelin_polkadot_wrappers::{
-    impl_openzeppelin_assets, impl_openzeppelin_consensus, impl_openzeppelin_governance,
-    impl_openzeppelin_system, impl_openzeppelin_xcm, AssetsConfig, ConsensusConfig,
+    impl_openzeppelin_assets, impl_openzeppelin_governance,
+    impl_openzeppelin_system, impl_openzeppelin_xcm, AssetsConfig,
     GovernanceConfig, SystemConfig, XcmConfig,
 };
+#[cfg(feature = "tanssi")]
+use openzeppelin_polkadot_wrappers::impl_tanssi;
+#[cfg(not(feature = "tanssi"))]
+use openzeppelin_polkadot_wrappers::{impl_openzeppelin_consensus, ConsensusConfig};
+#[cfg(not(feature = "tanssi"))]
+use crate::{CollatorSelection, Aura, Session};
 use parachains_common::message_queue::{NarrowOriginToSibling, ParaIdToSibling};
 use polkadot_runtime_common::{BlockHashCount, SlowAdjustingFeeUpdate};
+#[cfg(not(feature = "tanssi"))]
 use sp_consensus_aura::sr25519::AuthorityId as AuraId;
 use sp_runtime::{
     traits::{AccountIdLookup, BlakeTwo256, IdentityLookup},
@@ -50,26 +60,29 @@ use xcm_builder::{
 use xcm_config::*;
 use xcm_executor::XcmExecutor;
 use xcm_primitives::{AbsoluteAndRelativeReserve, AsAssetType};
+#[cfg(not(feature="tanssi"))]
+use crate::{
+    constants::HOURS,
+    types::{CollatorSelectionUpdateOrigin, BlockNumber},
+    SessionKeys
+};
 
 #[cfg(feature = "runtime-benchmarks")]
 use crate::benchmark::{OpenHrmpChannel, PayWithEnsure};
 use crate::{
     constants::{
         currency::{deposit, CENTS, EXISTENTIAL_DEPOSIT, MICROCENTS},
-        AVERAGE_ON_INITIALIZE_RATIO, DAYS, HOURS, MAXIMUM_BLOCK_WEIGHT, MAX_BLOCK_LENGTH,
+        AVERAGE_ON_INITIALIZE_RATIO, DAYS, MAXIMUM_BLOCK_WEIGHT, MAX_BLOCK_LENGTH,
         NORMAL_DISPATCH_RATIO,
     },
     types::{
-        AccountId, AssetId, AssetKind, Balance, Beneficiary, Block, BlockNumber,
-        CollatorSelectionUpdateOrigin, ConsensusHook, Hash, MessageQueueServiceWeight, Nonce,
-        PriceForSiblingParachainDelivery, ProxyType, TreasuryAccount, TreasuryInteriorLocation,
-        TreasuryPalletId, TreasuryPaymaster, Version,
+        AccountId, AssetId, AssetKind, Balance, Beneficiary, Block, Hash, MessageQueueServiceWeight, Nonce, PriceForSiblingParachainDelivery, ProxyType, TreasuryAccount, TreasuryInteriorLocation, TreasuryPalletId, TreasuryPaymaster, Version
     },
     weights::{self, BlockExecutionWeight, ExtrinsicBaseWeight, RocksDbWeight},
-    AllPalletsWithSystem, AssetManager, Aura, Balances, CollatorSelection, MessageQueue,
+    AllPalletsWithSystem, AssetManager, Balances, MessageQueue,
     OriginCaller, PalletInfo, ParachainInfo, ParachainSystem, PolkadotXcm, Preimage, Referenda,
     Runtime, RuntimeCall, RuntimeEvent, RuntimeFreezeReason, RuntimeHoldReason, RuntimeOrigin,
-    RuntimeTask, Scheduler, Session, SessionKeys, System, Treasury, WeightToFee, XcmpQueue,
+    RuntimeTask, Scheduler, System, Treasury, WeightToFee, XcmpQueue,
 };
 
 // OpenZeppelin runtime wrappers configuration
@@ -82,8 +95,11 @@ impl SystemConfig for OpenZeppelinRuntime {
     type ProxyType = ProxyType;
     type SS58Prefix = ConstU16<42>;
     type ScheduleOrigin = EnsureRoot<AccountId>;
+    type OnTimestampSet = ();
     type Version = Version;
+    type ConsensusHook = ExpectParentIncluded;
 }
+#[cfg(not(feature = "tanssi"))]
 impl ConsensusConfig for OpenZeppelinRuntime {
     type CollatorSelectionUpdateOrigin = CollatorSelectionUpdateOrigin;
 }
@@ -162,23 +178,12 @@ impl AssetsConfig for OpenZeppelinRuntime {
     type WeightToFee = WeightToFee;
 }
 impl_openzeppelin_system!(OpenZeppelinRuntime);
+#[cfg(not(feature = "tanssi"))]
 impl_openzeppelin_consensus!(OpenZeppelinRuntime);
 impl_openzeppelin_governance!(OpenZeppelinRuntime);
 impl_openzeppelin_xcm!(OpenZeppelinRuntime);
 impl_openzeppelin_assets!(OpenZeppelinRuntime);
 
-impl pallet_author_inherent::Config for Runtime {
-    type AccountLookup = dp_consensus::NimbusLookUp;
-    type AuthorId = NimbusId;
-    type CanAuthor = pallet_cc_authorities_noting::CanAuthor<Runtime>;
-    type SlotBeacon = dp_consensus::AuraDigestSlotBeacon<Runtime>;
-    type WeightInfo = pallet_author_inherent::weights::SubstrateWeight<Runtime>;
-}
 
-impl pallet_cc_authorities_noting::Config for Runtime {
-    type AuthorityId = NimbusId;
-    type RelayChainStateProvider = cumulus_pallet_parachain_system::RelaychainDataProvider<Self>;
-    type RuntimeEvent = RuntimeEvent;
-    type SelfParaId = parachain_info::Pallet<Runtime>;
-    type WeightInfo = pallet_cc_authorities_noting::weights::SubstrateWeight<Runtime>;
-}
+#[cfg(feature = "tanssi")]
+impl_tanssi!();

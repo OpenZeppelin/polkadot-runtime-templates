@@ -90,8 +90,16 @@ pub mod opaque {
     pub type Hash = <BlakeTwo256 as HashT>::Output;
 }
 
+#[cfg(not(feature="tanssi"))]
 impl_opaque_keys! {
-    pub struct SessionKeys {  }
+    pub struct SessionKeys { 
+        pub aura: Aura,
+    }
+}
+
+#[cfg(feature="tanssi")]
+impl_opaque_keys! {
+    pub struct SessionKeys { }
 }
 
 /// The version information used to identify this runtime when compiled
@@ -104,13 +112,12 @@ pub fn native_version() -> NativeVersion {
 }
 
 use openzeppelin_polkadot_wrappers_proc::openzeppelin_construct_runtime;
+
+#[cfg(feature = "tanssi")]
 #[openzeppelin_construct_runtime]
 mod runtime {
     #[abstraction]
     struct System;
-
-    #[abstraction]
-    struct Consensus;
 
     #[abstraction]
     struct XCM;
@@ -120,6 +127,28 @@ mod runtime {
 
     #[abstraction]
     struct Governance;
+
+    #[abstraction]
+    struct Tanssi;
+}
+
+#[cfg(not(feature = "tanssi"))]
+#[openzeppelin_construct_runtime]
+mod runtime {
+    #[abstraction]
+    struct System;
+
+    #[abstraction]
+    struct XCM;
+
+    #[abstraction]
+    struct Assets;
+
+    #[abstraction]
+    struct Governance;
+
+    #[abstraction]
+    struct Consensus;
 }
 
 #[cfg(feature = "runtime-benchmarks")]
