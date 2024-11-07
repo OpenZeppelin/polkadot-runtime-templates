@@ -3,9 +3,7 @@
 mod xcm_config;
 use frame_support::{
     construct_runtime, derive_impl, parameter_types,
-    traits::{
-        AsEnsureOriginWithArg, ConstU128, Everything, Nothing, ProcessMessage, ProcessMessageError,
-    },
+    traits::{ConstU128, Everything, Nothing, ProcessMessage, ProcessMessageError},
     weights::{Weight, WeightMeter},
 };
 use frame_system::EnsureRoot;

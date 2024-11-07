@@ -1,7 +1,6 @@
 pub mod parachain;
 pub mod relay_chain;
 
-use fp_account::AccountId20;
 use sp_runtime::BuildStorage;
 //use sp_tracing;
 use xcm::prelude::*;
@@ -101,7 +100,7 @@ pub fn para_ext(para_id: u32) -> sp_io::TestExternalities {
 }
 
 pub fn relay_ext() -> sp_io::TestExternalities {
-    use relay_chain::{Runtime, RuntimeOrigin, System};
+    use relay_chain::{Runtime, System};
 
     let mut t = frame_system::GenesisConfig::<Runtime>::default().build_storage().unwrap();
 

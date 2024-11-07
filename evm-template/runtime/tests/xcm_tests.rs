@@ -4,11 +4,12 @@ pub mod xcm_mock;
 
 use frame_support::{assert_ok, weights::Weight};
 use parity_scale_codec::Encode;
-use xcm::{latest::QueryResponseInfo, prelude::*};
+use xcm::prelude::*;
 use xcm_mock::*;
-use xcm_simulator::{mock_message_queue::ReceivedDmp, TestExt};
+use xcm_simulator::TestExt;
 
 // Helper function for forming buy execution message
+#[allow(dead_code)]
 fn buy_execution<C>(fees: impl Into<Asset>) -> Instruction<C> {
     BuyExecution { fees: fees.into(), weight_limit: Unlimited }
 }

@@ -4,7 +4,7 @@ use core::marker::PhantomData;
 use evm_runtime_template::configs::xcm_config::SignedToAccountId20;
 use frame_support::{
     construct_runtime, derive_impl, parameter_types,
-    traits::{ConstU128, ContainsPair, EnsureOrigin, EnsureOriginWithArg, Everything, Nothing},
+    traits::{ConstU128, ContainsPair, Everything, Nothing},
     weights::{constants::WEIGHT_REF_TIME_PER_SECOND, Weight},
 };
 use frame_system::EnsureRoot;
@@ -13,7 +13,7 @@ use sp_runtime::traits::{Get, IdentityLookup};
 use xcm::latest::prelude::*;
 use xcm_builder::EnsureXcmOrigin;
 pub use xcm_config::*;
-use xcm_executor::{traits::ConvertLocation, XcmExecutor};
+use xcm_executor::XcmExecutor;
 use xcm_simulator::mock_message_queue;
 
 pub type AccountId = fp_account::AccountId20;

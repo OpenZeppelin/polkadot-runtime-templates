@@ -14,9 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Polkadot.  If not, see <http://www.gnu.org/licenses/>.
 
-use xcm::latest::prelude::*;
-use xcm_builder::{ConvertedConcreteId, FungibleAdapter, IsConcrete};
-use xcm_executor::traits::JustTry;
+use xcm_builder::{FungibleAdapter, IsConcrete};
 
 use crate::parachain::{
     constants::KsmLocation, location_converter::LocationConverter, AccountId, Balances,

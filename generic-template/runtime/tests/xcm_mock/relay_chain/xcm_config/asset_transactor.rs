@@ -1,8 +1,4 @@
-use xcm_builder::{
-    AsPrefixedGeneralIndex, ConvertedConcreteId, FungibleAdapter, IsConcrete, NoChecking,
-    NonFungiblesAdapter,
-};
-use xcm_executor::traits::JustTry;
+use xcm_builder::{FungibleAdapter, IsConcrete};
 
 use crate::xcm_mock::relay_chain::{
     constants::TokenLocation, location_converter::LocationConverter, AccountId, Balances,

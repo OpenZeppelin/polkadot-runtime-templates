@@ -1,8 +1,4 @@
-use xcm::latest::prelude::*;
-use xcm_builder::{
-    ConvertedConcreteId, FungibleAdapter, IsConcrete, NoChecking, NonFungiblesAdapter,
-};
-use xcm_executor::traits::JustTry;
+use xcm_builder::{FungibleAdapter, IsConcrete};
 
 use crate::parachain::{
     constants::KsmLocation, location_converter::LocationConverter, AccountId, Balances,

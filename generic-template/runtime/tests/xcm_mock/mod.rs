@@ -96,7 +96,7 @@ pub fn para_ext(para_id: u32) -> sp_io::TestExternalities {
 }
 
 pub fn relay_ext() -> sp_io::TestExternalities {
-    use relay_chain::{Runtime, RuntimeOrigin, System};
+    use relay_chain::{Runtime, System};
 
     let mut t = frame_system::GenesisConfig::<Runtime>::default().build_storage().unwrap();
 

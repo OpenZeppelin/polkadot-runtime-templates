@@ -3,7 +3,7 @@ use core::marker::PhantomData;
 
 use frame_support::{
     construct_runtime, derive_impl, parameter_types,
-    traits::{ConstU128, ContainsPair, EnsureOrigin, EnsureOriginWithArg, Everything, Nothing},
+    traits::{ConstU128, ContainsPair, Everything, Nothing},
     weights::{constants::WEIGHT_REF_TIME_PER_SECOND, Weight},
 };
 use frame_system::EnsureRoot;
@@ -15,7 +15,7 @@ use sp_runtime::{
 use xcm::latest::prelude::*;
 use xcm_builder::{EnsureXcmOrigin, SignedToAccountId32};
 pub use xcm_config::*;
-use xcm_executor::{traits::ConvertLocation, XcmExecutor};
+use xcm_executor::XcmExecutor;
 use xcm_simulator::mock_message_queue;
 
 pub type AccountId = AccountId32;
