@@ -118,7 +118,7 @@ fn remote_locking_and_unlocking() {
     Relay::execute_with(|| {
         use pallet_balances::{BalanceLock, Reasons};
         assert_eq!(
-            relay_chain::Balances::locks(&child_account_id(2)),
+            relay_chain::Balances::locks(child_account_id(2)),
             vec![BalanceLock { id: *b"py/xcmlk", amount: locked_amount, reasons: Reasons::All }]
         );
     });
@@ -146,7 +146,7 @@ fn remote_locking_and_unlocking() {
         use pallet_balances::{BalanceLock, Reasons};
         // Lock is reduced
         assert_eq!(
-            relay_chain::Balances::locks(&child_account_id(2)),
+            relay_chain::Balances::locks(child_account_id(2)),
             vec![BalanceLock {
                 id: *b"py/xcmlk",
                 amount: locked_amount - 50,
