@@ -99,6 +99,7 @@ orml-xtokens = { workspace = true }
 [dev-dependencies]
 polkadot-runtime-parachains = { workspace = true }
 sp-io = { workspace = true }
+sp-tracing = { workspace = true }
 xcm-simulator = { workspace = true }
 
 [build-dependencies]

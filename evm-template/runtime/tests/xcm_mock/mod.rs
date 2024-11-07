@@ -2,7 +2,7 @@ pub mod parachain;
 pub mod relay_chain;
 
 use sp_runtime::BuildStorage;
-//use sp_tracing;
+use sp_tracing;
 use xcm::prelude::*;
 use xcm_executor::traits::ConvertLocation;
 use xcm_simulator::{decl_test_network, decl_test_parachain, decl_test_relay_chain, TestExt};
@@ -92,7 +92,7 @@ pub fn para_ext(para_id: u32) -> sp_io::TestExternalities {
 
     let mut ext = sp_io::TestExternalities::new(t);
     ext.execute_with(|| {
-        //sp_tracing::try_init_simple();
+        sp_tracing::try_init_simple();
         System::set_block_number(1);
         MsgQueue::set_para_id(para_id.into());
     });

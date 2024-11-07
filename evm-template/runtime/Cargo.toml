@@ -112,9 +112,9 @@ xcm-primitives = { workspace = true }
 
 
 [dev-dependencies]
-polkadot-core-primitives = { workspace = true }
 polkadot-runtime-parachains = { workspace = true }
 sp-io = { workspace = true }
+sp-tracing = { workspace = true }
 xcm-simulator = { workspace = true }
 
 [build-dependencies]
