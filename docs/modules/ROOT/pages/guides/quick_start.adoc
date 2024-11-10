@@ -66,6 +66,7 @@ We use the `generic-template-node` executable throughout all the commands since 
     --base-path <path to datadir> \
     --port 40333 \
     --rpc-port 8844 \
+    --unsafe-force-node-key-generation\
     -- \
     --execution wasm \
     --chain <path to the Paseo chainspec> \
@@ -83,6 +84,7 @@ We use the `generic-template-node` executable throughout all the commands since 
     --base-path <path to datadir> \
     --port 40333 \
     --rpc-port 8845 \
+    --unsafe-force-node-key-generation\
     -- \
     --execution wasm \
     --chain <path to the Paseo chainspec> \
