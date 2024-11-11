@@ -8,13 +8,13 @@ repository = { workspace = true }
 version = "2.0.0"
 
 [package.metadata.docs.rs]
-targets = ["x86_64-unknown-linux-gnu"]
+targets = [ "x86_64-unknown-linux-gnu" ]
 
 [dependencies]
 hex-literal = { workspace = true, optional = true }
 log = { workspace = true }
-parity-scale-codec = { workspace = true, features = ["derive"] }
-scale-info = { workspace = true, features = ["derive"] }
+parity-scale-codec = { workspace = true, features = [ "derive" ] }
+scale-info = { workspace = true, features = [ "derive" ] }
 smallvec = { workspace = true }
 
 openzeppelin-polkadot-wrappers = { workspace = true }
@@ -59,11 +59,11 @@ sp-std = { workspace = true }
 sp-transaction-pool = { workspace = true }
 sp-version = { workspace = true }
 
+cumulus-pallet-aura-ext = { workspace = true }
 pallet-aura = { workspace = true }
 pallet-authorship = { workspace = true }
-pallet-session = { workspace = true }
-cumulus-pallet-aura-ext = { workspace = true }
 pallet-collator-selection = { workspace = true }
+pallet-session = { workspace = true }
 
 # Polkadot
 pallet-xcm = { workspace = true }
@@ -82,8 +82,8 @@ cumulus-pallet-xcmp-queue = { workspace = true }
 cumulus-primitives-aura = { workspace = true }
 cumulus-primitives-core = { workspace = true }
 cumulus-primitives-storage-weight-reclaim = { workspace = true }
-cumulus-primitives-utility = { workspace = true }
 cumulus-primitives-timestamp = { workspace = true }
+cumulus-primitives-utility = { workspace = true }
 parachain-info = { workspace = true }
 parachains-common = { workspace = true }
 
@@ -94,14 +94,14 @@ pallet-xcm-weight-trader = { workspace = true }
 xcm-primitives = { workspace = true }
 
 # ORML
+dp-consensus = { workspace = true }
+nimbus-primitives = { workspace = true }
 orml-traits = { workspace = true }
 orml-xcm-support = { workspace = true }
 orml-xtokens = { workspace = true }
+pallet-author-inherent = { workspace = true }
 # Tanssi
 pallet-cc-authorities-noting = { workspace = true }
-pallet-author-inherent = { workspace = true }
-nimbus-primitives = { workspace = true }
-dp-consensus = { workspace = true }
 
 [dev-dependencies]
 sp-io = { workspace = true }
@@ -112,6 +112,7 @@ substrate-wasm-builder = { workspace = true }
 [features]
 std = [
 	"assets-common/std",
+	"cumulus-pallet-aura-ext/std",
 	"cumulus-pallet-parachain-system/std",
 	"cumulus-pallet-session-benchmarking/std",
 	"cumulus-pallet-xcm/std",
@@ -119,8 +120,9 @@ std = [
 	"cumulus-primitives-aura/std",
 	"cumulus-primitives-core/std",
 	"cumulus-primitives-storage-weight-reclaim/std",
-	"cumulus-primitives-utility/std",
 	"cumulus-primitives-timestamp/std",
+	"cumulus-primitives-utility/std",
+	"dp-consensus/std",
 	"frame-benchmarking?/std",
 	"frame-executive/std",
 	"frame-metadata-hash-extension/std",
@@ -130,16 +132,17 @@ std = [
 	"frame-system/std",
 	"frame-try-runtime?/std",
 	"log/std",
+	"nimbus-primitives/std",
 	"openzeppelin-polkadot-wrappers/std",
 	"orml-xtokens/std",
-	"pallet-aura/std",
-	"pallet-session/std",
-	"pallet-authorship/std",
-	"pallet-collator-selection/std",
-	"cumulus-pallet-aura-ext/std",
 	"pallet-asset-manager/std",
 	"pallet-assets/std",
+	"pallet-aura/std",
+	"pallet-author-inherent/std",
+	"pallet-authorship/std",
 	"pallet-balances/std",
+	"pallet-cc-authorities-noting/std",
+	"pallet-collator-selection/std",
 	"pallet-conviction-voting/std",
 	"pallet-message-queue/std",
 	"pallet-multisig/std",
@@ -147,6 +150,7 @@ std = [
 	"pallet-proxy/std",
 	"pallet-referenda/std",
 	"pallet-scheduler/std",
+	"pallet-session/std",
 	"pallet-sudo/std",
 	"pallet-timestamp/std",
 	"pallet-transaction-payment-rpc-runtime-api/std",
@@ -180,10 +184,6 @@ std = [
 	"xcm-executor/std",
 	"xcm-primitives/std",
 	"xcm/std",
-	"pallet-cc-authorities-noting/std",
-	"pallet-author-inherent/std",
-	"nimbus-primitives/std",
-	"dp-consensus/std",
 ]
 
 runtime-benchmarks = [
@@ -192,14 +192,18 @@ runtime-benchmarks = [
 	"cumulus-pallet-session-benchmarking/runtime-benchmarks",
 	"cumulus-pallet-xcmp-queue/runtime-benchmarks",
 	"cumulus-primitives-utility/runtime-benchmarks",
+	"dp-consensus/runtime-benchmarks",
 	"frame-benchmarking/runtime-benchmarks",
 	"frame-support/runtime-benchmarks",
 	"frame-system-benchmarking/runtime-benchmarks",
 	"frame-system/runtime-benchmarks",
 	"hex-literal",
+	"nimbus-primitives/runtime-benchmarks",
 	"pallet-asset-manager/runtime-benchmarks",
 	"pallet-assets/runtime-benchmarks",
+	"pallet-author-inherent/runtime-benchmarks",
 	"pallet-balances/runtime-benchmarks",
+	"pallet-cc-authorities-noting/runtime-benchmarks",
 	"pallet-conviction-voting/runtime-benchmarks",
 	"pallet-message-queue/runtime-benchmarks",
 	"pallet-multisig/runtime-benchmarks",
@@ -221,13 +225,10 @@ runtime-benchmarks = [
 	"sp-runtime/runtime-benchmarks",
 	"xcm-builder/runtime-benchmarks",
 	"xcm-executor/runtime-benchmarks",
-	"pallet-author-inherent/runtime-benchmarks",
-	"pallet-cc-authorities-noting/runtime-benchmarks",
-	"nimbus-primitives/runtime-benchmarks",
-	"dp-consensus/runtime-benchmarks",
 ]
 
 try-runtime = [
+	"cumulus-pallet-aura-ext/try-runtime",
 	"cumulus-pallet-parachain-system/try-runtime",
 	"cumulus-pallet-xcm/try-runtime",
 	"cumulus-pallet-xcmp-queue/try-runtime",
@@ -235,10 +236,15 @@ try-runtime = [
 	"frame-support/try-runtime",
 	"frame-system/try-runtime",
 	"frame-try-runtime/try-runtime",
+	"nimbus-primitives/try-runtime",
 	"orml-xtokens/try-runtime",
 	"pallet-asset-manager/try-runtime",
 	"pallet-assets/try-runtime",
+	"pallet-aura/try-runtime",
+	"pallet-author-inherent/try-runtime",
 	"pallet-balances/try-runtime",
+	"pallet-cc-authorities-noting/try-runtime",
+	"pallet-collator-selection/try-runtime",
 	"pallet-conviction-voting/try-runtime",
 	"pallet-message-queue/try-runtime",
 	"pallet-multisig/try-runtime",
@@ -258,23 +264,17 @@ try-runtime = [
 	"parachain-info/try-runtime",
 	"polkadot-runtime-common/try-runtime",
 	"sp-runtime/try-runtime",
-	"pallet-author-inherent/try-runtime",
-	"pallet-cc-authorities-noting/try-runtime",
-	"pallet-aura/try-runtime",
-	"cumulus-pallet-aura-ext/try-runtime",
-	"pallet-collator-selection/try-runtime",
-	"nimbus-primitives/try-runtime",
 ]
 
 # A feature that should be enabled when the runtime should be built for on-chain
 # deployment. This will disable stuff that shouldn't be part of the on-chain wasm
 # to make it smaller, like logging for example.
-on-chain-release-build = ["sp-api/disable-logging"]
+on-chain-release-build = [ "sp-api/disable-logging" ]
 
-async-backing = ["openzeppelin-polkadot-wrappers-proc/async-backing"]
+async-backing = [ "openzeppelin-polkadot-wrappers-proc/async-backing" ]
 
-default = ["std"]
+default = [ "std" ]
 
-metadata-hash = ["substrate-wasm-builder/metadata-hash"]
+metadata-hash = [ "substrate-wasm-builder/metadata-hash" ]
 
 tanssi = []

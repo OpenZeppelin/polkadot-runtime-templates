@@ -8,7 +8,6 @@ use cumulus_client_cli::CollatorOptions;
 #[cfg(not(feature = "tanssi"))]
 use cumulus_client_collator::service::CollatorService;
 use cumulus_client_consensus_common::ParachainBlockImport as TParachainBlockImport;
-
 #[cfg(not(feature = "tanssi"))]
 use cumulus_client_consensus_proposer::Proposer;
 use cumulus_client_service::{
@@ -16,12 +15,11 @@ use cumulus_client_service::{
     BuildNetworkParams, CollatorSybilResistance, DARecoveryProfile, ParachainHostFunctions,
     StartRelayChainTasksParams,
 };
+#[cfg(not(feature = "tanssi"))]
+use cumulus_primitives_core::relay_chain::CollatorPair;
 #[cfg(feature = "async-backing")]
 use cumulus_primitives_core::relay_chain::ValidationCode;
 use cumulus_primitives_core::ParaId;
-
-#[cfg(not(feature = "tanssi"))]
-use cumulus_primitives_core::relay_chain::CollatorPair;
 #[cfg(not(feature = "tanssi"))]
 use cumulus_relay_chain_interface::OverseerHandle;
 use cumulus_relay_chain_interface::RelayChainInterface;
@@ -37,12 +35,10 @@ use sc_consensus::ImportQueue;
 use sc_executor::{HeapAllocStrategy, WasmExecutor, DEFAULT_HEAP_ALLOC_STRATEGY};
 use sc_network::NetworkBlock;
 use sc_service::{Configuration, PartialComponents, TFullBackend, TFullClient, TaskManager};
-use sc_telemetry::{Telemetry, TelemetryWorker, TelemetryWorkerHandle};
-
-#[cfg(not(feature="tanssi"))]
+#[cfg(not(feature = "tanssi"))]
 use sc_telemetry::TelemetryHandle;
+use sc_telemetry::{Telemetry, TelemetryWorker, TelemetryWorkerHandle};
 use sc_transaction_pool_api::OffchainTransactionPoolFactory;
-
 #[cfg(not(feature = "tanssi"))]
 use sp_keystore::KeystorePtr;
 #[cfg(not(feature = "tanssi"))]
@@ -119,7 +115,7 @@ pub fn new_partial(config: &Configuration) -> Result<Service, sc_service::Error>
     );
 
     #[cfg(feature = "tanssi")]
-    let (block_import, import_queue) = 
+    let (block_import, import_queue) =
         import_queue(config, client.clone(), backend.clone(), &task_manager);
     #[cfg(not(feature = "tanssi"))]
     let (block_import, import_queue) = {
@@ -132,7 +128,7 @@ pub fn new_partial(config: &Configuration) -> Result<Service, sc_service::Error>
                 config,
                 telemetry.as_ref().map(|telemetry| telemetry.handle()),
                 &task_manager,
-            )?
+            )?,
         )
     };
 
@@ -162,7 +158,10 @@ async fn start_node_impl(
     let parachain_config = prepare_node_config(parachain_config);
 
     let params = new_partial(&parachain_config)?;
+    #[cfg(not(feature = "tanssi"))]
     let (block_import, mut telemetry, telemetry_worker_handle) = params.other;
+    #[cfg(feature = "tanssi")]
+    let (_, mut telemetry, telemetry_worker_handle) = params.other;
     let net_config = sc_network::config::FullNetworkConfiguration::<
         _,
         _,
@@ -293,9 +292,8 @@ async fn start_node_impl(
 
     let relay_chain_slot_duration = Duration::from_secs(6);
 
-    let overseer_handle = interface.0
-        .overseer_handle()
-        .map_err(|e| sc_service::Error::Application(Box::new(e)))?;
+    let overseer_handle =
+        interface.0.overseer_handle().map_err(|e| sc_service::Error::Application(Box::new(e)))?;
 
     start_relay_chain_tasks(StartRelayChainTasksParams {
         client: client.clone(),
@@ -340,7 +338,7 @@ async fn start_node_impl(
     Ok((task_manager, client))
 }
 
-#[cfg(feature="tanssi")]
+#[cfg(feature = "tanssi")]
 pub fn import_queue(
     parachain_config: &Configuration,
     client: Arc<ParachainClient>,

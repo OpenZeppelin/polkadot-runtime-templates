@@ -1,11 +1,7 @@
 use cumulus_primitives_core::ParaId;
 #[cfg(not(feature = "tanssi"))]
-use generic_runtime_template::{
-    constants::currency::EXISTENTIAL_DEPOSIT, AuraId,
-};
-use generic_runtime_template::{
-    AccountId, Signature,
-};
+use generic_runtime_template::{constants::currency::EXISTENTIAL_DEPOSIT, AuraId};
+use generic_runtime_template::{AccountId, Signature};
 use sc_chain_spec::{ChainSpecExtension, ChainSpecGroup};
 use sc_service::ChainType;
 use serde::{Deserialize, Serialize};
@@ -65,7 +61,7 @@ where
 ///
 /// The input must be a tuple of individual keys (a single arg for now since we
 /// have just one key).
-/// 
+///
 #[cfg(not(feature = "tanssi"))]
 pub fn template_session_keys(keys: AuraId) -> generic_runtime_template::SessionKeys {
     generic_runtime_template::SessionKeys { aura: keys }
@@ -215,7 +211,6 @@ fn testnet_genesis(
         "sudo": { "key": Some(root) }
     })
 }
-
 
 #[cfg(feature = "tanssi")]
 fn testnet_genesis(

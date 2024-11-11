@@ -90,14 +90,14 @@ pub mod opaque {
     pub type Hash = <BlakeTwo256 as HashT>::Output;
 }
 
-#[cfg(not(feature="tanssi"))]
+#[cfg(not(feature = "tanssi"))]
 impl_opaque_keys! {
-    pub struct SessionKeys { 
+    pub struct SessionKeys {
         pub aura: Aura,
     }
 }
 
-#[cfg(feature="tanssi")]
+#[cfg(feature = "tanssi")]
 impl_opaque_keys! {
     pub struct SessionKeys { }
 }

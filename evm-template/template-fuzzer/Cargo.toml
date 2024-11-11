@@ -59,6 +59,7 @@ std = [
 	"sp-consensus-aura/std",
 	"sp-runtime/std",
 ]
+tanssi = []
 try-runtime = [
 	"evm-runtime-template/try-runtime",
 	"frame-support/try-runtime",

@@ -1,14 +1,9 @@
-use frame_support::{
-    parameter_types,
-    traits::InstanceFilter,
-    weights::Weight,
-    PalletId,
-};
-#[cfg(not(feature="tanssi"))]
+#[cfg(not(feature = "tanssi"))]
 use frame_support::traits::EitherOfDiverse;
-#[cfg(not(feature="tanssi"))]
+use frame_support::{parameter_types, traits::InstanceFilter, weights::Weight, PalletId};
+#[cfg(not(feature = "tanssi"))]
 use frame_system::EnsureRoot;
-#[cfg(not(feature="tanssi"))]
+#[cfg(not(feature = "tanssi"))]
 use pallet_xcm::{EnsureXcm, IsVoiceOfBody};
 use parity_scale_codec::{Decode, Encode, MaxEncodedLen};
 use polkadot_runtime_common::impls::{
@@ -28,27 +23,20 @@ use xcm::{
 };
 use xcm_builder::PayOverXcm;
 
+#[cfg(not(feature = "tanssi"))]
+use crate::{
+    configs::{xcm_config::RelayLocation, StakingAdminBodyId},
+    constants::{
+        BLOCK_PROCESSING_VELOCITY, RELAY_CHAIN_SLOT_DURATION_MILLIS, UNINCLUDED_SEGMENT_CAPACITY,
+    },
+};
 use crate::{
     configs::XcmRouter,
     constants::{HOURS, VERSION},
     Treasury,
 };
-#[cfg(not(feature="tanssi"))]
-use crate::configs::StakingAdminBodyId;
-
-#[cfg(all(not(feature="tanssi"), feature = "async-backing"))]
-use crate::{
-    constants::{
-        BLOCK_PROCESSING_VELOCITY, RELAY_CHAIN_SLOT_DURATION_MILLIS, UNINCLUDED_SEGMENT_CAPACITY,
-    },
-    configs::xcm_config::RelayLocation,
-};
-
 pub use crate::{
-    configs::{
-        FeeAssetId, ToSiblingBaseDeliveryFee,
-        TransactionByteFee,
-    },
+    configs::{FeeAssetId, ToSiblingBaseDeliveryFee, TransactionByteFee},
     AllPalletsWithSystem, Runtime, RuntimeBlockWeights, RuntimeCall, XcmpQueue,
 };
 

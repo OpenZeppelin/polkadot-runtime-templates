@@ -4,13 +4,13 @@ pub mod governance;
 pub mod xcm_config;
 
 use asset_config::*;
+#[cfg(feature = "tanssi")]
 use cumulus_pallet_parachain_system::ExpectParentIncluded;
 #[cfg(feature = "async-backing")]
 use cumulus_pallet_parachain_system::RelayNumberMonotonicallyIncreases;
 #[cfg(not(feature = "async-backing"))]
 use cumulus_pallet_parachain_system::RelayNumberStrictlyIncreases;
 use cumulus_primitives_core::{AggregateMessageOrigin, ParaId};
-
 #[cfg(not(feature = "tanssi"))]
 use frame_support::PalletId;
 use frame_support::{
@@ -29,17 +29,14 @@ use frame_system::{
 };
 pub use governance::origins::pallet_custom_origins;
 use governance::{origins::Treasurer, tracks, Spender, WhitelistedCaller};
-use openzeppelin_polkadot_wrappers::{
-    impl_openzeppelin_assets, impl_openzeppelin_governance,
-    impl_openzeppelin_system, impl_openzeppelin_xcm, AssetsConfig,
-    GovernanceConfig, SystemConfig, XcmConfig,
-};
 #[cfg(feature = "tanssi")]
 use openzeppelin_polkadot_wrappers::impl_tanssi;
+use openzeppelin_polkadot_wrappers::{
+    impl_openzeppelin_assets, impl_openzeppelin_governance, impl_openzeppelin_system,
+    impl_openzeppelin_xcm, AssetsConfig, GovernanceConfig, SystemConfig, XcmConfig,
+};
 #[cfg(not(feature = "tanssi"))]
 use openzeppelin_polkadot_wrappers::{impl_openzeppelin_consensus, ConsensusConfig};
-#[cfg(not(feature = "tanssi"))]
-use crate::{CollatorSelection, Aura, Session};
 use parachains_common::message_queue::{NarrowOriginToSibling, ParaIdToSibling};
 use polkadot_runtime_common::{BlockHashCount, SlowAdjustingFeeUpdate};
 #[cfg(not(feature = "tanssi"))]
@@ -60,15 +57,15 @@ use xcm_builder::{
 use xcm_config::*;
 use xcm_executor::XcmExecutor;
 use xcm_primitives::{AbsoluteAndRelativeReserve, AsAssetType};
-#[cfg(not(feature="tanssi"))]
-use crate::{
-    constants::HOURS,
-    types::{CollatorSelectionUpdateOrigin, BlockNumber},
-    SessionKeys
-};
 
 #[cfg(feature = "runtime-benchmarks")]
 use crate::benchmark::{OpenHrmpChannel, PayWithEnsure};
+#[cfg(not(feature = "tanssi"))]
+use crate::{
+    constants::HOURS,
+    types::{BlockNumber, CollatorSelectionUpdateOrigin, ConsensusHook},
+    SessionKeys,
+};
 use crate::{
     constants::{
         currency::{deposit, CENTS, EXISTENTIAL_DEPOSIT, MICROCENTS},
@@ -76,34 +73,38 @@ use crate::{
         NORMAL_DISPATCH_RATIO,
     },
     types::{
-        AccountId, AssetId, AssetKind, Balance, Beneficiary, Block, Hash, MessageQueueServiceWeight, Nonce, PriceForSiblingParachainDelivery, ProxyType, TreasuryAccount, TreasuryInteriorLocation, TreasuryPalletId, TreasuryPaymaster, Version
+        AccountId, AssetId, AssetKind, Balance, Beneficiary, Block, Hash,
+        MessageQueueServiceWeight, Nonce, PriceForSiblingParachainDelivery, ProxyType,
+        TreasuryAccount, TreasuryInteriorLocation, TreasuryPalletId, TreasuryPaymaster, Version,
     },
     weights::{self, BlockExecutionWeight, ExtrinsicBaseWeight, RocksDbWeight},
-    AllPalletsWithSystem, AssetManager, Balances, MessageQueue,
-    OriginCaller, PalletInfo, ParachainInfo, ParachainSystem, PolkadotXcm, Preimage, Referenda,
-    Runtime, RuntimeCall, RuntimeEvent, RuntimeFreezeReason, RuntimeHoldReason, RuntimeOrigin,
-    RuntimeTask, Scheduler, System, Treasury, WeightToFee, XcmpQueue,
+    AllPalletsWithSystem, AssetManager, Balances, MessageQueue, OriginCaller, PalletInfo,
+    ParachainInfo, ParachainSystem, PolkadotXcm, Preimage, Referenda, Runtime, RuntimeCall,
+    RuntimeEvent, RuntimeFreezeReason, RuntimeHoldReason, RuntimeOrigin, RuntimeTask, Scheduler,
+    System, Treasury, WeightToFee, XcmpQueue,
 };
+#[cfg(not(feature = "tanssi"))]
+use crate::{Aura, CollatorSelection, Session};
 
 // OpenZeppelin runtime wrappers configuration
 pub struct OpenZeppelinRuntime;
 impl SystemConfig for OpenZeppelinRuntime {
     type AccountId = AccountId;
-    type ExistentialDeposit = ConstU128<EXISTENTIAL_DEPOSIT>;
-    type Lookup = AccountIdLookup<AccountId, ()>;
-    type PreimageOrigin = EnsureRoot<AccountId>;
-    type ProxyType = ProxyType;
-    type SS58Prefix = ConstU16<42>;
-    type ScheduleOrigin = EnsureRoot<AccountId>;
-    #[cfg(feature = "tanssi")]
-    type OnTimestampSet = ();
-    #[cfg(not(feature = "tanssi"))]
-    type OnTimestampSet = Aura;
-    type Version = Version;
     #[cfg(feature = "tanssi")]
     type ConsensusHook = ExpectParentIncluded;
     #[cfg(not(feature = "tanssi"))]
     type ConsensusHook = ConsensusHook;
+    type ExistentialDeposit = ConstU128<EXISTENTIAL_DEPOSIT>;
+    type Lookup = AccountIdLookup<AccountId, ()>;
+    #[cfg(feature = "tanssi")]
+    type OnTimestampSet = ();
+    #[cfg(not(feature = "tanssi"))]
+    type OnTimestampSet = Aura;
+    type PreimageOrigin = EnsureRoot<AccountId>;
+    type ProxyType = ProxyType;
+    type SS58Prefix = ConstU16<42>;
+    type ScheduleOrigin = EnsureRoot<AccountId>;
+    type Version = Version;
 }
 #[cfg(not(feature = "tanssi"))]
 impl ConsensusConfig for OpenZeppelinRuntime {
@@ -189,7 +190,6 @@ impl_openzeppelin_consensus!(OpenZeppelinRuntime);
 impl_openzeppelin_governance!(OpenZeppelinRuntime);
 impl_openzeppelin_xcm!(OpenZeppelinRuntime);
 impl_openzeppelin_assets!(OpenZeppelinRuntime);
-
 
 #[cfg(feature = "tanssi")]
 impl_tanssi!();

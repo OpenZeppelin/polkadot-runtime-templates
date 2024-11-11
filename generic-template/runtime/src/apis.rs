@@ -1,9 +1,12 @@
 use openzeppelin_polkadot_wrappers_proc::openzeppelin_runtime_apis;
 
-#[cfg(feature = "runtime-benchmarks")]
-use crate::{constants::currency::{CENTS, EXISTENTIAL_DEPOSIT}, configs::XcmExecutorConfig};
 #[cfg(all(not(feature = "async-backing"), not(feature = "tanssi")))]
 use crate::Aura;
+#[cfg(feature = "runtime-benchmarks")]
+use crate::{
+    configs::XcmExecutorConfig,
+    constants::currency::{CENTS, EXISTENTIAL_DEPOSIT},
+};
 #[cfg(feature = "async-backing")]
 use crate::{constants::SLOT_DURATION, types::ConsensusHook};
 use crate::{
@@ -73,7 +76,6 @@ mod apis {
         type Balances = Balances;
     }
 }
-
 
 #[cfg(feature = "tanssi")]
 #[openzeppelin_runtime_apis]

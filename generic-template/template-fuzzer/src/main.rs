@@ -3,10 +3,8 @@ use std::{
     time::{Duration, Instant},
 };
 
-
 #[cfg(not(feature = "tanssi"))]
 use frame_support::traits::Get;
-
 use frame_support::{
     dispatch::GetDispatchInfo,
     traits::{IntegrityTest, TryState, TryStateSelect},
@@ -30,14 +28,9 @@ use sp_runtime::{
 use sp_state_machine::BasicExternalities;
 
 fn generate_genesis(accounts: &[AccountId]) -> Storage {
-    use generic_runtime_template::{
-        BalancesConfig, RuntimeGenesisConfig,
-    };
-
+    use generic_runtime_template::{BalancesConfig, RuntimeGenesisConfig};
     #[cfg(not(feature = "tanssi"))]
-    use generic_runtime_template::{
-        CollatorSelectionConfig, SessionConfig, SessionKeys
-    };
+    use generic_runtime_template::{CollatorSelectionConfig, SessionConfig, SessionKeys};
     #[cfg(not(feature = "tanssi"))]
     use sp_consensus_aura::sr25519::AuthorityId as AuraId;
     #[cfg(not(feature = "tanssi"))]

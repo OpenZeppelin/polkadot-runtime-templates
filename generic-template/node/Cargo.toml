@@ -79,7 +79,6 @@ substrate-build-script-utils = { workspace = true }
 [features]
 default = []
 async-backing = []
-tanssi = []
 runtime-benchmarks = [
 	"frame-benchmarking-cli/runtime-benchmarks",
 	"frame-benchmarking/runtime-benchmarks",
@@ -89,6 +88,7 @@ runtime-benchmarks = [
 	"sc-service/runtime-benchmarks",
 	"sp-runtime/runtime-benchmarks",
 ]
+tanssi = []
 try-runtime = [
 	"generic-runtime-template/try-runtime",
 	"polkadot-cli/try-runtime",

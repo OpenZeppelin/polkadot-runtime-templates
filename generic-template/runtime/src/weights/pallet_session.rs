@@ -25,38 +25,40 @@
 // #![allow(unused_imports)]
 // #![allow(missing_docs)]
 
-use frame_support::{traits::Get, weights::Weight};
 use core::marker::PhantomData;
+
+use frame_support::{traits::Get, weights::Weight};
 
 /// Weight functions for `pallet_session`.
 pub struct WeightInfo<T>(PhantomData<T>);
 impl<T: frame_system::Config> pallet_session::WeightInfo for WeightInfo<T> {
-	/// Storage: `Session::NextKeys` (r:1 w:1)
-	/// Proof: `Session::NextKeys` (`max_values`: None, `max_size`: None, mode: `Measured`)
-	/// Storage: `Session::KeyOwner` (r:1 w:1)
-	/// Proof: `Session::KeyOwner` (`max_values`: None, `max_size`: None, mode: `Measured`)
-	fn set_keys() -> Weight {
-		// Proof Size summary in bytes:
-		//  Measured:  `298`
-		//  Estimated: `3763`
-		// Minimum execution time: 21_646_000 picoseconds.
-		Weight::from_parts(21_946_000, 0)
-			.saturating_add(Weight::from_parts(0, 3763))
-			.saturating_add(T::DbWeight::get().reads(2))
-			.saturating_add(T::DbWeight::get().writes(2))
-	}
-	/// Storage: `Session::NextKeys` (r:1 w:1)
-	/// Proof: `Session::NextKeys` (`max_values`: None, `max_size`: None, mode: `Measured`)
-	/// Storage: `Session::KeyOwner` (r:0 w:1)
-	/// Proof: `Session::KeyOwner` (`max_values`: None, `max_size`: None, mode: `Measured`)
-	fn purge_keys() -> Weight {
-		// Proof Size summary in bytes:
-		//  Measured:  `280`
-		//  Estimated: `3745`
-		// Minimum execution time: 15_321_000 picoseconds.
-		Weight::from_parts(15_898_000, 0)
-			.saturating_add(Weight::from_parts(0, 3745))
-			.saturating_add(T::DbWeight::get().reads(1))
-			.saturating_add(T::DbWeight::get().writes(2))
-	}
+    /// Storage: `Session::NextKeys` (r:1 w:1)
+    /// Proof: `Session::NextKeys` (`max_values`: None, `max_size`: None, mode: `Measured`)
+    /// Storage: `Session::KeyOwner` (r:1 w:1)
+    /// Proof: `Session::KeyOwner` (`max_values`: None, `max_size`: None, mode: `Measured`)
+    fn set_keys() -> Weight {
+        // Proof Size summary in bytes:
+        //  Measured:  `298`
+        //  Estimated: `3763`
+        // Minimum execution time: 21_646_000 picoseconds.
+        Weight::from_parts(21_946_000, 0)
+            .saturating_add(Weight::from_parts(0, 3763))
+            .saturating_add(T::DbWeight::get().reads(2))
+            .saturating_add(T::DbWeight::get().writes(2))
+    }
+
+    /// Storage: `Session::NextKeys` (r:1 w:1)
+    /// Proof: `Session::NextKeys` (`max_values`: None, `max_size`: None, mode: `Measured`)
+    /// Storage: `Session::KeyOwner` (r:0 w:1)
+    /// Proof: `Session::KeyOwner` (`max_values`: None, `max_size`: None, mode: `Measured`)
+    fn purge_keys() -> Weight {
+        // Proof Size summary in bytes:
+        //  Measured:  `280`
+        //  Estimated: `3745`
+        // Minimum execution time: 15_321_000 picoseconds.
+        Weight::from_parts(15_898_000, 0)
+            .saturating_add(Weight::from_parts(0, 3745))
+            .saturating_add(T::DbWeight::get().reads(1))
+            .saturating_add(T::DbWeight::get().writes(2))
+    }
 }
