@@ -3201,8 +3201,8 @@ dependencies = [
  "hex-literal 0.4.1",
  "log",
  "nimbus-primitives",
- "openzeppelin-polkadot-wrappers",
- "openzeppelin-polkadot-wrappers-proc",
+ "openzeppelin-pallet-abstractions",
+ "openzeppelin-pallet-abstractions-proc",
  "orml-traits",
  "orml-xcm-support",
  "orml-xtokens",
@@ -7128,8 +7128,9 @@ dependencies = [
 ]
 
 [[package]]
-name = "openzeppelin-polkadot-wrappers"
+name = "openzeppelin-pallet-abstractions"
 version = "0.1.0"
+source = "git+https://github.com/OpenZeppelin/openzeppelin-pallet-abstractions?branch=main#04ae7cfb1349a01bc0dee3c7fe08ed0cc696083d"
 dependencies = [
  "cumulus-primitives-core",
  "frame-support",
@@ -7139,11 +7140,12 @@ dependencies = [
 ]
 
 [[package]]
-name = "openzeppelin-polkadot-wrappers-proc"
+name = "openzeppelin-pallet-abstractions-proc"
 version = "0.1.0"
+source = "git+https://github.com/OpenZeppelin/openzeppelin-pallet-abstractions?branch=main#04ae7cfb1349a01bc0dee3c7fe08ed0cc696083d"
 dependencies = [
  "darling",
- "openzeppelin-polkadot-wrappers",
+ "openzeppelin-pallet-abstractions",
  "proc-macro2",
  "quote",
  "syn 2.0.87",

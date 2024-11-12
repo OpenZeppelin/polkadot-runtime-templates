@@ -209,7 +209,7 @@ std = [
 	"xcm-primitives/std",
 	"xcm/std",
 ]
-async-backing = [ "openzeppelin-polkadot-wrappers-proc/async-backing" ]
+async-backing = [ "openzeppelin-pallet-abstractions-proc/async-backing" ]
 metadata-hash = [ "substrate-wasm-builder/metadata-hash" ]
 runtime-benchmarks = [
 	"assets-common/runtime-benchmarks",

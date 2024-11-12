@@ -271,7 +271,7 @@ try-runtime = [
 # to make it smaller, like logging for example.
 on-chain-release-build = [ "sp-api/disable-logging" ]
 
-async-backing = [ "openzeppelin-polkadot-wrappers-proc/async-backing" ]
+async-backing = [ "openzeppelin-pallet-abstractions-proc/async-backing" ]
 
 default = [ "std" ]
 
