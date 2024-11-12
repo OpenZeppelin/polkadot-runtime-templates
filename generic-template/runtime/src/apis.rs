@@ -4,7 +4,7 @@ use openzeppelin_pallet_abstractions_proc::openzeppelin_runtime_apis;
 use crate::Aura;
 #[cfg(feature = "runtime-benchmarks")]
 use crate::{
-    configs::XcmExecutorConfig,
+    configs::xcm_config::RelayLocation,
     constants::currency::{CENTS, EXISTENTIAL_DEPOSIT},
 };
 #[cfg(feature = "async-backing")]
