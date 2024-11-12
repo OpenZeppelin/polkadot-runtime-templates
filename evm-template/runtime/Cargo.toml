@@ -17,8 +17,8 @@ parity-scale-codec = { workspace = true, features = [ "derive" ] }
 scale-info = { workspace = true, features = [ "derive" ] }
 smallvec = { workspace = true }
 
-openzeppelin-polkadot-wrappers = { workspace = true }
-openzeppelin-polkadot-wrappers-proc = { workspace = true }
+openzeppelin-pallet-abstractions = { workspace = true }
+openzeppelin-pallet-abstractions-proc = { workspace = true }
 
 # Substrate
 frame-benchmarking = { workspace = true, optional = true }
@@ -152,7 +152,7 @@ std = [
 	"frame-try-runtime?/std",
 	"log/std",
 	"nimbus-primitives/std",
-	"openzeppelin-polkadot-wrappers/std",
+	"openzeppelin-pallet-abstractions/std",
 	"orml-xtokens/std",
 	"pallet-asset-manager/std",
 	"pallet-assets/std",

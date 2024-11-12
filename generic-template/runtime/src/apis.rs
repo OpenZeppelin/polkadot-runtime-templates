@@ -1,4 +1,4 @@
-use openzeppelin_polkadot_wrappers_proc::openzeppelin_runtime_apis;
+use openzeppelin_pallet_abstractions_proc::openzeppelin_runtime_apis;
 
 #[cfg(all(not(feature = "async-backing"), not(feature = "tanssi")))]
 use crate::Aura;

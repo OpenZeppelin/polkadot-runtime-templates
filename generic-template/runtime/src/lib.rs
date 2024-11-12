@@ -111,7 +111,7 @@ pub fn native_version() -> NativeVersion {
     NativeVersion { runtime_version: VERSION, can_author_with: Default::default() }
 }
 
-use openzeppelin_polkadot_wrappers_proc::openzeppelin_construct_runtime;
+use openzeppelin_pallet_abstractions_proc::openzeppelin_construct_runtime;
 
 #[cfg(feature = "tanssi")]
 #[openzeppelin_construct_runtime]

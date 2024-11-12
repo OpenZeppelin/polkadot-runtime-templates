@@ -30,13 +30,13 @@ use frame_system::{
 pub use governance::origins::pallet_custom_origins;
 use governance::{origins::Treasurer, tracks, Spender, WhitelistedCaller};
 #[cfg(feature = "tanssi")]
-use openzeppelin_polkadot_wrappers::impl_openzeppelin_tanssi;
-use openzeppelin_polkadot_wrappers::{
+use openzeppelin_pallet_abstractions::impl_openzeppelin_tanssi;
+use openzeppelin_pallet_abstractions::{
     impl_openzeppelin_assets, impl_openzeppelin_governance, impl_openzeppelin_system,
     impl_openzeppelin_xcm, AssetsConfig, GovernanceConfig, SystemConfig, XcmConfig,
 };
 #[cfg(not(feature = "tanssi"))]
-use openzeppelin_polkadot_wrappers::{impl_openzeppelin_consensus, ConsensusConfig};
+use openzeppelin_pallet_abstractions::{impl_openzeppelin_consensus, ConsensusConfig};
 use parachains_common::message_queue::{NarrowOriginToSibling, ParaIdToSibling};
 use polkadot_runtime_common::{BlockHashCount, SlowAdjustingFeeUpdate};
 #[cfg(not(feature = "tanssi"))]
