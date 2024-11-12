@@ -23,17 +23,17 @@ use xcm::{
 };
 use xcm_builder::PayOverXcm;
 
+use crate::{
+    configs::XcmRouter,
+    constants::{HOURS, VERSION},
+    Treasury,
+};
 #[cfg(not(feature = "tanssi"))]
 use crate::{
     configs::{xcm_config::RelayLocation, StakingAdminBodyId},
     constants::{
         BLOCK_PROCESSING_VELOCITY, RELAY_CHAIN_SLOT_DURATION_MILLIS, UNINCLUDED_SEGMENT_CAPACITY,
     },
-};
-use crate::{
-    configs::XcmRouter,
-    constants::{HOURS, VERSION},
-    Treasury,
 };
 pub use crate::{
     configs::{FeeAssetId, ToSiblingBaseDeliveryFee, TransactionByteFee},
