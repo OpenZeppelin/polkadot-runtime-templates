@@ -28,8 +28,8 @@ serde_json = "1.0.121"
 smallvec = "1.11.0"
 
 # TODO: update to release
-openzeppelin-polkadot-wrappers = { path = "../../polkadot-runtime-wrappers", default-features = false }
-openzeppelin-polkadot-wrappers-proc = { path = "../../polkadot-runtime-wrappers/procedural", default-features = false }
+openzeppelin-polkadot-wrappers = { git = "https://github.com/OpenZeppelin/openzeppelin-pallet-abstractions", branch = "main", default-features = false }
+openzeppelin-polkadot-wrappers-proc = { git = "https://github.com/OpenZeppelin/openzeppelin-pallet-abstractions", branch = "main", default-features = false }
 
 # Substrate
 frame-benchmarking = { git = "https://github.com/paritytech/polkadot-sdk", default-features = false, tag = "polkadot-stable2407-1" }

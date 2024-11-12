@@ -30,7 +30,7 @@ use frame_system::{
 pub use governance::origins::pallet_custom_origins;
 use governance::{origins::Treasurer, tracks, Spender, WhitelistedCaller};
 #[cfg(feature = "tanssi")]
-use openzeppelin_polkadot_wrappers::impl_tanssi;
+use openzeppelin_polkadot_wrappers::impl_openzeppelin_tanssi;
 use openzeppelin_polkadot_wrappers::{
     impl_openzeppelin_assets, impl_openzeppelin_governance, impl_openzeppelin_system,
     impl_openzeppelin_xcm, AssetsConfig, GovernanceConfig, SystemConfig, XcmConfig,
@@ -192,4 +192,4 @@ impl_openzeppelin_xcm!(OpenZeppelinRuntime);
 impl_openzeppelin_assets!(OpenZeppelinRuntime);
 
 #[cfg(feature = "tanssi")]
-impl_tanssi!();
+impl_openzeppelin_tanssi!();

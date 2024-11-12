@@ -31,7 +31,7 @@ use governance::{origins::Treasurer, tracks, Spender, WhitelistedCaller};
 #[cfg(feature = "tanssi")]
 use nimbus_primitives::NimbusId;
 #[cfg(feature = "tanssi")]
-use openzeppelin_polkadot_wrappers::impl_tanssi;
+use openzeppelin_polkadot_wrappers::impl_openzeppelin_tanssi;
 use openzeppelin_polkadot_wrappers::{
     impl_openzeppelin_assets, impl_openzeppelin_evm, impl_openzeppelin_governance,
     impl_openzeppelin_system, impl_openzeppelin_xcm, AssetsConfig, EvmConfig, GovernanceConfig,
@@ -213,7 +213,7 @@ impl_openzeppelin_system!(OpenZeppelinRuntime);
 #[cfg(not(feature = "tanssi"))]
 impl_openzeppelin_consensus!(OpenZeppelinRuntime);
 #[cfg(feature = "tanssi")]
-impl_tanssi!();
+impl_openzeppelin_tanssi!();
 impl_openzeppelin_governance!(OpenZeppelinRuntime);
 impl_openzeppelin_xcm!(OpenZeppelinRuntime);
 impl_openzeppelin_evm!(OpenZeppelinRuntime);
