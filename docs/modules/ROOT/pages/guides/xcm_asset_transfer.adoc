@@ -1,0 +1,613 @@
+:source-highlighter: highlight.js
+:highlightjs-languages: rust
+:github-icon: pass:[<svg class="icon"><use href="#github-icon"/></svg>]
+
+= XCM Asset Transfer Prerequisite Knowledge
+
+[WARNING]
+====
+Statemint is renamed to AssetHub, which may be renamed into Plaza. This is important due to resources from past & future may not make sense otherwise.
+====
+
+== Multilocation
+
+As asset identifiers, multilocations proffer significant advantages over absolute (e.g. address, hash, integer) identifiers. Primarily, an asset’s multilocation itself identifies the controlling entity. In the above example, that would be the governance of Parachain 9,000. When looking at absolute identifiers, the user must trust the issuing entity and its claims, for example that the on-chain tokens are backed in one-to-one correspondence with off-chain assets. The multilocation, terminating at a parachain, smart contract, or other protocol actually indicates the logic that controls the asset. That does not absolve the user of all necessary diligence, perhaps for example Parachain 9,000 has a trusted “superuser”. But the multilocation tells the user that this asset is controlled by a protocol, and which one.
+
+Beyond the terminus of the multilocation, it actually makes explicit a “chain of command”. Take a longer example, say an asset with ID 42 within a pallet on parachain 9,000 – “parents: 1, interior: Parachain(9,000), PalletIndex(99), GeneralIndex(42)”. This asset is controlled by the pallet, which is within the consensus of the parachain, which is within the consensus of a shared parent (the Relay Chain). Multilocations can even express entirely foreign consensus systems, for example, “parents: 2, interior: GlobalConsensus(Ethereum)”. From a parachain’s perspective, this would say, “go up two levels (as in, one *above* the Relay Chain) and then go into Ethereum’s consensus”.
+
+Note that these locations are very similar to Unix file paths, e.g. “../Parachain(9000)/PalletIndex(99)/GeneralIndex(42)” or “../../GlobalConsensus(Ethereum)”.
+
+== Teleport vs Reserve
+
+In the Polkadot ecosystem, there are two main ways to transfer assets between chains: *teleport transfers* and *reserve transfers*. These methods are part of Polkadot's *Cross-Consensus Messaging (XCM)* format, which allows for communication and asset transfers across different parachains and the Relay Chain.
+
+=== 1. Teleport Transfers
+
+*Definition*:: Teleport transfers involve moving an asset from one chain to another by essentially "teleporting" it. This process means that the asset is burned (destroyed) on the source chain and minted (created) on the destination chain.
+
+*Process*::
+* *Burning*: The asset is removed from the total supply of the source chain.
+* *Minting*: An equivalent amount of the asset is created on the destination chain.
+
+*Use Case*:: This type of transfer is ideal when the source chain no longer needs to keep track of the transferred assets. It is typically used for fungible tokens that are native to a parachain.
+
+*Trust Model*:: Both the source and destination chains must trust each other to handle the burn and mint correctly.
+
+=== 2. Reserve Asset Transfers
+
+*Definition*:: Reserve transfers involve moving an asset while keeping it backed (reserved) on the original chain. The destination chain receives a representative asset that is locked on the source chain.
+
+*Process*::
+* *Locking*: The asset is locked on the source chain (the "reserve" chain).
+* *Issuance*: A corresponding wrapped or derivative asset is issued on the destination chain.
+* *Unlocking*: If the asset is moved back, the wrapped token is burned on the destination chain, and the original asset is unlocked on the source chain.
+
+*Use Case*:: This method is ideal for assets that must remain on their origin chain or when transferring non-fungible tokens (NFTs) or assets with complex state dependencies.
+
+*Trust Model*:: The source chain (reserve chain) remains responsible for the original asset, which adds a layer of security but also complexity.
+
+== Orml-XTokens
+
+[TIP]
+====
+`orml-xtokens` crate also uses `xcm` behind the curtains. It is basically an abstraction over the complex and error-prone process of writing `xcm` code.
+====
+
+=== How Bifrost configured it:
+[%collapsible]
+====
+.Config
+[source,rust]
+----
+impl orml_xtokens::Config for Runtime {
+	type RuntimeEvent = RuntimeEvent;
+	type Balance = Balance;
+	type CurrencyId = CurrencyId;
+	type CurrencyIdConvert = BifrostCurrencyIdConvert<ParachainInfo>;
+	type AccountIdToLocation = BifrostAccountIdToLocation;
+	type UniversalLocation = UniversalLocation;
+	type SelfLocation = SelfRelativeLocation;
+	type XcmExecutor = XcmExecutor<XcmConfig>;
+	type Weigher = FixedWeightBounds<UnitWeightCost, RuntimeCall, MaxInstructions>;
+	type BaseXcmWeight = BaseXcmWeight;
+	type MaxAssetsForTransfer = MaxAssetsForTransfer;
+	type MinXcmFee = ParachainMinFee;
+	type LocationsFilter = Everything;
+	type ReserveProvider = RelativeReserveProvider;
+	type RateLimiter = ();
+	type RateLimiterId = ();
+}
+----
+
+Most of these are generic, but the following 2 are important and may need specific configuration for our use case: **`BifrostCurrencyIdConvert`, `BifrostAccountIdToLocation`.**
+
+.BifrostCurrencyIdConvert
+[source,rust]
+----
+impl<T: Get<ParaId>> Convert<Asset, Option<CurrencyId>> for BifrostCurrencyIdConvert<T> {
+	fn convert(asset: Asset) -> Option<CurrencyId> {
+		if let Asset { id: AssetId(id), fun: xcm::v4::Fungibility::Fungible(_) } = asset {
+			Self::convert(id)
+		} else {
+			None
+		}
+	}
+}
+
+pub struct BifrostCurrencyIdConvert<T>(PhantomData<T>);
+impl<T: Get<ParaId>> Convert<CurrencyId, Option<Location>> for BifrostCurrencyIdConvert<T> {
+	fn convert(id: CurrencyId) -> Option<Location> {
+		use CurrencyId::*;
+		use TokenSymbol::*;
+
+		if let Some(id) = AssetIdMaps::<Runtime>::get_location(id) {
+			return Some(id);
+		}
+
+		match id {
+			Token2(DOT_TOKEN_ID) => Some(Location::parent()),
+			Native(BNC) => Some(native_currency_location(id)),
+			// Moonbeam Native token
+			Token2(GLMR_TOKEN_ID) => Some(Location::new(
+				1,
+				[
+					Parachain(parachains::moonbeam::ID),
+					PalletInstance(parachains::moonbeam::PALLET_ID.into()),
+				],
+			)),
+			_ => None,
+		}
+	}
+}
+
+impl<T: Get<ParaId>> Convert<Location, Option<CurrencyId>> for BifrostCurrencyIdConvert<T> {
+	fn convert(location: Location) -> Option<CurrencyId> {
+		use CurrencyId::*;
+		use TokenSymbol::*;
+
+		if location == Location::parent() {
+			return Some(Token2(DOT_TOKEN_ID));
+		}
+
+		if let Some(currency_id) = AssetIdMaps::<Runtime>::get_currency_id(location.clone()) {
+			return Some(currency_id);
+		}
+
+		match &location.unpack() {
+			(0, [Parachain(id), PalletInstance(index)])
+				if (*id == parachains::moonbeam::ID) &&
+					(*index == parachains::moonbeam::PALLET_ID) =>
+				Some(Token2(GLMR_TOKEN_ID)),
+			(0, [Parachain(id), GeneralKey { data, length }])
+				if *id == u32::from(ParachainInfo::parachain_id()) =>
+			{
+				let key = &data[..*length as usize];
+				if let Ok(currency_id) = CurrencyId::decode(&mut &key[..]) {
+					match currency_id {
+						Native(BNC) => Some(currency_id),
+						_ => None,
+					}
+				} else {
+					None
+				}
+			},
+			(0, [GeneralKey { data, length }]) => {
+				// decode the general key
+				let key = &data[..*length as usize];
+				if let Ok(currency_id) = CurrencyId::decode(&mut &key[..]) {
+					match currency_id {
+						Native(BNC) => Some(currency_id),
+						_ => None,
+					}
+				} else {
+					None
+				}
+			},
+			_ => None,
+		}
+	}
+}
+----
+
+.BifrostAccountIdToLocation
+[source,rust]
+----
+pub struct BifrostAccountIdToLocation;
+impl Convert<AccountId, Location> for BifrostAccountIdToLocation {
+	fn convert(account: AccountId) -> Location {
+		[AccountId32 { network: None, id: account.into() }].into()
+	}
+}
+----
+====
+
+=== How Moonbeam configured it:
+[%collapsible]
+====
+.Config
+[source,rust]
+----
+impl orml_xtokens::Config for Runtime {
+	type RuntimeEvent = RuntimeEvent;
+	type Balance = Balance;
+	type CurrencyId = CurrencyId;
+	type AccountIdToLocation = AccountIdToLocation<AccountId>;
+	type CurrencyIdConvert = CurrencyIdToLocation<AsAssetType<AssetId, AssetType, AssetManager>>;
+	type XcmExecutor = XcmExecutor;
+	type SelfLocation = SelfLocation;
+	type Weigher = XcmWeigher;
+	type BaseXcmWeight = BaseXcmWeight;
+	type UniversalLocation = UniversalLocation;
+	type MaxAssetsForTransfer = MaxAssetsForTransfer;
+	type MinXcmFee = ParachainMinFee;
+	type LocationsFilter = Everything;
+	type ReserveProvider = AbsoluteAndRelativeReserve<SelfLocationAbsolute>;
+	type RateLimiter = ();
+	type RateLimiterId = ();
+}
+----
+
+.AccountIdToLocation
+[source,rust]
+----
+/// Instructs how to convert a 20 byte accountId into a Location
+pub struct AccountIdToLocation<AccountId>(sp_std::marker::PhantomData<AccountId>);
+impl<AccountId> sp_runtime::traits::Convert<AccountId, Location> for AccountIdToLocation<AccountId>
+where
+	AccountId: Into<[u8; 20]>,
+{
+	fn convert(account: AccountId) -> Location {
+		Location {
+			parents: 0,
+			interior: [AccountKey20 {
+				network: None,
+				key: account.into(),
+			}]
+			.into(),
+		}
+	}
+}
+----
+
+.CurrencyIdToLocation
+[source,rust]
+----
+pub struct CurrencyIdToLocation<AssetXConverter>(sp_std::marker::PhantomData<AssetXConverter>);
+impl<AssetXConverter> sp_runtime::traits::Convert<CurrencyId, Option<Location>>
+	for CurrencyIdToLocation<AssetXConverter>
+where
+	AssetXConverter: sp_runtime::traits::MaybeEquivalence<Location, AssetId>,
+{
+	fn convert(currency: CurrencyId) -> Option<Location> {
+		match currency {
+			CurrencyId::SelfReserve => {
+				let multi: Location = SelfReserve::get();
+				Some(multi)
+			}
+			CurrencyId::ForeignAsset(asset) => AssetXConverter::convert_back(&asset),
+			CurrencyId::Erc20 { contract_address } => {
+				let mut location = Erc20XcmBridgePalletLocation::get();
+				location
+					.push_interior(Junction::AccountKey20 {
+						key: contract_address.0,
+						network: None,
+					})
+					.ok();
+				Some(location)
+			}
+		}
+	}
+}
+----
+====
+
+=== How HydraDX configured it:
+[%collapsible]
+====
+.Config
+[source,rust]
+----
+impl orml_xtokens::Config for Runtime {
+	type RuntimeEvent = RuntimeEvent;
+	type Balance = Balance;
+	type CurrencyId = AssetId;
+	type CurrencyIdConvert = CurrencyIdConvert;
+	type AccountIdToLocation = AccountIdToMultiLocation;
+	type SelfLocation = SelfLocation;
+	type XcmExecutor = XcmExecutor<XcmConfig>;
+	type Weigher = FixedWeightBounds<BaseXcmWeight, RuntimeCall, MaxInstructions>;
+	type BaseXcmWeight = BaseXcmWeight;
+	type MaxAssetsForTransfer = MaxAssetsForTransfer;
+	type LocationsFilter = Everything;
+	type ReserveProvider = AbsoluteReserveProvider;
+	type MinXcmFee = ParachainMinFee;
+	type UniversalLocation = UniversalLocation;
+	type RateLimiter = (); // do not use rate limiter
+	type RateLimiterId = ();
+}
+----
+
+.CurrencyIdConvert
+[source,rust]
+----
+pub struct CurrencyIdConvert;
+
+impl Convert<AssetId, Option<Location>> for CurrencyIdConvert {
+	fn convert(id: AssetId) -> Option<Location> {
+		match id {
+			CORE_ASSET_ID => Some(Location {
+				parents: 1,
+				interior: [Parachain(ParachainInfo::get().into()), GeneralIndex(id.into())].into(),
+			}),
+			_ => {
+				let loc = AssetRegistry::asset_to_location(id);
+				if let Some(location) = loc {
+					location.into()
+				} else {
+					None
+				}
+			}
+		}
+	}
+}
+
+impl Convert<Location, Option<AssetId>> for CurrencyIdConvert {
+	fn convert(location: Location) -> Option<AssetId> {
+		let Location { parents, interior } = location.clone();
+
+		match interior {
+			Junctions::X2(a)
+				if parents == 1
+					&& a.contains(&GeneralIndex(CORE_ASSET_ID.into()))
+					&& a.contains(&Parachain(ParachainInfo::get().into())) =>
+			{
+				Some(CORE_ASSET_ID)
+			}
+			Junctions::X1(a) if parents == 0 && a.contains(&GeneralIndex(CORE_ASSET_ID.into())) => Some(CORE_ASSET_ID),
+			_ => {
+				let location: Option<AssetLocation> = location.try_into().ok();
+				if let Some(location) = location {
+					AssetRegistry::location_to_asset(location)
+				} else {
+					None
+				}
+			}
+		}
+	}
+}
+
+impl Convert<Asset, Option<AssetId>> for CurrencyIdConvert {
+	fn convert(asset: Asset) -> Option<AssetId> {
+		Self::convert(asset.id.0)
+	}
+}
+----
+
+.AccountIdToMultiLocation
+[source,rust]
+----
+pub struct AccountIdToMultiLocation;
+impl Convert<AccountId, Location> for AccountIdToMultiLocation {
+	fn convert(account: AccountId) -> Location {
+		[AccountId32 {
+			network: None,
+			id: account.into(),
+		}]
+		.into()
+	}
+}
+----
+====
+
+= How do we use it for receiving bridged ERC20 Assets?
+
+== Accepting asset hub as a reserve for bridged assets & asset hub as a reserve for DOT.
+
+For this configuration, we will be using `reserve` instead of `teleport` transfer type.
+
+To deposit reserve assets on your chain, you can use `IsReserve` from XCM Executor. See the {polkadot-wiki}[Polkadot Wiki, window="_blank"] for more details.
+
+[NOTE]
+====
+The inline documentation for `IsReserve` type states:
+"Combinations of (Asset, Location) pairs which we trust as reserves."
+====
+
+=== Configuration Steps
+
+==== 1. Configure IsReserve Type
+
+In your `xcm_executor::Config` implementation, set:
+
+[source,rust]
+----
+type IsReserve = Reserves;
+----
+
+Where `Reserves` is defined as:
+
+[source,rust]
+----
+type Reserves = (
+    // Assets bridged from different consensus systems held in reserve on Asset Hub.
+    IsBridgedConcreteAssetFrom<AssetHubLocation>,
+    // Relaychain (DOT) from Asset Hub
+    Case<RelayChainNativeAssetFromAssetHub>,
+    // Assets which the reserve is the same as the origin.
+    MultiNativeAsset<AbsoluteAndRelativeReserve<SelfLocationAbsolute>>,
+);
+----
+
+==== 2. Implement Required Types
+
+.IsBridgedConcreteAssetFrom
+[source,rust]
+----
+/// Matches foreign assets from a given origin.
+/// Foreign assets are assets bridged from other consensus systems. i.e parents > 1.
+pub struct IsBridgedConcreteAssetFrom<Origin>(PhantomData<Origin>);
+impl<Origin> ContainsPair<Asset, Location> for IsBridgedConcreteAssetFrom<Origin>
+where
+    Origin: Get<Location>,
+{
+    fn contains(asset: &Asset, origin: &Location) -> bool {
+        let loc = Origin::get();
+        &loc == origin
+            && matches!(
+                asset,
+                Asset { id: AssetId(Location { parents: 2, .. }), fun: Fungibility::Fungible(_) },
+            )
+    }
+}
+----
+
+.Parameter Types Configuration
+[source,rust]
+----
+parameter_types! {
+    /// Location of Asset Hub
+    pub AssetHubLocation: Location = Location::new(1, [Parachain(1000)]);
+    pub const RelayLocation: Location = Location::parent();
+    pub RelayLocationFilter: AssetFilter = Wild(AllOf {
+        fun: WildFungible,
+        id: xcm::prelude::AssetId(RelayLocation::get()),
+    });
+    pub RelayChainNativeAssetFromAssetHub: (AssetFilter, Location) = (
+        RelayLocationFilter::get(),
+        AssetHubLocation::get()
+    );
+}
+----
+
+.SelfLocationAbsolute
+[source,rust]
+----
+parameter_types! {
+    pub SelfLocationAbsolute: Location = Location {
+        parents:1,
+        interior: [
+            Parachain(ParachainInfo::parachain_id().into())
+        ].into()
+    };
+}
+----
+
+=== Reference Implementations
+
+For more detailed examples, see these implementations:
+
+* link:https://github.com/bifrost-finance/bifrost/pull/1249[Bifrost Implementation^]
+* link:https://github.com/galacticcouncil/hydration-node/pull/784[HydraDX Implementation^]
+* link:https://github.com/moonbeam-foundation/moonbeam/pull/2844[Moonbeam Implementation^]
+* link:https://github.com/bifrost-finance/bifrost/pull/1305[Additional Bifrost Changes^]
+
+
+== Accepting DOT as XCM Execution Fee
+
+When using `pallet_asset_manager` for registering new assets, follow these steps to accept DOT as execution fee for XCM:
+
+1. Governance must set DOT on runtime by calling these extrinsics:
+* `set_asset_units_per_second`
+* `register_foreign_asset`
+
+
+== `pallet-xcm` & `orml-xtokens`
+
+You'll need the following pallets installed and configured:
+
+* `pallet-xcm`
+* `orml-xtokens`
+
+=== Understanding XTokens Default Behavior
+
+The `xtokens` pallet manages token transfers between chains with specific default behaviors:
+
+* Uses two key pieces of information to determine the reserve chain:
+** Destination chain (where tokens are being sent)
+** Asset location (identifier of asset origin)
+* Automatically treats destination chains matching asset origin as reserve transfers
+
+[NOTE]
+====
+A reserve transfer occurs when sending assets back to their source chain.
+====
+
+=== The Problem
+
+When dealing with bridged assets:
+
+* Bridged assets typically have a prefix indicating their origin
+* This prefix doesn't match the destination chain identifier
+* By default, `xtokens` won't recognize Asset Hub as the reserve
+* Asset Hub needs recognition as the reserve chain for its issued assets
+
+=== The Solution
+
+We need to extend the `xtokens` configuration through custom trait implementations:
+
+.DOTReserveProvider Implementation
+[source,rust]
+----
+/// The `DOTReserveProvider` overrides the default reserve location for DOT (Polkadot's native token).
+///
+/// DOT can exist in multiple locations, and this provider ensures that the reserve is correctly set
+/// to the AssetHub parachain.
+///
+/// - **Default Location:** `{ parents: 1, location: Here }`
+/// - **Reserve Location on AssetHub:** `{ parents: 1, location: X1(Parachain(AssetHubParaId)) }`
+pub struct DOTReserveProvider;
+
+impl Reserve for DOTReserveProvider {
+    fn reserve(asset: &Asset) -> Option<Location> {
+        let AssetId(location) = &asset.id;
+
+        let dot_here = Location::new(1, Here);
+        let dot_asset_hub = AssetHubLocation::get();
+
+        if location == &dot_here {
+            Some(dot_asset_hub) // Reserve is on AssetHub.
+        } else {
+            None
+        }
+    }
+}
+----
+
+.BridgedAssetReserveProvider Implementation
+[source,rust]
+----
+/// The `BridgedAssetReserveProvider` handles assets that are bridged from external consensus systems
+/// (e.g., Ethereum) and may have multiple valid reserve locations.
+pub struct BridgedAssetReserveProvider;
+
+impl Reserve for BridgedAssetReserveProvider {
+    fn reserve(asset: &Asset) -> Option<Location> {
+        let AssetId(location) = &asset.id;
+        let asset_hub_reserve = AssetHubLocation::get();
+
+        // Check if asset is bridged (parents > 1 and starts with GlobalConsensus)
+        if location.parents > 1 && location.interior.clone().split_global().is_ok() {
+            Some(asset_hub_reserve)
+        } else {
+            None
+        }
+    }
+}
+----
+
+.Combined ReserveProviders Implementation
+[source,rust]
+----
+pub struct ReserveProviders;
+
+impl Reserve for ReserveProviders {
+    fn reserve(asset: &Asset) -> Option<Location> {
+        // Try each provider's reserve method in sequence.
+        DOTReserveProvider::reserve(asset)
+            .or_else(|| BridgedAssetReserveProvider::reserve(asset))
+            .or_else(|| AbsoluteAndRelativeReserve::<SelfLocationAbsolute>::reserve(asset))
+    }
+}
+----
+
+=== Final Configuration
+
+Configure the `orml_xtokens` pallet with the custom reserve providers:
+
+[source,rust]
+----
+impl orml_xtokens::Config for Runtime {
+    type AccountIdToLocation = AccountIdToLocation<AccountId>;
+    type Balance = Balance;
+    type BaseXcmWeight = BaseXcmWeight;
+    type CurrencyId = CurrencyId;
+    type CurrencyIdConvert = CurrencyIdToLocation<AsAssetType<AssetId, AssetType, AssetManager>>;
+    type LocationsFilter = Everything;
+    type MaxAssetsForTransfer = MaxAssetsForTransfer;
+    type MinXcmFee = ParachainMinFee;
+    type RateLimiter = ();
+    type RateLimiterId = ();
+    type ReserveProvider = ReserveProviders;
+    type RuntimeEvent = RuntimeEvent;
+    type SelfLocation = SelfLocation;
+    type UniversalLocation = UniversalLocation;
+    type Weigher = XcmWeigher;
+    type XcmExecutor = XcmExecutor<XcmConfig>;
+}
+----
+
+== A Pallet for Storing Bridged Assets
+
+For storing bridged assets, we follow the Moonbeam approach:
+
+* Use `orml` and `pallet_asset_manager`
+* Assets must first be registered with the asset manager via extrinsics:
+** `set_asset_units_per_second`
+** `register_foreign_asset`
+
+[TIP]
+====
+For a detailed implementation example, see the {github-ref}[OpenZeppelin PR #331^].
+====
+
+:github-ref: https://github.com/OpenZeppelin/polkadot-runtime-templates/pull/331/files
