@@ -365,7 +365,9 @@ impl Convert<AccountId, Location> for AccountIdToMultiLocation {
 
 For this configuration, we will be using `reserve` instead of `teleport` transfer type.
 
-To deposit reserve assets on your chain, you can use `IsReserve` from XCM Executor. See the {polkadot-wiki}[Polkadot Wiki, window="_blank"] for more details.
+:polkadot-wiki-xcm: https://wiki.polkadot.network/docs/learn/xcm/config-deep-dive#isreserve
+
+To deposit reserve assets on your chain, you can use `IsReserve` from XCM Executor. See the {polkadot-wiki-xcm}[Polkadot Wiki, window="_blank"] for more details.
 
 [NOTE]
 ====
