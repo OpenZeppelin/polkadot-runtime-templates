@@ -26,8 +26,8 @@ serde_json = "1.0.121"
 smallvec = "1.11.0"
 
 # TODO: update to release
-openzeppelin-pallet-abstractions = { git = "https://github.com/OpenZeppelin/openzeppelin-pallet-abstractions", branch = "main", default-features = false }
-openzeppelin-pallet-abstractions-proc = { git = "https://github.com/OpenZeppelin/openzeppelin-pallet-abstractions", branch = "main", default-features = false }
+openzeppelin-pallet-abstractions = { git = "https://github.com/OpenZeppelin/openzeppelin-pallet-abstractions", tag = "v0.1-rc2", default-features = false }
+openzeppelin-pallet-abstractions-proc = { git = "https://github.com/OpenZeppelin/openzeppelin-pallet-abstractions", tag = "v0.1-rc2", default-features = false }
 
 # Substrate
 frame-benchmarking = { git = "https://github.com/paritytech/polkadot-sdk", default-features = false, tag = "polkadot-stable2407-1" }

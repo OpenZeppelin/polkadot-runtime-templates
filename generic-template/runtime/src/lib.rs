@@ -116,38 +116,28 @@ use openzeppelin_pallet_abstractions_proc::openzeppelin_construct_runtime;
 #[cfg(feature = "tanssi")]
 #[openzeppelin_construct_runtime]
 mod runtime {
-    #[abstraction]
     struct System;
 
-    #[abstraction]
     struct XCM;
 
-    #[abstraction]
     struct Assets;
 
-    #[abstraction]
     struct Governance;
 
-    #[abstraction]
     struct Tanssi;
 }
 
 #[cfg(not(feature = "tanssi"))]
 #[openzeppelin_construct_runtime]
 mod runtime {
-    #[abstraction]
     struct System;
 
-    #[abstraction]
     struct XCM;
 
-    #[abstraction]
     struct Assets;
 
-    #[abstraction]
     struct Governance;
 
-    #[abstraction]
     struct Consensus;
 }
 

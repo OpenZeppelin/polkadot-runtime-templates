@@ -25,14 +25,12 @@ mod apis {
     type Runtime = Runtime;
     type Block = Block;
 
-    #[abstraction]
     mod assets {
         type RuntimeCall = RuntimeCall;
         type TransactionPayment = TransactionPayment;
         type Balance = Balance;
     }
 
-    #[abstraction]
     mod consensus {
         type SessionKeys = SessionKeys;
         #[cfg(not(feature = "async-backing"))]
@@ -43,7 +41,6 @@ mod apis {
         type ConsensusHook = ConsensusHook;
     }
 
-    #[abstraction]
     mod system {
         type Executive = Executive;
         type System = System;
@@ -55,7 +52,6 @@ mod apis {
         type RuntimeBlockWeights = RuntimeBlockWeights;
     }
 
-    #[abstraction]
     mod benchmarks {
         type AllPalletsWithSystem = AllPalletsWithSystem;
         type Assets = Assets;
@@ -83,19 +79,16 @@ mod apis {
     type Runtime = Runtime;
     type Block = Block;
 
-    #[abstraction]
     mod assets {
         type RuntimeCall = RuntimeCall;
         type TransactionPayment = TransactionPayment;
         type Balance = Balance;
     }
 
-    #[abstraction]
     mod tanssi {
         type SessionKeys = SessionKeys;
     }
 
-    #[abstraction]
     mod system {
         type Executive = Executive;
         type System = System;
@@ -107,7 +100,6 @@ mod apis {
         type RuntimeBlockWeights = RuntimeBlockWeights;
     }
 
-    #[abstraction]
     mod benchmarks {
         type AllPalletsWithSystem = AllPalletsWithSystem;
         type Assets = Assets;
