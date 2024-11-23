@@ -183,6 +183,11 @@ async fn start_node_impl(
     .await
     .map_err(|e| sc_service::Error::Application(Box::new(e) as Box<_>))?;
 
+    #[cfg(not(feature = "tanssi"))]
+    let (relay_chain_interface, collator_key) = relay_chain_interface;
+    #[cfg(feature = "tanssi")]
+    let (relay_chain_interface, _) = relay_chain_interface;
+
     let validator = parachain_config.role.is_authority();
     #[cfg(not(feature = "tanssi"))]
     let prometheus_registry = parachain_config.prometheus_registry().cloned();
@@ -197,7 +202,7 @@ async fn start_node_impl(
             transaction_pool: transaction_pool.clone(),
             para_id,
             spawn_handle: task_manager.spawn_handle(),
-            relay_chain_interface: interface.0.clone(),
+            relay_chain_interface: relay_chain_interface.clone(),
             import_queue: params.import_queue,
             sybil_resistance_level: CollatorSybilResistance::Resistant, // because of Aura
         })
@@ -293,13 +298,13 @@ async fn start_node_impl(
     let relay_chain_slot_duration = Duration::from_secs(6);
 
     let overseer_handle =
-        interface.0.overseer_handle().map_err(|e| sc_service::Error::Application(Box::new(e)))?;
+        relay_chain_interface.overseer_handle().map_err(|e| sc_service::Error::Application(Box::new(e)))?;
 
     start_relay_chain_tasks(StartRelayChainTasksParams {
         client: client.clone(),
         announce_block: announce_block.clone(),
         para_id,
-        relay_chain_interface: interface.0.clone(),
+        relay_chain_interface: relay_chain_interface.clone(),
         task_manager: &mut task_manager,
         da_recovery_profile: if validator {
             DARecoveryProfile::Collator
@@ -322,12 +327,12 @@ async fn start_node_impl(
             prometheus_registry.as_ref(),
             telemetry.as_ref().map(|t| t.handle()),
             &task_manager,
-            interface.0.clone(),
+            relay_chain_interface.clone(),
             transaction_pool,
             params.keystore_container.keystore(),
             relay_chain_slot_duration,
             para_id,
-            interface.1.expect("Command line arguments do not allow this. qed"),
+            collator_key.expect("Command line arguments do not allow this. qed"),
             overseer_handle,
             announce_block,
         )?;
