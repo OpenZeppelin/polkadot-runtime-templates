@@ -297,8 +297,9 @@ async fn start_node_impl(
 
     let relay_chain_slot_duration = Duration::from_secs(6);
 
-    let overseer_handle =
-        relay_chain_interface.overseer_handle().map_err(|e| sc_service::Error::Application(Box::new(e)))?;
+    let overseer_handle = relay_chain_interface
+        .overseer_handle()
+        .map_err(|e| sc_service::Error::Application(Box::new(e)))?;
 
     start_relay_chain_tasks(StartRelayChainTasksParams {
         client: client.clone(),
