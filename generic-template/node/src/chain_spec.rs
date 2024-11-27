@@ -1,7 +1,7 @@
 use cumulus_primitives_core::ParaId;
-use generic_runtime_template::{
-    constants::currency::EXISTENTIAL_DEPOSIT, AccountId, AuraId, Signature,
-};
+#[cfg(not(feature = "tanssi"))]
+use generic_runtime_template::{constants::currency::EXISTENTIAL_DEPOSIT, AuraId};
+use generic_runtime_template::{AccountId, Signature};
 use sc_chain_spec::{ChainSpecExtension, ChainSpecGroup};
 use sc_service::ChainType;
 use serde::{Deserialize, Serialize};
@@ -44,6 +44,7 @@ type AccountPublic = <Signature as Verify>::Signer;
 ///
 /// This function's return type must always match the session keys of the chain
 /// in tuple format.
+#[cfg(not(feature = "tanssi"))]
 pub fn get_collator_keys_from_seed(seed: &str) -> AuraId {
     get_from_seed::<AuraId>(seed)
 }
@@ -60,6 +61,8 @@ where
 ///
 /// The input must be a tuple of individual keys (a single arg for now since we
 /// have just one key).
+///
+#[cfg(not(feature = "tanssi"))]
 pub fn template_session_keys(keys: AuraId) -> generic_runtime_template::SessionKeys {
     generic_runtime_template::SessionKeys { aura: keys }
 }
@@ -86,6 +89,7 @@ pub fn development_config() -> ChainSpec {
     .with_chain_type(ChainType::Development)
     .with_genesis_config_patch(testnet_genesis(
         // initial collators.
+        #[cfg(not(feature = "tanssi"))]
         vec![
             (
                 get_account_id_from_seed::<sr25519::Public>("Alice"),
@@ -137,6 +141,7 @@ pub fn local_testnet_config() -> ChainSpec {
     .with_chain_type(ChainType::Local)
     .with_genesis_config_patch(testnet_genesis(
         // initial collators.
+        #[cfg(not(feature = "tanssi"))]
         vec![
             (
                 get_account_id_from_seed::<sr25519::Public>("Alice"),
@@ -169,6 +174,7 @@ pub fn local_testnet_config() -> ChainSpec {
     .build()
 }
 
+#[cfg(not(feature = "tanssi"))]
 fn testnet_genesis(
     invulnerables: Vec<(AccountId, AuraId)>,
     endowed_accounts: Vec<AccountId>,
@@ -197,6 +203,27 @@ fn testnet_genesis(
                     )
                 })
             .collect::<Vec<_>>(),
+        },
+        "treasury": {},
+        "polkadotXcm": {
+            "safeXcmVersion": Some(SAFE_XCM_VERSION),
+        },
+        "sudo": { "key": Some(root) }
+    })
+}
+
+#[cfg(feature = "tanssi")]
+fn testnet_genesis(
+    endowed_accounts: Vec<AccountId>,
+    root: AccountId,
+    id: ParaId,
+) -> serde_json::Value {
+    serde_json::json!({
+        "balances": {
+            "balances": endowed_accounts.iter().cloned().map(|k| (k, 1u64 << 60)).collect::<Vec<_>>(),
+        },
+        "parachainInfo": {
+            "parachainId": id,
         },
         "treasury": {},
         "polkadotXcm": {

@@ -17,8 +17,8 @@ parity-scale-codec = { workspace = true, features = [ "derive" ] }
 scale-info = { workspace = true, features = [ "derive" ] }
 smallvec = { workspace = true }
 
-openzeppelin-polkadot-wrappers = { workspace = true }
-openzeppelin-polkadot-wrappers-proc = { workspace = true }
+openzeppelin-pallet-abstractions = { workspace = true }
+openzeppelin-pallet-abstractions-proc = { workspace = true }
 
 # Substrate
 frame-benchmarking = { workspace = true, optional = true }
@@ -30,8 +30,6 @@ frame-system-benchmarking = { workspace = true, optional = true }
 frame-system-rpc-runtime-api = { workspace = true }
 frame-try-runtime = { workspace = true, optional = true }
 pallet-assets = { workspace = true }
-pallet-aura = { workspace = true }
-pallet-authorship = { workspace = true }
 pallet-balances = { workspace = true }
 pallet-conviction-voting = { workspace = true }
 pallet-message-queue = { workspace = true }
@@ -40,7 +38,6 @@ pallet-preimage = { workspace = true }
 pallet-proxy = { workspace = true }
 pallet-referenda = { workspace = true }
 pallet-scheduler = { workspace = true }
-pallet-session = { workspace = true }
 pallet-sudo = { workspace = true }
 pallet-timestamp = { workspace = true }
 pallet-transaction-payment = { workspace = true }
@@ -62,6 +59,12 @@ sp-std = { workspace = true }
 sp-transaction-pool = { workspace = true }
 sp-version = { workspace = true }
 
+cumulus-pallet-aura-ext = { workspace = true }
+pallet-aura = { workspace = true }
+pallet-authorship = { workspace = true }
+pallet-collator-selection = { workspace = true }
+pallet-session = { workspace = true }
+
 # Polkadot
 pallet-xcm = { workspace = true }
 polkadot-parachain-primitives = { workspace = true }
@@ -72,7 +75,6 @@ xcm-executor = { workspace = true }
 
 # Cumulus
 assets-common = { workspace = true }
-cumulus-pallet-aura-ext = { workspace = true }
 cumulus-pallet-parachain-system = { workspace = true }
 cumulus-pallet-session-benchmarking = { workspace = true }
 cumulus-pallet-xcm = { workspace = true }
@@ -80,8 +82,8 @@ cumulus-pallet-xcmp-queue = { workspace = true }
 cumulus-primitives-aura = { workspace = true }
 cumulus-primitives-core = { workspace = true }
 cumulus-primitives-storage-weight-reclaim = { workspace = true }
+cumulus-primitives-timestamp = { workspace = true }
 cumulus-primitives-utility = { workspace = true }
-pallet-collator-selection = { workspace = true }
 parachain-info = { workspace = true }
 parachains-common = { workspace = true }
 
@@ -92,9 +94,14 @@ pallet-xcm-weight-trader = { workspace = true }
 xcm-primitives = { workspace = true }
 
 # ORML
+dp-consensus = { workspace = true }
+nimbus-primitives = { workspace = true }
 orml-traits = { workspace = true }
 orml-xcm-support = { workspace = true }
 orml-xtokens = { workspace = true }
+pallet-author-inherent = { workspace = true }
+# Tanssi
+pallet-cc-authorities-noting = { workspace = true }
 
 [dev-dependencies]
 sp-io = { workspace = true }
@@ -113,7 +120,9 @@ std = [
 	"cumulus-primitives-aura/std",
 	"cumulus-primitives-core/std",
 	"cumulus-primitives-storage-weight-reclaim/std",
+	"cumulus-primitives-timestamp/std",
 	"cumulus-primitives-utility/std",
+	"dp-consensus/std",
 	"frame-benchmarking?/std",
 	"frame-executive/std",
 	"frame-metadata-hash-extension/std",
@@ -123,13 +132,16 @@ std = [
 	"frame-system/std",
 	"frame-try-runtime?/std",
 	"log/std",
-	"openzeppelin-polkadot-wrappers/std",
+	"nimbus-primitives/std",
+	"openzeppelin-pallet-abstractions/std",
 	"orml-xtokens/std",
 	"pallet-asset-manager/std",
 	"pallet-assets/std",
 	"pallet-aura/std",
+	"pallet-author-inherent/std",
 	"pallet-authorship/std",
 	"pallet-balances/std",
+	"pallet-cc-authorities-noting/std",
 	"pallet-collator-selection/std",
 	"pallet-conviction-voting/std",
 	"pallet-message-queue/std",
@@ -180,15 +192,18 @@ runtime-benchmarks = [
 	"cumulus-pallet-session-benchmarking/runtime-benchmarks",
 	"cumulus-pallet-xcmp-queue/runtime-benchmarks",
 	"cumulus-primitives-utility/runtime-benchmarks",
+	"dp-consensus/runtime-benchmarks",
 	"frame-benchmarking/runtime-benchmarks",
 	"frame-support/runtime-benchmarks",
 	"frame-system-benchmarking/runtime-benchmarks",
 	"frame-system/runtime-benchmarks",
 	"hex-literal",
+	"nimbus-primitives/runtime-benchmarks",
 	"pallet-asset-manager/runtime-benchmarks",
 	"pallet-assets/runtime-benchmarks",
+	"pallet-author-inherent/runtime-benchmarks",
 	"pallet-balances/runtime-benchmarks",
-	"pallet-collator-selection/runtime-benchmarks",
+	"pallet-cc-authorities-noting/runtime-benchmarks",
 	"pallet-conviction-voting/runtime-benchmarks",
 	"pallet-message-queue/runtime-benchmarks",
 	"pallet-multisig/runtime-benchmarks",
@@ -221,12 +236,14 @@ try-runtime = [
 	"frame-support/try-runtime",
 	"frame-system/try-runtime",
 	"frame-try-runtime/try-runtime",
+	"nimbus-primitives/try-runtime",
 	"orml-xtokens/try-runtime",
 	"pallet-asset-manager/try-runtime",
 	"pallet-assets/try-runtime",
 	"pallet-aura/try-runtime",
-	"pallet-authorship/try-runtime",
+	"pallet-author-inherent/try-runtime",
 	"pallet-balances/try-runtime",
+	"pallet-cc-authorities-noting/try-runtime",
 	"pallet-collator-selection/try-runtime",
 	"pallet-conviction-voting/try-runtime",
 	"pallet-message-queue/try-runtime",
@@ -235,8 +252,6 @@ try-runtime = [
 	"pallet-proxy/try-runtime",
 	"pallet-referenda/try-runtime",
 	"pallet-scheduler/try-runtime",
-	"pallet-session/try-runtime",
-	"pallet-session/try-runtime",
 	"pallet-sudo/try-runtime",
 	"pallet-timestamp/try-runtime",
 	"pallet-transaction-payment/try-runtime",
@@ -256,8 +271,10 @@ try-runtime = [
 # to make it smaller, like logging for example.
 on-chain-release-build = [ "sp-api/disable-logging" ]
 
-async-backing = [ "openzeppelin-polkadot-wrappers-proc/async-backing" ]
+async-backing = [ "openzeppelin-pallet-abstractions-proc/async-backing" ]
 
 default = [ "std" ]
 
 metadata-hash = [ "substrate-wasm-builder/metadata-hash" ]
+
+tanssi = []

@@ -26,8 +26,8 @@ serde_json = "1.0.121"
 smallvec = "1.11.0"
 
 # TODO: update to release
-openzeppelin-polkadot-wrappers = { git = "https://github.com/openzeppelin/polkadot-runtime-wrappers", default-features = false, tag = "v0.1-rc1" }
-openzeppelin-polkadot-wrappers-proc = { git = "https://github.com/openzeppelin/polkadot-runtime-wrappers", default-features = false, tag = "v0.1-rc1" }
+openzeppelin-pallet-abstractions = { git = "https://github.com/OpenZeppelin/openzeppelin-pallet-abstractions", default-features = false, tag = "v0.1-rc2" }
+openzeppelin-pallet-abstractions-proc = { git = "https://github.com/OpenZeppelin/openzeppelin-pallet-abstractions", default-features = false, tag = "v0.1-rc2" }
 
 # Substrate
 frame-benchmarking = { git = "https://github.com/paritytech/polkadot-sdk", default-features = false, tag = "polkadot-stable2407-1" }
@@ -127,6 +127,7 @@ cumulus-primitives-aura = { git = "https://github.com/paritytech/polkadot-sdk", 
 cumulus-primitives-core = { git = "https://github.com/paritytech/polkadot-sdk", default-features = false, tag = "polkadot-stable2407-1" }
 cumulus-primitives-parachain-inherent = { git = "https://github.com/paritytech/polkadot-sdk", default-features = false, tag = "polkadot-stable2407-1" }
 cumulus-primitives-storage-weight-reclaim = { git = "https://github.com/paritytech/polkadot-sdk", default-features = false, tag = "polkadot-stable2407-1" }
+cumulus-primitives-timestamp = { git = "https://github.com/paritytech/polkadot-sdk", default-features = false, tag = "polkadot-stable2407-1" }
 cumulus-primitives-utility = { git = "https://github.com/paritytech/polkadot-sdk", default-features = false, tag = "polkadot-stable2407-1" }
 cumulus-relay-chain-interface = { git = "https://github.com/paritytech/polkadot-sdk", default-features = false, tag = "polkadot-stable2407-1" }
 cumulus-test-relay-sproof-builder = { git = "https://github.com/paritytech/polkadot-sdk", default-features = false, tag = "polkadot-stable2407-1" }
@@ -148,6 +149,12 @@ orml-xtokens = { git = "https://github.com/OpenZeppelin/open-runtime-module-libr
 # Fuzzer
 ziggy = { version = "1.0.2", default-features = false }
 
+# Tanssi
+dp-consensus = { git = "https://github.com/OpenZeppelin/dancekit", default-features = false, tag = "polkadot-stable2407-1" }
+nimbus-consensus = { git = "https://github.com/OpenZeppelin/moonkit", default-features = false, tag = "polkadot-stable2407-1" }
+nimbus-primitives = { git = "https://github.com/OpenZeppelin/moonkit", default-features = false, tag = "polkadot-stable2407-1" }
+pallet-author-inherent = { git = "https://github.com/OpenZeppelin/moonkit", default-features = false, tag = "polkadot-stable2407-1" }
+pallet-cc-authorities-noting = { git = "https://github.com/OpenZeppelin/dancekit", default-features = false, tag = "polkadot-stable2407-1" }
 
 [workspace.lints.clippy]
 large_enum_variant = "allow"

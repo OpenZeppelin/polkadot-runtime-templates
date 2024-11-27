@@ -34,6 +34,7 @@ sc-cli = { workspace = true }
 sc-client-api = { workspace = true }
 sc-consensus = { workspace = true }
 sc-consensus-aura = { workspace = true }
+sc-consensus-slots = { workspace = true }
 sc-executor = { workspace = true }
 sc-network = { workspace = true }
 sc-network-sync = { workspace = true }
@@ -70,10 +71,12 @@ cumulus-client-collator = { workspace = true }
 cumulus-client-consensus-aura = { workspace = true }
 cumulus-client-consensus-common = { workspace = true }
 cumulus-client-consensus-proposer = { workspace = true }
+cumulus-client-parachain-inherent = { workspace = true }
 cumulus-client-service = { workspace = true }
 cumulus-primitives-core = { workspace = true }
 cumulus-primitives-parachain-inherent = { workspace = true }
 cumulus-relay-chain-interface = { workspace = true }
+cumulus-test-relay-sproof-builder = { workspace = true }
 
 # Frontier
 fc-api = { workspace = true }
@@ -87,21 +90,19 @@ fp-dynamic-fee = { workspace = true, features = [ "std" ] }
 fp-evm = { workspace = true }
 fp-rpc = { workspace = true }
 
+# Tanssi
+ccp-authorities-noting-inherent = { workspace = true }
+nimbus-consensus = { workspace = true }
+tc-consensus = { workspace = true }
+
 [build-dependencies]
 substrate-build-script-utils = { workspace = true }
 
 [features]
 default = []
 async-backing = []
-runtime-benchmarks = [
-	"evm-runtime-template/runtime-benchmarks",
-	"frame-benchmarking-cli/runtime-benchmarks",
-	"frame-benchmarking/runtime-benchmarks",
-	"polkadot-cli/runtime-benchmarks",
-	"polkadot-primitives/runtime-benchmarks",
-	"sc-service/runtime-benchmarks",
-	"sp-runtime/runtime-benchmarks",
-]
+runtime-benchmarks = [ "evm-runtime-template/runtime-benchmarks", "frame-benchmarking-cli/runtime-benchmarks", "frame-benchmarking/runtime-benchmarks", "polkadot-cli/runtime-benchmarks", "polkadot-primitives/runtime-benchmarks", "sc-service/runtime-benchmarks", "sp-runtime/runtime-benchmarks", "tc-consensus/runtime-benchmarks" ]
+tanssi = []
 try-runtime = [
 	"evm-runtime-template/try-runtime",
 	"polkadot-cli/try-runtime",
