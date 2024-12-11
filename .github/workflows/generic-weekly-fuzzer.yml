@@ -29,10 +29,9 @@ jobs:
         run: cargo afl config --build
         working-directory: generic-template/template-fuzzer
 
-        # this is set for 30 minutes for testing purposes
       - name: Run Ziggy Fuzzing
         run: |
-          AFL_I_DONT_CARE_ABOUT_MISSING_CRASHES=1 timeout 30m cargo ziggy fuzz -t 20 || true
+          AFL_I_DONT_CARE_ABOUT_MISSING_CRASHES=1 timeout 5h cargo ziggy fuzz -t 20 || true
         working-directory: generic-template/template-fuzzer
       
       - name: Zip Artifacts
