@@ -31,12 +31,14 @@ jobs:
 
       - name: Run Ziggy Fuzzing
         run: |
-          timeout 5h cargo ziggy fuzz -t 20 || true
+          AFL_I_DONT_CARE_ABOUT_MISSING_CRASHES=1 timeout 5h cargo ziggy fuzz -t 20 || true
         working-directory: generic-template/template-fuzzer
+      
+      - name: Zip Artifacts
+        run: zip artifacts.zip generic-template/template-fuzzer/output/* -r
       
       - name: Save Artifacts
         uses: actions/upload-artifact@v4
         with:
           name: fuzzing-artifacts
-          path: |
-            generic-template/template-fuzzer/output
+          path: artifacts.zip
