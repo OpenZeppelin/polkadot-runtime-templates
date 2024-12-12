@@ -13,6 +13,7 @@ use crate::{
 };
 
 impl SystemWeight for OpenZeppelinRuntime {
+    type Balances = weights::pallet_balances::WeightInfo<Runtime>;
     type DbWeight = RocksDbWeight;
     type Multisig = weights::pallet_multisig::WeightInfo<Runtime>;
     type ParachainSystem = weights::cumulus_pallet_parachain_system::WeightInfo<Runtime>;
@@ -20,6 +21,7 @@ impl SystemWeight for OpenZeppelinRuntime {
     type Proxy = weights::pallet_proxy::WeightInfo<Runtime>;
     type Scheduler = weights::pallet_scheduler::WeightInfo<Runtime>;
     type Timestamp = weights::pallet_timestamp::WeightInfo<Runtime>;
+    type Utility = weights::pallet_utility::WeightInfo<Runtime>;
 }
 
 #[cfg(not(feature = "tanssi"))]
