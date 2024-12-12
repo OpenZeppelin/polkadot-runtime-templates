@@ -17,8 +17,8 @@ parity-scale-codec = { workspace = true, features = [ "derive" ] }
 scale-info = { workspace = true, features = [ "derive" ] }
 smallvec = { workspace = true }
 
-openzeppelin-pallet-abstractions = { workspace = true }
-openzeppelin-pallet-abstractions-proc = { workspace = true }
+openzeppelin-pallet-abstractions = { git = "https://github.com/OpenZeppelin/openzeppelin-pallet-abstractions", default-features = false, commit = "5e73aecd7a5afc7e9dadce6a52a255f5c222f032" }
+openzeppelin-pallet-abstractions-proc = { git = "https://github.com/OpenZeppelin/openzeppelin-pallet-abstractions", default-features = false, commit = "5e73aecd7a5afc7e9dadce6a52a255f5c222f032" }
 
 # Substrate
 frame-benchmarking = { workspace = true, optional = true }

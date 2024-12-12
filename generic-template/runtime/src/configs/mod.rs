@@ -1,6 +1,7 @@
 pub mod asset_config;
 pub use asset_config::AssetType;
 pub mod governance;
+pub mod weight;
 pub mod xcm_config;
 
 use asset_config::*;
@@ -29,14 +30,17 @@ use frame_system::{
 };
 pub use governance::origins::pallet_custom_origins;
 use governance::{origins::Treasurer, tracks, Spender, WhitelistedCaller};
-#[cfg(feature = "tanssi")]
-use openzeppelin_pallet_abstractions::impl_openzeppelin_tanssi;
 use openzeppelin_pallet_abstractions::{
     impl_openzeppelin_assets, impl_openzeppelin_governance, impl_openzeppelin_system,
-    impl_openzeppelin_xcm, AssetsConfig, GovernanceConfig, SystemConfig, XcmConfig,
+    impl_openzeppelin_xcm, AssetsConfig, AssetsWeight, GovernanceConfig, GovernanceWeight,
+    SystemConfig, SystemWeight, XcmConfig, XcmWeight,
 };
 #[cfg(not(feature = "tanssi"))]
-use openzeppelin_pallet_abstractions::{impl_openzeppelin_consensus, ConsensusConfig};
+use openzeppelin_pallet_abstractions::{
+    impl_openzeppelin_consensus, ConsensusConfig, ConsensusWeight,
+};
+#[cfg(feature = "tanssi")]
+use openzeppelin_pallet_abstractions::{impl_openzeppelin_tanssi, TanssiConfig, TanssiWeight};
 use parachains_common::message_queue::{NarrowOriginToSibling, ParaIdToSibling};
 use polkadot_runtime_common::{BlockHashCount, SlowAdjustingFeeUpdate};
 #[cfg(not(feature = "tanssi"))]
@@ -70,14 +74,14 @@ use crate::{
     constants::{
         currency::{deposit, CENTS, EXISTENTIAL_DEPOSIT, MICROCENTS},
         AVERAGE_ON_INITIALIZE_RATIO, DAYS, MAXIMUM_BLOCK_WEIGHT, MAX_BLOCK_LENGTH,
-        NORMAL_DISPATCH_RATIO,
+        NORMAL_DISPATCH_RATIO, SLOT_DURATION,
     },
     types::{
         AccountId, AssetId, AssetKind, Balance, Beneficiary, Block, Hash,
         MessageQueueServiceWeight, Nonce, PriceForSiblingParachainDelivery, ProxyType,
         TreasuryAccount, TreasuryInteriorLocation, TreasuryPalletId, TreasuryPaymaster, Version,
     },
-    weights::{self, BlockExecutionWeight, ExtrinsicBaseWeight, RocksDbWeight},
+    weights::{BlockExecutionWeight, ExtrinsicBaseWeight},
     AllPalletsWithSystem, AssetManager, Balances, MessageQueue, OriginCaller, PalletInfo,
     ParachainInfo, ParachainSystem, PolkadotXcm, Preimage, Referenda, Runtime, RuntimeCall,
     RuntimeEvent, RuntimeFreezeReason, RuntimeHoldReason, RuntimeOrigin, RuntimeTask, Scheduler,
@@ -104,6 +108,7 @@ impl SystemConfig for OpenZeppelinRuntime {
     type ProxyType = ProxyType;
     type SS58Prefix = ConstU16<42>;
     type ScheduleOrigin = EnsureRoot<AccountId>;
+    type SlotDuration = ConstU64<SLOT_DURATION>;
     type Version = Version;
 }
 #[cfg(not(feature = "tanssi"))]
