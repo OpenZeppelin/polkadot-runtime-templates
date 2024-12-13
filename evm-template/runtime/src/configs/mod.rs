@@ -1,5 +1,6 @@
 pub mod asset_config;
 pub mod governance;
+pub mod weight;
 pub mod xcm_config;
 
 use asset_config::*;
@@ -30,15 +31,18 @@ pub use governance::origins::pallet_custom_origins;
 use governance::{origins::Treasurer, tracks, Spender, WhitelistedCaller};
 #[cfg(feature = "tanssi")]
 use nimbus_primitives::NimbusId;
-#[cfg(feature = "tanssi")]
-use openzeppelin_pallet_abstractions::impl_openzeppelin_tanssi;
 use openzeppelin_pallet_abstractions::{
     impl_openzeppelin_assets, impl_openzeppelin_evm, impl_openzeppelin_governance,
-    impl_openzeppelin_system, impl_openzeppelin_xcm, AssetsConfig, EvmConfig, GovernanceConfig,
-    SystemConfig, XcmConfig,
+    impl_openzeppelin_system, impl_openzeppelin_xcm, AssetsConfig, AssetsWeight, EvmConfig,
+    EvmWeight, GovernanceConfig, GovernanceWeight, SystemConfig, SystemWeight, XcmConfig,
+    XcmWeight,
 };
 #[cfg(not(feature = "tanssi"))]
-use openzeppelin_pallet_abstractions::{impl_openzeppelin_consensus, ConsensusConfig};
+use openzeppelin_pallet_abstractions::{
+    impl_openzeppelin_consensus, ConsensusConfig, ConsensusWeight,
+};
+#[cfg(feature = "tanssi")]
+use openzeppelin_pallet_abstractions::{impl_openzeppelin_tanssi, TanssiConfig, TanssiWeight};
 use pallet_ethereum::PostLogContent;
 use pallet_evm::{EVMCurrencyAdapter, EnsureAccountId20, IdentityAddressMapping};
 use parachains_common::message_queue::{NarrowOriginToSibling, ParaIdToSibling};
@@ -79,7 +83,7 @@ use crate::{
     constants::{
         currency::{deposit, CENTS, EXISTENTIAL_DEPOSIT, MICROCENTS, MILLICENTS},
         AVERAGE_ON_INITIALIZE_RATIO, DAYS, MAXIMUM_BLOCK_WEIGHT, MAX_BLOCK_LENGTH,
-        NORMAL_DISPATCH_RATIO, WEIGHT_PER_GAS,
+        NORMAL_DISPATCH_RATIO, SLOT_DURATION, WEIGHT_PER_GAS,
     },
     opaque,
     types::{
@@ -87,7 +91,7 @@ use crate::{
         MessageQueueServiceWeight, Nonce, PrecompilesValue, PriceForSiblingParachainDelivery,
         ProxyType, TreasuryInteriorLocation, TreasuryPalletId, TreasuryPaymaster, Version,
     },
-    weights::{self, BlockExecutionWeight, ExtrinsicBaseWeight, RocksDbWeight},
+    weights::{BlockExecutionWeight, ExtrinsicBaseWeight},
     AllPalletsWithSystem, AssetManager, Balances, BaseFee, EVMChainId, Erc20XcmBridge,
     MessageQueue, OpenZeppelinPrecompiles, OriginCaller, PalletInfo, ParachainInfo,
     ParachainSystem, PolkadotXcm, Preimage, Referenda, Runtime, RuntimeCall, RuntimeEvent,
@@ -113,8 +117,11 @@ impl SystemConfig for OpenZeppelinRuntime {
     type ProxyType = ProxyType;
     type SS58Prefix = ConstU16<42>;
     type ScheduleOrigin = EnsureRoot<AccountId>;
+    type SlotDuration = ConstU64<SLOT_DURATION>;
     type Version = Version;
 }
+#[cfg(feature = "tanssi")]
+impl TanssiConfig for OpenZeppelinRuntime {}
 #[cfg(not(feature = "tanssi"))]
 impl ConsensusConfig for OpenZeppelinRuntime {
     type CollatorSelectionUpdateOrigin = CollatorSelectionUpdateOrigin;
