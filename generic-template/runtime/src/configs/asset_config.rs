@@ -165,12 +165,18 @@ mod tests {
         use pallet_asset_manager::AssetRegistrar;
         use sp_io::TestExternalities;
 
-        use crate::{configs::{AssetRegistrar as Registrar, AssetRegistrarMetadata}, types::AssetId, AssetManager, Assets, Runtime, RuntimeOrigin};
+        use crate::{
+            configs::{AssetRegistrar as Registrar, AssetRegistrarMetadata},
+            types::AssetId,
+            AssetManager, Assets, Runtime, RuntimeOrigin,
+        };
 
         #[test]
         fn test_destroy_asset_dispatch_info_weight() {
             let asset_id: AssetId = 1;
-            let weight = <Registrar as AssetRegistrar<Runtime>>::destroy_asset_dispatch_info_weight(asset_id);
+            let weight = <Registrar as AssetRegistrar<Runtime>>::destroy_asset_dispatch_info_weight(
+                asset_id,
+            );
         }
 
         #[test]
@@ -178,11 +184,11 @@ mod tests {
             TestExternalities::default().execute_with(|| {
                 let asset_id: AssetId = 1;
                 let _ = Assets::force_create(
-                    RuntimeOrigin::root(), 
-                    asset_id.into(), 
-                    sp_runtime::MultiAddress::Id(AssetManager::account_id()), 
-                    true, 
-                    1
+                    RuntimeOrigin::root(),
+                    asset_id.into(),
+                    sp_runtime::MultiAddress::Id(AssetManager::account_id()),
+                    true,
+                    1,
                 );
                 let res = <Registrar as AssetRegistrar<Runtime>>::destroy_foreign_asset(asset_id);
                 assert!(res.is_ok());
@@ -194,15 +200,15 @@ mod tests {
             TestExternalities::default().execute_with(|| {
                 let asset_id = 1;
                 let res = <Registrar as AssetRegistrar<Runtime>>::create_foreign_asset(
-                    asset_id, 
-                    1, 
+                    asset_id,
+                    1,
                     AssetRegistrarMetadata {
                         name: vec![0, 1, 2, 3],
                         symbol: vec![4, 5, 6, 7],
                         decimals: 6,
-                        is_frozen: false
-                    }, 
-                    false
+                        is_frozen: false,
+                    },
+                    false,
                 );
                 assert!(res.is_ok());
             });
@@ -212,7 +218,13 @@ mod tests {
     mod account_asset_id_conversion {
         use sp_runtime::AccountId32;
 
-        use crate::{configs::{asset_config::FOREIGN_ASSET_PRECOMPILE_ADDRESS_PREFIX, AccountIdAssetIdConversion}, types::AssetId, AccountId, Runtime};
+        use crate::{
+            configs::{
+                asset_config::FOREIGN_ASSET_PRECOMPILE_ADDRESS_PREFIX, AccountIdAssetIdConversion,
+            },
+            types::AssetId,
+            AccountId, Runtime,
+        };
 
         #[test]
         fn test_account_to_asset_id_success() {
@@ -221,7 +233,8 @@ mod tests {
             data[0..28].copy_from_slice(FOREIGN_ASSET_PRECOMPILE_ADDRESS_PREFIX);
             data[28..32].copy_from_slice(&expected_asset_id.to_be_bytes());
             let account_id = AccountId::from(data);
-            let (prefix, asset_id) = Runtime::account_to_asset_id(account_id).expect("Account to asset id conversion failed");
+            let (prefix, asset_id) = Runtime::account_to_asset_id(account_id)
+                .expect("Account to asset id conversion failed");
             assert_eq!(prefix, FOREIGN_ASSET_PRECOMPILE_ADDRESS_PREFIX);
             assert_eq!(asset_id, expected_asset_id);
         }
@@ -240,9 +253,13 @@ mod tests {
 
         #[test]
         fn test_asset_id_to_account() {
-            let expected = AccountId32::new([255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,0,0,0,1]);
+            let expected = AccountId32::new([
+                255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255,
+                255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 0, 0, 0, 1,
+            ]);
             let asset_id = 1;
-            let result = Runtime::asset_id_to_account(FOREIGN_ASSET_PRECOMPILE_ADDRESS_PREFIX, asset_id);
+            let result =
+                Runtime::asset_id_to_account(FOREIGN_ASSET_PRECOMPILE_ADDRESS_PREFIX, asset_id);
             assert_eq!(result, expected);
         }
     }
@@ -254,13 +271,11 @@ mod tests {
         fn test_asset_type_default() {
             let default_asset_type = AssetType::default();
             assert_eq!(
-                default_asset_type, 
-                AssetType::Xcm(
-                    xcm::v3::Location {
-                        parents: 0,
-                        interior: xcm::v3::Junctions::Here
-                    }
-                )
+                default_asset_type,
+                AssetType::Xcm(xcm::v3::Location {
+                    parents: 0,
+                    interior: xcm::v3::Junctions::Here
+                })
             );
         }
 
@@ -268,7 +283,7 @@ mod tests {
         fn test_asset_type_from_location_v3() {
             let location = xcm::v3::Location {
                 parents: 0,
-                interior: xcm::v3::Junctions::X1(xcm::v3::Junction::OnlyChild)
+                interior: xcm::v3::Junctions::X1(xcm::v3::Junction::OnlyChild),
             };
             let asset_type = AssetType::from(location);
 
@@ -277,25 +292,19 @@ mod tests {
 
         #[test]
         fn test_asset_type_try_from_location_v4() {
-            let location = xcm::latest::Location {
-                parents: 0,
-                interior: xcm::latest::Junctions::Here
-            };
-            let old_location: xcm::v3::Location = xcm::v3::Location {
-                parents: 0,
-                interior: xcm::v3::Junctions::Here
-            };
-            let asset_type = AssetType::try_from(location).expect("AssetType conversion from location v4 failed");
+            let location =
+                xcm::latest::Location { parents: 0, interior: xcm::latest::Junctions::Here };
+            let old_location: xcm::v3::Location =
+                xcm::v3::Location { parents: 0, interior: xcm::v3::Junctions::Here };
+            let asset_type = AssetType::try_from(location)
+                .expect("AssetType conversion from location v4 failed");
 
             assert_eq!(asset_type, AssetType::Xcm(old_location));
         }
 
         #[test]
         fn test_asset_type_into_location() {
-            let location = xcm::v3::Location {
-                parents: 0,
-                interior: xcm::v3::Junctions::Here
-            };
+            let location = xcm::v3::Location { parents: 0, interior: xcm::v3::Junctions::Here };
             let asset_type = AssetType::Xcm(location);
             let converted: Option<xcm::v3::Location> = asset_type.into();
             assert_eq!(converted, Some(location));
@@ -303,10 +312,7 @@ mod tests {
 
         #[test]
         fn test_asset_type_into_asset_id() {
-            let location = xcm::v3::Location {
-                parents: 0,
-                interior: xcm::v3::Junctions::Here
-            };
+            let location = xcm::v3::Location { parents: 0, interior: xcm::v3::Junctions::Here };
             let expected_asset_id: u32 = 3068126878;
             let asset_type = AssetType::Xcm(location);
 

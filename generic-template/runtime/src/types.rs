@@ -206,7 +206,9 @@ mod test {
 
         #[test]
         fn test_filter_any() {
-            let call = RuntimeCall::CollatorSelection(pallet_collator_selection::Call::set_desired_candidates { max: 10 });
+            let call = RuntimeCall::CollatorSelection(
+                pallet_collator_selection::Call::set_desired_candidates { max: 10 },
+            );
             let proxy_type = ProxyType::Any;
             assert!(proxy_type.filter(&call));
         }
@@ -214,33 +216,38 @@ mod test {
         #[test]
         fn test_filter_nontransfer() {
             let proxy_type = ProxyType::NonTransfer;
-            let valid_call = RuntimeCall::CollatorSelection(pallet_collator_selection::Call::set_desired_candidates { max: 10 });
+            let valid_call = RuntimeCall::CollatorSelection(
+                pallet_collator_selection::Call::set_desired_candidates { max: 10 },
+            );
             assert!(proxy_type.filter(&valid_call));
-            let invalid_call = RuntimeCall::Balances(pallet_balances::Call::burn { value: 1, keep_alive: true });
+            let invalid_call =
+                RuntimeCall::Balances(pallet_balances::Call::burn { value: 1, keep_alive: true });
             assert!(!proxy_type.filter(&invalid_call));
         }
 
         #[test]
         fn test_filter_cancel_proxy() {
             let proxy_type = ProxyType::CancelProxy;
-            let invalid_call = RuntimeCall::CollatorSelection(pallet_collator_selection::Call::set_desired_candidates { max: 10 });
-            assert!(!proxy_type.filter(&invalid_call));
-            let valid_call = RuntimeCall::Proxy(
-                pallet_proxy::Call::reject_announcement { 
-                    delegate: sp_runtime::MultiAddress::Id(AssetManager::account_id()), 
-                    call_hash: H256::zero() 
-                }
+            let invalid_call = RuntimeCall::CollatorSelection(
+                pallet_collator_selection::Call::set_desired_candidates { max: 10 },
             );
+            assert!(!proxy_type.filter(&invalid_call));
+            let valid_call = RuntimeCall::Proxy(pallet_proxy::Call::reject_announcement {
+                delegate: sp_runtime::MultiAddress::Id(AssetManager::account_id()),
+                call_hash: H256::zero(),
+            });
             assert!(proxy_type.filter(&valid_call));
         }
-
 
         #[test]
         fn test_filter_collator() {
             let proxy_type = ProxyType::Collator;
-            let valid_call = RuntimeCall::CollatorSelection(pallet_collator_selection::Call::set_desired_candidates { max: 10 });
+            let valid_call = RuntimeCall::CollatorSelection(
+                pallet_collator_selection::Call::set_desired_candidates { max: 10 },
+            );
             assert!(proxy_type.filter(&valid_call));
-            let invalid_call = RuntimeCall::Balances(pallet_balances::Call::burn { value: 1, keep_alive: true });
+            let invalid_call =
+                RuntimeCall::Balances(pallet_balances::Call::burn { value: 1, keep_alive: true });
             assert!(!proxy_type.filter(&invalid_call));
         }
 

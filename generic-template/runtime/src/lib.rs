@@ -128,7 +128,10 @@ mod runtime {
 mod test {
     use frame_support::weights::WeightToFeePolynomial;
 
-    use crate::{constants::{POLY_DEGREE, VERSION}, native_version, WeightToFee};
+    use crate::{
+        constants::{POLY_DEGREE, VERSION},
+        native_version, WeightToFee,
+    };
 
     #[test]
     fn test_native_version() {
