@@ -259,8 +259,8 @@ mod test {
 
         #[test]
         fn test_filter_derives() {
-            let r#type = ProxyType::type_info();
-            let len = ProxyType::max_encoded_len();
+            let _ = ProxyType::type_info();
+            let _ = ProxyType::max_encoded_len();
         }
     }
 }

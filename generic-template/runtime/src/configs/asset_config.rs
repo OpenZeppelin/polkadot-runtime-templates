@@ -174,7 +174,7 @@ mod tests {
         #[test]
         fn test_destroy_asset_dispatch_info_weight() {
             let asset_id: AssetId = 1;
-            let weight = <Registrar as AssetRegistrar<Runtime>>::destroy_asset_dispatch_info_weight(
+            let _ = <Registrar as AssetRegistrar<Runtime>>::destroy_asset_dispatch_info_weight(
                 asset_id,
             );
         }
