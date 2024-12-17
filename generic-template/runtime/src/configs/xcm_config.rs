@@ -417,3 +417,139 @@ mod testing {
         }
     }
 }
+
+#[cfg(test)]
+mod tests {
+    mod location_conversion {
+        use sp_runtime::traits::Convert;
+        use xcm::latest::{Junction::AccountId32, Location};
+
+        use crate::configs::{AccountIdToLocation, CurrencyId, CurrencyIdToLocation, SelfReserve};
+
+        #[test]
+        fn test_account_id_to_location_conversion() {
+            let account_id = [1u8; 32];
+            let expected_location = Location::new(0, AccountId32 { network: None, id: account_id });
+
+            let result = AccountIdToLocation::convert(account_id.into());
+
+            assert_eq!(result, expected_location);
+        }
+
+        #[test]
+        fn test_account_id_to_location_empty() {
+            let account_id = [0u8; 32];
+            let expected_location = Location::new(0, AccountId32 { network: None, id: account_id });
+
+            let result = AccountIdToLocation::convert(account_id.into());
+
+            assert_eq!(result, expected_location);
+        }
+
+        #[test]
+        fn test_account_id_to_location_unusual_bytes() {
+            let account_id = [0xFF; 32];
+            let expected_location = Location::new(0, AccountId32 { network: None, id: account_id });
+
+            let result = AccountIdToLocation::convert(account_id.into());
+
+            assert_eq!(result, expected_location);
+        }
+
+        #[test]
+        fn test_currency_id_to_location_self_reserve() {
+            let currency = CurrencyId::SelfReserve;
+            let expected_location = SelfReserve::get();
+
+            let result = CurrencyIdToLocation::<()>::convert(currency);
+
+            assert_eq!(result, Some(expected_location));
+        }
+
+        #[test]
+        fn test_currency_id_to_location_foreign_asset() {
+            let foreign_asset_id = 123u32;
+            let currency = CurrencyId::ForeignAsset(foreign_asset_id);
+
+            let result = CurrencyIdToLocation::<()>::convert(currency);
+
+            assert!(result.is_none()); // As no `convert_back` logic is defined in the placeholder.
+        }
+    }
+
+    mod asset_fee_filter {
+        use cumulus_primitives_core::Junctions::{X1, X4};
+        use frame_support::traits::Contains;
+        use sp_std::sync::Arc;
+        use xcm::{latest::Location, prelude::*};
+
+        use crate::configs::{AssetFeesFilter, PolkadotXcmLocation};
+
+        #[test]
+        fn test_asset_fee_filter_valid() {
+            let location = Location::new(1, X1(Arc::new([Junction::Parachain(1000)])));
+            assert!(AssetFeesFilter::contains(&location));
+        }
+
+        #[test]
+        fn test_asset_fee_filter_invalid() {
+            let invalid_location = PolkadotXcmLocation::get();
+            assert!(!AssetFeesFilter::contains(&invalid_location));
+        }
+
+        #[test]
+        fn test_asset_fee_filter_no_parents() {
+            let location = Location::new(0, Here);
+            assert!(!AssetFeesFilter::contains(&location));
+        }
+
+        #[test]
+        fn test_asset_fee_filter_deeply_nested_junctions() {
+            let location = Location::new(
+                1,
+                X4(Arc::new([
+                    Junction::Parachain(1000),
+                    Junction::PalletInstance(5),
+                    Junction::GeneralIndex(42),
+                    Junction::AccountId32 { network: None, id: [1u8; 32] },
+                ])),
+            );
+            assert!(AssetFeesFilter::contains(&location));
+        }
+
+        #[test]
+        fn test_asset_fee_filter_unusual_parents() {
+            let location = Location::new(5, X1(Arc::new([Junction::Parachain(1000)])));
+            assert!(AssetFeesFilter::contains(&location));
+        }
+    }
+
+    mod asset_transactor {
+        use xcm::latest::Location;
+        use xcm_primitives::XcmTransact;
+
+        use crate::configs::Transactors;
+
+        #[test]
+        fn test_transactors_destination_relay() {
+            let transactor = Transactors::Relay;
+            let expected_location = Location::parent();
+
+            let result = transactor.destination();
+
+            assert_eq!(result, expected_location);
+        }
+
+        #[test]
+        fn test_transactors_try_from_valid() {
+            let result = Transactors::try_from(0u8);
+            assert_eq!(result, Ok(Transactors::Relay));
+        }
+
+        #[test]
+        fn test_transactors_try_from_invalid() {
+            let result = Transactors::try_from(1u8);
+            assert!(result.is_err());
+        }
+    }
+}
