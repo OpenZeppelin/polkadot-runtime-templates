@@ -137,18 +137,18 @@ mod tests {
         ReferendumKiller,
     }
 
-    impl Into<Result<Origin, TestOrigin>> for TestOrigin {
-        fn into(self) -> Result<Origin, TestOrigin> {
+    impl From<TestOrigin> for Result<Origin, TestOrigin> {
+        fn from(value: TestOrigin) -> Self {
             match self {
-                Self::SmallTipper => Ok(Origin::SmallTipper),
-                Self::SmallSpender => Ok(Origin::SmallSpender),
-                Self::Treasurer => Ok(Origin::Treasurer),
-                Self::ReferendumCanceller => Ok(Origin::ReferendumCanceller),
-                Self::ReferendumKiller => Ok(Origin::ReferendumKiller),
-                Self::BigTipper => Ok(Origin::BigTipper),
-                Self::MediumSpender => Ok(Origin::MediumSpender),
-                Self::BigSpender => Ok(Origin::BigSpender),
-                Self::WhitelistedCaller => Ok(Origin::WhitelistedCaller),
+                TestOrigin::SmallTipper => Ok(Origin::SmallTipper),
+                TestOrigin::SmallSpender => Ok(Origin::SmallSpender),
+                TestOrigin::Treasurer => Ok(Origin::Treasurer),
+                TestOrigin::ReferendumCanceller => Ok(Origin::ReferendumCanceller),
+                TestOrigin::ReferendumKiller => Ok(Origin::ReferendumKiller),
+                TestOrigin::BigTipper => Ok(Origin::BigTipper),
+                TestOrigin::MediumSpender => Ok(Origin::MediumSpender),
+                TestOrigin::BigSpender => Ok(Origin::BigSpender),
+                TestOrigin::WhitelistedCaller => Ok(Origin::WhitelistedCaller),
             }
         }
     }
