@@ -215,77 +215,135 @@ pallet_referenda::impl_tracksinfo_get!(TracksInfo, Balance, BlockNumber);
 
 #[cfg(test)]
 mod tests {
-    use crate::{Balance, BlockNumber, OriginCaller};
-
     use super::origins;
+    use crate::{Balance, BlockNumber, OriginCaller};
 
     #[test]
     fn test_track_system_origin() {
-        let track = <crate::configs::governance::tracks::TracksInfo as pallet_referenda::TracksInfo<Balance, BlockNumber>>::track_for(&OriginCaller::system(frame_system::RawOrigin::Root)).expect("incorrect config");
+        let track =
+            <crate::configs::governance::tracks::TracksInfo as pallet_referenda::TracksInfo<
+                Balance,
+                BlockNumber,
+            >>::track_for(&OriginCaller::system(frame_system::RawOrigin::Root))
+            .expect("incorrect config");
         assert_eq!(track, 0);
     }
 
     #[test]
     fn test_track_system_origin_error() {
-        let () = <crate::configs::governance::tracks::TracksInfo as pallet_referenda::TracksInfo<Balance, BlockNumber>>::track_for(&OriginCaller::system(frame_system::RawOrigin::None)).expect_err("incorrect config");
+        let () = <crate::configs::governance::tracks::TracksInfo as pallet_referenda::TracksInfo<
+            Balance,
+            BlockNumber,
+        >>::track_for(&OriginCaller::system(frame_system::RawOrigin::None))
+        .expect_err("incorrect config");
     }
 
     #[test]
     fn test_track_custom_origin_whitelisted_caller() {
-        let track = <crate::configs::governance::tracks::TracksInfo as pallet_referenda::TracksInfo<Balance, BlockNumber>>::track_for(&OriginCaller::Origins(origins::Origin::WhitelistedCaller)).expect("incorrect config");
+        let track =
+            <crate::configs::governance::tracks::TracksInfo as pallet_referenda::TracksInfo<
+                Balance,
+                BlockNumber,
+            >>::track_for(&OriginCaller::Origins(origins::Origin::WhitelistedCaller))
+            .expect("incorrect config");
         assert_eq!(track, 1);
     }
 
     #[test]
     fn test_track_custom_origin_treasurer() {
-        let track = <crate::configs::governance::tracks::TracksInfo as pallet_referenda::TracksInfo<Balance, BlockNumber>>::track_for(&OriginCaller::Origins(origins::Origin::Treasurer)).expect("incorrect config");
+        let track =
+            <crate::configs::governance::tracks::TracksInfo as pallet_referenda::TracksInfo<
+                Balance,
+                BlockNumber,
+            >>::track_for(&OriginCaller::Origins(origins::Origin::Treasurer))
+            .expect("incorrect config");
         assert_eq!(track, 11);
     }
 
     #[test]
     fn test_track_custom_origin_referendum_canceller() {
-        let track = <crate::configs::governance::tracks::TracksInfo as pallet_referenda::TracksInfo<Balance, BlockNumber>>::track_for(&OriginCaller::Origins(origins::Origin::ReferendumCanceller)).expect("incorrect config");
+        let track =
+            <crate::configs::governance::tracks::TracksInfo as pallet_referenda::TracksInfo<
+                Balance,
+                BlockNumber,
+            >>::track_for(&OriginCaller::Origins(origins::Origin::ReferendumCanceller))
+            .expect("incorrect config");
         assert_eq!(track, 20);
     }
 
     #[test]
     fn test_track_custom_origin_referendum_killer() {
-        let track = <crate::configs::governance::tracks::TracksInfo as pallet_referenda::TracksInfo<Balance, BlockNumber>>::track_for(&OriginCaller::Origins(origins::Origin::ReferendumKiller)).expect("incorrect config");
+        let track =
+            <crate::configs::governance::tracks::TracksInfo as pallet_referenda::TracksInfo<
+                Balance,
+                BlockNumber,
+            >>::track_for(&OriginCaller::Origins(origins::Origin::ReferendumKiller))
+            .expect("incorrect config");
         assert_eq!(track, 21);
     }
 
     #[test]
     fn test_track_custom_origin_small_tipper() {
-        let track = <crate::configs::governance::tracks::TracksInfo as pallet_referenda::TracksInfo<Balance, BlockNumber>>::track_for(&OriginCaller::Origins(origins::Origin::SmallTipper)).expect("incorrect config");
+        let track =
+            <crate::configs::governance::tracks::TracksInfo as pallet_referenda::TracksInfo<
+                Balance,
+                BlockNumber,
+            >>::track_for(&OriginCaller::Origins(origins::Origin::SmallTipper))
+            .expect("incorrect config");
         assert_eq!(track, 30);
     }
 
     #[test]
     fn test_track_custom_origin_big_tipper() {
-        let track = <crate::configs::governance::tracks::TracksInfo as pallet_referenda::TracksInfo<Balance, BlockNumber>>::track_for(&OriginCaller::Origins(origins::Origin::BigTipper)).expect("incorrect config");
+        let track =
+            <crate::configs::governance::tracks::TracksInfo as pallet_referenda::TracksInfo<
+                Balance,
+                BlockNumber,
+            >>::track_for(&OriginCaller::Origins(origins::Origin::BigTipper))
+            .expect("incorrect config");
         assert_eq!(track, 31);
     }
 
     #[test]
     fn test_track_custom_origin_small_spender() {
-        let track = <crate::configs::governance::tracks::TracksInfo as pallet_referenda::TracksInfo<Balance, BlockNumber>>::track_for(&OriginCaller::Origins(origins::Origin::SmallSpender)).expect("incorrect config");
+        let track =
+            <crate::configs::governance::tracks::TracksInfo as pallet_referenda::TracksInfo<
+                Balance,
+                BlockNumber,
+            >>::track_for(&OriginCaller::Origins(origins::Origin::SmallSpender))
+            .expect("incorrect config");
         assert_eq!(track, 32);
     }
 
     #[test]
     fn test_track_custom_origin_medium_spender() {
-        let track = <crate::configs::governance::tracks::TracksInfo as pallet_referenda::TracksInfo<Balance, BlockNumber>>::track_for(&OriginCaller::Origins(origins::Origin::MediumSpender)).expect("incorrect config");
+        let track =
+            <crate::configs::governance::tracks::TracksInfo as pallet_referenda::TracksInfo<
+                Balance,
+                BlockNumber,
+            >>::track_for(&OriginCaller::Origins(origins::Origin::MediumSpender))
+            .expect("incorrect config");
         assert_eq!(track, 33);
     }
 
     #[test]
     fn test_track_custom_origin_big_spender() {
-        let track = <crate::configs::governance::tracks::TracksInfo as pallet_referenda::TracksInfo<Balance, BlockNumber>>::track_for(&OriginCaller::Origins(origins::Origin::BigSpender)).expect("incorrect config");
+        let track =
+            <crate::configs::governance::tracks::TracksInfo as pallet_referenda::TracksInfo<
+                Balance,
+                BlockNumber,
+            >>::track_for(&OriginCaller::Origins(origins::Origin::BigSpender))
+            .expect("incorrect config");
         assert_eq!(track, 34);
     }
 
     #[test]
     fn test_track_error() {
-        let () = <crate::configs::governance::tracks::TracksInfo as pallet_referenda::TracksInfo<Balance, BlockNumber>>::track_for(&OriginCaller::CumulusXcm(cumulus_pallet_xcm::Origin::Relay)).expect_err("incorrect config");
+        let () =
+            <crate::configs::governance::tracks::TracksInfo as pallet_referenda::TracksInfo<
+                Balance,
+                BlockNumber,
+            >>::track_for(&OriginCaller::CumulusXcm(cumulus_pallet_xcm::Origin::Relay))
+            .expect_err("incorrect config");
     }
 }

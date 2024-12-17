@@ -115,17 +115,21 @@ pub mod pallet_custom_origins {
 }
 
 #[cfg(test)]
-mod tests {        
+mod tests {
     use frame_support::traits::EnsureOrigin;
 
-    use crate::{configs::{governance::Spender, pallet_custom_origins::Origin}, constants::currency::{CENTS, GRAND}, Balance};
+    use crate::{
+        configs::{governance::Spender, pallet_custom_origins::Origin},
+        constants::currency::{CENTS, GRAND},
+        Balance,
+    };
 
     #[derive(Debug, PartialEq)]
     enum TestOrigin {
         SmallTipper,
         SmallSpender,
         Treasurer,
-        BigTipper,       
+        BigTipper,
         MediumSpender,
         BigSpender,
         WhitelistedCaller,
@@ -144,7 +148,7 @@ mod tests {
                 Self::BigTipper => Ok(Origin::BigTipper),
                 Self::MediumSpender => Ok(Origin::MediumSpender),
                 Self::BigSpender => Ok(Origin::BigSpender),
-                Self::WhitelistedCaller => Ok(Origin::WhitelistedCaller)
+                Self::WhitelistedCaller => Ok(Origin::WhitelistedCaller),
             }
         }
     }
@@ -169,55 +173,64 @@ mod tests {
 
         #[test]
         fn test_small_tipper() {
-            let a: Balance = Spender::try_origin(TestOrigin::SmallTipper).expect("SmallTipper misconfigured");
-            assert_eq!(a, 250*3*CENTS);
+            let a: Balance =
+                Spender::try_origin(TestOrigin::SmallTipper).expect("SmallTipper misconfigured");
+            assert_eq!(a, 250 * 3 * CENTS);
         }
 
         #[test]
         fn test_small_spender() {
-            let a: Balance = Spender::try_origin(TestOrigin::SmallSpender).expect("SmallSpender misconfigured");
-            assert_eq!(a, 10*GRAND);
+            let a: Balance =
+                Spender::try_origin(TestOrigin::SmallSpender).expect("SmallSpender misconfigured");
+            assert_eq!(a, 10 * GRAND);
         }
 
         #[test]
         fn test_big_tipper() {
-            let a: Balance = Spender::try_origin(TestOrigin::BigTipper).expect("SmallSpender misconfigured");
+            let a: Balance =
+                Spender::try_origin(TestOrigin::BigTipper).expect("SmallSpender misconfigured");
             assert_eq!(a, GRAND);
         }
 
         #[test]
         fn test_medium_spender() {
-            let a: Balance = Spender::try_origin(TestOrigin::MediumSpender).expect("SmallSpender misconfigured");
-            assert_eq!(a, 100*GRAND);
+            let a: Balance =
+                Spender::try_origin(TestOrigin::MediumSpender).expect("SmallSpender misconfigured");
+            assert_eq!(a, 100 * GRAND);
         }
 
         #[test]
         fn test_big_spender() {
-            let a: Balance = Spender::try_origin(TestOrigin::BigSpender).expect("SmallSpender misconfigured");
-            assert_eq!(a, 1_000*GRAND);
+            let a: Balance =
+                Spender::try_origin(TestOrigin::BigSpender).expect("SmallSpender misconfigured");
+            assert_eq!(a, 1_000 * GRAND);
         }
 
         #[test]
         fn test_treasurer() {
-            let a: Balance = Spender::try_origin(TestOrigin::Treasurer).expect("SmallSpender misconfigured");
-            assert_eq!(a, 10_000*GRAND);
+            let a: Balance =
+                Spender::try_origin(TestOrigin::Treasurer).expect("SmallSpender misconfigured");
+            assert_eq!(a, 10_000 * GRAND);
         }
 
         #[test]
         fn test_referendum_killer() {
-            let a: TestOrigin = Spender::try_origin(TestOrigin::ReferendumKiller).expect_err("SmallSpender misconfigured");
+            let a: TestOrigin = Spender::try_origin(TestOrigin::ReferendumKiller)
+                .expect_err("SmallSpender misconfigured");
             assert_eq!(a, TestOrigin::ReferendumKiller);
         }
 
         #[test]
         fn test_referendum_canceller() {
-            let a: TestOrigin = Spender::try_origin(TestOrigin::ReferendumCanceller).expect_err("SmallSpender misconfigured");
+            let a: TestOrigin = Spender::try_origin(TestOrigin::ReferendumCanceller)
+                .expect_err("SmallSpender misconfigured");
             assert_eq!(a, TestOrigin::ReferendumCanceller);
         }
 
         #[test]
         fn test_whitelisted_caller() {
-            let a: TestOrigin = Spender::try_origin(TestOrigin::WhitelistedCaller).expect_err("SmallSpender misconfigured");
+            let a: TestOrigin = Spender::try_origin(TestOrigin::WhitelistedCaller)
+                .expect_err("SmallSpender misconfigured");
             assert_eq!(a, TestOrigin::WhitelistedCaller);
         }
 
@@ -230,9 +243,8 @@ mod tests {
     }
 
     mod treasurer {
-        use crate::configs::pallet_custom_origins::Treasurer;
-
         use super::*;
+        use crate::configs::pallet_custom_origins::Treasurer;
 
         #[test]
         pub fn test_treasurer_try_origin() {
@@ -240,7 +252,7 @@ mod tests {
             let a = Treasurer::try_origin(TestOrigin::MediumSpender).expect_err("should be err");
             assert_eq!(a, TestOrigin::MediumSpender)
         }
-    
+
         #[test]
         #[cfg(feature = "runtime-benchmarks")]
         fn test_treasurer_try_successful_origin() {
@@ -250,16 +262,18 @@ mod tests {
     }
 
     mod referendum_canceller {
-        use crate::configs::pallet_custom_origins::ReferendumCanceller;
         use super::*;
+        use crate::configs::pallet_custom_origins::ReferendumCanceller;
 
         #[test]
         pub fn test_referendum_canceller_try_origin() {
-            let () = ReferendumCanceller::try_origin(TestOrigin::ReferendumCanceller).expect("incorrect configuration");
-            let a = ReferendumCanceller::try_origin(TestOrigin::MediumSpender).expect_err("should be err");
+            let () = ReferendumCanceller::try_origin(TestOrigin::ReferendumCanceller)
+                .expect("incorrect configuration");
+            let a = ReferendumCanceller::try_origin(TestOrigin::MediumSpender)
+                .expect_err("should be err");
             assert_eq!(a, TestOrigin::MediumSpender)
         }
-    
+
         #[test]
         #[cfg(feature = "runtime-benchmarks")]
         fn test_treasurer_try_successful_origin() {
