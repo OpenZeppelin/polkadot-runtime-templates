@@ -519,3 +519,122 @@ mod testing {
         }
     }
 }
+
+#[cfg(test)]
+mod tests {
+    mod location_conversion {
+        use sp_core::H160;
+        use sp_runtime::traits::{Convert, TryConvert};
+        use xcm::latest::{Junction::AccountKey20, Location};
+
+        use crate::{
+            configs::{
+                CurrencyId, CurrencyIdToLocation, RelayNetwork, SelfReserve, SignedToAccountId20,
+            },
+            types::AccountId,
+            RuntimeOrigin,
+        };
+
+        #[test]
+        fn test_account_id_to_location_conversion() {
+            let account_id: AccountId = H160::from_low_u64_be(1).into();
+            let expected_location =
+                Location::new(0, AccountKey20 { network: None, key: account_id.into() });
+
+            let origin = RuntimeOrigin::signed(account_id);
+            let result = SignedToAccountId20::<_, AccountId, RelayNetwork>::try_convert(origin);
+
+            assert_eq!(result.unwrap(), expected_location); // Unwrap ensures proper equality
+        }
+
+        #[test]
+        fn test_currency_id_to_location_self_reserve() {
+            let currency = CurrencyId::SelfReserve;
+            let expected_location = SelfReserve::get();
+
+            let result = CurrencyIdToLocation::<()>::convert(currency);
+
+            assert_eq!(result, Some(expected_location));
+        }
+
+        #[test]
+        fn test_currency_id_to_location_erc20() {
+            let contract_address = H160::from_low_u64_be(0x1234);
+            let currency = CurrencyId::Erc20 { contract_address };
+
+            let mut expected_location = crate::configs::Erc20XcmBridgePalletLocation::get();
+            expected_location
+                .push_interior(AccountKey20 { network: None, key: contract_address.0 })
+                .unwrap();
+
+            let result = CurrencyIdToLocation::<()>::convert(currency);
+
+            assert_eq!(result, Some(expected_location));
+        }
+    }
+
+    mod asset_fee_filter {
+        use frame_support::traits::Contains;
+        use xcm::latest::{Junction::AccountKey20, Location};
+
+        use crate::configs::AssetFeesFilter;
+
+        #[test]
+        fn test_asset_fee_filter_valid() {
+            let location = Location::new(1, AccountKey20 { network: None, key: [0u8; 20] });
+            assert!(AssetFeesFilter::contains(&location));
+        }
+
+        #[test]
+        fn test_asset_fee_filter_invalid() {
+            let location = crate::configs::Erc20XcmBridgePalletLocation::get();
+            assert!(!AssetFeesFilter::contains(&location));
+        }
+
+        #[test]
+        fn test_asset_fee_filter_no_parents() {
+            let location = Location::new(0, AccountKey20 { network: None, key: [0u8; 20] });
+            assert!(!AssetFeesFilter::contains(&location));
+        }
+    }
+
+    mod asset_transactor {
+        use xcm::latest::Location;
+        use xcm_primitives::{UtilityAvailableCalls, UtilityEncodeCall, XcmTransact};
+
+        use crate::configs::Transactors;
+
+        #[test]
+        fn test_transactors_destination_relay() {
+            let transactor = Transactors::Relay;
+            let expected_location = Location::parent();
+
+            let result = transactor.destination();
+
+            assert_eq!(result, expected_location);
+        }
+
+        #[test]
+        fn test_transactors_encode_call() {
+            sp_io::TestExternalities::default().execute_with(|| {
+                let transactor = Transactors::Relay;
+                let call = UtilityAvailableCalls::AsDerivative(1u16, Vec::<u8>::new());
+
+                let encoded_call = transactor.encode_call(call);
+                assert!(!encoded_call.is_empty());
+            });
+        }
+
+        #[test]
+        fn test_transactors_try_from_valid() {
+            let result = Transactors::try_from(0u8);
+            assert_eq!(result, Ok(Transactors::Relay));
+        }
+
+        #[test]
+        fn test_transactors_try_from_invalid() {
+            let result = Transactors::try_from(1u8);
+            assert!(result.is_err());
+        }
+    }
+}
