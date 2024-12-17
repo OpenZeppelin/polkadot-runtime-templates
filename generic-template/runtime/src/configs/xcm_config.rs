@@ -528,7 +528,7 @@ mod tests {
         use xcm::latest::Location;
         use xcm_primitives::{UtilityAvailableCalls, UtilityEncodeCall, XcmTransact};
 
-        use crate::{configs::Transactors, Runtime};
+        use crate::configs::Transactors;
 
         #[test]
         fn test_transactors_destination_relay() {
@@ -544,8 +544,7 @@ mod tests {
         fn test_transactors_encode_call() {
             sp_io::TestExternalities::default().execute_with(|| {
                 let transactor = Transactors::Relay;
-                let call =
-                    xcm_primitives::UtilityAvailableCalls::AsDerivative(1u16, Vec::<u8>::new());
+                let call = UtilityAvailableCalls::AsDerivative(1u16, Vec::<u8>::new());
 
                 let encoded_call = transactor.encode_call(call);
                 assert!(!encoded_call.is_empty()); // Ensure the call encodes successfully.
