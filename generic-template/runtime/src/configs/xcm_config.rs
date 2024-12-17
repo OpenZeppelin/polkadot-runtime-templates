@@ -526,9 +526,9 @@ mod tests {
 
     mod asset_transactor {
         use xcm::latest::Location;
-        use xcm_primitives::XcmTransact;
+        use xcm_primitives::{UtilityAvailableCalls, UtilityEncodeCall, XcmTransact};
 
-        use crate::configs::Transactors;
+        use crate::{configs::Transactors, Runtime};
 
         #[test]
         fn test_transactors_destination_relay() {
@@ -538,6 +538,18 @@ mod tests {
             let result = transactor.destination();
 
             assert_eq!(result, expected_location);
+        }
+
+        #[test]
+        fn test_transactors_encode_call() {
+            sp_io::TestExternalities::default().execute_with(|| {
+                let transactor = Transactors::Relay;
+                let call =
+                    xcm_primitives::UtilityAvailableCalls::AsDerivative(1u16, Vec::<u8>::new());
+
+                let encoded_call = transactor.encode_call(call);
+                assert!(!encoded_call.is_empty()); // Ensure the call encodes successfully.
+            });
         }
 
         #[test]
