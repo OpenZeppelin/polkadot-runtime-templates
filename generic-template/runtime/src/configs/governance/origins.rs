@@ -139,7 +139,7 @@ mod tests {
 
     impl From<TestOrigin> for Result<Origin, TestOrigin> {
         fn from(value: TestOrigin) -> Self {
-            match self {
+            match value {
                 TestOrigin::SmallTipper => Ok(Origin::SmallTipper),
                 TestOrigin::SmallSpender => Ok(Origin::SmallSpender),
                 TestOrigin::Treasurer => Ok(Origin::Treasurer),
