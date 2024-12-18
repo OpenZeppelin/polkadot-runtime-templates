@@ -198,8 +198,6 @@ parameter_types! {
 mod test {
     mod filter {
         use frame_support::traits::InstanceFilter;
-        use parity_scale_codec::MaxEncodedLen;
-        use scale_info::TypeInfo;
         use sp_core::H256;
 
         use crate::{types::ProxyType, AssetManager, RuntimeCall};
