@@ -194,8 +194,8 @@ mod tests {
 
         #[test]
         fn test_medium_spender() {
-            let a: Balance =
-                Spender::try_origin(TestOrigin::MediumSpender).expect("MediumSpender misconfigured");
+            let a: Balance = Spender::try_origin(TestOrigin::MediumSpender)
+                .expect("MediumSpender misconfigured");
             assert_eq!(a, 100 * GRAND);
         }
 
