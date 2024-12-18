@@ -256,11 +256,5 @@ mod test {
             let expected = ProxyType::Any;
             assert_eq!(expected, ProxyType::default());
         }
-
-        #[test]
-        fn test_filter_derives() {
-            let _ = ProxyType::type_info();
-            let _ = ProxyType::max_encoded_len();
-        }
     }
 }

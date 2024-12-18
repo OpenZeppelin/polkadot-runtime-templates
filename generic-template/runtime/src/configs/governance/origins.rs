@@ -188,57 +188,57 @@ mod tests {
         #[test]
         fn test_big_tipper() {
             let a: Balance =
-                Spender::try_origin(TestOrigin::BigTipper).expect("SmallSpender misconfigured");
+                Spender::try_origin(TestOrigin::BigTipper).expect("BigTipper misconfigured");
             assert_eq!(a, GRAND);
         }
 
         #[test]
         fn test_medium_spender() {
             let a: Balance =
-                Spender::try_origin(TestOrigin::MediumSpender).expect("SmallSpender misconfigured");
+                Spender::try_origin(TestOrigin::MediumSpender).expect("MediumSpender misconfigured");
             assert_eq!(a, 100 * GRAND);
         }
 
         #[test]
         fn test_big_spender() {
             let a: Balance =
-                Spender::try_origin(TestOrigin::BigSpender).expect("SmallSpender misconfigured");
+                Spender::try_origin(TestOrigin::BigSpender).expect("BigSpender misconfigured");
             assert_eq!(a, 1_000 * GRAND);
         }
 
         #[test]
         fn test_treasurer() {
             let a: Balance =
-                Spender::try_origin(TestOrigin::Treasurer).expect("SmallSpender misconfigured");
+                Spender::try_origin(TestOrigin::Treasurer).expect("Treasurer misconfigured");
             assert_eq!(a, 10_000 * GRAND);
         }
 
         #[test]
         fn test_referendum_killer() {
             let a: TestOrigin = Spender::try_origin(TestOrigin::ReferendumKiller)
-                .expect_err("SmallSpender misconfigured");
+                .expect_err("ReferendumKiller misconfigured");
             assert_eq!(a, TestOrigin::ReferendumKiller);
         }
 
         #[test]
         fn test_referendum_canceller() {
             let a: TestOrigin = Spender::try_origin(TestOrigin::ReferendumCanceller)
-                .expect_err("SmallSpender misconfigured");
+                .expect_err("ReferendumCanceller misconfigured");
             assert_eq!(a, TestOrigin::ReferendumCanceller);
         }
 
         #[test]
         fn test_whitelisted_caller() {
             let a: TestOrigin = Spender::try_origin(TestOrigin::WhitelistedCaller)
-                .expect_err("SmallSpender misconfigured");
+                .expect_err("WhitelistedCaller misconfigured");
             assert_eq!(a, TestOrigin::WhitelistedCaller);
         }
 
         #[test]
         #[cfg(feature = "runtime-benchmarks")]
         fn test_try_successful_origin() {
-            let a: Result<TestOrigin, ()> = Spender::try_successful_origin();
-            println!("{a:?}");
+            let a: TestOrigin = Spender::try_successful_origin().expect("incorrect setup");
+            assert_eq!(a, TestOrigin::Treasurer);
         }
     }
 
