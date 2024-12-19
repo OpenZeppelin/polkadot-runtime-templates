@@ -8,6 +8,7 @@ use frame_support::{
     weights::{constants::WEIGHT_REF_TIME_PER_SECOND, Weight},
 };
 use frame_system::EnsureRoot;
+use openzeppelin_polkadot_wrappers::{impl_openzeppelin_xcm, XcmConfig};
 use sp_core::ConstU32;
 use sp_runtime::traits::{Get, IdentityLookup};
 use xcm::latest::prelude::*;
@@ -38,59 +39,51 @@ impl pallet_balances::Config for Runtime {
     type ExistentialDeposit = ConstU128<1>;
 }
 
-parameter_types! {
-    pub const ReservedXcmpWeight: Weight = Weight::from_parts(WEIGHT_REF_TIME_PER_SECOND.saturating_div(4), 0);
-    pub const ReservedDmpWeight: Weight = Weight::from_parts(WEIGHT_REF_TIME_PER_SECOND.saturating_div(4), 0);
+pub struct OpenZeppelinRuntime;
+impl XcmConfig for OpenZeppelinRuntime {
+    type AccountIdToLocation = AccountIdToLocation<AccountId>;
+    type AddSupportedAssetOrigin = EnsureRoot<AccountId>;
+    type AssetFeesFilter = AssetFeesFilter;
+    type AssetTransactors = AssetTransactors;
+    type BaseXcmWeight = BaseXcmWeight;
+    type CurrencyId = CurrencyId;
+    type CurrencyIdToLocation = CurrencyIdToLocation<AsAssetType<AssetId, AssetType, AssetManager>>;
+    type DerivativeAddressRegistrationOrigin = EnsureRoot<AccountId>;
+    type EditSupportedAssetOrigin = EnsureRoot<AccountId>;
+    type FeeManager = FeeManager;
+    type HrmpManipulatorOrigin = EnsureRoot<AccountId>;
+    type HrmpOpenOrigin = EnsureRoot<AccountId>;
+    type LocalOriginToLocation = LocalOriginToLocation;
+    type LocationToAccountId = LocationToAccountId;
+    type MaxAssetsForTransfer = MaxAssetsForTransfer;
+    type MaxHrmpRelayFee = MaxHrmpRelayFee;
+    type MessageQueueHeapSize = ConstU32<{ 64 * 1024 }>;
+    type MessageQueueMaxStale = ConstU32<8>;
+    type MessageQueueServiceWeight = MessageQueueServiceWeight;
+    type ParachainMinFee = ParachainMinFee;
+    type PauseSupportedAssetOrigin = EnsureRoot<AccountId>;
+    type RelayLocation = RelayLocation;
+    type RemoveSupportedAssetOrigin = EnsureRoot<AccountId>;
+    type Reserves = Reserves;
+    type ResumeSupportedAssetOrigin = EnsureRoot<AccountId>;
+    type SelfLocation = SelfLocation;
+    type SelfReserve = SelfReserve;
+    type SovereignAccountDispatcherOrigin = EnsureRoot<AccountId>;
+    type Trader = pallet_xcm_weight_trader::Trader<Runtime>;
+    type TransactorReserveProvider = AbsoluteAndRelativeReserve<SelfLocationAbsolute>;
+    type Transactors = Transactors;
+    type UniversalLocation = UniversalLocation;
+    type WeightToFee = WeightToFee;
+    type XcmAdminOrigin = EnsureRoot<AccountId>;
+    type XcmFeesAccount = TreasuryAccount;
+    type XcmOriginToTransactDispatchOrigin = XcmOriginToTransactDispatchOrigin;
+    type XcmSender = XcmRouter;
+    type XcmWeigher = XcmWeigher;
+    type XcmpQueueControllerOrigin = EnsureRoot<AccountId>;
+    type XcmpQueueMaxInboundSuspended = ConstU32<1000>;
+    type XtokensReserveProviders = ReserveProviders;
 }
-
-impl mock_message_queue::Config for Runtime {
-    type RuntimeEvent = RuntimeEvent;
-    type XcmExecutor = XcmExecutor<XcmConfig>;
-}
-
-pub type LocalOriginToLocation =
-    SignedToAccountId20<RuntimeOrigin, AccountId, constants::RelayNetwork>;
-
-pub struct TrustedLockerCase<T>(PhantomData<T>);
-impl<T: Get<(Location, AssetFilter)>> ContainsPair<Location, Asset> for TrustedLockerCase<T> {
-    fn contains(origin: &Location, asset: &Asset) -> bool {
-        let (o, a) = T::get();
-        a.matches(asset) && &o == origin
-    }
-}
-
-parameter_types! {
-    pub RelayTokenForRelay: (Location, AssetFilter) = (Parent.into(), Wild(AllOf { id: AssetId(Parent.into()), fun: WildFungible }));
-}
-
-pub type TrustedLockers = TrustedLockerCase<RelayTokenForRelay>;
-
-impl pallet_xcm::Config for Runtime {
-    type AdminOrigin = EnsureRoot<AccountId>;
-    type AdvertisedXcmVersion = pallet_xcm::CurrentXcmVersion;
-    type Currency = Balances;
-    type CurrencyMatcher = ();
-    type ExecuteXcmOrigin = EnsureXcmOrigin<RuntimeOrigin, LocalOriginToLocation>;
-    type MaxLockers = ConstU32<8>;
-    type MaxRemoteLockConsumers = ConstU32<0>;
-    type RemoteLockConsumerIdentifier = ();
-    type RuntimeCall = RuntimeCall;
-    type RuntimeEvent = RuntimeEvent;
-    type RuntimeOrigin = RuntimeOrigin;
-    type SendXcmOrigin = EnsureXcmOrigin<RuntimeOrigin, LocalOriginToLocation>;
-    type SovereignAccountOf = location_converter::LocationConverter;
-    type TrustedLockers = TrustedLockers;
-    type UniversalLocation = constants::UniversalLocation;
-    type Weigher = weigher::Weigher;
-    type WeightInfo = pallet_xcm::TestWeightInfo;
-    type XcmExecuteFilter = Everything;
-    type XcmExecutor = XcmExecutor<XcmConfig>;
-    type XcmReserveTransferFilter = Everything;
-    type XcmRouter = XcmRouter;
-    type XcmTeleportFilter = Nothing;
-
-    const VERSION_DISCOVERY_QUEUE_SIZE: u32 = 100;
-}
+impl_openzeppelin_xcm!(OpenZeppelinRuntime);
 
 type Block = frame_system::mocking::MockBlock<Runtime>;
 
@@ -98,7 +91,12 @@ construct_runtime!(
     pub struct Runtime {
         System: frame_system,
         Balances: pallet_balances,
-        MsgQueue: mock_message_queue,
+        MessageQueue: pallet_message_queue,
+        XcmpQueue: cumulus_pallet_xcmp_queue,
+        CumulusXcm: cumulus_pallet_xcm,
+        XcmWeightTrader: pallet_xcm_weight_trader,
+        XTokens: orml_xtokens,
+        XcmTransactor: pallet_xcm_transactor,
         PolkadotXcm: pallet_xcm,
     }
 );
