@@ -124,5 +124,29 @@ mod runtime {
     struct Governance;
 }
 
+#[cfg(test)]
+mod test {
+    use frame_support::weights::WeightToFeePolynomial;
+
+    use crate::{
+        constants::{POLY_DEGREE, VERSION},
+        native_version, WeightToFee,
+    };
+
+    #[test]
+    fn test_native_version() {
+        let version = native_version();
+        assert_eq!(version.runtime_version, VERSION);
+    }
+
+    #[test]
+    fn test_weight_to_fee() {
+        let mut fee = WeightToFee::polynomial();
+        let coef = fee.pop().expect("no coef");
+        assert!(!coef.negative);
+        assert_eq!(coef.degree, POLY_DEGREE);
+    }
+}
+
 #[cfg(feature = "runtime-benchmarks")]
 mod benchmark;

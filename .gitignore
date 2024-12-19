@@ -26,3 +26,5 @@ docs/build
 **/zombienet-linux-arm64
 **/zombienet-linux-x64
 **/bin-*
+
+coverage
