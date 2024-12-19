@@ -3823,7 +3823,7 @@ dependencies = [
 
 [[package]]
 name = "generic-runtime-template"
-version = "2.0.0"
+version = "3.0.0"
 dependencies = [
  "assets-common",
  "cumulus-pallet-aura-ext",
@@ -3909,7 +3909,7 @@ dependencies = [
 
 [[package]]
 name = "generic-template-node"
-version = "2.0.0"
+version = "3.0.0"
 dependencies = [
  "clap",
  "color-print",
