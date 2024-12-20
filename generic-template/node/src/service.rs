@@ -172,7 +172,7 @@ async fn start_node_impl(
     let backend = params.backend.clone();
     let mut task_manager = params.task_manager;
 
-    let interface = build_relay_chain_interface(
+    let relay_chain_interface = build_relay_chain_interface(
         polkadot_config,
         &parachain_config,
         telemetry_worker_handle,
