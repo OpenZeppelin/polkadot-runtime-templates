@@ -159,10 +159,7 @@ mod runtime_tests {
 
     #[test]
     fn transaction_payment_constants() {
-        assert_eq!(
-            <Runtime as pallet_transaction_payment::Config>::TransactionByteFee::get(),
-            10 * MICROCENTS
-        );
+        assert_eq!(configs::TransactionByteFee::get(), 10 * MICROCENTS);
 
         assert_eq!(
             <Runtime as pallet_transaction_payment::Config>::OperationalFeeMultiplier::get(),
