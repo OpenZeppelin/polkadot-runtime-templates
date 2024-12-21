@@ -194,7 +194,6 @@ parameter_types! {
     pub PrecompilesValue: OpenZeppelinPrecompiles<Runtime> = OpenZeppelinPrecompiles::<_>::new();
 }
 
-
 #[cfg(test)]
 mod test {
     mod filter {

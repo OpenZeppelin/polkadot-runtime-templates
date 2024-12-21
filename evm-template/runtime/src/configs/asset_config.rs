@@ -172,8 +172,6 @@ impl AccountIdAssetIdConversion<AccountId, AssetId> for Runtime {
     }
 }
 
-
-
 #[cfg(test)]
 mod tests {
     mod asset_registrar {
@@ -271,7 +269,8 @@ mod tests {
 
         #[test]
         fn test_asset_id_to_account() {
-            let expected = AccountId20::from_str("0xFFFFFFFF00000000000000000000000000000001").unwrap();
+            let expected =
+                AccountId20::from_str("0xFFFFFFFF00000000000000000000000000000001").unwrap();
             let asset_id = 1;
             let result =
                 Runtime::asset_id_to_account(FOREIGN_ASSET_PRECOMPILE_ADDRESS_PREFIX, asset_id);
