@@ -113,3 +113,171 @@ pub mod pallet_custom_origins {
         }
     }
 }
+
+mod tests {
+    use frame_support::traits::EnsureOrigin;
+
+    use crate::{
+        configs::{governance::Spender, pallet_custom_origins::Origin},
+        constants::currency::{CENTS, GRAND},
+        Balance,
+    };
+
+    #[derive(Debug, PartialEq)]
+    enum TestOrigin {
+        SmallTipper,
+        SmallSpender,
+        Treasurer,
+        BigTipper,
+        MediumSpender,
+        BigSpender,
+        WhitelistedCaller,
+        ReferendumCanceller,
+        ReferendumKiller,
+    }
+
+    impl From<TestOrigin> for Result<Origin, TestOrigin> {
+        fn from(value: TestOrigin) -> Self {
+            match value {
+                TestOrigin::SmallTipper => Ok(Origin::SmallTipper),
+                TestOrigin::SmallSpender => Ok(Origin::SmallSpender),
+                TestOrigin::Treasurer => Ok(Origin::Treasurer),
+                TestOrigin::ReferendumCanceller => Ok(Origin::ReferendumCanceller),
+                TestOrigin::ReferendumKiller => Ok(Origin::ReferendumKiller),
+                TestOrigin::BigTipper => Ok(Origin::BigTipper),
+                TestOrigin::MediumSpender => Ok(Origin::MediumSpender),
+                TestOrigin::BigSpender => Ok(Origin::BigSpender),
+                TestOrigin::WhitelistedCaller => Ok(Origin::WhitelistedCaller),
+            }
+        }
+    }
+
+    impl From<Origin> for TestOrigin {
+        fn from(value: Origin) -> Self {
+            match value {
+                Origin::SmallTipper => TestOrigin::SmallTipper,
+                Origin::SmallSpender => TestOrigin::SmallSpender,
+                Origin::Treasurer => TestOrigin::Treasurer,
+                Origin::ReferendumCanceller => TestOrigin::ReferendumCanceller,
+                Origin::ReferendumKiller => TestOrigin::ReferendumKiller,
+                Origin::BigTipper => TestOrigin::BigTipper,
+                Origin::MediumSpender => TestOrigin::MediumSpender,
+                Origin::BigSpender => TestOrigin::BigSpender,
+                Origin::WhitelistedCaller => TestOrigin::WhitelistedCaller,
+            }
+        }
+    }
+    mod spender {
+        use super::*;
+
+        #[test]
+        fn test_small_tipper() {
+            let a: Balance =
+                Spender::try_origin(TestOrigin::SmallTipper).expect("SmallTipper misconfigured");
+            assert_eq!(a, 250 * 3 * CENTS);
+        }
+
+        #[test]
+        fn test_small_spender() {
+            let a: Balance =
+                Spender::try_origin(TestOrigin::SmallSpender).expect("SmallSpender misconfigured");
+            assert_eq!(a, 10 * GRAND);
+        }
+
+        #[test]
+        fn test_big_tipper() {
+            let a: Balance =
+                Spender::try_origin(TestOrigin::BigTipper).expect("BigTipper misconfigured");
+            assert_eq!(a, GRAND);
+        }
+
+        #[test]
+        fn test_medium_spender() {
+            let a: Balance = Spender::try_origin(TestOrigin::MediumSpender)
+                .expect("MediumSpender misconfigured");
+            assert_eq!(a, 100 * GRAND);
+        }
+
+        #[test]
+        fn test_big_spender() {
+            let a: Balance =
+                Spender::try_origin(TestOrigin::BigSpender).expect("BigSpender misconfigured");
+            assert_eq!(a, 1_000 * GRAND);
+        }
+
+        #[test]
+        fn test_treasurer() {
+            let a: Balance =
+                Spender::try_origin(TestOrigin::Treasurer).expect("Treasurer misconfigured");
+            assert_eq!(a, 10_000 * GRAND);
+        }
+
+        #[test]
+        fn test_referendum_killer() {
+            let a: TestOrigin = Spender::try_origin(TestOrigin::ReferendumKiller)
+                .expect_err("ReferendumKiller misconfigured");
+            assert_eq!(a, TestOrigin::ReferendumKiller);
+        }
+
+        #[test]
+        fn test_referendum_canceller() {
+            let a: TestOrigin = Spender::try_origin(TestOrigin::ReferendumCanceller)
+                .expect_err("ReferendumCanceller misconfigured");
+            assert_eq!(a, TestOrigin::ReferendumCanceller);
+        }
+
+        #[test]
+        fn test_whitelisted_caller() {
+            let a: TestOrigin = Spender::try_origin(TestOrigin::WhitelistedCaller)
+                .expect_err("WhitelistedCaller misconfigured");
+            assert_eq!(a, TestOrigin::WhitelistedCaller);
+        }
+
+        #[test]
+        #[cfg(feature = "runtime-benchmarks")]
+        fn test_try_successful_origin() {
+            let a: TestOrigin = Spender::try_successful_origin().expect("incorrect setup");
+            assert_eq!(a, TestOrigin::Treasurer);
+        }
+    }
+
+    mod treasurer {
+        use super::*;
+        use crate::configs::pallet_custom_origins::Treasurer;
+
+        #[test]
+        pub fn test_treasurer_try_origin() {
+            let () = Treasurer::try_origin(TestOrigin::Treasurer).expect("incorrect configuration");
+            let a = Treasurer::try_origin(TestOrigin::MediumSpender).expect_err("should be err");
+            assert_eq!(a, TestOrigin::MediumSpender)
+        }
+
+        #[test]
+        #[cfg(feature = "runtime-benchmarks")]
+        fn test_treasurer_try_successful_origin() {
+            let a: Result<TestOrigin, ()> = Treasurer::try_successful_origin();
+            assert_eq!(a, Ok(TestOrigin::Treasurer));
+        }
+    }
+
+    mod referendum_canceller {
+        use super::*;
+        use crate::configs::pallet_custom_origins::ReferendumCanceller;
+
+        #[test]
+        pub fn test_referendum_canceller_try_origin() {
+            let () = ReferendumCanceller::try_origin(TestOrigin::ReferendumCanceller)
+                .expect("incorrect configuration");
+            let a = ReferendumCanceller::try_origin(TestOrigin::MediumSpender)
+                .expect_err("should be err");
+            assert_eq!(a, TestOrigin::MediumSpender)
+        }
+
+        #[test]
+        #[cfg(feature = "runtime-benchmarks")]
+        fn test_treasurer_try_successful_origin() {
+            let a: Result<TestOrigin, ()> = ReferendumCanceller::try_successful_origin();
+            assert_eq!(a, Ok(TestOrigin::ReferendumCanceller));
+        }
+    }
+}

@@ -3029,6 +3029,7 @@ dependencies = [
  "cumulus-primitives-core",
  "cumulus-primitives-storage-weight-reclaim",
  "cumulus-primitives-utility",
+ "ethereum",
  "fp-account",
  "fp-evm",
  "fp-rpc",

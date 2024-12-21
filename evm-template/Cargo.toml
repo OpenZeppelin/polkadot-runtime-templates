@@ -184,6 +184,8 @@ xcm-primitives = { git = "https://github.com/OpenZeppelin/moonbeam.git", branch 
 substrate-runtimes-fuzzers = { git = "https://github.com/srlabs/substrate-runtime-fuzzer.git", default-features = false, tag = "polkadot-v1.12.0" }
 ziggy = { version = "0.8", default-features = false }
 
+ethereum = { version = "0.15.0" }
+
 [workspace.lints.clippy]
 large_enum_variant = "allow"
 too_many_arguments = "allow"
