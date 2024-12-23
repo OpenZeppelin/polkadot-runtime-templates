@@ -229,7 +229,6 @@ impl fp_rpc::ConvertTransaction<opaque::UncheckedExtrinsic> for TransactionConve
 mod tests {
     mod transaction_converter {
         use core::str::FromStr;
-        use std::assert_matches;
 
         use ethereum::{LegacyTransaction, TransactionAction, TransactionSignature};
         use fp_rpc::ConvertTransaction;
@@ -269,13 +268,13 @@ mod tests {
         fn test_convert_transaction() {
             let converter = TransactionConverter;
             let extrinsic: UncheckedExtrinsic = converter.convert_transaction(get_transaction());
-            assert_matches::assert_matches!(extrinsic.0.function, RuntimeCall::Ethereum(_));
+            assert!(matches!(extrinsic.0.function, RuntimeCall::Ethereum(_)));
         }
 
         #[test]
         fn test_convert_transaction_to_opaque() {
             let converter = TransactionConverter;
-            let extrinsic: crate::opaque::UncheckedExtrinsic =
+            let _: crate::opaque::UncheckedExtrinsic =
                 converter.convert_transaction(get_transaction());
         }
     }

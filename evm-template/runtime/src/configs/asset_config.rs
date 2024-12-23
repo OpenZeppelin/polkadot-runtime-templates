@@ -232,7 +232,6 @@ mod tests {
         use core::str::FromStr;
 
         use fp_account::AccountId20;
-        use sp_runtime::AccountId32;
 
         use crate::{
             configs::{

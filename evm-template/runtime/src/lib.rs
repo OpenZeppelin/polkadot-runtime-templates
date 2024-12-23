@@ -302,16 +302,15 @@ mod test {
             use core::str::FromStr;
 
             use ethereum::{
-                EIP2930Transaction, LegacyTransaction, TransactionRecoveryId, TransactionSignature,
+                LegacyTransaction, TransactionSignature,
             };
             use fp_account::AccountId20;
             use fp_self_contained::SelfContainedCall;
             use frame_support::dispatch::GetDispatchInfo;
             use pallet_ethereum::TransactionAction;
             use sp_core::{H160, H256, U256};
-            use sp_runtime::traits::Dispatchable;
 
-            use crate::{AccountId, Runtime, RuntimeCall, RuntimeOrigin};
+            use crate::{Runtime, RuntimeCall, RuntimeOrigin};
 
             fn get_transaction() -> pallet_ethereum::Transaction {
                 let mut input = vec![];
@@ -440,7 +439,7 @@ mod test {
                     for _ in 0..842 {
                         frame_system::Pallet::<Runtime>::inc_account_nonce(who);
                     }
-                    let i = call
+                    let () = call
                         .pre_dispatch_self_contained(&addr, &info, 0)
                         .expect("wrong implementation")
                         .expect("wrong transaction");
@@ -471,7 +470,6 @@ mod test {
                 let call = RuntimeCall::Ethereum(pallet_ethereum::Call::transact {
                     transaction: get_transaction(),
                 });
-                let info = call.get_dispatch_info();
 
                 sp_io::TestExternalities::default().execute_with(|| {
                     let addr =
@@ -486,7 +484,7 @@ mod test {
                     for _ in 0..842 {
                         frame_system::Pallet::<Runtime>::inc_account_nonce(who);
                     }
-                    let i = call
+                    let _ = call
                         .apply_self_contained(addr)
                         .expect("wrong implementation")
                         .expect("wrong transaction");
@@ -499,7 +497,6 @@ mod test {
                     value: 1,
                     keep_alive: true,
                 });
-                let info = call.get_dispatch_info();
 
                 sp_io::TestExternalities::default().execute_with(|| {
                     let i = call.apply_self_contained(
