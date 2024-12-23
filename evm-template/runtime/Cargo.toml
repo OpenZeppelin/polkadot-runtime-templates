@@ -112,11 +112,11 @@ xcm-primitives = { workspace = true }
 
 
 [dev-dependencies]
+ethereum = { workspace = true }
 polkadot-runtime-parachains = { workspace = true }
 sp-io = { workspace = true }
 sp-tracing = { workspace = true }
 xcm-simulator = { workspace = true }
-ethereum = { workspace = true }
 
 [build-dependencies]
 substrate-wasm-builder = { workspace = true }
