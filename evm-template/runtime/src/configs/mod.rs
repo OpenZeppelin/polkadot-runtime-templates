@@ -224,3 +224,58 @@ impl fp_rpc::ConvertTransaction<opaque::UncheckedExtrinsic> for TransactionConve
             .expect("Encoded extrinsic is always valid")
     }
 }
+
+#[cfg(test)]
+mod tests {
+    mod transaction_converter {
+        use core::str::FromStr;
+
+        use ethereum::{LegacyTransaction, TransactionAction, TransactionSignature};
+        use fp_rpc::ConvertTransaction;
+        use sp_core::{H160, H256, U256};
+
+        use crate::{configs::TransactionConverter, RuntimeCall, UncheckedExtrinsic};
+
+        fn get_transaction() -> pallet_ethereum::Transaction {
+            let mut input = vec![];
+            let data = "095ea7b30000000000000000000000007a250d5630b4cf539739df2c5dacb4c659f2488d0000000000000000000000000000000000000000000001b1ae4d6e2ef5000000".as_bytes();
+            input.extend_from_slice(data);
+            pallet_ethereum::Transaction::Legacy(LegacyTransaction {
+                nonce: U256::from_dec_str("842").unwrap(),
+                gas_price: U256::from_dec_str("35540887252").unwrap(),
+                gas_limit: U256::from_dec_str("500000").unwrap(),
+                action: TransactionAction::Call(
+                    H160::from_str("0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48").unwrap(),
+                ),
+                value: U256::from_dec_str("0").unwrap(),
+                input,
+                signature: TransactionSignature::new(
+                    27,
+                    H256::from_str(
+                        "dd6a5b9e4f357728f7718589d802ec2317c73c2ee3c72deb51f07766f1294859",
+                    )
+                    .unwrap(),
+                    H256::from_str(
+                        "32d1883c43f8ed779219374be9e94174aa42fbf5ab63093f3fadd9e2aae0d1d1",
+                    )
+                    .unwrap(),
+                )
+                .unwrap(),
+            })
+        }
+
+        #[test]
+        fn test_convert_transaction() {
+            let converter = TransactionConverter;
+            let extrinsic: UncheckedExtrinsic = converter.convert_transaction(get_transaction());
+            assert!(matches!(extrinsic.0.function, RuntimeCall::Ethereum(_)));
+        }
+
+        #[test]
+        fn test_convert_transaction_to_opaque() {
+            let converter = TransactionConverter;
+            let _: crate::opaque::UncheckedExtrinsic =
+                converter.convert_transaction(get_transaction());
+        }
+    }
+}
