@@ -301,9 +301,7 @@ mod test {
         mod is_self_contained {
             use core::str::FromStr;
 
-            use ethereum::{
-                LegacyTransaction, TransactionSignature,
-            };
+            use ethereum::{LegacyTransaction, TransactionSignature};
             use fp_account::AccountId20;
             use fp_self_contained::SelfContainedCall;
             use frame_support::dispatch::GetDispatchInfo;
