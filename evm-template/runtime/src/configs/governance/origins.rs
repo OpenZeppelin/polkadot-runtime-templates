@@ -114,6 +114,7 @@ pub mod pallet_custom_origins {
     }
 }
 
+#[cfg(test)]
 mod tests {
     use frame_support::traits::EnsureOrigin;
 
