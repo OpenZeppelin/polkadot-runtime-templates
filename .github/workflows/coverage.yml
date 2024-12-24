@@ -82,12 +82,13 @@ jobs:
 
       - name: Generate generic runtime coverage
         run: |
-          cd ./generic-runtime/runtime
+          ls -l
+          cd generic-runtime/runtime
           cargo llvm-cov --all-features --ignore-filename-regex ".*(weights|benchmark).*" --codecov --output-path lcov.info
 
       - name: Generate EVM runtime coverage
         run: |
-          cd ./evm-runtime/runtime
+          cd evm-runtime/runtime
           cargo llvm-cov --all-features --ignore-filename-regex ".*(weights|benchmark).*" --codecov --output-path lcov.info
 
       - name: Upload coverage reports to Codecov
