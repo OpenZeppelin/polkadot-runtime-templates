@@ -1,4 +1,4 @@
-name: "generic template cargo tests"
+name: "coverage generation"
 
 on:
   push:
