@@ -1,16 +1,16 @@
-name: "evm template cargo tests"
+name: "coverage generation"
 
 on:
   push:
     branches:
       - main
     paths-ignore:
-      - "generic-template/**"
+      - "evm-template/**"
       - "**.md"
       - "**.adoc"
   pull_request:
     paths-ignore:
-      - "generic-template/**"
+      - "evm-template/**"
       - "**.md"
       - "**.adoc"
   workflow_dispatch:
@@ -41,7 +41,7 @@ env:
   SCCACHE_CACHE_SIZE: "50GB"
 
 jobs:
-  evm-clippy-fmt-test:
+  clippy-fmt-test:
     strategy:
       fail-fast: false
       matrix:
@@ -57,7 +57,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     defaults:
       run:
-        working-directory: ./evm-template
+        working-directory: ./
     steps:
       - name: git checkout
         uses: actions/checkout@v4
@@ -74,40 +74,26 @@ jobs:
         uses: actions-rust-lang/setup-rust-toolchain@v1
         with:
           components: clippy, rustfmt
-
-      - name: Install toml-sort
-        run: cargo install --git https://github.com/4meta5/toml_sort
-
-      - name: Add file permissions for toml-sort
-        run: chmod +x ./scripts/toml-sort.sh
-
-      - name: Add file permissions for check-toml-sorted
-        run: chmod +x ./scripts/check-toml-sorted.sh
-
-      - name: Check Cargo.toml files are formatted using toml_sort
-        run: ./scripts/check-toml-sorted.sh
-
-      - name: Check format
-        run: cargo fmt --all -- --check
-
-      - name: "Install nextest"
+      
+      - name: "Install cargo-llvm-cov"
         uses: taiki-e/install-action@v2
         with:
-          tool: cargo-nextest
+          tool: cargo-llvm-cov
 
-      - name: Run tests
-        run: cargo nextest run --release
+      - name: Generate generic runtime coverage
+        run: |
+          ls -l
+          cd generic-template/runtime
+          cargo llvm-cov --all-features --ignore-filename-regex ".*(weights|benchmark).*" --codecov --output-path lcov.info
 
-      - name: Check benchmarking compilation
-        run: cargo check --release --features runtime-benchmarks
+      - name: Generate EVM runtime coverage
+        run: |
+          cd evm-template/runtime
+          cargo llvm-cov --all-features --ignore-filename-regex ".*(weights|benchmark).*" --codecov --output-path lcov.info
 
-      - name: Run tests with async backing
-        run: cargo nextest run --release --features="async-backing"
-
-      - name: Check clippy
-        run: cargo clippy --release --locked --all-targets -- -D warnings
-
-      - name: Check Documentation
-        run: cargo doc --release --locked --all --no-deps
+      - name: Upload coverage reports to Codecov
+        uses: codecov/codecov-action@v3
         env:
-          RUSTDOCFLAGS: "-D rustdoc::broken-intra-doc-links -D rustdoc::private_intra_doc_links"
+          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
+          files: ./generic-template/runtime/lcov.info,./evm-template/runtime/lcov.info
+          fail_ci_if_error: true
