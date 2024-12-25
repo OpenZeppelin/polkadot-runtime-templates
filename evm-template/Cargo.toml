@@ -190,12 +190,12 @@ ziggy = { version = "0.8", default-features = false }
 # Tanssi
 ccp-authorities-noting-inherent = { git = "https://github.com/OpenZeppelin/dancekit", default-features = false, tag = "polkadot-stable2407-1" }
 dp-consensus = { git = "https://github.com/OpenZeppelin/dancekit", default-features = false, tag = "polkadot-stable2407-1" }
+ethereum = { version = "0.15.0" }
 nimbus-consensus = { git = "https://github.com/OpenZeppelin/moonkit", default-features = false, tag = "polkadot-stable2407-1" }
 nimbus-primitives = { git = "https://github.com/OpenZeppelin/moonkit", default-features = false, tag = "polkadot-stable2407-1" }
 pallet-author-inherent = { git = "https://github.com/OpenZeppelin/moonkit", default-features = false, tag = "polkadot-stable2407-1" }
 pallet-cc-authorities-noting = { git = "https://github.com/OpenZeppelin/dancekit", default-features = false, tag = "polkadot-stable2407-1" }
 tc-consensus = { git = "https://github.com/KitHat/tanssi", branch = "polkadot-stable2407-1", default-features = false }
-ethereum = { version = "0.15.0" }
 
 [workspace.lints.clippy]
 large_enum_variant = "allow"
