@@ -115,7 +115,10 @@ pub fn run() -> Result<()> {
     match &cli.subcommand {
 		Some(Subcommand::BuildSpec(cmd)) => {
 			let runner = cli.create_runner(cmd)?;
-			runner.sync_run(|config| cmd.run(config.chain_spec, config.network))
+			runner.sync_run(|config| {
+                let chain_spec = config.chain_spec;
+                cmd.run(chain_spec, config.network)
+            })
 		},
 		Some(Subcommand::CheckBlock(cmd)) => {
 			construct_async_run!(|components, cli, cmd, config| {

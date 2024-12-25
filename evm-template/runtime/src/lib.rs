@@ -168,10 +168,15 @@ pub mod opaque {
     pub type Hash = <BlakeTwo256 as HashT>::Output;
 }
 
+#[cfg(not(feature = "tanssi"))]
 impl_opaque_keys! {
     pub struct SessionKeys {
         pub aura: Aura,
     }
+}
+#[cfg(feature = "tanssi")]
+impl_opaque_keys! {
+    pub struct SessionKeys {}
 }
 
 /// The version information used to identify this runtime when compiled
@@ -183,50 +188,60 @@ pub fn native_version() -> NativeVersion {
     NativeVersion { runtime_version: VERSION, can_author_with: Default::default() }
 }
 
-use openzeppelin_polkadot_wrappers_proc::openzeppelin_construct_runtime;
+use openzeppelin_pallet_abstractions_proc::openzeppelin_construct_runtime;
+
+#[cfg(not(feature = "tanssi"))]
 #[openzeppelin_construct_runtime]
 mod runtime {
-    #[abstraction]
     struct System;
 
-    #[abstraction]
     struct Consensus;
 
-    #[abstraction]
     struct XCM;
 
-    #[abstraction]
     struct Assets;
 
-    #[abstraction]
     struct Governance;
 
-    #[abstraction]
     struct EVM;
 }
 
-use openzeppelin_polkadot_wrappers_proc::openzeppelin_runtime_apis;
+#[cfg(feature = "tanssi")]
+#[openzeppelin_construct_runtime]
+mod runtime {
+    struct System;
 
+    struct Tanssi;
+
+    struct XCM;
+
+    struct Assets;
+
+    struct Governance;
+
+    struct EVM;
+}
+
+use openzeppelin_pallet_abstractions_proc::openzeppelin_runtime_apis;
+
+#[cfg(not(feature = "tanssi"))]
 #[openzeppelin_runtime_apis]
 mod apis {
     type Runtime = Runtime;
     type Block = Block;
 
-    #[abstraction]
     mod evm {
         type RuntimeCall = RuntimeCall;
         type Executive = Executive;
         type Ethereum = Ethereum;
     }
 
-    #[abstraction]
     mod assets {
         type RuntimeCall = RuntimeCall;
         type TransactionPayment = TransactionPayment;
         type Balance = Balance;
     }
 
-    #[abstraction]
     mod consensus {
         type SessionKeys = SessionKeys;
         #[cfg(not(feature = "async-backing"))]
@@ -237,7 +252,6 @@ mod apis {
         type ConsensusHook = ConsensusHook;
     }
 
-    #[abstraction]
     mod system {
         type Executive = Executive;
         type System = System;
@@ -249,7 +263,60 @@ mod apis {
         type RuntimeBlockWeights = RuntimeBlockWeights;
     }
 
-    #[abstraction]
+    mod benchmarks {
+        type AllPalletsWithSystem = AllPalletsWithSystem;
+        type Assets = Assets;
+        type AssetManager = AssetManager;
+        type AssetType = AssetType;
+        type RuntimeOrigin = RuntimeOrigin;
+        type RelayLocation = RelayLocation;
+        type ParachainSystem = ParachainSystem;
+        type System = System;
+        type ExistentialDeposit = ExistentialDeposit;
+        type AssetId = AssetId;
+        type XCMConfig = XcmExecutorConfig;
+        type AccountId = AccountId;
+        type Cents = CENTS;
+        type FeeAssetId = FeeAssetId;
+        type TransactionByteFee = TransactionByteFee;
+        type Address = Address;
+        type Balances = Balances;
+    }
+}
+
+#[cfg(feature = "tanssi")]
+#[openzeppelin_runtime_apis]
+mod apis {
+    type Runtime = Runtime;
+    type Block = Block;
+
+    mod evm {
+        type RuntimeCall = RuntimeCall;
+        type Executive = Executive;
+        type Ethereum = Ethereum;
+    }
+
+    mod assets {
+        type RuntimeCall = RuntimeCall;
+        type TransactionPayment = TransactionPayment;
+        type Balance = Balance;
+    }
+
+    mod tanssi {
+        type SessionKeys = SessionKeys;
+    }
+
+    mod system {
+        type Executive = Executive;
+        type System = System;
+        type ParachainSystem = ParachainSystem;
+        type RuntimeVersion = VERSION;
+        type AccountId = AccountId;
+        type Nonce = Nonce;
+        type RuntimeGenesisConfig = RuntimeGenesisConfig;
+        type RuntimeBlockWeights = RuntimeBlockWeights;
+    }
+
     mod benchmarks {
         type AllPalletsWithSystem = AllPalletsWithSystem;
         type Assets = Assets;

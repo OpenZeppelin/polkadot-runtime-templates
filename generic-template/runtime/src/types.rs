@@ -1,10 +1,9 @@
-use frame_support::{
-    parameter_types,
-    traits::{EitherOfDiverse, InstanceFilter},
-    weights::Weight,
-    PalletId,
-};
+#[cfg(not(feature = "tanssi"))]
+use frame_support::traits::EitherOfDiverse;
+use frame_support::{parameter_types, traits::InstanceFilter, weights::Weight, PalletId};
+#[cfg(not(feature = "tanssi"))]
 use frame_system::EnsureRoot;
+#[cfg(not(feature = "tanssi"))]
 use pallet_xcm::{EnsureXcm, IsVoiceOfBody};
 use parity_scale_codec::{Decode, Encode, MaxEncodedLen};
 use polkadot_runtime_common::impls::{
@@ -29,14 +28,15 @@ use crate::{
     constants::{HOURS, VERSION},
     Treasury,
 };
-pub use crate::{
-    configs::{
-        xcm_config::RelayLocation, FeeAssetId, StakingAdminBodyId, ToSiblingBaseDeliveryFee,
-        TransactionByteFee,
-    },
+#[cfg(not(feature = "tanssi"))]
+use crate::{
+    configs::{xcm_config::RelayLocation, StakingAdminBodyId},
     constants::{
         BLOCK_PROCESSING_VELOCITY, RELAY_CHAIN_SLOT_DURATION_MILLIS, UNINCLUDED_SEGMENT_CAPACITY,
     },
+};
+pub use crate::{
+    configs::{FeeAssetId, ToSiblingBaseDeliveryFee, TransactionByteFee},
     AllPalletsWithSystem, Runtime, RuntimeBlockWeights, RuntimeCall, XcmpQueue,
 };
 
@@ -107,19 +107,21 @@ pub type PriceForSiblingParachainDelivery = polkadot_runtime_common::xcm_sender:
     XcmpQueue,
 >;
 
-/// We allow root and the StakingAdmin to execute privileged collator selection
-/// operations.
-pub type CollatorSelectionUpdateOrigin = EitherOfDiverse<
-    EnsureRoot<AccountId>,
-    EnsureXcm<IsVoiceOfBody<RelayLocation, StakingAdminBodyId>>,
->;
-
 /// Configures the number of blocks that can be created without submission of validity proof to the relay chain
+#[cfg(not(feature = "tanssi"))]
 pub type ConsensusHook = cumulus_pallet_aura_ext::FixedVelocityConsensusHook<
     Runtime,
     RELAY_CHAIN_SLOT_DURATION_MILLIS,
     BLOCK_PROCESSING_VELOCITY,
     UNINCLUDED_SEGMENT_CAPACITY,
+>;
+
+/// We allow root and the StakingAdmin to execute privileged collator selection
+/// operations.
+#[cfg(not(feature = "tanssi"))]
+pub type CollatorSelectionUpdateOrigin = EitherOfDiverse<
+    EnsureRoot<AccountId>,
+    EnsureXcm<IsVoiceOfBody<RelayLocation, StakingAdminBodyId>>,
 >;
 
 /// These aliases are describing the Beneficiary and AssetKind for the Treasury pallet
@@ -162,6 +164,7 @@ pub enum ProxyType {
     NonTransfer,
     /// Allows to finish the proxy
     CancelProxy,
+    #[cfg(not(feature = "tanssi"))]
     /// Allows to operate with collators list (invulnerables, candidates, etc.)
     Collator,
 }
@@ -176,6 +179,7 @@ impl InstanceFilter<RuntimeCall> for ProxyType {
                 RuntimeCall::Proxy(pallet_proxy::Call::reject_announcement { .. })
                     | RuntimeCall::Multisig { .. }
             ),
+            #[cfg(not(feature = "tanssi"))]
             ProxyType::Collator => {
                 matches!(c, RuntimeCall::CollatorSelection { .. } | RuntimeCall::Multisig { .. })
             }
