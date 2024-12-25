@@ -340,3 +340,237 @@ mod apis {
 
 #[cfg(feature = "runtime-benchmarks")]
 mod benchmark;
+
+#[cfg(test)]
+mod test {
+    use frame_support::weights::WeightToFeePolynomial;
+
+    use crate::{
+        constants::{POLY_DEGREE, VERSION},
+        native_version, WeightToFee,
+    };
+
+    #[test]
+    fn test_native_version() {
+        let version = native_version();
+        assert_eq!(version.runtime_version, VERSION);
+    }
+
+    #[test]
+    fn test_weight_to_fee() {
+        let mut fee = WeightToFee::polynomial();
+        let coef = fee.pop().expect("no coef");
+        assert!(!coef.negative);
+        assert_eq!(coef.degree, POLY_DEGREE);
+    }
+
+    mod self_contained_call {
+        mod is_self_contained {
+            use core::str::FromStr;
+
+            use ethereum::{LegacyTransaction, TransactionSignature};
+            use fp_account::AccountId20;
+            use fp_self_contained::SelfContainedCall;
+            use frame_support::dispatch::GetDispatchInfo;
+            use pallet_ethereum::TransactionAction;
+            use sp_core::{H160, H256, U256};
+
+            use crate::{Runtime, RuntimeCall, RuntimeOrigin};
+
+            fn get_transaction() -> pallet_ethereum::Transaction {
+                let mut input = vec![];
+                let data = "095ea7b30000000000000000000000007a250d5630b4cf539739df2c5dacb4c659f2488d0000000000000000000000000000000000000000000001b1ae4d6e2ef5000000".as_bytes();
+                input.extend_from_slice(data);
+                pallet_ethereum::Transaction::Legacy(LegacyTransaction {
+                    nonce: U256::from_dec_str("842").unwrap(),
+                    gas_price: U256::from_dec_str("35540887252").unwrap(),
+                    gas_limit: U256::from_dec_str("500000").unwrap(),
+                    action: TransactionAction::Call(
+                        H160::from_str("0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48").unwrap(),
+                    ),
+                    value: U256::from_dec_str("0").unwrap(),
+                    input,
+                    signature: TransactionSignature::new(
+                        27,
+                        H256::from_str(
+                            "dd6a5b9e4f357728f7718589d802ec2317c73c2ee3c72deb51f07766f1294859",
+                        )
+                        .unwrap(),
+                        H256::from_str(
+                            "32d1883c43f8ed779219374be9e94174aa42fbf5ab63093f3fadd9e2aae0d1d1",
+                        )
+                        .unwrap(),
+                    )
+                    .unwrap(),
+                })
+            }
+
+            #[test]
+            fn test_is_self_contained_ethereum() {
+                let call = RuntimeCall::Ethereum(pallet_ethereum::Call::transact {
+                    transaction: get_transaction(),
+                });
+                assert!(call.is_self_contained())
+            }
+
+            #[test]
+            fn test_is_not_self_contained() {
+                let call = RuntimeCall::Balances(pallet_balances::Call::burn {
+                    value: 1,
+                    keep_alive: true,
+                });
+                assert!(!call.is_self_contained())
+            }
+
+            #[test]
+            fn test_check_self_contained() {
+                let call = RuntimeCall::Ethereum(pallet_ethereum::Call::transact {
+                    transaction: get_transaction(),
+                });
+                assert!(call.check_self_contained().is_some());
+                assert!(call.check_self_contained().unwrap().is_ok());
+            }
+
+            #[test]
+            fn test_check_not_self_contained() {
+                let call = RuntimeCall::Balances(pallet_balances::Call::burn {
+                    value: 1,
+                    keep_alive: true,
+                });
+
+                assert!(call.check_self_contained().is_none());
+            }
+
+            #[test]
+            fn test_validate_self_contained() {
+                let call = RuntimeCall::Ethereum(pallet_ethereum::Call::transact {
+                    transaction: get_transaction(),
+                });
+                let info = call.get_dispatch_info();
+
+                sp_io::TestExternalities::default().execute_with(|| {
+                    let addr =
+                        H160::from_str("0x78DFFE34196A5987fb73fb9bbfd55a2A33e467Fb").unwrap();
+                    let _ = pallet_balances::Pallet::<Runtime>::force_set_balance(
+                        RuntimeOrigin::root(),
+                        AccountId20(addr.0),
+                        90000000000000000,
+                    );
+                    let i = call
+                        .validate_self_contained(&addr, &info, 0)
+                        .expect("wrong implementation")
+                        .expect("wrong transaction");
+
+                    assert_eq!(i.priority, 34540887252);
+                });
+            }
+
+            #[test]
+            fn test_validate_not_self_contained() {
+                let call = RuntimeCall::Balances(pallet_balances::Call::burn {
+                    value: 1,
+                    keep_alive: true,
+                });
+                let info = call.get_dispatch_info();
+
+                sp_io::TestExternalities::default().execute_with(|| {
+                    let i = call.validate_self_contained(
+                        &H160::from_str("0x78DFFE34196A5987fb73fb9bbfd55a2A33e467Fb").unwrap(),
+                        &info,
+                        0,
+                    );
+
+                    assert!(i.is_none());
+                });
+            }
+
+            #[test]
+            fn test_pre_dispatch_self_contained() {
+                let call = RuntimeCall::Ethereum(pallet_ethereum::Call::transact {
+                    transaction: get_transaction(),
+                });
+                let info = call.get_dispatch_info();
+
+                sp_io::TestExternalities::default().execute_with(|| {
+                    let addr =
+                        H160::from_str("0x78DFFE34196A5987fb73fb9bbfd55a2A33e467Fb").unwrap();
+                    let who = AccountId20(addr.0);
+                    let _ = pallet_balances::Pallet::<Runtime>::force_set_balance(
+                        RuntimeOrigin::root(),
+                        who,
+                        90000000000000000,
+                    );
+                    // I do not know any other way to increase nonce
+                    for _ in 0..842 {
+                        frame_system::Pallet::<Runtime>::inc_account_nonce(who);
+                    }
+                    let () = call
+                        .pre_dispatch_self_contained(&addr, &info, 0)
+                        .expect("wrong implementation")
+                        .expect("wrong transaction");
+                });
+            }
+
+            #[test]
+            fn test_pre_dispatch_not_self_contained() {
+                let call = RuntimeCall::Balances(pallet_balances::Call::burn {
+                    value: 1,
+                    keep_alive: true,
+                });
+                let info = call.get_dispatch_info();
+
+                sp_io::TestExternalities::default().execute_with(|| {
+                    let i = call.pre_dispatch_self_contained(
+                        &H160::from_str("0x78DFFE34196A5987fb73fb9bbfd55a2A33e467Fb").unwrap(),
+                        &info,
+                        0,
+                    );
+
+                    assert!(i.is_none());
+                });
+            }
+
+            #[test]
+            fn test_apply_self_contained() {
+                let call = RuntimeCall::Ethereum(pallet_ethereum::Call::transact {
+                    transaction: get_transaction(),
+                });
+
+                sp_io::TestExternalities::default().execute_with(|| {
+                    let addr =
+                        H160::from_str("0x78DFFE34196A5987fb73fb9bbfd55a2A33e467Fb").unwrap();
+                    let who = AccountId20(addr.0);
+                    let _ = pallet_balances::Pallet::<Runtime>::force_set_balance(
+                        RuntimeOrigin::root(),
+                        who,
+                        90000000000000000,
+                    );
+                    // I do not know any other way to increase nonce
+                    for _ in 0..842 {
+                        frame_system::Pallet::<Runtime>::inc_account_nonce(who);
+                    }
+                    let _ = call
+                        .apply_self_contained(addr)
+                        .expect("wrong implementation")
+                        .expect("wrong transaction");
+                });
+            }
+
+            #[test]
+            fn test_apply_not_self_contained() {
+                let call = RuntimeCall::Balances(pallet_balances::Call::burn {
+                    value: 1,
+                    keep_alive: true,
+                });
+
+                sp_io::TestExternalities::default().execute_with(|| {
+                    let i = call.apply_self_contained(
+                        H160::from_str("0x78DFFE34196A5987fb73fb9bbfd55a2A33e467Fb").unwrap(),
+                    );
+
+                    assert!(i.is_none());
+                });
+            }
+        }
+    }
+}

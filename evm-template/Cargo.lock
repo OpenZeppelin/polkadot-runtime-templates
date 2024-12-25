@@ -3186,6 +3186,7 @@ dependencies = [
  "cumulus-primitives-timestamp",
  "cumulus-primitives-utility",
  "dp-consensus",
+ "ethereum",
  "fp-account",
  "fp-evm",
  "fp-rpc",
