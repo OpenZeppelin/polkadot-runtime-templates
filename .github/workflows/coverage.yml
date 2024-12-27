@@ -85,11 +85,13 @@ jobs:
           ls -l
           cd generic-template/runtime
           cargo llvm-cov --features="runtime-benchmarks" --ignore-filename-regex ".*(weights|benchmark).*" --codecov --output-path lcov.info
+          cargo clean
 
       - name: Generate EVM runtime coverage
         run: |
           cd evm-template/runtime
           cargo llvm-cov --features="runtime-benchmarks" --ignore-filename-regex ".*(weights|benchmark).*" --codecov --output-path lcov.info
+          cargo clean
 
       - name: Upload coverage reports to Codecov
         uses: codecov/codecov-action@v3
