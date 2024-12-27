@@ -1,11 +1,10 @@
 use fp_account::EthereumSignature;
-use frame_support::{
-    parameter_types,
-    traits::{EitherOfDiverse, InstanceFilter},
-    weights::Weight,
-    PalletId,
-};
+#[cfg(not(feature = "tanssi"))]
+use frame_support::traits::EitherOfDiverse;
+use frame_support::{parameter_types, traits::InstanceFilter, weights::Weight, PalletId};
+#[cfg(not(feature = "tanssi"))]
 use frame_system::EnsureRoot;
+#[cfg(not(feature = "tanssi"))]
 use pallet_xcm::{EnsureXcm, IsVoiceOfBody};
 use parity_scale_codec::{Decode, Encode, MaxEncodedLen};
 use polkadot_runtime_common::impls::{
@@ -26,19 +25,19 @@ use xcm::{
 use xcm_builder::PayOverXcm;
 
 use crate::{
-    configs::{
-        xcm_config::{self, RelayLocation},
-        FeeAssetId, StakingAdminBodyId, ToSiblingBaseDeliveryFee, TransactionByteFee,
-    },
+    configs::{xcm_config, FeeAssetId, ToSiblingBaseDeliveryFee, TransactionByteFee},
     constants::HOURS,
 };
-pub use crate::{
+#[cfg(not(feature = "tanssi"))]
+use crate::{
+    configs::{xcm_config::RelayLocation, StakingAdminBodyId},
     constants::{
         BLOCK_PROCESSING_VELOCITY, RELAY_CHAIN_SLOT_DURATION_MILLIS, UNINCLUDED_SEGMENT_CAPACITY,
-        VERSION,
     },
-    AllPalletsWithSystem, OpenZeppelinPrecompiles, Runtime, RuntimeBlockWeights, RuntimeCall,
-    Treasury, XcmpQueue,
+};
+pub use crate::{
+    constants::VERSION, AllPalletsWithSystem, OpenZeppelinPrecompiles, Runtime,
+    RuntimeBlockWeights, RuntimeCall, Treasury, XcmpQueue,
 };
 
 /// Unchecked extrinsic type as expected by this runtime.
@@ -107,6 +106,7 @@ pub type PriceForSiblingParachainDelivery = polkadot_runtime_common::xcm_sender:
 >;
 
 /// Configures the number of blocks that can be created without submission of validity proof to the relay chain
+#[cfg(not(feature = "tanssi"))]
 pub type ConsensusHook = cumulus_pallet_aura_ext::FixedVelocityConsensusHook<
     Runtime,
     RELAY_CHAIN_SLOT_DURATION_MILLIS,
@@ -116,6 +116,7 @@ pub type ConsensusHook = cumulus_pallet_aura_ext::FixedVelocityConsensusHook<
 
 /// We allow root and the StakingAdmin to execute privileged collator selection
 /// operations.
+#[cfg(not(feature = "tanssi"))]
 pub type CollatorSelectionUpdateOrigin = EitherOfDiverse<
     EnsureRoot<AccountId>,
     EnsureXcm<IsVoiceOfBody<RelayLocation, StakingAdminBodyId>>,
@@ -162,6 +163,7 @@ pub enum ProxyType {
     /// Allows to finish the proxy
     CancelProxy,
     /// Allows to operate with collators list (invulnerables, candidates, etc.)
+    #[cfg(not(feature = "tanssi"))]
     Collator,
 }
 
@@ -175,6 +177,7 @@ impl InstanceFilter<RuntimeCall> for ProxyType {
                 RuntimeCall::Proxy(pallet_proxy::Call::reject_announcement { .. })
                     | RuntimeCall::Multisig { .. }
             ),
+            #[cfg(not(feature = "tanssi"))]
             ProxyType::Collator => {
                 matches!(c, RuntimeCall::CollatorSelection { .. } | RuntimeCall::Multisig { .. })
             }
@@ -192,4 +195,67 @@ parameter_types! {
     pub TreasuryInteriorLocation: InteriorLocation = PalletInstance(13).into();
     pub MessageQueueServiceWeight: Weight = Perbill::from_percent(35) * RuntimeBlockWeights::get().max_block;
     pub PrecompilesValue: OpenZeppelinPrecompiles<Runtime> = OpenZeppelinPrecompiles::<_>::new();
+}
+
+#[cfg(test)]
+mod test {
+    mod filter {
+        use frame_support::traits::InstanceFilter;
+        use sp_core::H256;
+
+        use crate::{types::ProxyType, AssetManager, RuntimeCall};
+
+        #[test]
+        fn test_filter_any() {
+            let call = RuntimeCall::CollatorSelection(
+                pallet_collator_selection::Call::set_desired_candidates { max: 10 },
+            );
+            let proxy_type = ProxyType::Any;
+            assert!(proxy_type.filter(&call));
+        }
+
+        #[test]
+        fn test_filter_nontransfer() {
+            let proxy_type = ProxyType::NonTransfer;
+            let valid_call = RuntimeCall::CollatorSelection(
+                pallet_collator_selection::Call::set_desired_candidates { max: 10 },
+            );
+            assert!(proxy_type.filter(&valid_call));
+            let invalid_call =
+                RuntimeCall::Balances(pallet_balances::Call::burn { value: 1, keep_alive: true });
+            assert!(!proxy_type.filter(&invalid_call));
+        }
+
+        #[test]
+        fn test_filter_cancel_proxy() {
+            let proxy_type = ProxyType::CancelProxy;
+            let invalid_call = RuntimeCall::CollatorSelection(
+                pallet_collator_selection::Call::set_desired_candidates { max: 10 },
+            );
+            assert!(!proxy_type.filter(&invalid_call));
+            let valid_call = RuntimeCall::Proxy(pallet_proxy::Call::reject_announcement {
+                delegate: AssetManager::account_id(),
+                call_hash: H256::zero(),
+            });
+            assert!(proxy_type.filter(&valid_call));
+        }
+
+        #[test]
+        fn test_filter_collator() {
+            let proxy_type = ProxyType::Collator;
+            let valid_call = RuntimeCall::CollatorSelection(
+                pallet_collator_selection::Call::set_desired_candidates { max: 10 },
+            );
+            assert!(proxy_type.filter(&valid_call));
+            let invalid_call =
+                RuntimeCall::Balances(pallet_balances::Call::burn { value: 1, keep_alive: true });
+            assert!(!proxy_type.filter(&invalid_call));
+        }
+
+        #[test]
+        fn test_filter_default() {
+            let expected = ProxyType::Any;
+            assert_eq!(expected, ProxyType::default());
+        }
+    }
 }

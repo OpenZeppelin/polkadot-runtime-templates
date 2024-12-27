@@ -28,8 +28,8 @@ serde_json = "1.0.121"
 smallvec = "1.11.0"
 
 # TODO: update to release
-openzeppelin-polkadot-wrappers = { git = "https://github.com/openzeppelin/polkadot-runtime-wrappers", default-features = false, tag = "v0.1-rc1" }
-openzeppelin-polkadot-wrappers-proc = { git = "https://github.com/openzeppelin/polkadot-runtime-wrappers", default-features = false, tag = "v0.1-rc1" }
+openzeppelin-pallet-abstractions = { git = "https://github.com/OpenZeppelin/openzeppelin-pallet-abstractions", default-features = false, tag = "v0.1-rc3" }
+openzeppelin-pallet-abstractions-proc = { git = "https://github.com/OpenZeppelin/openzeppelin-pallet-abstractions", default-features = false, tag = "v0.1-rc3" }
 
 # Substrate
 frame-benchmarking = { git = "https://github.com/paritytech/polkadot-sdk", default-features = false, tag = "polkadot-stable2407-1" }
@@ -67,6 +67,7 @@ sc-cli = { git = "https://github.com/paritytech/polkadot-sdk", default-features 
 sc-client-api = { git = "https://github.com/paritytech/polkadot-sdk", default-features = false, tag = "polkadot-stable2407-1" }
 sc-consensus = { git = "https://github.com/paritytech/polkadot-sdk", default-features = false, tag = "polkadot-stable2407-1" }
 sc-consensus-aura = { git = "https://github.com/paritytech/polkadot-sdk", default-features = false, tag = "polkadot-stable2407-1" }
+sc-consensus-slots = { git = "https://github.com/paritytech/polkadot-sdk", default-features = false, tag = "polkadot-stable2407-1" }
 sc-executor = { git = "https://github.com/paritytech/polkadot-sdk", default-features = false, tag = "polkadot-stable2407-1" }
 sc-network = { git = "https://github.com/paritytech/polkadot-sdk", default-features = false, tag = "polkadot-stable2407-1" }
 sc-network-sync = { git = "https://github.com/paritytech/polkadot-sdk", default-features = false, tag = "polkadot-stable2407-1" }
@@ -123,6 +124,7 @@ cumulus-client-collator = { git = "https://github.com/paritytech/polkadot-sdk", 
 cumulus-client-consensus-aura = { git = "https://github.com/paritytech/polkadot-sdk", default-features = false, tag = "polkadot-stable2407-1" }
 cumulus-client-consensus-common = { git = "https://github.com/paritytech/polkadot-sdk", default-features = false, tag = "polkadot-stable2407-1" }
 cumulus-client-consensus-proposer = { git = "https://github.com/paritytech/polkadot-sdk", default-features = false, tag = "polkadot-stable2407-1" }
+cumulus-client-parachain-inherent = { git = "https://github.com/paritytech/polkadot-sdk", default-features = false, tag = "polkadot-stable2407-1" }
 cumulus-client-service = { git = "https://github.com/paritytech/polkadot-sdk", default-features = false, tag = "polkadot-stable2407-1" }
 cumulus-pallet-aura-ext = { git = "https://github.com/paritytech/polkadot-sdk", default-features = false, tag = "polkadot-stable2407-1" }
 cumulus-pallet-parachain-system = { git = "https://github.com/paritytech/polkadot-sdk", default-features = false, tag = "polkadot-stable2407-1" }
@@ -133,6 +135,7 @@ cumulus-primitives-aura = { git = "https://github.com/paritytech/polkadot-sdk", 
 cumulus-primitives-core = { git = "https://github.com/paritytech/polkadot-sdk", default-features = false, tag = "polkadot-stable2407-1" }
 cumulus-primitives-parachain-inherent = { git = "https://github.com/paritytech/polkadot-sdk", default-features = false, tag = "polkadot-stable2407-1" }
 cumulus-primitives-storage-weight-reclaim = { git = "https://github.com/paritytech/polkadot-sdk", default-features = false, tag = "polkadot-stable2407-1" }
+cumulus-primitives-timestamp = { git = "https://github.com/paritytech/polkadot-sdk", default-features = false, tag = "polkadot-stable2407-1" }
 cumulus-primitives-utility = { git = "https://github.com/paritytech/polkadot-sdk", default-features = false, tag = "polkadot-stable2407-1" }
 cumulus-relay-chain-interface = { git = "https://github.com/paritytech/polkadot-sdk", default-features = false, tag = "polkadot-stable2407-1" }
 cumulus-test-relay-sproof-builder = { git = "https://github.com/paritytech/polkadot-sdk", default-features = false, tag = "polkadot-stable2407-1" }
@@ -183,6 +186,16 @@ xcm-primitives = { git = "https://github.com/OpenZeppelin/moonbeam.git", branch 
 # Fuzzer
 substrate-runtimes-fuzzers = { git = "https://github.com/srlabs/substrate-runtime-fuzzer.git", default-features = false, tag = "polkadot-v1.12.0" }
 ziggy = { version = "0.8", default-features = false }
+
+# Tanssi
+ccp-authorities-noting-inherent = { git = "https://github.com/OpenZeppelin/dancekit", default-features = false, tag = "polkadot-stable2407-1" }
+dp-consensus = { git = "https://github.com/OpenZeppelin/dancekit", default-features = false, tag = "polkadot-stable2407-1" }
+ethereum = { version = "0.15.0" }
+nimbus-consensus = { git = "https://github.com/OpenZeppelin/moonkit", default-features = false, tag = "polkadot-stable2407-1" }
+nimbus-primitives = { git = "https://github.com/OpenZeppelin/moonkit", default-features = false, tag = "polkadot-stable2407-1" }
+pallet-author-inherent = { git = "https://github.com/OpenZeppelin/moonkit", default-features = false, tag = "polkadot-stable2407-1" }
+pallet-cc-authorities-noting = { git = "https://github.com/OpenZeppelin/dancekit", default-features = false, tag = "polkadot-stable2407-1" }
+tc-consensus = { git = "https://github.com/KitHat/tanssi", branch = "polkadot-stable2407-1", default-features = false }
 
 [workspace.lints.clippy]
 large_enum_variant = "allow"

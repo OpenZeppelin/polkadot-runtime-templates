@@ -1,13 +1,18 @@
 pub mod asset_config;
 pub mod governance;
+pub mod weight;
 pub mod xcm_config;
 
 use asset_config::*;
+#[cfg(feature = "tanssi")]
+use cumulus_pallet_parachain_system::ExpectParentIncluded;
 #[cfg(feature = "async-backing")]
 use cumulus_pallet_parachain_system::RelayNumberMonotonicallyIncreases;
 #[cfg(not(feature = "async-backing"))]
 use cumulus_pallet_parachain_system::RelayNumberStrictlyIncreases;
 use cumulus_primitives_core::{AggregateMessageOrigin, ParaId};
+#[cfg(not(feature = "tanssi"))]
+use frame_support::PalletId;
 use frame_support::{
     derive_impl,
     dispatch::DispatchClass,
@@ -17,7 +22,6 @@ use frame_support::{
         EitherOfDiverse, Everything, FindAuthor, Nothing, TransformOrigin,
     },
     weights::{ConstantMultiplier, Weight},
-    PalletId,
 };
 use frame_system::{
     limits::{BlockLength, BlockWeights},
@@ -25,16 +29,26 @@ use frame_system::{
 };
 pub use governance::origins::pallet_custom_origins;
 use governance::{origins::Treasurer, tracks, Spender, WhitelistedCaller};
-use openzeppelin_polkadot_wrappers::{
-    impl_openzeppelin_assets, impl_openzeppelin_consensus, impl_openzeppelin_evm,
-    impl_openzeppelin_governance, impl_openzeppelin_system, impl_openzeppelin_xcm, AssetsConfig,
-    ConsensusConfig, EvmConfig, GovernanceConfig, SystemConfig, XcmConfig,
+#[cfg(feature = "tanssi")]
+use nimbus_primitives::NimbusId;
+use openzeppelin_pallet_abstractions::{
+    impl_openzeppelin_assets, impl_openzeppelin_evm, impl_openzeppelin_governance,
+    impl_openzeppelin_system, impl_openzeppelin_xcm, AssetsConfig, AssetsWeight, EvmConfig,
+    EvmWeight, GovernanceConfig, GovernanceWeight, SystemConfig, SystemWeight, XcmConfig,
+    XcmWeight,
 };
+#[cfg(not(feature = "tanssi"))]
+use openzeppelin_pallet_abstractions::{
+    impl_openzeppelin_consensus, ConsensusConfig, ConsensusWeight,
+};
+#[cfg(feature = "tanssi")]
+use openzeppelin_pallet_abstractions::{impl_openzeppelin_tanssi, TanssiConfig, TanssiWeight};
 use pallet_ethereum::PostLogContent;
 use pallet_evm::{EVMCurrencyAdapter, EnsureAccountId20, IdentityAddressMapping};
 use parachains_common::message_queue::{NarrowOriginToSibling, ParaIdToSibling};
 use parity_scale_codec::{Decode, Encode};
 use polkadot_runtime_common::{BlockHashCount, SlowAdjustingFeeUpdate};
+#[cfg(not(feature = "tanssi"))]
 use sp_consensus_aura::sr25519::AuthorityId as AuraId;
 use sp_core::{H160, U256};
 use sp_runtime::{
@@ -57,39 +71,58 @@ use xcm_primitives::{AbsoluteAndRelativeReserve, AccountIdToLocation, AsAssetTyp
 
 #[cfg(feature = "runtime-benchmarks")]
 use crate::benchmark::{OpenHrmpChannel, PayWithEnsure};
+#[cfg(feature = "tanssi")]
+use crate::AuthorInherent;
+#[cfg(not(feature = "tanssi"))]
+use crate::{
+    constants::HOURS,
+    types::{BlockNumber, CollatorSelectionUpdateOrigin, ConsensusHook},
+    Aura, CollatorSelection, Session, SessionKeys,
+};
 use crate::{
     constants::{
         currency::{deposit, CENTS, EXISTENTIAL_DEPOSIT, MICROCENTS, MILLICENTS},
-        AVERAGE_ON_INITIALIZE_RATIO, DAYS, HOURS, MAXIMUM_BLOCK_WEIGHT, MAX_BLOCK_LENGTH,
-        NORMAL_DISPATCH_RATIO, WEIGHT_PER_GAS,
+        AVERAGE_ON_INITIALIZE_RATIO, DAYS, MAXIMUM_BLOCK_WEIGHT, MAX_BLOCK_LENGTH,
+        NORMAL_DISPATCH_RATIO, SLOT_DURATION, WEIGHT_PER_GAS,
     },
     opaque,
     types::{
-        AccountId, AssetId, AssetKind, Balance, Beneficiary, Block, BlockNumber,
-        CollatorSelectionUpdateOrigin, ConsensusHook, Hash, MessageQueueServiceWeight, Nonce,
-        PrecompilesValue, PriceForSiblingParachainDelivery, ProxyType, TreasuryInteriorLocation,
-        TreasuryPalletId, TreasuryPaymaster, Version,
+        AccountId, AssetId, AssetKind, Balance, Beneficiary, Block, Hash,
+        MessageQueueServiceWeight, Nonce, PrecompilesValue, PriceForSiblingParachainDelivery,
+        ProxyType, TreasuryInteriorLocation, TreasuryPalletId, TreasuryPaymaster, Version,
     },
-    weights::{self, BlockExecutionWeight, ExtrinsicBaseWeight, RocksDbWeight},
-    AllPalletsWithSystem, AssetManager, Aura, Balances, BaseFee, CollatorSelection, EVMChainId,
-    Erc20XcmBridge, MessageQueue, OpenZeppelinPrecompiles, OriginCaller, PalletInfo, ParachainInfo,
+    weights::{BlockExecutionWeight, ExtrinsicBaseWeight},
+    AllPalletsWithSystem, AssetManager, Balances, BaseFee, EVMChainId, Erc20XcmBridge,
+    MessageQueue, OpenZeppelinPrecompiles, OriginCaller, PalletInfo, ParachainInfo,
     ParachainSystem, PolkadotXcm, Preimage, Referenda, Runtime, RuntimeCall, RuntimeEvent,
-    RuntimeFreezeReason, RuntimeHoldReason, RuntimeOrigin, RuntimeTask, Scheduler, Session,
-    SessionKeys, System, Timestamp, Treasury, UncheckedExtrinsic, WeightToFee, XcmpQueue,
+    RuntimeFreezeReason, RuntimeHoldReason, RuntimeOrigin, RuntimeTask, Scheduler, System,
+    Timestamp, Treasury, UncheckedExtrinsic, WeightToFee, XcmpQueue,
 };
 
 // OpenZeppelin runtime wrappers configuration
 pub struct OpenZeppelinRuntime;
 impl SystemConfig for OpenZeppelinRuntime {
     type AccountId = AccountId;
+    #[cfg(not(feature = "tanssi"))]
+    type ConsensusHook = ConsensusHook;
+    #[cfg(feature = "tanssi")]
+    type ConsensusHook = ExpectParentIncluded;
     type ExistentialDeposit = ConstU128<EXISTENTIAL_DEPOSIT>;
     type Lookup = IdentityLookup<AccountId>;
+    #[cfg(not(feature = "tanssi"))]
+    type OnTimestampSet = Aura;
+    #[cfg(feature = "tanssi")]
+    type OnTimestampSet = ();
     type PreimageOrigin = EnsureRoot<AccountId>;
     type ProxyType = ProxyType;
     type SS58Prefix = ConstU16<42>;
     type ScheduleOrigin = EnsureRoot<AccountId>;
+    type SlotDuration = ConstU64<SLOT_DURATION>;
     type Version = Version;
 }
+#[cfg(feature = "tanssi")]
+impl TanssiConfig for OpenZeppelinRuntime {}
+#[cfg(not(feature = "tanssi"))]
 impl ConsensusConfig for OpenZeppelinRuntime {
     type CollatorSelectionUpdateOrigin = CollatorSelectionUpdateOrigin;
 }
@@ -158,7 +191,10 @@ impl EvmConfig for OpenZeppelinRuntime {
     type AddressMapping = IdentityAddressMapping;
     type CallOrigin = EnsureAccountId20;
     type Erc20XcmBridgeTransferGasLimit = ConstU64<800_000>;
+    #[cfg(not(feature = "tanssi"))]
     type FindAuthor = FindAuthorSession<Aura>;
+    #[cfg(feature = "tanssi")]
+    type FindAuthor = FindAuthorSession<AuthorInherent>;
     type LocationToH160 = LocationToH160;
     type PrecompilesType = OpenZeppelinPrecompiles<Runtime>;
     type PrecompilesValue = PrecompilesValue;
@@ -181,12 +217,16 @@ impl AssetsConfig for OpenZeppelinRuntime {
 }
 impl_openzeppelin_assets!(OpenZeppelinRuntime);
 impl_openzeppelin_system!(OpenZeppelinRuntime);
+#[cfg(not(feature = "tanssi"))]
 impl_openzeppelin_consensus!(OpenZeppelinRuntime);
+#[cfg(feature = "tanssi")]
+impl_openzeppelin_tanssi!();
 impl_openzeppelin_governance!(OpenZeppelinRuntime);
 impl_openzeppelin_xcm!(OpenZeppelinRuntime);
 impl_openzeppelin_evm!(OpenZeppelinRuntime);
 
 pub struct FindAuthorSession<F>(PhantomData<F>);
+#[cfg(not(feature = "tanssi"))]
 impl<F: FindAuthor<u32>> FindAuthor<H160> for FindAuthorSession<F> {
     fn find_author<'a, I>(digests: I) -> Option<H160>
     where
@@ -195,6 +235,19 @@ impl<F: FindAuthor<u32>> FindAuthor<H160> for FindAuthorSession<F> {
         if let Some(author_index) = F::find_author(digests) {
             let account_id: AccountId = Session::validators()[author_index as usize];
             return Some(H160::from(account_id));
+        }
+        None
+    }
+}
+
+#[cfg(feature = "tanssi")]
+impl<F: FindAuthor<NimbusId>> FindAuthor<H160> for FindAuthorSession<F> {
+    fn find_author<'a, I>(digests: I) -> Option<H160>
+    where
+        I: 'a + IntoIterator<Item = (ConsensusEngineId, &'a [u8])>,
+    {
+        if let Some(author) = F::find_author(digests) {
+            return Some(H160::from_slice(&author.encode()[0..20]));
         }
         None
     }
@@ -222,5 +275,60 @@ impl fp_rpc::ConvertTransaction<opaque::UncheckedExtrinsic> for TransactionConve
         let encoded = extrinsic.encode();
         opaque::UncheckedExtrinsic::decode(&mut &encoded[..])
             .expect("Encoded extrinsic is always valid")
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    mod transaction_converter {
+        use core::str::FromStr;
+
+        use ethereum::{LegacyTransaction, TransactionAction, TransactionSignature};
+        use fp_rpc::ConvertTransaction;
+        use sp_core::{H160, H256, U256};
+
+        use crate::{configs::TransactionConverter, RuntimeCall, UncheckedExtrinsic};
+
+        fn get_transaction() -> pallet_ethereum::Transaction {
+            let mut input = vec![];
+            let data = "095ea7b30000000000000000000000007a250d5630b4cf539739df2c5dacb4c659f2488d0000000000000000000000000000000000000000000001b1ae4d6e2ef5000000".as_bytes();
+            input.extend_from_slice(data);
+            pallet_ethereum::Transaction::Legacy(LegacyTransaction {
+                nonce: U256::from_dec_str("842").unwrap(),
+                gas_price: U256::from_dec_str("35540887252").unwrap(),
+                gas_limit: U256::from_dec_str("500000").unwrap(),
+                action: TransactionAction::Call(
+                    H160::from_str("0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48").unwrap(),
+                ),
+                value: U256::from_dec_str("0").unwrap(),
+                input,
+                signature: TransactionSignature::new(
+                    27,
+                    H256::from_str(
+                        "dd6a5b9e4f357728f7718589d802ec2317c73c2ee3c72deb51f07766f1294859",
+                    )
+                    .unwrap(),
+                    H256::from_str(
+                        "32d1883c43f8ed779219374be9e94174aa42fbf5ab63093f3fadd9e2aae0d1d1",
+                    )
+                    .unwrap(),
+                )
+                .unwrap(),
+            })
+        }
+
+        #[test]
+        fn test_convert_transaction() {
+            let converter = TransactionConverter;
+            let extrinsic: UncheckedExtrinsic = converter.convert_transaction(get_transaction());
+            assert!(matches!(extrinsic.0.function, RuntimeCall::Ethereum(_)));
+        }
+
+        #[test]
+        fn test_convert_transaction_to_opaque() {
+            let converter = TransactionConverter;
+            let _: crate::opaque::UncheckedExtrinsic =
+                converter.convert_transaction(get_transaction());
+        }
     }
 }

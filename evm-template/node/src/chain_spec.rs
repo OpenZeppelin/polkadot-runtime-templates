@@ -1,16 +1,19 @@
 use std::collections::BTreeMap;
 
 use cumulus_primitives_core::ParaId;
-use evm_runtime_template::{
-    AccountId, AuraId, OpenZeppelinPrecompiles as Precompiles, Runtime, Signature,
-};
+use evm_runtime_template::{AccountId, OpenZeppelinPrecompiles as Precompiles, Runtime};
+#[cfg(not(feature = "tanssi"))]
+use evm_runtime_template::{AuraId, Signature};
 use fp_evm::GenesisAccount;
 use hex_literal::hex;
 use log::error;
 use sc_chain_spec::{ChainSpecExtension, ChainSpecGroup};
 use sc_service::ChainType;
 use serde::{Deserialize, Serialize};
-use sp_core::{ecdsa, Pair, Public, H160};
+use sp_core::H160;
+#[cfg(not(feature = "tanssi"))]
+use sp_core::{ecdsa, Pair, Public};
+#[cfg(not(feature = "tanssi"))]
 use sp_runtime::traits::{IdentifyAccount, Verify};
 
 use crate::contracts::{parse_contracts, ContractsPath};
@@ -22,6 +25,7 @@ pub type ChainSpec = sc_service::GenericChainSpec<Extensions>;
 const SAFE_XCM_VERSION: u32 = xcm::prelude::XCM_VERSION;
 
 /// Helper function to generate a crypto pair from seed
+#[cfg(not(feature = "tanssi"))]
 pub fn get_from_seed<TPublic: Public>(seed: &str) -> <TPublic::Pair as Pair>::Public {
     TPublic::Pair::from_string(&format!("//{}", seed), None)
         .expect("static values are valid; qed")
@@ -45,17 +49,20 @@ impl Extensions {
     }
 }
 
+#[cfg(not(feature = "tanssi"))]
 type AccountPublic = <Signature as Verify>::Signer;
 
 /// Generate collator keys from seed.
 ///
 /// This function's return type must always match the session keys of the chain
 /// in tuple format.
+#[cfg(not(feature = "tanssi"))]
 pub fn get_collator_keys_from_seed(seed: &str) -> AuraId {
     get_from_seed::<AuraId>(seed)
 }
 
 /// Helper function to generate an account ID from seed
+#[cfg(not(feature = "tanssi"))]
 pub fn get_account_id_from_seed<TPublic: Public>(seed: &str) -> AccountId
 where
     AccountPublic: From<<TPublic::Pair as Pair>::Public>,
@@ -67,6 +74,7 @@ where
 ///
 /// The input must be a tuple of individual keys (a single arg for now since we
 /// have just one key).
+#[cfg(not(feature = "tanssi"))]
 pub fn template_session_keys(keys: AuraId) -> evm_runtime_template::SessionKeys {
     evm_runtime_template::SessionKeys { aura: keys }
 }
@@ -94,6 +102,7 @@ pub fn development_config(contracts_path: ContractsPath) -> ChainSpec {
     .with_chain_type(ChainType::Development)
     .with_genesis_config_patch(testnet_genesis(
         // initial collators.
+        #[cfg(not(feature = "tanssi"))]
         vec![
             (
                 get_account_id_from_seed::<ecdsa::Public>("Alice"),
@@ -140,6 +149,7 @@ pub fn local_testnet_config(contracts_path: ContractsPath) -> ChainSpec {
     .with_chain_type(ChainType::Local)
     .with_genesis_config_patch(testnet_genesis(
         // initial collators.
+        #[cfg(not(feature = "tanssi"))]
         vec![
             (
                 get_account_id_from_seed::<ecdsa::Public>("Alice"),
@@ -165,6 +175,7 @@ pub fn local_testnet_config(contracts_path: ContractsPath) -> ChainSpec {
     .build()
 }
 
+#[cfg(not(feature = "tanssi"))]
 fn testnet_genesis(
     invulnerables: Vec<(AccountId, AuraId)>,
     #[cfg(not(feature = "runtime-benchmarks"))] endowed_accounts: Vec<AccountId>,
@@ -231,6 +242,70 @@ fn testnet_genesis(
                     )
                 })
             .collect::<Vec<_>>(),
+        },
+        "treasury": {},
+        "evmChainId": {
+            "chainId": 9999
+        },
+        "evm": {
+            "accounts": accounts
+        },
+        "polkadotXcm": {
+            "safeXcmVersion": Some(SAFE_XCM_VERSION),
+        },
+        "sudo": { "key": Some(root) }
+    })
+}
+
+#[cfg(feature = "tanssi")]
+fn testnet_genesis(
+    #[cfg(not(feature = "runtime-benchmarks"))] endowed_accounts: Vec<AccountId>,
+    #[cfg(feature = "runtime-benchmarks")] mut endowed_accounts: Vec<AccountId>,
+    root: AccountId,
+    id: ParaId,
+    contracts_path: ContractsPath,
+) -> serde_json::Value {
+    let contracts = parse_contracts(contracts_path)
+        .map_err(|e| error!("Error while parsing contracts: {e:?}"))
+        .unwrap_or_default();
+    let precompiles = Precompiles::<Runtime>::used_addresses()
+        .map(|addr| {
+            (
+                addr,
+                GenesisAccount {
+                    nonce: Default::default(),
+                    balance: Default::default(),
+                    storage: Default::default(),
+                    // bytecode to revert without returning data
+                    // (PUSH1 0x00 PUSH1 0x00 REVERT)
+                    code: vec![0x60, 0x00, 0x60, 0x00, 0xFD],
+                },
+            )
+        })
+        .into_iter();
+    let accounts: BTreeMap<H160, GenesisAccount> = contracts
+        .into_iter()
+        .map(|(address, contract)| {
+            (
+                address,
+                GenesisAccount {
+                    code: contract.bytecode(),
+                    nonce: Default::default(),
+                    balance: Default::default(),
+                    storage: Default::default(),
+                },
+            )
+        })
+        .chain(precompiles)
+        .collect();
+    #[cfg(feature = "runtime-benchmarks")]
+    endowed_accounts.push(AccountId::from(hex!("1000000000000000000000000000000000000001")));
+    serde_json::json!({
+        "balances": {
+            "balances": endowed_accounts.iter().cloned().map(|k| (k, 1u64 << 60)).collect::<Vec<_>>(),
+        },
+        "parachainInfo": {
+            "parachainId": id,
         },
         "treasury": {},
         "evmChainId": {

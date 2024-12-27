@@ -11,7 +11,11 @@ mod constant_tests {
 
         assert_eq!(DOLLARS, 100 * CENTS);
 
+        #[cfg(not(feature = "runtime-benchmarks"))]
         assert_eq!(EXISTENTIAL_DEPOSIT, 0);
+
+        #[cfg(feature = "runtime-benchmarks")]
+        assert_eq!(EXISTENTIAL_DEPOSIT, 1);
 
         // Ensure deposit function behavior remains constant
         assert_eq!(deposit(2, 3), 2 * 15 * CENTS + 3 * 6 * CENTS);
@@ -142,9 +146,7 @@ mod runtime_tests {
     fn assets_constants() {
         assert_eq!(<Runtime as pallet_assets::Config>::AssetDeposit::get(), 10 * CENTS);
 
-        // TODO: uncomment once patch is merged and updated RC is released and pointed to in deps
-        //assert_eq!(<Runtime as pallet_assets::Config>::AssetAccountDeposit::get(), deposit(1, 16));
-        assert_eq!(<Runtime as pallet_assets::Config>::AssetAccountDeposit::get(), MILLICENTS);
+        assert_eq!(<Runtime as pallet_assets::Config>::AssetAccountDeposit::get(), deposit(1, 16));
 
         assert_eq!(<Runtime as pallet_assets::Config>::ApprovalDeposit::get(), MILLICENTS);
 
@@ -235,7 +237,7 @@ mod runtime_tests {
             pallet_id_to_string(PalletId(*b"PotStake"))
         );
 
-        assert_eq!(configs::Period::get(), 6 * HOURS);
+        assert_eq!(configs::SessionLength::get(), 6 * HOURS);
 
         assert_eq!(configs::StakingAdminBodyId::get(), BodyId::Defense);
 

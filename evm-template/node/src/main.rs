@@ -9,6 +9,8 @@ mod cli;
 mod command;
 mod contracts;
 mod eth;
+
+#[cfg_attr(feature = "tanssi", path = "tanssi_rpc/mod.rs")]
 mod rpc;
 
 fn main() -> sc_cli::Result<()> {

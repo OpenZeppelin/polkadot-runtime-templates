@@ -90,10 +90,16 @@ pub mod opaque {
     pub type Hash = <BlakeTwo256 as HashT>::Output;
 }
 
+#[cfg(not(feature = "tanssi"))]
 impl_opaque_keys! {
     pub struct SessionKeys {
         pub aura: Aura,
     }
+}
+
+#[cfg(feature = "tanssi")]
+impl_opaque_keys! {
+    pub struct SessionKeys { }
 }
 
 /// The version information used to identify this runtime when compiled
@@ -105,23 +111,58 @@ pub fn native_version() -> NativeVersion {
     NativeVersion { runtime_version: VERSION, can_author_with: Default::default() }
 }
 
-use openzeppelin_polkadot_wrappers_proc::openzeppelin_construct_runtime;
+use openzeppelin_pallet_abstractions_proc::openzeppelin_construct_runtime;
+
+#[cfg(feature = "tanssi")]
 #[openzeppelin_construct_runtime]
 mod runtime {
-    #[abstraction]
     struct System;
 
-    #[abstraction]
-    struct Consensus;
-
-    #[abstraction]
     struct XCM;
 
-    #[abstraction]
     struct Assets;
 
-    #[abstraction]
     struct Governance;
+
+    struct Tanssi;
+}
+
+#[cfg(not(feature = "tanssi"))]
+#[openzeppelin_construct_runtime]
+mod runtime {
+    struct System;
+
+    struct XCM;
+
+    struct Assets;
+
+    struct Governance;
+
+    struct Consensus;
+}
+
+#[cfg(test)]
+mod test {
+    use frame_support::weights::WeightToFeePolynomial;
+
+    use crate::{
+        constants::{POLY_DEGREE, VERSION},
+        native_version, WeightToFee,
+    };
+
+    #[test]
+    fn test_native_version() {
+        let version = native_version();
+        assert_eq!(version.runtime_version, VERSION);
+    }
+
+    #[test]
+    fn test_weight_to_fee() {
+        let mut fee = WeightToFee::polynomial();
+        let coef = fee.pop().expect("no coef");
+        assert!(!coef.negative);
+        assert_eq!(coef.degree, POLY_DEGREE);
+    }
 }
 
 #[cfg(feature = "runtime-benchmarks")]

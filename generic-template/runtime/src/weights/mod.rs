@@ -24,6 +24,7 @@ pub mod extrinsic_weights;
 pub mod pallet_asset_manager;
 pub mod pallet_assets;
 pub mod pallet_balances;
+#[cfg(not(feature = "tanssi"))]
 pub mod pallet_collator_selection;
 pub mod pallet_conviction_voting;
 pub mod pallet_message_queue;
@@ -32,6 +33,7 @@ pub mod pallet_preimage;
 pub mod pallet_proxy;
 pub mod pallet_referenda;
 pub mod pallet_scheduler;
+#[cfg(not(feature = "tanssi"))]
 pub mod pallet_session;
 pub mod pallet_sudo;
 pub mod pallet_timestamp;
