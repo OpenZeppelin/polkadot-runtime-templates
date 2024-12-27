@@ -1,9 +1,13 @@
 // Storage indices integration checks
 use frame_support::traits::PalletInfo;
 use generic_runtime_template::{
-    Aura, AuraExt, Authorship, Balances, CollatorSelection, CumulusXcm, MessageQueue, Multisig,
-    ParachainInfo, ParachainSystem, PolkadotXcm, Proxy, Runtime, Session, Sudo, System, Timestamp,
+    Balances, CumulusXcm, MessageQueue, Multisig,
+    ParachainInfo, ParachainSystem, PolkadotXcm, Proxy, Runtime,  Sudo, System, Timestamp,
     TransactionPayment, XcmpQueue,
+};
+#[cfg(not(feature = "tanssi"))]
+use generic_runtime_template::{
+    Aura, AuraExt, Authorship, CollatorSelection, Session
 };
 
 fn assert_pallet_prefix<P: 'static>(name: &str) {
@@ -21,13 +25,18 @@ fn verify_pallet_prefixes() {
     assert_pallet_prefix::<TransactionPayment>("TransactionPayment");
     assert_pallet_prefix::<Sudo>("Sudo");
     assert_pallet_prefix::<Multisig>("Multisig");
-    assert_pallet_prefix::<Authorship>("Authorship");
-    assert_pallet_prefix::<CollatorSelection>("CollatorSelection");
-    assert_pallet_prefix::<Session>("Session");
-    assert_pallet_prefix::<Aura>("Aura");
-    assert_pallet_prefix::<AuraExt>("AuraExt");
     assert_pallet_prefix::<XcmpQueue>("XcmpQueue");
     assert_pallet_prefix::<PolkadotXcm>("PolkadotXcm");
     assert_pallet_prefix::<CumulusXcm>("CumulusXcm");
     assert_pallet_prefix::<MessageQueue>("MessageQueue");
+    
+    #[cfg(not(feature = "tanssi"))]
+    {
+
+        assert_pallet_prefix::<Authorship>("Authorship");
+        assert_pallet_prefix::<Aura>("Aura");
+        assert_pallet_prefix::<AuraExt>("AuraExt");
+        assert_pallet_prefix::<CollatorSelection>("CollatorSelection");
+        assert_pallet_prefix::<Session>("Session");
+    }
 }

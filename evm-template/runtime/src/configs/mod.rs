@@ -120,8 +120,6 @@ impl SystemConfig for OpenZeppelinRuntime {
     type SlotDuration = ConstU64<SLOT_DURATION>;
     type Version = Version;
 }
-#[cfg(feature = "tanssi")]
-impl TanssiConfig for OpenZeppelinRuntime {}
 #[cfg(not(feature = "tanssi"))]
 impl ConsensusConfig for OpenZeppelinRuntime {
     type CollatorSelectionUpdateOrigin = CollatorSelectionUpdateOrigin;
@@ -215,12 +213,17 @@ impl AssetsConfig for OpenZeppelinRuntime {
     type ForeignAssetModifierOrigin = EnsureRoot<AccountId>;
     type WeightToFee = WeightToFee;
 }
+#[cfg(feature = "tanssi")]
+impl TanssiConfig for OpenZeppelinRuntime {
+    type AuthorInherent = pallet_author_inherent::weights::SubstrateWeight<Runtime>;
+    type AuthoritiesNothing = pallet_cc_authorities_noting::weights::SubstrateWeight<Runtime>;
+}
 impl_openzeppelin_assets!(OpenZeppelinRuntime);
 impl_openzeppelin_system!(OpenZeppelinRuntime);
 #[cfg(not(feature = "tanssi"))]
 impl_openzeppelin_consensus!(OpenZeppelinRuntime);
 #[cfg(feature = "tanssi")]
-impl_openzeppelin_tanssi!();
+impl_openzeppelin_tanssi!(OpenZeppelinRuntime);
 impl_openzeppelin_governance!(OpenZeppelinRuntime);
 impl_openzeppelin_xcm!(OpenZeppelinRuntime);
 impl_openzeppelin_evm!(OpenZeppelinRuntime);
