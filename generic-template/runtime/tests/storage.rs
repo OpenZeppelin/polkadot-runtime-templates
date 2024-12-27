@@ -1,13 +1,10 @@
 // Storage indices integration checks
 use frame_support::traits::PalletInfo;
-use generic_runtime_template::{
-    Balances, CumulusXcm, MessageQueue, Multisig,
-    ParachainInfo, ParachainSystem, PolkadotXcm, Proxy, Runtime,  Sudo, System, Timestamp,
-    TransactionPayment, XcmpQueue,
-};
 #[cfg(not(feature = "tanssi"))]
+use generic_runtime_template::{Aura, AuraExt, Authorship, CollatorSelection, Session};
 use generic_runtime_template::{
-    Aura, AuraExt, Authorship, CollatorSelection, Session
+    Balances, CumulusXcm, MessageQueue, Multisig, ParachainInfo, ParachainSystem, PolkadotXcm,
+    Proxy, Runtime, Sudo, System, Timestamp, TransactionPayment, XcmpQueue,
 };
 
 fn assert_pallet_prefix<P: 'static>(name: &str) {
@@ -29,10 +26,9 @@ fn verify_pallet_prefixes() {
     assert_pallet_prefix::<PolkadotXcm>("PolkadotXcm");
     assert_pallet_prefix::<CumulusXcm>("CumulusXcm");
     assert_pallet_prefix::<MessageQueue>("MessageQueue");
-    
+
     #[cfg(not(feature = "tanssi"))]
     {
-
         assert_pallet_prefix::<Authorship>("Authorship");
         assert_pallet_prefix::<Aura>("Aura");
         assert_pallet_prefix::<AuraExt>("AuraExt");

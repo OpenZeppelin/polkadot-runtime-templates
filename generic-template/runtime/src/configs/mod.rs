@@ -31,7 +31,9 @@ use frame_system::{
 pub use governance::origins::pallet_custom_origins;
 use governance::{origins::Treasurer, tracks, Spender, WhitelistedCaller};
 use openzeppelin_pallet_abstractions::{
-    impl_openzeppelin_assets, impl_openzeppelin_governance, impl_openzeppelin_system, impl_openzeppelin_xcm, AssetsConfig, AssetsWeight, GovernanceConfig, GovernanceWeight, SystemConfig, SystemWeight, XcmConfig, XcmWeight
+    impl_openzeppelin_assets, impl_openzeppelin_governance, impl_openzeppelin_system,
+    impl_openzeppelin_xcm, AssetsConfig, AssetsWeight, GovernanceConfig, GovernanceWeight,
+    SystemConfig, SystemWeight, XcmConfig, XcmWeight,
 };
 #[cfg(not(feature = "tanssi"))]
 use openzeppelin_pallet_abstractions::{
@@ -187,7 +189,7 @@ impl AssetsConfig for OpenZeppelinRuntime {
     type ForeignAssetModifierOrigin = EnsureRoot<AccountId>;
     type WeightToFee = WeightToFee;
 }
-#[cfg(feature="tanssi")]
+#[cfg(feature = "tanssi")]
 impl TanssiConfig for OpenZeppelinRuntime {
     type AuthorInherent = pallet_author_inherent::weights::SubstrateWeight<Runtime>;
     type AuthoritiesNothing = pallet_cc_authorities_noting::weights::SubstrateWeight<Runtime>;
