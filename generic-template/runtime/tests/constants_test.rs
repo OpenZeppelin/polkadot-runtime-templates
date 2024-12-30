@@ -204,6 +204,7 @@ mod runtime_tests {
     }
 
     #[test]
+    #[cfg(not(feature = "tanssi"))]
     fn session_constants() {
         assert_eq!(configs::Period::get(), 6 * HOURS);
 
@@ -212,6 +213,7 @@ mod runtime_tests {
 
     #[test]
     #[allow(clippy::assertions_on_constants)]
+    #[cfg(not(feature = "tanssi"))]
     fn aura_constants() {
         #[cfg(not(feature = "async-backing"))]
         assert!(!<Runtime as pallet_aura::Config>::AllowMultipleBlocksPerSlot::get());
@@ -222,6 +224,7 @@ mod runtime_tests {
     }
 
     #[test]
+    #[cfg(not(feature = "tanssi"))]
     fn collator_selection_constants() {
         let pallet_id_to_string = |id: PalletId| -> String {
             core::str::from_utf8(&id.0).unwrap_or_default().to_string()

@@ -189,6 +189,11 @@ impl AssetsConfig for OpenZeppelinRuntime {
     type ForeignAssetModifierOrigin = EnsureRoot<AccountId>;
     type WeightToFee = WeightToFee;
 }
+#[cfg(feature = "tanssi")]
+impl TanssiConfig for OpenZeppelinRuntime {
+    type AuthorInherent = pallet_author_inherent::weights::SubstrateWeight<Runtime>;
+    type AuthoritiesNothing = pallet_cc_authorities_noting::weights::SubstrateWeight<Runtime>;
+}
 impl_openzeppelin_system!(OpenZeppelinRuntime);
 #[cfg(not(feature = "tanssi"))]
 impl_openzeppelin_consensus!(OpenZeppelinRuntime);
@@ -197,4 +202,4 @@ impl_openzeppelin_xcm!(OpenZeppelinRuntime);
 impl_openzeppelin_assets!(OpenZeppelinRuntime);
 
 #[cfg(feature = "tanssi")]
-impl_openzeppelin_tanssi!();
+impl_openzeppelin_tanssi!(OpenZeppelinRuntime);
