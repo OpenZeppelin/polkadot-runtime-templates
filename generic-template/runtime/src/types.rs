@@ -207,6 +207,7 @@ mod test {
         use crate::{types::ProxyType, AssetManager, RuntimeCall};
 
         #[test]
+        #[cfg(not(feature = "tanssi"))]
         fn test_filter_any() {
             let call = RuntimeCall::CollatorSelection(
                 pallet_collator_selection::Call::set_desired_candidates { max: 10 },
@@ -216,6 +217,7 @@ mod test {
         }
 
         #[test]
+        #[cfg(not(feature = "tanssi"))]
         fn test_filter_nontransfer() {
             let proxy_type = ProxyType::NonTransfer;
             let valid_call = RuntimeCall::CollatorSelection(
@@ -228,6 +230,7 @@ mod test {
         }
 
         #[test]
+        #[cfg(not(feature = "tanssi"))]
         fn test_filter_cancel_proxy() {
             let proxy_type = ProxyType::CancelProxy;
             let invalid_call = RuntimeCall::CollatorSelection(
@@ -242,6 +245,7 @@ mod test {
         }
 
         #[test]
+        #[cfg(not(feature = "tanssi"))]
         fn test_filter_collator() {
             let proxy_type = ProxyType::Collator;
             let valid_call = RuntimeCall::CollatorSelection(
