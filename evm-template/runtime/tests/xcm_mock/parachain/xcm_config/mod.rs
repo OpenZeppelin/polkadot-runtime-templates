@@ -8,7 +8,7 @@ pub mod weigher;
 use frame_support::traits::{Everything, Nothing};
 use xcm_builder::{EnsureDecodableXcm, FixedRateOfFungible, FrameTransactionalProcessor};
 
-use crate::xcm_mock::parachain::{MsgQueue, PolkadotXcm, RuntimeCall};
+use crate::xcm_mock::parachain::{MessageQueue, PolkadotXcm, RuntimeCall};
 
 // Generated from `decl_test_network!`
 pub type XcmRouter = EnsureDecodableXcm<crate::xcm_mock::ParachainXcmRouter<MsgQueue>>;

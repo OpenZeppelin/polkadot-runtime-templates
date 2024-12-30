@@ -14,8 +14,8 @@ pub const INITIAL_BALANCE: u128 = 1_000_000_000;
 decl_test_parachain! {
     pub struct ParaA {
         Runtime = parachain::Runtime,
-        XcmpMessageHandler = parachain::MsgQueue,
-        DmpMessageHandler = parachain::MsgQueue,
+        XcmpMessageHandler = parachain::MessageQueue,
+        DmpMessageHandler = parachain::MessageQueue,
         new_ext = para_ext(1),
     }
 }
@@ -23,8 +23,8 @@ decl_test_parachain! {
 decl_test_parachain! {
     pub struct ParaB {
         Runtime = parachain::Runtime,
-        XcmpMessageHandler = parachain::MsgQueue,
-        DmpMessageHandler = parachain::MsgQueue,
+        XcmpMessageHandler = parachain::MessageQueue,
+        DmpMessageHandler = parachain::MessageQueue,
         new_ext = para_ext(2),
     }
 }
@@ -77,7 +77,7 @@ pub fn parent_account_account_id(who: sp_runtime::AccountId32) -> parachain::Acc
 }
 
 pub fn para_ext(para_id: u32) -> sp_io::TestExternalities {
-    use parachain::{MsgQueue, Runtime, System};
+    use parachain::{MessageQueue, Runtime, System};
 
     let mut t = frame_system::GenesisConfig::<Runtime>::default().build_storage().unwrap();
 
@@ -94,7 +94,7 @@ pub fn para_ext(para_id: u32) -> sp_io::TestExternalities {
     ext.execute_with(|| {
         sp_tracing::try_init_simple();
         System::set_block_number(1);
-        MsgQueue::set_para_id(para_id.into());
+        MessageQueue::set_para_id(para_id.into());
     });
     ext
 }

@@ -4,17 +4,25 @@ use core::marker::PhantomData;
 use evm_runtime_template::configs::xcm_config::SignedToAccountId20;
 use frame_support::{
     construct_runtime, derive_impl, parameter_types,
-    traits::{ConstU128, ContainsPair, Everything, Nothing},
+    traits::{ConstU128, Contains, ContainsPair, Everything, Nothing},
     weights::{constants::WEIGHT_REF_TIME_PER_SECOND, Weight},
 };
 use frame_system::EnsureRoot;
-use openzeppelin_polkadot_wrappers::{impl_openzeppelin_xcm, XcmConfig};
+use openzeppelin_pallet_abstractions::{impl_openzeppelin_xcm, XcmConfig, XcmWeight};
 use sp_core::ConstU32;
 use sp_runtime::traits::{Get, IdentityLookup};
-use xcm::latest::prelude::*;
-use xcm_builder::EnsureXcmOrigin;
+use xcm::latest::{prelude::*, InteriorLocation};
+#[cfg(not(feature = "runtime-benchmarks"))]
+use xcm_builder::ProcessXcmMessage;
+use xcm_builder::{
+    AllowExplicitUnpaidExecutionFrom, AllowTopLevelPaidExecutionFrom,
+    DenyReserveTransferToRelayChain, DenyThenTry, EnsureXcmOrigin, FixedWeightBounds,
+    FrameTransactionalProcessor, TakeWeightCredit, TrailingSetTopicAsId, WithComputedOrigin,
+    WithUniqueTopic,
+};
 pub use xcm_config::*;
 use xcm_executor::XcmExecutor;
+use xcm_primitives::{AbsoluteAndRelativeReserve, AccountIdToLocation, AsAssetType};
 use xcm_simulator::mock_message_queue;
 
 pub type AccountId = fp_account::AccountId20;
@@ -39,7 +47,12 @@ impl pallet_balances::Config for Runtime {
     type ExistentialDeposit = ConstU128<1>;
 }
 
+impl parachain_info::Config for Runtime {}
+
 pub struct OpenZeppelinRuntime;
+impl XcmWeight for OpenZeppelinRuntime {
+    type Xcm = pallet_xcm::TestWeightInfo;
+}
 impl XcmConfig for OpenZeppelinRuntime {
     type AccountIdToLocation = AccountIdToLocation<AccountId>;
     type AddSupportedAssetOrigin = EnsureRoot<AccountId>;
@@ -98,5 +111,6 @@ construct_runtime!(
         XTokens: orml_xtokens,
         XcmTransactor: pallet_xcm_transactor,
         PolkadotXcm: pallet_xcm,
+        ParachainInfo: parachain_info,
     }
 );
