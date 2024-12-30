@@ -525,36 +525,32 @@ mod tests {
 
     mod is_bridged_concrete_assets_from {
         use frame_support::traits::ContainsPair;
+        use xcm::latest::{Asset, AssetId, Fungibility, Junctions, Location};
 
         use crate::configs::{AssetHubLocation, IsBridgedConcreteAssetFrom};
-        use xcm::latest::{Asset, AssetId, Location, Junctions, Fungibility};
 
         #[test]
         pub fn is_bridged_concrete_assets_from_contains() {
             let asset = Asset {
-                id: AssetId(
-                    Location {
-                        parents: 2,
-                        interior: Junctions::Here
-                    }
-                ),
-                fun: Fungibility::Fungible(100)
+                id: AssetId(Location { parents: 2, interior: Junctions::Here }),
+                fun: Fungibility::Fungible(100),
             };
-            assert!(IsBridgedConcreteAssetFrom::<AssetHubLocation>::contains(&asset, &AssetHubLocation::get()))
+            assert!(IsBridgedConcreteAssetFrom::<AssetHubLocation>::contains(
+                &asset,
+                &AssetHubLocation::get()
+            ))
         }
 
         #[test]
         pub fn is_bridged_concrete_assets_from_not_contains() {
             let asset = Asset {
-                id: AssetId(
-                    Location {
-                        parents: 1,
-                        interior: Junctions::Here
-                    }
-                ),
-                fun: Fungibility::Fungible(100)
+                id: AssetId(Location { parents: 1, interior: Junctions::Here }),
+                fun: Fungibility::Fungible(100),
             };
-            assert!(!IsBridgedConcreteAssetFrom::<AssetHubLocation>::contains(&asset, &AssetHubLocation::get()))
+            assert!(!IsBridgedConcreteAssetFrom::<AssetHubLocation>::contains(
+                &asset,
+                &AssetHubLocation::get()
+            ))
         }
     }
 
