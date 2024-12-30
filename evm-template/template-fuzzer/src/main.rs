@@ -3,6 +3,7 @@ use std::{
     time::{Duration, Instant},
 };
 
+use clap::Args;
 // Local Imports
 use evm_runtime_template::{
     constants::SLOT_DURATION, AccountId, AllPalletsWithSystem, Balance, Balances, EVMChainIdConfig,
@@ -25,6 +26,11 @@ use sp_runtime::{
     Digest, DigestItem, Storage,
 };
 use sp_state_machine::BasicExternalities;
+
+mod random;
+mod assets;
+
+type ExtrinsicData = Vec<(/* lapse */ u8, /* origin */ u8, RuntimeCall)>;
 
 fn generate_genesis(accounts: &[AccountId]) -> Storage {
     use evm_runtime_template::{BalancesConfig, RuntimeGenesisConfig};
@@ -79,13 +85,16 @@ fn generate_genesis(accounts: &[AccountId]) -> Storage {
     .unwrap()
 }
 
-fn process_input(accounts: &[AccountId], genesis: &Storage, data: &[u8]) {
-    let mut data = data;
+fn process_input(
+    accounts: &[AccountId], 
+    genesis: &Storage, 
+    data: &mut [u8], 
+    generate_extrinsics: impl Fn(&mut [u8]) -> ExtrinsicData,
+    call_filter: impl Fn(&RuntimeCall, usize) -> bool,
+) {
     // We build the list of extrinsics we will execute
-    let extrinsics: Vec<(/* lapse */ u8, /* origin */ u8, RuntimeCall)> =
-        iter::from_fn(|| DecodeLimit::decode_with_depth_limit(64, &mut data).ok())
-            .filter(|(_, _, x)| !matches!(x, RuntimeCall::System(_)))
-            .collect();
+    let extrinsics: ExtrinsicData = generate_extrinsics(data);
+        
     if extrinsics.is_empty() {
         return;
     }
@@ -101,7 +110,7 @@ fn process_input(accounts: &[AccountId], genesis: &Storage, data: &[u8]) {
 
         for (lapse, origin, extrinsic) in extrinsics {
             let origin_no = origin as usize % accounts.len();
-            if !recursive_call_filter(&extrinsic, origin_no) {
+            if !call_filter(&extrinsic, origin_no) {
                 continue;
             }
             if lapse > 0 {
@@ -209,77 +218,6 @@ fn initialize_block(block: u32) {
     // Calls that need to be called before each block starts (init_calls) go here
 }
 
-fn recursive_call_filter(call: &RuntimeCall, origin: usize) -> bool {
-    match call {
-        //recursion
-        RuntimeCall::Sudo(
-            pallet_sudo::Call::sudo { call }
-            | pallet_sudo::Call::sudo_unchecked_weight { call, weight: _ },
-        ) if origin == 0 => recursive_call_filter(call, origin),
-        RuntimeCall::Utility(
-            pallet_utility::Call::with_weight { call, weight: _ }
-            | pallet_utility::Call::dispatch_as { as_origin: _, call }
-            | pallet_utility::Call::as_derivative { index: _, call },
-        ) => recursive_call_filter(call, origin),
-        RuntimeCall::Utility(
-            pallet_utility::Call::force_batch { calls }
-            | pallet_utility::Call::batch { calls }
-            | pallet_utility::Call::batch_all { calls },
-        ) => calls.iter().map(|call| recursive_call_filter(call, origin)).all(|e| e),
-        RuntimeCall::Scheduler(
-            pallet_scheduler::Call::schedule_named_after {
-                id: _,
-                after: _,
-                maybe_periodic: _,
-                priority: _,
-                call,
-            }
-            | pallet_scheduler::Call::schedule { when: _, maybe_periodic: _, priority: _, call }
-            | pallet_scheduler::Call::schedule_named {
-                when: _,
-                id: _,
-                maybe_periodic: _,
-                priority: _,
-                call,
-            }
-            | pallet_scheduler::Call::schedule_after {
-                after: _,
-                maybe_periodic: _,
-                priority: _,
-                call,
-            },
-        ) => recursive_call_filter(call, origin),
-        RuntimeCall::Multisig(
-            pallet_multisig::Call::as_multi_threshold_1 { other_signatories: _, call }
-            | pallet_multisig::Call::as_multi {
-                threshold: _,
-                other_signatories: _,
-                maybe_timepoint: _,
-                call,
-                max_weight: _,
-            },
-        ) => recursive_call_filter(call, origin),
-        RuntimeCall::Whitelist(
-            pallet_whitelist::Call::dispatch_whitelisted_call_with_preimage { call },
-        ) => recursive_call_filter(call, origin),
-
-        // restrictions
-        RuntimeCall::Sudo(_) if origin != 0 => false,
-        RuntimeCall::System(
-            frame_system::Call::set_code { .. } | frame_system::Call::kill_prefix { .. },
-        ) => false,
-        #[cfg(not(feature = "tanssi"))]
-        RuntimeCall::CollatorSelection(
-            pallet_collator_selection::Call::set_desired_candidates { max },
-        ) =>
-            *max < <<Runtime as pallet_collator_selection::Config>::MaxCandidates as Get<u32>>::get(
-            ),
-        RuntimeCall::Balances(pallet_balances::Call::force_adjust_total_issuance { .. }) => false,
-
-        _ => true,
-    }
-}
-
 fn finalize_block(elapsed: Duration) {
     println!("\n  time spent: {elapsed:?}");
     assert!(elapsed.as_secs() <= 2, "block execution took too much time");
@@ -317,10 +255,21 @@ fn check_invariants(block: u32, initial_total_issuance: Balance) {
 }
 
 fn main() {
+    // let args = cli::Args::parse();
     let accounts: Vec<AccountId> = (0..5).map(|i| [i; 32].into()).collect();
     let genesis = generate_genesis(&accounts);
 
+    // if args.random {
+        // (random::generate_extrinsic_stream, random::recursive_call_filter)
+    // } else if args.assets {
+        
+    // } else {
+    //     println!("Mode was not specified. Halting");
+    //     return;
+    // };
+
     ziggy::fuzz!(|data: &[u8]| {
-        process_input(&accounts, &genesis, data);
+        let mut data = data.to_vec();
+        process_input(&accounts, &genesis, &mut data, assets::generate_extrinsics_stream, |_, _| true);
     });
 }
