@@ -14708,13 +14708,16 @@ dependencies = [
 name = "template-fuzzer"
 version = "0.1.0"
 dependencies = [
+ "clap",
  "cumulus-pallet-parachain-system",
  "cumulus-primitives-core",
  "cumulus-primitives-parachain-inherent",
  "cumulus-test-relay-sproof-builder",
  "evm-runtime-template",
+ "fp-account",
  "frame-support",
  "frame-system",
+ "pallet-assets",
  "pallet-balances",
  "pallet-collator-selection",
  "pallet-multisig",
