@@ -10,7 +10,7 @@ pub mod configs;
 pub mod constants;
 mod precompiles;
 pub use precompiles::OpenZeppelinPrecompiles;
-mod types;
+pub mod types;
 mod weights;
 
 use frame_support::{

@@ -5,13 +5,23 @@ pub mod location_converter;
 pub mod origin_converter;
 pub mod weigher;
 
+use evm_runtime_template::{
+    configs::{
+        asset_config::AssetType,
+        xcm_config::{
+            AssetFeesFilter, AssetTransactors, BaseXcmWeight, CurrencyId, CurrencyIdToLocation,
+            FeeManager, LocalOriginToLocation, LocationToAccountId, MaxAssetsForTransfer,
+        },
+    },
+    AssetManager,
+};
 use frame_support::traits::{Everything, Nothing};
 use xcm_builder::{EnsureDecodableXcm, FixedRateOfFungible, FrameTransactionalProcessor};
 
 use crate::xcm_mock::parachain::{MessageQueue, PolkadotXcm, RuntimeCall};
 
 // Generated from `decl_test_network!`
-pub type XcmRouter = EnsureDecodableXcm<crate::xcm_mock::ParachainXcmRouter<MsgQueue>>;
+pub type XcmRouter = EnsureDecodableXcm<crate::xcm_mock::ParachainXcmRouter<MessageQueue>>;
 
 pub struct XcmConfig;
 impl xcm_executor::Config for XcmConfig {
