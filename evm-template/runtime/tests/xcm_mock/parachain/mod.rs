@@ -1,5 +1,6 @@
 use core::marker::PhantomData;
 
+use cumulus_pallet_parachain_system::RelayNumberStrictlyIncreases;
 use cumulus_primitives_core::{AggregateMessageOrigin, ParaId};
 use evm_runtime_template::{
     configs::{
@@ -54,6 +55,8 @@ impl frame_system::Config for Runtime {
     type AccountId = AccountId;
     type Block = Block;
     type Lookup = IdentityLookup<Self::AccountId>;
+    // The action to take on a Runtime Upgrade
+    type OnSetCode = cumulus_pallet_parachain_system::ParachainSetCode<Self>;
 }
 
 #[derive_impl(pallet_balances::config_preludes::TestDefaultConfig)]
