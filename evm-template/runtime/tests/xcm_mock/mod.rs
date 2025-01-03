@@ -1,6 +1,7 @@
 pub mod parachain;
 pub mod relay_chain;
 
+use openzeppelin_pallet_abstractions::XcmConfig;
 use sp_runtime::BuildStorage;
 use sp_tracing;
 use xcm::prelude::*;
@@ -14,8 +15,8 @@ pub const INITIAL_BALANCE: u128 = 1_000_000_000;
 decl_test_parachain! {
     pub struct ParaA {
         Runtime = parachain::Runtime,
-        XcmpMessageHandler = parachain::MsgQueue,
-        DmpMessageHandler = parachain::MsgQueue,
+        XcmpMessageHandler = parachain::MessageQueue,
+        DmpMessageHandler = parachain::MessageQueue,
         new_ext = para_ext(1),
     }
 }
@@ -23,8 +24,8 @@ decl_test_parachain! {
 decl_test_parachain! {
     pub struct ParaB {
         Runtime = parachain::Runtime,
-        XcmpMessageHandler = parachain::MsgQueue,
-        DmpMessageHandler = parachain::MsgQueue,
+        XcmpMessageHandler = parachain::MessageQueue,
+        DmpMessageHandler = parachain::MessageQueue,
         new_ext = para_ext(2),
     }
 }
@@ -53,7 +54,10 @@ decl_test_network! {
 
 pub fn parent_account_id() -> parachain::AccountId {
     let location = (Parent,);
-    parachain::location_converter::LocationConverter::convert_location(&location.into()).unwrap()
+    <parachain::OpenZeppelinRuntime as XcmConfig>::AccountIdToLocation::convert_location(
+        &location.into(),
+    )
+    .unwrap()
 }
 
 pub fn child_account_id(para: u32) -> relay_chain::AccountId {
@@ -68,16 +72,22 @@ pub fn child_account_account_id(para: u32, who: sp_runtime::AccountId32) -> rela
 
 pub fn sibling_account_account_id(para: u32, who: sp_runtime::AccountId32) -> parachain::AccountId {
     let location = (Parent, Parachain(para), AccountId32 { network: None, id: who.into() });
-    parachain::location_converter::LocationConverter::convert_location(&location.into()).unwrap()
+    <parachain::OpenZeppelinRuntime as XcmConfig>::AccountIdToLocation::convert_location(
+        &location.into(),
+    )
+    .unwrap()
 }
 
 pub fn parent_account_account_id(who: sp_runtime::AccountId32) -> parachain::AccountId {
     let location = (Parent, AccountId32 { network: None, id: who.into() });
-    parachain::location_converter::LocationConverter::convert_location(&location.into()).unwrap()
+    <parachain::OpenZeppelinRuntime as XcmConfig>::AccountIdToLocation::convert_location(
+        &location.into(),
+    )
+    .unwrap()
 }
 
 pub fn para_ext(para_id: u32) -> sp_io::TestExternalities {
-    use parachain::{MsgQueue, Runtime, System};
+    use parachain::{MessageQueue, Runtime, System};
 
     let mut t = frame_system::GenesisConfig::<Runtime>::default().build_storage().unwrap();
 
@@ -94,7 +104,7 @@ pub fn para_ext(para_id: u32) -> sp_io::TestExternalities {
     ext.execute_with(|| {
         sp_tracing::try_init_simple();
         System::set_block_number(1);
-        MsgQueue::set_para_id(para_id.into());
+        MessageQueue::set_para_id(para_id.into());
     });
     ext
 }
