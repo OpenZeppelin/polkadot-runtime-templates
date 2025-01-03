@@ -38,7 +38,6 @@ use xcm_builder::{
 };
 use xcm_executor::XcmExecutor;
 use xcm_primitives::{AbsoluteAndRelativeReserve, AccountIdToLocation, AsAssetType};
-use xcm_simulator::mock_message_queue;
 
 use crate::relay_chain::MessageQueueServiceWeight;
 
@@ -57,6 +56,14 @@ impl frame_system::Config for Runtime {
     type Lookup = IdentityLookup<Self::AccountId>;
     // The action to take on a Runtime Upgrade
     type OnSetCode = cumulus_pallet_parachain_system::ParachainSetCode<Self>;
+    // Converts a module to an index of this module in the runtime.
+    type PalletInfo = PalletInfo;
+    // The aggregated dispatch type that is available for extrinsics.
+    type RuntimeCall = RuntimeCall;
+    // The ubiquitous event type.
+    type RuntimeEvent = RuntimeEvent;
+    // The ubiquitous origin type.
+    type RuntimeOrigin = RuntimeOrigin;
 }
 
 #[derive_impl(pallet_balances::config_preludes::TestDefaultConfig)]
