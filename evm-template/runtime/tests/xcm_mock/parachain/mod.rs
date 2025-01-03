@@ -1,4 +1,3 @@
-mod xcm_config;
 use core::marker::PhantomData;
 
 use cumulus_primitives_core::{AggregateMessageOrigin, ParaId};
@@ -13,9 +12,9 @@ use evm_runtime_template::{
             TreasuryAccount, XcmOriginToTransactDispatchOrigin, XcmWeigher,
         },
     },
-    constants::currency::CENTS,
-    types::PriceForSiblingParachainDelivery,
-    AssetManager, ParachainSystem, WeightToFee,
+    constants::{currency::CENTS, MAXIMUM_BLOCK_WEIGHT},
+    types::{ConsensusHook, PriceForSiblingParachainDelivery},
+    WeightToFee,
 };
 use frame_support::{
     construct_runtime, derive_impl, parameter_types,
@@ -36,7 +35,6 @@ use xcm_builder::{
     FrameTransactionalProcessor, TakeWeightCredit, TrailingSetTopicAsId, WithComputedOrigin,
     WithUniqueTopic,
 };
-pub use xcm_config::*;
 use xcm_executor::XcmExecutor;
 use xcm_primitives::{AbsoluteAndRelativeReserve, AccountIdToLocation, AsAssetType};
 use xcm_simulator::mock_message_queue;
@@ -67,6 +65,42 @@ impl pallet_balances::Config for Runtime {
 
 impl parachain_info::Config for Runtime {}
 
+parameter_types! {
+    pub const ReservedXcmpWeight: Weight = MAXIMUM_BLOCK_WEIGHT.saturating_div(4);
+    pub const ReservedDmpWeight: Weight = MAXIMUM_BLOCK_WEIGHT.saturating_div(4);
+    pub const RelayOrigin: AggregateMessageOrigin = AggregateMessageOrigin::Parent;
+}
+
+// base pallet for Cumulus-based parachains.
+impl cumulus_pallet_parachain_system::Config for Runtime {
+    // Checks if the associated relay parent block number is valid. Depending on the feature, it ensures the relay number increases as expected.
+    #[cfg(not(feature = "async-backing"))]
+    type CheckAssociatedRelayNumber = RelayNumberStrictlyIncreases;
+    #[cfg(feature = "async-backing")]
+    type CheckAssociatedRelayNumber = RelayNumberMonotonicallyIncreases;
+    // An entry-point for managing the backlog of unincluded parachain blocks and authorship rights for those blocks.
+    type ConsensusHook = ConsensusHook;
+    // Queues inbound downward messages for delayed processing.
+    // All inbound DMP messages from the relay are pushed into this.
+    // The handler is expected to eventually process all the messages that are pushed to it.
+    type DmpQueue = frame_support::traits::EnqueueWithOrigin<MessageQueue, RelayOrigin>;
+    // Something which can be notified when the validation data is set.
+    type OnSystemEvent = ();
+    // The place where outbound XCMP messages come from. This is queried in `finalize_block`.
+    type OutboundXcmpMessageSource = XcmpQueue;
+    // The weight reserved at the beginning of the block for processing DMP messages.
+    type ReservedDmpWeight = ReservedDmpWeight;
+    // The weight reserved at the beginning of the block for processing XCMP messages.
+    type ReservedXcmpWeight = ReservedXcmpWeight;
+    // The overarching event type.
+    type RuntimeEvent = RuntimeEvent;
+    // Returns the parachain ID we are running with.
+    type SelfParaId = parachain_info::Pallet<Runtime>;
+    type WeightInfo = ();
+    // The message handler that will be invoked when messages are received via XCMP.
+    type XcmpMessageHandler = XcmpQueue;
+}
+
 pub struct OpenZeppelinRuntime;
 impl XcmWeight for OpenZeppelinRuntime {
     type Xcm = pallet_xcm::TestWeightInfo;
@@ -78,7 +112,7 @@ impl XcmConfig for OpenZeppelinRuntime {
     type AssetTransactors = AssetTransactors;
     type BaseXcmWeight = BaseXcmWeight;
     type CurrencyId = CurrencyId;
-    type CurrencyIdToLocation = CurrencyIdToLocation<AsAssetType<AssetId, AssetType, AssetManager>>;
+    type CurrencyIdToLocation = CurrencyIdToLocation<AsAssetType<AssetId, AssetType, Balances>>;
     type DerivativeAddressRegistrationOrigin = EnsureRoot<AccountId>;
     type EditSupportedAssetOrigin = EnsureRoot<AccountId>;
     type FeeManager = FeeManager;
@@ -130,5 +164,6 @@ construct_runtime!(
         XcmTransactor: pallet_xcm_transactor,
         PolkadotXcm: pallet_xcm,
         ParachainInfo: parachain_info,
+        ParachainSystem: cumulus_pallet_parachain_system,
     }
 );
