@@ -26,125 +26,127 @@ serde_json = "1.0.121"
 smallvec = "1.11.0"
 
 # TODO: update to release
-openzeppelin-pallet-abstractions = { git = "https://github.com/OpenZeppelin/openzeppelin-pallet-abstractions", default-features = false, tag = "v0.1-rc3" }
-openzeppelin-pallet-abstractions-proc = { git = "https://github.com/OpenZeppelin/openzeppelin-pallet-abstractions", default-features = false, tag = "v0.1-rc3" }
+openzeppelin-pallet-abstractions = { git = "https://github.com/OpenZeppelin/openzeppelin-pallet-abstractions", default-features = false, branch = "amar-upgrade-polkadot2412" }
+openzeppelin-pallet-abstractions-proc = { git = "https://github.com/OpenZeppelin/openzeppelin-pallet-abstractions", default-features = false, branch = "amar-upgrade-polkadot2412" }
 
 # Substrate
-frame-benchmarking = { git = "https://github.com/paritytech/polkadot-sdk", default-features = false, tag = "polkadot-stable2407-1" }
-frame-benchmarking-cli = { git = "https://github.com/paritytech/polkadot-sdk", default-features = false, tag = "polkadot-stable2407-1" }
-frame-executive = { git = "https://github.com/paritytech/polkadot-sdk", default-features = false, tag = "polkadot-stable2407-1" }
-frame-metadata-hash-extension = { git = "https://github.com/paritytech/polkadot-sdk", default-features = false, tag = "polkadot-stable2407-1" }
-frame-support = { git = "https://github.com/paritytech/polkadot-sdk", default-features = false, tag = "polkadot-stable2407-1" }
-frame-system = { git = "https://github.com/paritytech/polkadot-sdk", default-features = false, tag = "polkadot-stable2407-1" }
-frame-system-benchmarking = { git = "https://github.com/paritytech/polkadot-sdk", default-features = false, tag = "polkadot-stable2407-1" }
-frame-system-rpc-runtime-api = { git = "https://github.com/paritytech/polkadot-sdk", default-features = false, tag = "polkadot-stable2407-1" }
-frame-try-runtime = { git = "https://github.com/paritytech/polkadot-sdk", default-features = false, tag = "polkadot-stable2407-1" }
-pallet-assets = { git = "https://github.com/paritytech/polkadot-sdk", default-features = false, tag = "polkadot-stable2407-1" }
-pallet-aura = { git = "https://github.com/paritytech/polkadot-sdk", default-features = false, tag = "polkadot-stable2407-1" }
-pallet-authorship = { git = "https://github.com/paritytech/polkadot-sdk", default-features = false, tag = "polkadot-stable2407-1" }
-pallet-balances = { git = "https://github.com/paritytech/polkadot-sdk", default-features = false, tag = "polkadot-stable2407-1" }
-pallet-conviction-voting = { git = "https://github.com/paritytech/polkadot-sdk", default-features = false, tag = "polkadot-stable2407-1" }
-pallet-message-queue = { git = "https://github.com/paritytech/polkadot-sdk", default-features = false, tag = "polkadot-stable2407-1" }
-pallet-multisig = { git = "https://github.com/paritytech/polkadot-sdk", default-features = false, tag = "polkadot-stable2407-1" }
-pallet-preimage = { git = "https://github.com/paritytech/polkadot-sdk", default-features = false, tag = "polkadot-stable2407-1" }
-pallet-proxy = { git = "https://github.com/paritytech/polkadot-sdk", default-features = false, tag = "polkadot-stable2407-1" }
-pallet-referenda = { git = "https://github.com/paritytech/polkadot-sdk", default-features = false, tag = "polkadot-stable2407-1" }
-pallet-scheduler = { git = "https://github.com/paritytech/polkadot-sdk", default-features = false, tag = "polkadot-stable2407-1" }
-pallet-session = { git = "https://github.com/paritytech/polkadot-sdk", default-features = false, tag = "polkadot-stable2407-1" }
-pallet-sudo = { git = "https://github.com/paritytech/polkadot-sdk", default-features = false, tag = "polkadot-stable2407-1" }
-pallet-timestamp = { git = "https://github.com/paritytech/polkadot-sdk", default-features = false, tag = "polkadot-stable2407-1" }
-pallet-transaction-payment = { git = "https://github.com/paritytech/polkadot-sdk", default-features = false, tag = "polkadot-stable2407-1" }
-pallet-transaction-payment-rpc = { git = "https://github.com/paritytech/polkadot-sdk", default-features = false, tag = "polkadot-stable2407-1" }
-pallet-transaction-payment-rpc-runtime-api = { git = "https://github.com/paritytech/polkadot-sdk", default-features = false, tag = "polkadot-stable2407-1" }
-pallet-treasury = { git = "https://github.com/paritytech/polkadot-sdk", default-features = false, tag = "polkadot-stable2407-1" }
-pallet-utility = { git = "https://github.com/paritytech/polkadot-sdk", default-features = false, tag = "polkadot-stable2407-1" }
-pallet-whitelist = { git = "https://github.com/paritytech/polkadot-sdk", default-features = false, tag = "polkadot-stable2407-1" }
-sc-basic-authorship = { git = "https://github.com/paritytech/polkadot-sdk", default-features = false, tag = "polkadot-stable2407-1" }
-sc-chain-spec = { git = "https://github.com/paritytech/polkadot-sdk", default-features = false, tag = "polkadot-stable2407-1" }
-sc-cli = { git = "https://github.com/paritytech/polkadot-sdk", default-features = false, tag = "polkadot-stable2407-1" }
-sc-client-api = { git = "https://github.com/paritytech/polkadot-sdk", default-features = false, tag = "polkadot-stable2407-1" }
-sc-consensus = { git = "https://github.com/paritytech/polkadot-sdk", default-features = false, tag = "polkadot-stable2407-1" }
-sc-executor = { git = "https://github.com/paritytech/polkadot-sdk", default-features = false, tag = "polkadot-stable2407-1" }
-sc-network = { git = "https://github.com/paritytech/polkadot-sdk", default-features = false, tag = "polkadot-stable2407-1" }
-sc-network-sync = { git = "https://github.com/paritytech/polkadot-sdk", default-features = false, tag = "polkadot-stable2407-1" }
-sc-offchain = { git = "https://github.com/paritytech/polkadot-sdk", default-features = false, tag = "polkadot-stable2407-1" }
-sc-rpc = { git = "https://github.com/paritytech/polkadot-sdk", default-features = false, tag = "polkadot-stable2407-1" }
-sc-service = { git = "https://github.com/paritytech/polkadot-sdk", default-features = false, tag = "polkadot-stable2407-1" }
-sc-sysinfo = { git = "https://github.com/paritytech/polkadot-sdk", default-features = false, tag = "polkadot-stable2407-1" }
-sc-telemetry = { git = "https://github.com/paritytech/polkadot-sdk", default-features = false, tag = "polkadot-stable2407-1" }
-sc-tracing = { git = "https://github.com/paritytech/polkadot-sdk", default-features = false, tag = "polkadot-stable2407-1" }
-sc-transaction-pool = { git = "https://github.com/paritytech/polkadot-sdk", default-features = false, tag = "polkadot-stable2407-1" }
-sc-transaction-pool-api = { git = "https://github.com/paritytech/polkadot-sdk", default-features = false, tag = "polkadot-stable2407-1" }
-sp-api = { git = "https://github.com/paritytech/polkadot-sdk", default-features = false, tag = "polkadot-stable2407-1" }
-sp-arithmetic = { git = "https://github.com/paritytech/polkadot-sdk", default-features = false, tag = "polkadot-stable2407-1" }
-sp-block-builder = { git = "https://github.com/paritytech/polkadot-sdk", default-features = false, tag = "polkadot-stable2407-1" }
-sp-blockchain = { git = "https://github.com/paritytech/polkadot-sdk", default-features = false, tag = "polkadot-stable2407-1" }
-sp-consensus-aura = { git = "https://github.com/paritytech/polkadot-sdk", default-features = false, tag = "polkadot-stable2407-1" }
-sp-core = { git = "https://github.com/paritytech/polkadot-sdk", default-features = false, tag = "polkadot-stable2407-1" }
-sp-genesis-builder = { git = "https://github.com/paritytech/polkadot-sdk", default-features = false, tag = "polkadot-stable2407-1" }
-sp-inherents = { git = "https://github.com/paritytech/polkadot-sdk", default-features = false, tag = "polkadot-stable2407-1" }
-sp-io = { git = "https://github.com/paritytech/polkadot-sdk", tag = "polkadot-stable2407-1" }
-sp-keystore = { git = "https://github.com/paritytech/polkadot-sdk", default-features = false, tag = "polkadot-stable2407-1" }
-sp-offchain = { git = "https://github.com/paritytech/polkadot-sdk", default-features = false, tag = "polkadot-stable2407-1" }
-sp-runtime = { git = "https://github.com/paritytech/polkadot-sdk", default-features = false, tag = "polkadot-stable2407-1" }
-sp-session = { git = "https://github.com/paritytech/polkadot-sdk", default-features = false, tag = "polkadot-stable2407-1" }
-sp-state-machine = { git = "https://github.com/paritytech/polkadot-sdk", default-features = false, tag = "polkadot-stable2407-1" }
-sp-std = { git = "https://github.com/paritytech/polkadot-sdk", default-features = false, tag = "polkadot-stable2407-1" }
-sp-timestamp = { git = "https://github.com/paritytech/polkadot-sdk", default-features = false, tag = "polkadot-stable2407-1" }
-sp-tracing = { git = "https://github.com/paritytech/polkadot-sdk", default-features = false, tag = "polkadot-stable2407-1" }
-sp-transaction-pool = { git = "https://github.com/paritytech/polkadot-sdk", default-features = false, tag = "polkadot-stable2407-1" }
-sp-version = { git = "https://github.com/paritytech/polkadot-sdk", default-features = false, tag = "polkadot-stable2407-1" }
-substrate-build-script-utils = { git = "https://github.com/paritytech/polkadot-sdk", tag = "polkadot-stable2407-1" }
-substrate-frame-rpc-system = { git = "https://github.com/paritytech/polkadot-sdk", default-features = false, tag = "polkadot-stable2407-1" }
-substrate-prometheus-endpoint = { git = "https://github.com/paritytech/polkadot-sdk", default-features = false, tag = "polkadot-stable2407-1" }
-substrate-wasm-builder = { git = "https://github.com/paritytech/polkadot-sdk", tag = "polkadot-stable2407-1" }
+frame-benchmarking = { git = "https://github.com/paritytech/polkadot-sdk", default-features = false, tag = "polkadot-stable2412" }
+frame-benchmarking-cli = { git = "https://github.com/paritytech/polkadot-sdk", default-features = false, tag = "polkadot-stable2412" }
+frame-executive = { git = "https://github.com/paritytech/polkadot-sdk", default-features = false, tag = "polkadot-stable2412" }
+frame-metadata-hash-extension = { git = "https://github.com/paritytech/polkadot-sdk", default-features = false, tag = "polkadot-stable2412" }
+frame-support = { git = "https://github.com/paritytech/polkadot-sdk", default-features = false, tag = "polkadot-stable2412" }
+frame-system = { git = "https://github.com/paritytech/polkadot-sdk", default-features = false, tag = "polkadot-stable2412" }
+frame-system-benchmarking = { git = "https://github.com/paritytech/polkadot-sdk", default-features = false, tag = "polkadot-stable2412" }
+frame-system-rpc-runtime-api = { git = "https://github.com/paritytech/polkadot-sdk", default-features = false, tag = "polkadot-stable2412" }
+frame-try-runtime = { git = "https://github.com/paritytech/polkadot-sdk", default-features = false, tag = "polkadot-stable2412" }
+pallet-assets = { git = "https://github.com/paritytech/polkadot-sdk", default-features = false, tag = "polkadot-stable2412" }
+pallet-aura = { git = "https://github.com/paritytech/polkadot-sdk", default-features = false, tag = "polkadot-stable2412" }
+pallet-authorship = { git = "https://github.com/paritytech/polkadot-sdk", default-features = false, tag = "polkadot-stable2412" }
+pallet-balances = { git = "https://github.com/paritytech/polkadot-sdk", default-features = false, tag = "polkadot-stable2412" }
+pallet-conviction-voting = { git = "https://github.com/paritytech/polkadot-sdk", default-features = false, tag = "polkadot-stable2412" }
+pallet-message-queue = { git = "https://github.com/paritytech/polkadot-sdk", default-features = false, tag = "polkadot-stable2412" }
+pallet-multisig = { git = "https://github.com/paritytech/polkadot-sdk", default-features = false, tag = "polkadot-stable2412" }
+pallet-preimage = { git = "https://github.com/paritytech/polkadot-sdk", default-features = false, tag = "polkadot-stable2412" }
+pallet-proxy = { git = "https://github.com/paritytech/polkadot-sdk", default-features = false, tag = "polkadot-stable2412" }
+pallet-referenda = { git = "https://github.com/paritytech/polkadot-sdk", default-features = false, tag = "polkadot-stable2412" }
+pallet-scheduler = { git = "https://github.com/paritytech/polkadot-sdk", default-features = false, tag = "polkadot-stable2412" }
+pallet-session = { git = "https://github.com/paritytech/polkadot-sdk", default-features = false, tag = "polkadot-stable2412" }
+pallet-sudo = { git = "https://github.com/paritytech/polkadot-sdk", default-features = false, tag = "polkadot-stable2412" }
+pallet-timestamp = { git = "https://github.com/paritytech/polkadot-sdk", default-features = false, tag = "polkadot-stable2412" }
+pallet-transaction-payment = { git = "https://github.com/paritytech/polkadot-sdk", default-features = false, tag = "polkadot-stable2412" }
+pallet-transaction-payment-rpc = { git = "https://github.com/paritytech/polkadot-sdk", default-features = false, tag = "polkadot-stable2412" }
+pallet-transaction-payment-rpc-runtime-api = { git = "https://github.com/paritytech/polkadot-sdk", default-features = false, tag = "polkadot-stable2412" }
+pallet-treasury = { git = "https://github.com/paritytech/polkadot-sdk", default-features = false, tag = "polkadot-stable2412" }
+pallet-utility = { git = "https://github.com/paritytech/polkadot-sdk", default-features = false, tag = "polkadot-stable2412" }
+pallet-whitelist = { git = "https://github.com/paritytech/polkadot-sdk", default-features = false, tag = "polkadot-stable2412" }
+sc-basic-authorship = { git = "https://github.com/paritytech/polkadot-sdk", default-features = false, tag = "polkadot-stable2412" }
+sc-chain-spec = { git = "https://github.com/paritytech/polkadot-sdk", default-features = false, tag = "polkadot-stable2412" }
+sc-cli = { git = "https://github.com/paritytech/polkadot-sdk", default-features = false, tag = "polkadot-stable2412" }
+sc-client-api = { git = "https://github.com/paritytech/polkadot-sdk", default-features = false, tag = "polkadot-stable2412" }
+sc-consensus = { git = "https://github.com/paritytech/polkadot-sdk", default-features = false, tag = "polkadot-stable2412" }
+sc-executor = { git = "https://github.com/paritytech/polkadot-sdk", default-features = false, tag = "polkadot-stable2412" }
+sc-network = { git = "https://github.com/paritytech/polkadot-sdk", default-features = false, tag = "polkadot-stable2412" }
+sc-network-sync = { git = "https://github.com/paritytech/polkadot-sdk", default-features = false, tag = "polkadot-stable2412" }
+sc-offchain = { git = "https://github.com/paritytech/polkadot-sdk", default-features = false, tag = "polkadot-stable2412" }
+sc-rpc = { git = "https://github.com/paritytech/polkadot-sdk", default-features = false, tag = "polkadot-stable2412" }
+sc-service = { git = "https://github.com/paritytech/polkadot-sdk", default-features = false, tag = "polkadot-stable2412" }
+sc-sysinfo = { git = "https://github.com/paritytech/polkadot-sdk", default-features = false, tag = "polkadot-stable2412" }
+sc-telemetry = { git = "https://github.com/paritytech/polkadot-sdk", default-features = false, tag = "polkadot-stable2412" }
+sc-tracing = { git = "https://github.com/paritytech/polkadot-sdk", default-features = false, tag = "polkadot-stable2412" }
+sc-transaction-pool = { git = "https://github.com/paritytech/polkadot-sdk", default-features = false, tag = "polkadot-stable2412" }
+sc-transaction-pool-api = { git = "https://github.com/paritytech/polkadot-sdk", default-features = false, tag = "polkadot-stable2412" }
+sp-api = { git = "https://github.com/paritytech/polkadot-sdk", default-features = false, tag = "polkadot-stable2412" }
+sp-arithmetic = { git = "https://github.com/paritytech/polkadot-sdk", default-features = false, tag = "polkadot-stable2412" }
+sp-block-builder = { git = "https://github.com/paritytech/polkadot-sdk", default-features = false, tag = "polkadot-stable2412" }
+sp-blockchain = { git = "https://github.com/paritytech/polkadot-sdk", default-features = false, tag = "polkadot-stable2412" }
+sp-consensus-aura = { git = "https://github.com/paritytech/polkadot-sdk", default-features = false, tag = "polkadot-stable2412" }
+sp-core = { git = "https://github.com/paritytech/polkadot-sdk", default-features = false, tag = "polkadot-stable2412" }
+sp-genesis-builder = { git = "https://github.com/paritytech/polkadot-sdk", default-features = false, tag = "polkadot-stable2412" }
+sp-inherents = { git = "https://github.com/paritytech/polkadot-sdk", default-features = false, tag = "polkadot-stable2412" }
+sp-io = { git = "https://github.com/paritytech/polkadot-sdk", tag = "polkadot-stable2412" }
+sp-keystore = { git = "https://github.com/paritytech/polkadot-sdk", default-features = false, tag = "polkadot-stable2412" }
+sp-offchain = { git = "https://github.com/paritytech/polkadot-sdk", default-features = false, tag = "polkadot-stable2412" }
+sp-runtime = { git = "https://github.com/paritytech/polkadot-sdk", default-features = false, tag = "polkadot-stable2412" }
+sp-session = { git = "https://github.com/paritytech/polkadot-sdk", default-features = false, tag = "polkadot-stable2412" }
+sp-state-machine = { git = "https://github.com/paritytech/polkadot-sdk", default-features = false, tag = "polkadot-stable2412" }
+sp-std = { git = "https://github.com/paritytech/polkadot-sdk", default-features = false, tag = "polkadot-stable2412" }
+sp-timestamp = { git = "https://github.com/paritytech/polkadot-sdk", default-features = false, tag = "polkadot-stable2412" }
+sp-tracing = { git = "https://github.com/paritytech/polkadot-sdk", default-features = false, tag = "polkadot-stable2412" }
+sp-transaction-pool = { git = "https://github.com/paritytech/polkadot-sdk", default-features = false, tag = "polkadot-stable2412" }
+sp-version = { git = "https://github.com/paritytech/polkadot-sdk", default-features = false, tag = "polkadot-stable2412" }
+substrate-build-script-utils = { git = "https://github.com/paritytech/polkadot-sdk", tag = "polkadot-stable2412" }
+substrate-frame-rpc-system = { git = "https://github.com/paritytech/polkadot-sdk", default-features = false, tag = "polkadot-stable2412" }
+substrate-prometheus-endpoint = { git = "https://github.com/paritytech/polkadot-sdk", default-features = false, tag = "polkadot-stable2412" }
+substrate-wasm-builder = { git = "https://github.com/paritytech/polkadot-sdk", tag = "polkadot-stable2412" }
 
 # Polkadot
-pallet-xcm = { git = "https://github.com/paritytech/polkadot-sdk", default-features = false, tag = "polkadot-stable2407-1" }
+pallet-xcm = { git = "https://github.com/paritytech/polkadot-sdk", default-features = false, tag = "polkadot-stable2412" }
 polkadot-cli = { git = "https://github.com/paritytech/polkadot-sdk", features = [
 	"rococo-native",
-], tag = "polkadot-stable2407-1" }
-polkadot-parachain-primitives = { git = "https://github.com/paritytech/polkadot-sdk", default-features = false, tag = "polkadot-stable2407-1" }
-polkadot-primitives = { git = "https://github.com/paritytech/polkadot-sdk", default-features = false, tag = "polkadot-stable2407-1" }
-polkadot-runtime-common = { git = "https://github.com/paritytech/polkadot-sdk", default-features = false, tag = "polkadot-stable2407-1" }
-polkadot-runtime-parachains = { git = "https://github.com/paritytech/polkadot-sdk", default-features = false, tag = "polkadot-stable2407-1" }
-xcm = { package = "staging-xcm", git = "https://github.com/paritytech/polkadot-sdk", default-features = false, tag = "polkadot-stable2407-1" }
-xcm-builder = { package = "staging-xcm-builder", git = "https://github.com/paritytech/polkadot-sdk", default-features = false, tag = "polkadot-stable2407-1" }
-xcm-executor = { package = "staging-xcm-executor", git = "https://github.com/paritytech/polkadot-sdk", default-features = false, tag = "polkadot-stable2407-1" }
-xcm-simulator = { git = "https://github.com/paritytech/polkadot-sdk", tag = "polkadot-stable2407-1" }
+], tag = "polkadot-stable2412" }
+polkadot-parachain-primitives = { git = "https://github.com/paritytech/polkadot-sdk", default-features = false, tag = "polkadot-stable2412" }
+polkadot-primitives = { git = "https://github.com/paritytech/polkadot-sdk", default-features = false, tag = "polkadot-stable2412" }
+polkadot-runtime-common = { git = "https://github.com/paritytech/polkadot-sdk", default-features = false, tag = "polkadot-stable2412" }
+polkadot-runtime-parachains = { git = "https://github.com/paritytech/polkadot-sdk", default-features = false, tag = "polkadot-stable2412" }
+xcm = { package = "staging-xcm", git = "https://github.com/paritytech/polkadot-sdk", default-features = false, tag = "polkadot-stable2412" }
+xcm-builder = { package = "staging-xcm-builder", git = "https://github.com/paritytech/polkadot-sdk", default-features = false, tag = "polkadot-stable2412" }
+xcm-executor = { package = "staging-xcm-executor", git = "https://github.com/paritytech/polkadot-sdk", default-features = false, tag = "polkadot-stable2412" }
+xcm-simulator = { git = "https://github.com/paritytech/polkadot-sdk", tag = "polkadot-stable2412" }
 
 # Cumulus
-assets-common = { git = "https://github.com/paritytech/polkadot-sdk", default-features = false, tag = "polkadot-stable2407-1" }
-cumulus-client-cli = { git = "https://github.com/paritytech/polkadot-sdk", default-features = false, tag = "polkadot-stable2407-1" }
-cumulus-client-collator = { git = "https://github.com/paritytech/polkadot-sdk", default-features = false, tag = "polkadot-stable2407-1" }
-cumulus-client-consensus-aura = { git = "https://github.com/paritytech/polkadot-sdk", default-features = false, tag = "polkadot-stable2407-1" }
-cumulus-client-consensus-common = { git = "https://github.com/paritytech/polkadot-sdk", default-features = false, tag = "polkadot-stable2407-1" }
-cumulus-client-consensus-proposer = { git = "https://github.com/paritytech/polkadot-sdk", default-features = false, tag = "polkadot-stable2407-1" }
-cumulus-client-service = { git = "https://github.com/paritytech/polkadot-sdk", default-features = false, tag = "polkadot-stable2407-1" }
-cumulus-pallet-aura-ext = { git = "https://github.com/paritytech/polkadot-sdk", default-features = false, tag = "polkadot-stable2407-1" }
-cumulus-pallet-parachain-system = { git = "https://github.com/paritytech/polkadot-sdk", default-features = false, tag = "polkadot-stable2407-1" }
-cumulus-pallet-session-benchmarking = { git = "https://github.com/paritytech/polkadot-sdk", default-features = false, tag = "polkadot-stable2407-1" }
-cumulus-pallet-xcm = { git = "https://github.com/paritytech/polkadot-sdk", default-features = false, tag = "polkadot-stable2407-1" }
-cumulus-pallet-xcmp-queue = { git = "https://github.com/paritytech/polkadot-sdk", default-features = false, tag = "polkadot-stable2407-1" }
-cumulus-primitives-aura = { git = "https://github.com/paritytech/polkadot-sdk", default-features = false, tag = "polkadot-stable2407-1" }
-cumulus-primitives-core = { git = "https://github.com/paritytech/polkadot-sdk", default-features = false, tag = "polkadot-stable2407-1" }
-cumulus-primitives-parachain-inherent = { git = "https://github.com/paritytech/polkadot-sdk", default-features = false, tag = "polkadot-stable2407-1" }
-cumulus-primitives-storage-weight-reclaim = { git = "https://github.com/paritytech/polkadot-sdk", default-features = false, tag = "polkadot-stable2407-1" }
-cumulus-primitives-timestamp = { git = "https://github.com/paritytech/polkadot-sdk", default-features = false, tag = "polkadot-stable2407-1" }
-cumulus-primitives-utility = { git = "https://github.com/paritytech/polkadot-sdk", default-features = false, tag = "polkadot-stable2407-1" }
-cumulus-relay-chain-interface = { git = "https://github.com/paritytech/polkadot-sdk", default-features = false, tag = "polkadot-stable2407-1" }
-cumulus-test-relay-sproof-builder = { git = "https://github.com/paritytech/polkadot-sdk", default-features = false, tag = "polkadot-stable2407-1" }
-pallet-collator-selection = { git = "https://github.com/paritytech/polkadot-sdk", default-features = false, tag = "polkadot-stable2407-1" }
-parachain-info = { package = "staging-parachain-info", git = "https://github.com/paritytech/polkadot-sdk", default-features = false, tag = "polkadot-stable2407-1" }
-parachains-common = { git = "https://github.com/paritytech/polkadot-sdk", default-features = false, tag = "polkadot-stable2407-1" }
+assets-common = { git = "https://github.com/paritytech/polkadot-sdk", default-features = false, tag = "polkadot-stable2412" }
+cumulus-client-cli = { git = "https://github.com/paritytech/polkadot-sdk", default-features = false, tag = "polkadot-stable2412" }
+cumulus-client-collator = { git = "https://github.com/paritytech/polkadot-sdk", default-features = false, tag = "polkadot-stable2412" }
+cumulus-client-consensus-aura = { git = "https://github.com/paritytech/polkadot-sdk", default-features = false, tag = "polkadot-stable2412" }
+cumulus-client-consensus-common = { git = "https://github.com/paritytech/polkadot-sdk", default-features = false, tag = "polkadot-stable2412" }
+cumulus-client-consensus-proposer = { git = "https://github.com/paritytech/polkadot-sdk", default-features = false, tag = "polkadot-stable2412" }
+cumulus-client-service = { git = "https://github.com/paritytech/polkadot-sdk", default-features = false, tag = "polkadot-stable2412" }
+cumulus-pallet-aura-ext = { git = "https://github.com/paritytech/polkadot-sdk", default-features = false, tag = "polkadot-stable2412" }
+cumulus-pallet-parachain-system = { git = "https://github.com/paritytech/polkadot-sdk", default-features = false, tag = "polkadot-stable2412" }
+cumulus-pallet-session-benchmarking = { git = "https://github.com/paritytech/polkadot-sdk", default-features = false, tag = "polkadot-stable2412" }
+cumulus-pallet-xcm = { git = "https://github.com/paritytech/polkadot-sdk", default-features = false, tag = "polkadot-stable2412" }
+cumulus-pallet-xcmp-queue = { git = "https://github.com/paritytech/polkadot-sdk", default-features = false, tag = "polkadot-stable2412" }
+cumulus-primitives-aura = { git = "https://github.com/paritytech/polkadot-sdk", default-features = false, tag = "polkadot-stable2412" }
+cumulus-primitives-core = { git = "https://github.com/paritytech/polkadot-sdk", default-features = false, tag = "polkadot-stable2412" }
+cumulus-primitives-parachain-inherent = { git = "https://github.com/paritytech/polkadot-sdk", default-features = false, tag = "polkadot-stable2412" }
+cumulus-primitives-storage-weight-reclaim = { git = "https://github.com/paritytech/polkadot-sdk", default-features = false, tag = "polkadot-stable2412" }
+cumulus-primitives-timestamp = { git = "https://github.com/paritytech/polkadot-sdk", default-features = false, tag = "polkadot-stable2412" }
+cumulus-primitives-utility = { git = "https://github.com/paritytech/polkadot-sdk", default-features = false, tag = "polkadot-stable2412" }
+cumulus-relay-chain-interface = { git = "https://github.com/paritytech/polkadot-sdk", default-features = false, tag = "polkadot-stable2412" }
+cumulus-test-relay-sproof-builder = { git = "https://github.com/paritytech/polkadot-sdk", default-features = false, tag = "polkadot-stable2412" }
+pallet-collator-selection = { git = "https://github.com/paritytech/polkadot-sdk", default-features = false, tag = "polkadot-stable2412" }
+parachain-info = { package = "staging-parachain-info", git = "https://github.com/paritytech/polkadot-sdk", default-features = false, tag = "polkadot-stable2412" }
+parachains-common = { git = "https://github.com/paritytech/polkadot-sdk", default-features = false, tag = "polkadot-stable2412" }
 
 # Moonbeam
-pallet-asset-manager = { git = "https://github.com/OpenZeppelin/moonbeam.git", branch = "polkadot-stable2407-1", default-features = false }
-pallet-xcm-transactor = { git = "https://github.com/OpenZeppelin/moonbeam.git", branch = "polkadot-stable2407-1", default-features = false }
-pallet-xcm-weight-trader = { git = "https://github.com/OpenZeppelin/moonbeam.git", branch = "polkadot-stable2407-1", default-features = false }
-xcm-primitives = { git = "https://github.com/OpenZeppelin/moonbeam.git", branch = "polkadot-stable2407-1", default-features = false }
+# TODO update
+pallet-asset-manager = { git = "https://github.com/OpenZeppelin/moonbeam.git", branch = "polkadot-stable2412", default-features = false }
+pallet-xcm-transactor = { git = "https://github.com/OpenZeppelin/moonbeam.git", branch = "polkadot-stable2412", default-features = false }
+pallet-xcm-weight-trader = { git = "https://github.com/OpenZeppelin/moonbeam.git", branch = "polkadot-stable2412", default-features = false }
+xcm-primitives = { git = "https://github.com/OpenZeppelin/moonbeam.git", branch = "polkadot-stable2412", default-features = false }
 
 # ORML
+# TODO update
 orml-traits = { git = "https://github.com/OpenZeppelin/open-runtime-module-library", branch = "polkadot-stable2407-1", default-features = false }
 orml-xcm-support = { git = "https://github.com/OpenZeppelin/open-runtime-module-library", branch = "polkadot-stable2407-1", default-features = false }
 orml-xtokens = { git = "https://github.com/OpenZeppelin/open-runtime-module-library", branch = "polkadot-stable2407-1", default-features = false }
@@ -153,11 +155,11 @@ orml-xtokens = { git = "https://github.com/OpenZeppelin/open-runtime-module-libr
 ziggy = { version = "1.0.2", default-features = false }
 
 # Tanssi
-dp-consensus = { git = "https://github.com/OpenZeppelin/dancekit", default-features = false, tag = "polkadot-stable2407-1" }
-nimbus-consensus = { git = "https://github.com/OpenZeppelin/moonkit", default-features = false, tag = "polkadot-stable2407-1" }
-nimbus-primitives = { git = "https://github.com/OpenZeppelin/moonkit", default-features = false, tag = "polkadot-stable2407-1" }
-pallet-author-inherent = { git = "https://github.com/OpenZeppelin/moonkit", default-features = false, tag = "polkadot-stable2407-1" }
-pallet-cc-authorities-noting = { git = "https://github.com/OpenZeppelin/dancekit", default-features = false, tag = "polkadot-stable2407-1" }
+dp-consensus = { git = "https://github.com/OpenZeppelin/dancekit", default-features = false, tag = "polkadot-stable2412" }
+nimbus-consensus = { git = "https://github.com/OpenZeppelin/moonkit", default-features = false, tag = "polkadot-stable2412" }
+nimbus-primitives = { git = "https://github.com/OpenZeppelin/moonkit", default-features = false, tag = "polkadot-stable2412" }
+pallet-author-inherent = { git = "https://github.com/OpenZeppelin/moonkit", default-features = false, tag = "polkadot-stable2412" }
+pallet-cc-authorities-noting = { git = "https://github.com/OpenZeppelin/dancekit", default-features = false, tag = "polkadot-stable2412" }
 
 [workspace.lints.clippy]
 large_enum_variant = "allow"
