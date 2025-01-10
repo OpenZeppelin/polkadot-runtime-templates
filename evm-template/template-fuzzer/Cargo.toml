@@ -29,6 +29,7 @@ sp-consensus-aura = { workspace = true }
 sp-runtime = { workspace = true }
 sp-state-machine = { workspace = true }
 
+pallet-assets = { workspace = true }
 pallet-balances = { workspace = true }
 pallet-collator-selection = { workspace = true }
 pallet-multisig = { workspace = true }
@@ -42,6 +43,9 @@ cumulus-pallet-parachain-system = { workspace = true }
 cumulus-primitives-core = { workspace = true }
 cumulus-primitives-parachain-inherent = { workspace = true }
 cumulus-test-relay-sproof-builder = { workspace = true }
+
+clap = { workspace = true }
+fp-account = {workspace = true}
 
 [features]
 default = [ "std", "try-runtime" ]
