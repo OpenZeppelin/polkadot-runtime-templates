@@ -135,7 +135,7 @@ fn process_input(accounts: &[AccountId], genesis: &Storage, data: &[u8]) {
             println!("    result:     {res:?}");
         }
 
-        finalize_block(elapsed);
+        Executive::finalize_block();
 
         check_invariants(block, initial_total_issuance);
     });
