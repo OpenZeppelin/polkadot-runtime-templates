@@ -15,8 +15,8 @@ workspace = true
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
+quinn-proto = { version = "0.9.6", features = [ "arbitrary" ] }
 ziggy = { workspace = true }
-quinn-proto = { version = "0.9.6", features = ["arbitrary"] }
 
 evm-runtime-template = { path = "../runtime" }
 parachains-common = { workspace = true }
