@@ -1,4 +1,4 @@
-name: Generic Template Fuzzer (Weekly run)
+name: EVM Template Fuzzer (Weekly run)
 
 on:
   schedule:
@@ -27,20 +27,20 @@ jobs:
 
       - name: Build AFL config
         run: cargo afl config --build
-        working-directory: generic-template/template-fuzzer
+        working-directory: evm-template/template-fuzzer
 
       - name: Run Ziggy Fuzzing
         run: |
           AFL_I_DONT_CARE_ABOUT_MISSING_CRASHES=1 timeout 5h cargo ziggy fuzz -t 20 || true
-        working-directory: generic-template/template-fuzzer
+        working-directory: evm-template/template-fuzzer
 
       - name: Generate Ziggy Fuzzing Coverage Result
         run: |
           CARGO_HOME=.cargo cargo ziggy cover
-        working-directory: generic-template/template-fuzzer
+        working-directory: evm-template/template-fuzzer
       
       - name: Zip Artifacts
-        run: zip artifacts.zip generic-template/template-fuzzer/output/* -r
+        run: zip artifacts.zip evm-template/template-fuzzer/output/* -r
       
       - name: Save Artifacts
         uses: actions/upload-artifact@v4

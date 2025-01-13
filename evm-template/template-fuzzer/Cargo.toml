@@ -16,6 +16,7 @@ workspace = true
 
 [dependencies]
 ziggy = { workspace = true }
+quinn-proto = { version = "0.9.6", features = ["arbitrary"] }
 
 evm-runtime-template = { path = "../runtime" }
 parachains-common = { workspace = true }
