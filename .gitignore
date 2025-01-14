@@ -28,3 +28,6 @@ docs/build
 **/bin-*
 
 coverage
+
+# fuzzing output
+**/template-fuzzer/output
