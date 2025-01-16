@@ -26,8 +26,8 @@ serde_json = "1.0.121"
 smallvec = "1.11.0"
 
 # TODO: update to release
-openzeppelin-pallet-abstractions = { git = "https://github.com/OpenZeppelin/openzeppelin-pallet-abstractions", default-features = false, branch = "amar-upgrade-polkadot2412" }
-openzeppelin-pallet-abstractions-proc = { git = "https://github.com/OpenZeppelin/openzeppelin-pallet-abstractions", default-features = false, branch = "amar-upgrade-polkadot2412" }
+openzeppelin-pallet-abstractions = { git = "https://github.com/OpenZeppelin/openzeppelin-pallet-abstractions", branch = "amar-upgrade-polkadot2412", default-features = false }
+openzeppelin-pallet-abstractions-proc = { git = "https://github.com/OpenZeppelin/openzeppelin-pallet-abstractions", branch = "amar-upgrade-polkadot2412", default-features = false }
 
 # Substrate
 frame-benchmarking = { git = "https://github.com/paritytech/polkadot-sdk", default-features = false, tag = "polkadot-stable2412" }
@@ -153,11 +153,11 @@ orml-xtokens = { git = "https://github.com/OpenZeppelin/open-runtime-module-libr
 ziggy = { version = "1.0.2", default-features = false }
 
 # Tanssi
-dp-consensus = { git = "https://github.com/OpenZeppelin/dancekit", default-features = false, branch = "polkadot-stable2412" }
-nimbus-consensus = { git = "https://github.com/OpenZeppelin/moonkit", default-features = false, branch = "polkadot-stable2412" }
-nimbus-primitives = { git = "https://github.com/OpenZeppelin/moonkit", default-features = false, branch = "polkadot-stable2412" }
-pallet-author-inherent = { git = "https://github.com/OpenZeppelin/moonkit", default-features = false, branch = "polkadot-stable2412" }
-pallet-cc-authorities-noting = { git = "https://github.com/OpenZeppelin/dancekit", default-features = false, branch = "polkadot-stable2412" }
+dp-consensus = { git = "https://github.com/OpenZeppelin/dancekit", branch = "polkadot-stable2412", default-features = false }
+nimbus-consensus = { git = "https://github.com/OpenZeppelin/moonkit", branch = "polkadot-stable2412", default-features = false }
+nimbus-primitives = { git = "https://github.com/OpenZeppelin/moonkit", branch = "polkadot-stable2412", default-features = false }
+pallet-author-inherent = { git = "https://github.com/OpenZeppelin/moonkit", branch = "polkadot-stable2412", default-features = false }
+pallet-cc-authorities-noting = { git = "https://github.com/OpenZeppelin/dancekit", branch = "polkadot-stable2412", default-features = false }
 
 [workspace.lints.clippy]
 large_enum_variant = "allow"
