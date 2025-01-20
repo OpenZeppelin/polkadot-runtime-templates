@@ -41,7 +41,7 @@ mod runtime_tests {
                 impl_version: 0,
                 apis: generic_runtime_template::apis::RUNTIME_API_VERSIONS,
                 transaction_version: 1,
-                state_version: 1,
+                system_version: 1,
             }
         );
     }

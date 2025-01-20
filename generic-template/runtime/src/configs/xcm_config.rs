@@ -21,7 +21,7 @@ use xcm_builder::{
     XcmFeeToAccount,
 };
 use xcm_primitives::{
-    AbsoluteAndRelativeReserve, UtilityAvailableCalls, UtilityEncodeCall, XcmTransact,
+    AbsoluteAndRelativeReserve, Reserve, UtilityAvailableCalls, UtilityEncodeCall, XcmTransact,
 };
 
 use crate::{
