@@ -315,7 +315,7 @@ impl Reserve for BridgedAssetReserveProvider {
 // Provide reserve in relative path view
 // Self tokens are represeneted as Here
 // Moved from Moonbeam to implement orml_traits::location::Reserve after Moonbeam
-// removed ORML dependenies
+// removed ORML dependencies
 pub struct RelativeReserveProvider;
 
 impl Reserve for RelativeReserveProvider {
@@ -338,7 +338,7 @@ impl Reserve for RelativeReserveProvider {
 /// This helps users by preventing errors when they try to transfer a token through xtokens
 /// to our chain (either inserting the relative or the absolute value).
 // Moved from Moonbeam to implement orml_traits::location::Reserve after Moonbeam
-// removed ORML dependenies
+// removed ORML dependencies
 pub struct AbsoluteAndRelativeReserve<AbsoluteMultiLocation>(PhantomData<AbsoluteMultiLocation>);
 impl<AbsoluteMultiLocation> Reserve for AbsoluteAndRelativeReserve<AbsoluteMultiLocation>
 where
