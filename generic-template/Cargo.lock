@@ -1625,9 +1625,9 @@ dependencies = [
 
 [[package]]
 name = "clap"
-version = "4.5.26"
+version = "4.5.27"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "a8eb5e908ef3a6efbe1ed62520fb7287959888c88485abe072543190ecc66783"
+checksum = "769b0145982b4b48713e01ec42d61614425f27b7058bda7180a3a41f30104796"
 dependencies = [
  "clap_builder",
  "clap_derive",
@@ -1635,9 +1635,9 @@ dependencies = [
 
 [[package]]
 name = "clap_builder"
-version = "4.5.26"
+version = "4.5.27"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "96b01801b5fc6a0a232407abc821660c9c6d25a1cafc0d4f85f29fb8d9afc121"
+checksum = "1b26884eb4b57140e4d2d93652abfa49498b938b3c9179f9fc487b0acc3edad7"
 dependencies = [
  "anstream",
  "anstyle",
@@ -7235,17 +7235,16 @@ dependencies = [
 
 [[package]]
 name = "netlink-proto"
-version = "0.11.3"
+version = "0.11.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "86b33524dc0968bfad349684447bfce6db937a9ac3332a1fe60c0c5a5ce63f21"
+checksum = "b2741a6c259755922e3ed29ebce3b299cc2160c4acae94b465b5938ab02c2bbe"
 dependencies = [
  "bytes",
  "futures 0.3.31",
  "log",
  "netlink-packet-core",
  "netlink-sys",
- "thiserror 1.0.69",
- "tokio",
+ "thiserror 2.0.11",
 ]
 
 [[package]]
@@ -7566,7 +7565,7 @@ checksum = "ff011a302c396a5197692431fc1948019154afc178baf7d8e37367442a4601cf"
 [[package]]
 name = "openzeppelin-pallet-abstractions"
 version = "0.1.0"
-source = "git+https://github.com/OpenZeppelin/openzeppelin-pallet-abstractions?branch=amar-upgrade-polkadot2412#4d7167d2e483b1e7674b4a19b708fda7e58155ea"
+source = "git+https://github.com/OpenZeppelin/openzeppelin-pallet-abstractions?branch=amar-upgrade-polkadot2412#e46a62b0b7f01a53d6b4fe8618db69fca906bc22"
 dependencies = [
  "cumulus-primitives-core",
  "frame-support",
@@ -7579,7 +7578,7 @@ dependencies = [
 [[package]]
 name = "openzeppelin-pallet-abstractions-proc"
 version = "0.1.0"
-source = "git+https://github.com/OpenZeppelin/openzeppelin-pallet-abstractions?branch=amar-upgrade-polkadot2412#4d7167d2e483b1e7674b4a19b708fda7e58155ea"
+source = "git+https://github.com/OpenZeppelin/openzeppelin-pallet-abstractions?branch=amar-upgrade-polkadot2412#e46a62b0b7f01a53d6b4fe8618db69fca906bc22"
 dependencies = [
  "darling 0.20.10",
  "openzeppelin-pallet-abstractions",
@@ -14158,7 +14157,7 @@ dependencies = [
 [[package]]
 name = "sp-crypto-ec-utils"
 version = "0.10.0"
-source = "git+https://github.com/paritytech/polkadot-sdk#711e6ff33373bc08b026446ce19b73920bfe068c"
+source = "git+https://github.com/paritytech/polkadot-sdk#2345eb9a5b5e2145ac1c04fd9cf1fcf12b7278b6"
 dependencies = [
  "ark-bls12-377",
  "ark-bls12-377-ext",
@@ -14234,7 +14233,7 @@ dependencies = [
 [[package]]
 name = "sp-debug-derive"
 version = "14.0.0"
-source = "git+https://github.com/paritytech/polkadot-sdk#711e6ff33373bc08b026446ce19b73920bfe068c"
+source = "git+https://github.com/paritytech/polkadot-sdk#2345eb9a5b5e2145ac1c04fd9cf1fcf12b7278b6"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -14254,7 +14253,7 @@ dependencies = [
 [[package]]
 name = "sp-externalities"
 version = "0.25.0"
-source = "git+https://github.com/paritytech/polkadot-sdk#711e6ff33373bc08b026446ce19b73920bfe068c"
+source = "git+https://github.com/paritytech/polkadot-sdk#2345eb9a5b5e2145ac1c04fd9cf1fcf12b7278b6"
 dependencies = [
  "environmental",
  "parity-scale-codec",
@@ -14473,7 +14472,7 @@ dependencies = [
 [[package]]
 name = "sp-runtime-interface"
 version = "24.0.0"
-source = "git+https://github.com/paritytech/polkadot-sdk#711e6ff33373bc08b026446ce19b73920bfe068c"
+source = "git+https://github.com/paritytech/polkadot-sdk#2345eb9a5b5e2145ac1c04fd9cf1fcf12b7278b6"
 dependencies = [
  "bytes",
  "impl-trait-for-tuples",
@@ -14505,7 +14504,7 @@ dependencies = [
 [[package]]
 name = "sp-runtime-interface-proc-macro"
 version = "17.0.0"
-source = "git+https://github.com/paritytech/polkadot-sdk#711e6ff33373bc08b026446ce19b73920bfe068c"
+source = "git+https://github.com/paritytech/polkadot-sdk#2345eb9a5b5e2145ac1c04fd9cf1fcf12b7278b6"
 dependencies = [
  "Inflector",
  "expander",
@@ -14594,7 +14593,7 @@ source = "git+https://github.com/paritytech/polkadot-sdk?tag=polkadot-stable2412
 [[package]]
 name = "sp-std"
 version = "14.0.0"
-source = "git+https://github.com/paritytech/polkadot-sdk#711e6ff33373bc08b026446ce19b73920bfe068c"
+source = "git+https://github.com/paritytech/polkadot-sdk#2345eb9a5b5e2145ac1c04fd9cf1fcf12b7278b6"
 
 [[package]]
 name = "sp-storage"
@@ -14611,7 +14610,7 @@ dependencies = [
 [[package]]
 name = "sp-storage"
 version = "19.0.0"
-source = "git+https://github.com/paritytech/polkadot-sdk#711e6ff33373bc08b026446ce19b73920bfe068c"
+source = "git+https://github.com/paritytech/polkadot-sdk#2345eb9a5b5e2145ac1c04fd9cf1fcf12b7278b6"
 dependencies = [
  "impl-serde 0.5.0",
  "parity-scale-codec",
@@ -14646,7 +14645,7 @@ dependencies = [
 [[package]]
 name = "sp-tracing"
 version = "16.0.0"
-source = "git+https://github.com/paritytech/polkadot-sdk#711e6ff33373bc08b026446ce19b73920bfe068c"
+source = "git+https://github.com/paritytech/polkadot-sdk#2345eb9a5b5e2145ac1c04fd9cf1fcf12b7278b6"
 dependencies = [
  "parity-scale-codec",
  "tracing",
@@ -14743,7 +14742,7 @@ dependencies = [
 [[package]]
 name = "sp-wasm-interface"
 version = "20.0.0"
-source = "git+https://github.com/paritytech/polkadot-sdk#711e6ff33373bc08b026446ce19b73920bfe068c"
+source = "git+https://github.com/paritytech/polkadot-sdk#2345eb9a5b5e2145ac1c04fd9cf1fcf12b7278b6"
 dependencies = [
  "anyhow",
  "impl-trait-for-tuples",

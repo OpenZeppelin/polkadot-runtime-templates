@@ -41,6 +41,7 @@ use openzeppelin_pallet_abstractions::{
 };
 #[cfg(feature = "tanssi")]
 use openzeppelin_pallet_abstractions::{impl_openzeppelin_tanssi, TanssiConfig, TanssiWeight};
+use orml_traits::location::Reserve;
 use parachains_common::message_queue::{NarrowOriginToSibling, ParaIdToSibling};
 use polkadot_runtime_common::{BlockHashCount, SlowAdjustingFeeUpdate};
 #[cfg(not(feature = "tanssi"))]

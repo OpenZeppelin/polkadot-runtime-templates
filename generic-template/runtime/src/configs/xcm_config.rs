@@ -16,12 +16,12 @@ use xcm::latest::{prelude::*, Junction::PalletInstance};
 use xcm_builder::{
     AccountId32Aliases, Case, FixedWeightBounds, FungibleAdapter, FungiblesAdapter,
     IsChildSystemParachain, IsConcrete, NoChecking, ParentIsPreset, RelayChainAsNative,
-    SiblingParachainAsNative, SiblingParachainConvertsVia, SignedAccountId32AsNative,
-    SignedToAccountId32, SovereignSignedViaLocation, WithUniqueTopic, XcmFeeManagerFromComponents,
-    XcmFeeToAccount,
+    SendXcmFeeToAccount, SiblingParachainAsNative, SiblingParachainConvertsVia,
+    SignedAccountId32AsNative, SignedToAccountId32, SovereignSignedViaLocation, WithUniqueTopic,
+    XcmFeeManagerFromComponents,
 };
 use xcm_primitives::{
-    AbsoluteAndRelativeReserve, Reserve, UtilityAvailableCalls, UtilityEncodeCall, XcmTransact,
+    AbsoluteAndRelativeReserve, UtilityAvailableCalls, UtilityEncodeCall, XcmTransact,
 };
 
 use crate::{
@@ -124,7 +124,7 @@ pub type XcmOriginToTransactDispatchOrigin = (
 
 pub type FeeManager = XcmFeeManagerFromComponents<
     IsChildSystemParachain<primitives::Id>,
-    XcmFeeToAccount<AssetTransactors, AccountId, TreasuryAccount>,
+    SendXcmFeeToAccount<AssetTransactors, TreasuryAccount>,
 >;
 
 /// Matches foreign assets from a given origin.
