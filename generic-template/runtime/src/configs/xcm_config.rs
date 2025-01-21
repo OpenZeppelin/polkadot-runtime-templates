@@ -20,9 +20,7 @@ use xcm_builder::{
     SignedAccountId32AsNative, SignedToAccountId32, SovereignSignedViaLocation, WithUniqueTopic,
     XcmFeeManagerFromComponents,
 };
-use xcm_primitives::{
-    AbsoluteAndRelativeReserve, UtilityAvailableCalls, UtilityEncodeCall, XcmTransact,
-};
+use xcm_primitives::{UtilityAvailableCalls, UtilityEncodeCall, XcmTransact};
 
 use crate::{
     configs::{MaxInstructions, ParachainSystem, Runtime, RuntimeCall, UnitWeightCost, XcmpQueue},
@@ -311,6 +309,49 @@ impl Reserve for BridgedAssetReserveProvider {
         } else {
             None
         }
+    }
+}
+
+// Provide reserve in relative path view
+// Self tokens are represeneted as Here
+// Moved from Moonbeam to implement orml_traits::location::Reserve after Moonbeam
+// removed ORML dependenies
+pub struct RelativeReserveProvider;
+
+impl Reserve for RelativeReserveProvider {
+    fn reserve(asset: &Asset) -> Option<Location> {
+        let AssetId(location) = &asset.id;
+        if location.parents == 0
+            && !matches!(location.first_interior(), Some(Junction::Parachain(_)))
+        {
+            Some(Location::here())
+        } else {
+            Some(location.chain_location())
+        }
+    }
+}
+
+/// This struct offers uses RelativeReserveProvider to output relative views of multilocations
+/// However, additionally accepts a Location that aims at representing the chain part
+/// (parent: 1, Parachain(paraId)) of the absolute representation of our chain.
+/// If a token reserve matches against this absolute view, we return  Some(Location::here())
+/// This helps users by preventing errors when they try to transfer a token through xtokens
+/// to our chain (either inserting the relative or the absolute value).
+// Moved from Moonbeam to implement orml_traits::location::Reserve after Moonbeam
+// removed ORML dependenies
+pub struct AbsoluteAndRelativeReserve<AbsoluteMultiLocation>(PhantomData<AbsoluteMultiLocation>);
+impl<AbsoluteMultiLocation> Reserve for AbsoluteAndRelativeReserve<AbsoluteMultiLocation>
+where
+    AbsoluteMultiLocation: Get<Location>,
+{
+    fn reserve(asset: &Asset) -> Option<Location> {
+        RelativeReserveProvider::reserve(asset).map(|relative_reserve| {
+            if relative_reserve == AbsoluteMultiLocation::get() {
+                Location::here()
+            } else {
+                relative_reserve
+            }
+        })
     }
 }
 

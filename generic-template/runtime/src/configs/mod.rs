@@ -41,7 +41,6 @@ use openzeppelin_pallet_abstractions::{
 };
 #[cfg(feature = "tanssi")]
 use openzeppelin_pallet_abstractions::{impl_openzeppelin_tanssi, TanssiConfig, TanssiWeight};
-use orml_traits::location::Reserve;
 use parachains_common::message_queue::{NarrowOriginToSibling, ParaIdToSibling};
 use polkadot_runtime_common::{BlockHashCount, SlowAdjustingFeeUpdate};
 #[cfg(not(feature = "tanssi"))]
@@ -61,7 +60,7 @@ use xcm_builder::{
 };
 use xcm_config::*;
 use xcm_executor::XcmExecutor;
-use xcm_primitives::{AbsoluteAndRelativeReserve, AsAssetType};
+use xcm_primitives::AsAssetType;
 
 #[cfg(feature = "runtime-benchmarks")]
 use crate::benchmark::{OpenHrmpChannel, PayWithEnsure};
@@ -164,7 +163,8 @@ impl XcmConfig for OpenZeppelinRuntime {
     type SelfReserve = SelfReserve;
     type SovereignAccountDispatcherOrigin = EnsureRoot<AccountId>;
     type Trader = pallet_xcm_weight_trader::Trader<Runtime>;
-    type TransactorReserveProvider = AbsoluteAndRelativeReserve<SelfLocationAbsolute>;
+    type TransactorReserveProvider =
+        xcm_primitives::AbsoluteAndRelativeReserve<SelfLocationAbsolute>;
     type Transactors = Transactors;
     type UniversalLocation = UniversalLocation;
     type WeightToFee = WeightToFee;
