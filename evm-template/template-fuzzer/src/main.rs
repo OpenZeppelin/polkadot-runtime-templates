@@ -105,7 +105,8 @@ fn process_input(accounts: &[AccountId], genesis: &Storage, data: &[u8]) {
                 continue;
             }
             if lapse > 0 {
-                finalize_block(elapsed);
+                println!("\n  time spent: {elapsed:?}");
+                assert!(elapsed.as_secs() <= 2, "block execution took too much time");
 
                 block += u32::from(lapse) * 393; // 393 * 256 = 100608 which nearly corresponds to a week
                 weight = 0.into();
@@ -126,6 +127,7 @@ fn process_input(accounts: &[AccountId], genesis: &Storage, data: &[u8]) {
             println!("    call:       {extrinsic:?}");
 
             let now = Instant::now(); // We get the current time for timing purposes.
+
             #[allow(unused_variables)]
             let res = extrinsic.dispatch(RuntimeOrigin::signed(origin));
             elapsed += now.elapsed();
@@ -133,7 +135,7 @@ fn process_input(accounts: &[AccountId], genesis: &Storage, data: &[u8]) {
             println!("    result:     {res:?}");
         }
 
-        finalize_block(elapsed);
+        Executive::finalize_block();
 
         check_invariants(block, initial_total_issuance);
     });
@@ -142,11 +144,14 @@ fn process_input(accounts: &[AccountId], genesis: &Storage, data: &[u8]) {
 fn initialize_block(block: u32) {
     println!("\ninitializing block {}", block);
 
-    let current_timestamp = u64::from(block) * SLOT_DURATION;
+    let current_timestamp = u64::from(block) * SLOT_DURATION * 2;
 
     let prev_header = match block {
         1 => None,
-        _ => Some(Executive::finalize_block()),
+        _ => {
+            println!("  finalizing block");
+            Some(Executive::finalize_block())
+        }
     };
 
     let parent_header = &Header::new(
@@ -278,14 +283,6 @@ fn recursive_call_filter(call: &RuntimeCall, origin: usize) -> bool {
 
         _ => true,
     }
-}
-
-fn finalize_block(elapsed: Duration) {
-    println!("\n  time spent: {elapsed:?}");
-    assert!(elapsed.as_secs() <= 2, "block execution took too much time");
-
-    println!("  finalizing block");
-    Executive::finalize_block();
 }
 
 fn check_invariants(block: u32, initial_total_issuance: Balance) {
