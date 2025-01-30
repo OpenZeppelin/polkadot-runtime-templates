@@ -46,8 +46,7 @@ use polkadot_runtime_common::{BlockHashCount, SlowAdjustingFeeUpdate};
 #[cfg(not(feature = "tanssi"))]
 use sp_consensus_aura::sr25519::AuthorityId as AuraId;
 use sp_runtime::{
-    traits::{AccountIdLookup, BlakeTwo256, IdentityLookup},
-    Perbill,
+    traits::{AccountIdLookup, BlakeTwo256, IdentityLookup}, Perbill
 };
 use xcm::latest::{prelude::*, InteriorLocation};
 #[cfg(not(feature = "runtime-benchmarks"))]
@@ -85,7 +84,7 @@ use crate::{
     AllPalletsWithSystem, AssetManager, Balances, MessageQueue, OriginCaller, PalletInfo,
     ParachainInfo, ParachainSystem, PolkadotXcm, Preimage, Referenda, Runtime, RuntimeCall,
     RuntimeEvent, RuntimeFreezeReason, RuntimeHoldReason, RuntimeOrigin, RuntimeTask, Scheduler,
-    System, Treasury, WeightToFee, XcmpQueue,
+    System, Treasury, WeightToFee, XcmpQueue, Timestamp, Oracle, OracleMembership
 };
 #[cfg(not(feature = "tanssi"))]
 use crate::{Aura, CollatorSelection, Session};
@@ -188,7 +187,12 @@ impl AssetsConfig for OpenZeppelinRuntime {
     type ForceOrigin = EnsureRoot<AccountId>;
     type ForeignAssetModifierOrigin = EnsureRoot<AccountId>;
     type WeightToFee = WeightToFee;
+
+    type AccountId = AccountId;
+    type FungiblesToAccount = TreasuryAccount;
+    type Timestamp = Timestamp;
 }
+
 #[cfg(feature = "tanssi")]
 impl TanssiConfig for OpenZeppelinRuntime {
     type AuthorInherent = pallet_author_inherent::weights::SubstrateWeight<Runtime>;

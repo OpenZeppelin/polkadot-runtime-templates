@@ -45,6 +45,8 @@ pallet-transaction-payment-rpc-runtime-api = { workspace = true }
 pallet-treasury = { workspace = true }
 pallet-utility = { workspace = true }
 pallet-whitelist = { workspace = true }
+pallet-asset-tx-payment = { workspace = true }
+pallet-membership = { workspace = true }
 sp-api = { workspace = true }
 sp-arithmetic = { workspace = true }
 sp-block-builder = { workspace = true }
@@ -97,6 +99,8 @@ xcm-primitives = { workspace = true }
 dp-consensus = { workspace = true }
 nimbus-primitives = { workspace = true }
 orml-traits = { workspace = true }
+orml-oracle = { workspace = true }
+orml-oracle-runtime-api = { workspace = true }
 orml-xcm-support = { workspace = true }
 orml-xtokens = { workspace = true }
 pallet-author-inherent = { workspace = true }
@@ -161,6 +165,10 @@ std = [
 	"pallet-treasury/std",
 	"pallet-utility/std",
 	"pallet-whitelist/std",
+	"pallet-asset-tx-payment/std",
+	"pallet-membership/std",
+	"orml-oracle/std",
+	"orml-oracle-runtime-api/std",
 	"pallet-xcm-transactor/std",
 	"pallet-xcm-weight-trader/std",
 	"pallet-xcm/std",
@@ -222,6 +230,9 @@ runtime-benchmarks = [
 	"pallet-xcm-transactor/runtime-benchmarks",
 	"pallet-xcm-weight-trader/runtime-benchmarks",
 	"pallet-xcm/runtime-benchmarks",
+	"pallet-asset-tx-payment/runtime-benchmarks",
+	"pallet-membership/runtime-benchmarks",
+	"orml-oracle/runtime-benchmarks",
 	"parachains-common/runtime-benchmarks",
 	"polkadot-parachain-primitives/runtime-benchmarks",
 	"polkadot-runtime-common/runtime-benchmarks",
@@ -267,6 +278,9 @@ try-runtime = [
 	"parachain-info/try-runtime",
 	"polkadot-runtime-common/try-runtime",
 	"sp-runtime/try-runtime",
+	"pallet-asset-tx-payment/try-runtime",
+	"pallet-membership/try-runtime",
+	"orml-oracle/try-runtime",
 ]
 
 # A feature that should be enabled when the runtime should be built for on-chain
