@@ -11,9 +11,9 @@ use crate::{
 use crate::{constants::SLOT_DURATION, types::ConsensusHook};
 use crate::{
     constants::VERSION,
-    types::{AccountId, Balance, Block, Executive, Nonce, AssetId},
-    InherentDataExt, ParachainSystem, Runtime, RuntimeBlockWeights, RuntimeCall,
-    RuntimeGenesisConfig, SessionKeys, System, TransactionPayment, Oracle
+    types::{AccountId, AssetId, Balance, Block, Executive, Nonce},
+    InherentDataExt, Oracle, ParachainSystem, Runtime, RuntimeBlockWeights, RuntimeCall,
+    RuntimeGenesisConfig, SessionKeys, System, TransactionPayment,
 };
 
 #[cfg(feature = "runtime-benchmarks")]
@@ -30,7 +30,7 @@ mod apis {
         type TransactionPayment = TransactionPayment;
         type Balance = Balance;
         type Oracle = Oracle;
-        type OracleKey = AssetId; 
+        type OracleKey = AssetId;
     }
 
     mod consensus {
@@ -85,6 +85,8 @@ mod apis {
         type RuntimeCall = RuntimeCall;
         type TransactionPayment = TransactionPayment;
         type Balance = Balance;
+        type Oracle = Oracle;
+        type OracleKey = AssetId;
     }
 
     mod tanssi {

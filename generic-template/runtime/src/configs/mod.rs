@@ -46,7 +46,8 @@ use polkadot_runtime_common::{BlockHashCount, SlowAdjustingFeeUpdate};
 #[cfg(not(feature = "tanssi"))]
 use sp_consensus_aura::sr25519::AuthorityId as AuraId;
 use sp_runtime::{
-    traits::{AccountIdLookup, BlakeTwo256, IdentityLookup}, Perbill
+    traits::{AccountIdLookup, BlakeTwo256, IdentityLookup},
+    Perbill,
 };
 use xcm::latest::{prelude::*, InteriorLocation};
 #[cfg(not(feature = "runtime-benchmarks"))]
@@ -81,10 +82,10 @@ use crate::{
         TreasuryAccount, TreasuryInteriorLocation, TreasuryPalletId, TreasuryPaymaster, Version,
     },
     weights::{BlockExecutionWeight, ExtrinsicBaseWeight},
-    AllPalletsWithSystem, AssetManager, Balances, MessageQueue, OriginCaller, PalletInfo,
-    ParachainInfo, ParachainSystem, PolkadotXcm, Preimage, Referenda, Runtime, RuntimeCall,
-    RuntimeEvent, RuntimeFreezeReason, RuntimeHoldReason, RuntimeOrigin, RuntimeTask, Scheduler,
-    System, Treasury, WeightToFee, XcmpQueue, Timestamp, Oracle, OracleMembership
+    AllPalletsWithSystem, AssetManager, Balances, MessageQueue, Oracle, OracleMembership,
+    OriginCaller, PalletInfo, ParachainInfo, ParachainSystem, PolkadotXcm, Preimage, Referenda,
+    Runtime, RuntimeCall, RuntimeEvent, RuntimeFreezeReason, RuntimeHoldReason, RuntimeOrigin,
+    RuntimeTask, Scheduler, System, Timestamp, Treasury, WeightToFee, XcmpQueue,
 };
 #[cfg(not(feature = "tanssi"))]
 use crate::{Aura, CollatorSelection, Session};
@@ -175,7 +176,13 @@ impl XcmConfig for OpenZeppelinRuntime {
     type XcmpQueueMaxInboundSuspended = ConstU32<1000>;
     type XtokensReserveProviders = ReserveProviders;
 }
+
+parameter_types! {
+    pub RootOperatorAccountId: AccountId = AccountId::from([0xffu8; 32]);
+}
+
 impl AssetsConfig for OpenZeppelinRuntime {
+    type AccountId = AccountId;
     type ApprovalDeposit = ConstU128<EXISTENTIAL_DEPOSIT>;
     type AssetAccountDeposit = ConstU128<{ deposit(1, 16) }>;
     type AssetDeposit = ConstU128<{ 10 * CENTS }>;
@@ -183,14 +190,14 @@ impl AssetsConfig for OpenZeppelinRuntime {
     type AssetRegistrar = AssetRegistrar;
     type AssetRegistrarMetadata = AssetRegistrarMetadata;
     type AssetType = AssetType;
+    type AssetsToBlockAuthor = parachains_common::impls::AssetsToBlockAuthor<Runtime, ()>;
     type CreateOrigin = AsEnsureOriginWithArg<EnsureSigned<AccountId>>;
     type ForceOrigin = EnsureRoot<AccountId>;
     type ForeignAssetModifierOrigin = EnsureRoot<AccountId>;
-    type WeightToFee = WeightToFee;
-
-    type AccountId = AccountId;
     type FungiblesToAccount = TreasuryAccount;
+    type RootOperatorAccountId = RootOperatorAccountId;
     type Timestamp = Timestamp;
+    type WeightToFee = WeightToFee;
 }
 
 #[cfg(feature = "tanssi")]

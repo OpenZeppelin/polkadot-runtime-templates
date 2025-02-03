@@ -18,8 +18,8 @@ use frame_support::{
     dispatch::DispatchClass,
     parameter_types,
     traits::{
-        AsEnsureOriginWithArg, ConstU128, ConstU16, ConstU32, ConstU64, Contains, EitherOf,
-        EitherOfDiverse, Everything, FindAuthor, Nothing, TransformOrigin,
+        fungibles::Credit, AsEnsureOriginWithArg, ConstU128, ConstU16, ConstU32, ConstU64,
+        Contains, EitherOf, EitherOfDiverse, Everything, FindAuthor, Nothing, TransformOrigin,
     },
     weights::{ConstantMultiplier, Weight},
 };
@@ -43,9 +43,13 @@ use openzeppelin_pallet_abstractions::{
 };
 #[cfg(feature = "tanssi")]
 use openzeppelin_pallet_abstractions::{impl_openzeppelin_tanssi, TanssiConfig, TanssiWeight};
+use pallet_asset_tx_payment::HandleCredit;
 use pallet_ethereum::PostLogContent;
 use pallet_evm::{EVMCurrencyAdapter, EnsureAccountId20, IdentityAddressMapping};
-use parachains_common::message_queue::{NarrowOriginToSibling, ParaIdToSibling};
+use parachains_common::{
+    impls::AccountIdOf,
+    message_queue::{NarrowOriginToSibling, ParaIdToSibling},
+};
 use parity_scale_codec::{Decode, Encode};
 use polkadot_runtime_common::{BlockHashCount, SlowAdjustingFeeUpdate};
 #[cfg(not(feature = "tanssi"))]
@@ -93,10 +97,10 @@ use crate::{
     },
     weights::{BlockExecutionWeight, ExtrinsicBaseWeight},
     AllPalletsWithSystem, AssetManager, Balances, BaseFee, EVMChainId, Erc20XcmBridge,
-    MessageQueue, OpenZeppelinPrecompiles, OriginCaller, PalletInfo, ParachainInfo,
-    ParachainSystem, PolkadotXcm, Preimage, Referenda, Runtime, RuntimeCall, RuntimeEvent,
-    RuntimeFreezeReason, RuntimeHoldReason, RuntimeOrigin, RuntimeTask, Scheduler, System,
-    Timestamp, Treasury, UncheckedExtrinsic, WeightToFee, XcmpQueue,
+    MessageQueue, OpenZeppelinPrecompiles, Oracle, OracleMembership, OriginCaller, PalletInfo,
+    ParachainInfo, ParachainSystem, PolkadotXcm, Preimage, Referenda, Runtime, RuntimeCall,
+    RuntimeEvent, RuntimeFreezeReason, RuntimeHoldReason, RuntimeOrigin, RuntimeTask, Scheduler,
+    System, Timestamp, Treasury, UncheckedExtrinsic, WeightToFee, XcmpQueue,
 };
 
 // OpenZeppelin runtime wrappers configuration
@@ -198,7 +202,28 @@ impl EvmConfig for OpenZeppelinRuntime {
     type PrecompilesValue = PrecompilesValue;
     type WithdrawOrigin = EnsureAccountId20;
 }
+
+parameter_types! {
+    pub RootOperatorAccountId: AccountId = AccountId::from([0xffu8; 20]);
+}
+
+pub struct AssetsToBlockAuthor<R, I>(PhantomData<(R, I)>);
+impl<R, I> HandleCredit<AccountIdOf<R>, pallet_assets::Pallet<R, I>> for AssetsToBlockAuthor<R, I>
+where
+    I: 'static,
+    R: pallet_authorship::Config + pallet_assets::Config<I>,
+{
+    fn handle_credit(credit: Credit<AccountIdOf<R>, pallet_assets::Pallet<R, I>>) {
+        use frame_support::traits::fungibles::Balanced;
+        if let Some(author) = pallet_authorship::Pallet::<R>::author() {
+            // In case of error: Will drop the result triggering the `OnDrop` of the imbalance.
+            let _ = pallet_assets::Pallet::<R, I>::resolve(&author, credit);
+        }
+    }
+}
+
 impl AssetsConfig for OpenZeppelinRuntime {
+    type AccountId = AccountId;
     type ApprovalDeposit = ConstU128<MILLICENTS>;
     type AssetAccountDeposit = ConstU128<{ deposit(1, 16) }>;
     type AssetDeposit = ConstU128<{ 10 * CENTS }>;
@@ -206,11 +231,15 @@ impl AssetsConfig for OpenZeppelinRuntime {
     type AssetRegistrar = AssetRegistrar;
     type AssetRegistrarMetadata = AssetRegistrarMetadata;
     type AssetType = AssetType;
+    type AssetsToBlockAuthor = AssetsToBlockAuthor<Runtime, ()>;
     #[cfg(feature = "runtime-benchmarks")]
     type BenchmarkHelper = BenchmarkHelper;
     type CreateOrigin = AsEnsureOriginWithArg<EnsureSigned<AccountId>>;
     type ForceOrigin = EnsureRoot<AccountId>;
     type ForeignAssetModifierOrigin = EnsureRoot<AccountId>;
+    type FungiblesToAccount = TreasuryAccount;
+    type RootOperatorAccountId = RootOperatorAccountId;
+    type Timestamp = Timestamp;
     type WeightToFee = WeightToFee;
 }
 #[cfg(feature = "tanssi")]

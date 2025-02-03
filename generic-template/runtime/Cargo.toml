@@ -29,9 +29,11 @@ frame-system = { workspace = true }
 frame-system-benchmarking = { workspace = true, optional = true }
 frame-system-rpc-runtime-api = { workspace = true }
 frame-try-runtime = { workspace = true, optional = true }
+pallet-asset-tx-payment = { workspace = true }
 pallet-assets = { workspace = true }
 pallet-balances = { workspace = true }
 pallet-conviction-voting = { workspace = true }
+pallet-membership = { workspace = true }
 pallet-message-queue = { workspace = true }
 pallet-multisig = { workspace = true }
 pallet-preimage = { workspace = true }
@@ -45,8 +47,6 @@ pallet-transaction-payment-rpc-runtime-api = { workspace = true }
 pallet-treasury = { workspace = true }
 pallet-utility = { workspace = true }
 pallet-whitelist = { workspace = true }
-pallet-asset-tx-payment = { workspace = true }
-pallet-membership = { workspace = true }
 sp-api = { workspace = true }
 sp-arithmetic = { workspace = true }
 sp-block-builder = { workspace = true }
@@ -98,9 +98,9 @@ xcm-primitives = { workspace = true }
 # ORML
 dp-consensus = { workspace = true }
 nimbus-primitives = { workspace = true }
-orml-traits = { workspace = true }
 orml-oracle = { workspace = true }
 orml-oracle-runtime-api = { workspace = true }
+orml-traits = { workspace = true }
 orml-xcm-support = { workspace = true }
 orml-xtokens = { workspace = true }
 pallet-author-inherent = { workspace = true }
@@ -141,8 +141,11 @@ std = [
 	"log/std",
 	"nimbus-primitives/std",
 	"openzeppelin-pallet-abstractions/std",
+	"orml-oracle-runtime-api/std",
+	"orml-oracle/std",
 	"orml-xtokens/std",
 	"pallet-asset-manager/std",
+	"pallet-asset-tx-payment/std",
 	"pallet-assets/std",
 	"pallet-aura/std",
 	"pallet-author-inherent/std",
@@ -151,6 +154,7 @@ std = [
 	"pallet-cc-authorities-noting/std",
 	"pallet-collator-selection/std",
 	"pallet-conviction-voting/std",
+	"pallet-membership/std",
 	"pallet-message-queue/std",
 	"pallet-multisig/std",
 	"pallet-preimage/std",
@@ -165,10 +169,6 @@ std = [
 	"pallet-treasury/std",
 	"pallet-utility/std",
 	"pallet-whitelist/std",
-	"pallet-asset-tx-payment/std",
-	"pallet-membership/std",
-	"orml-oracle/std",
-	"orml-oracle-runtime-api/std",
 	"pallet-xcm-transactor/std",
 	"pallet-xcm-weight-trader/std",
 	"pallet-xcm/std",
@@ -210,12 +210,15 @@ runtime-benchmarks = [
 	"frame-system/runtime-benchmarks",
 	"hex-literal",
 	"nimbus-primitives/runtime-benchmarks",
+	"orml-oracle/runtime-benchmarks",
 	"pallet-asset-manager/runtime-benchmarks",
+	"pallet-asset-tx-payment/runtime-benchmarks",
 	"pallet-assets/runtime-benchmarks",
 	"pallet-author-inherent/runtime-benchmarks",
 	"pallet-balances/runtime-benchmarks",
 	"pallet-cc-authorities-noting/runtime-benchmarks",
 	"pallet-conviction-voting/runtime-benchmarks",
+	"pallet-membership/runtime-benchmarks",
 	"pallet-message-queue/runtime-benchmarks",
 	"pallet-multisig/runtime-benchmarks",
 	"pallet-preimage/runtime-benchmarks",
@@ -230,9 +233,6 @@ runtime-benchmarks = [
 	"pallet-xcm-transactor/runtime-benchmarks",
 	"pallet-xcm-weight-trader/runtime-benchmarks",
 	"pallet-xcm/runtime-benchmarks",
-	"pallet-asset-tx-payment/runtime-benchmarks",
-	"pallet-membership/runtime-benchmarks",
-	"orml-oracle/runtime-benchmarks",
 	"parachains-common/runtime-benchmarks",
 	"polkadot-parachain-primitives/runtime-benchmarks",
 	"polkadot-runtime-common/runtime-benchmarks",
@@ -251,8 +251,10 @@ try-runtime = [
 	"frame-system/try-runtime",
 	"frame-try-runtime/try-runtime",
 	"nimbus-primitives/try-runtime",
+	"orml-oracle/try-runtime",
 	"orml-xtokens/try-runtime",
 	"pallet-asset-manager/try-runtime",
+	"pallet-asset-tx-payment/try-runtime",
 	"pallet-assets/try-runtime",
 	"pallet-aura/try-runtime",
 	"pallet-author-inherent/try-runtime",
@@ -260,6 +262,7 @@ try-runtime = [
 	"pallet-cc-authorities-noting/try-runtime",
 	"pallet-collator-selection/try-runtime",
 	"pallet-conviction-voting/try-runtime",
+	"pallet-membership/try-runtime",
 	"pallet-message-queue/try-runtime",
 	"pallet-multisig/try-runtime",
 	"pallet-preimage/try-runtime",
@@ -278,9 +281,6 @@ try-runtime = [
 	"parachain-info/try-runtime",
 	"polkadot-runtime-common/try-runtime",
 	"sp-runtime/try-runtime",
-	"pallet-asset-tx-payment/try-runtime",
-	"pallet-membership/try-runtime",
-	"orml-oracle/try-runtime",
 ]
 
 # A feature that should be enabled when the runtime should be built for on-chain
