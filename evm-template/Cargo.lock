@@ -7158,7 +7158,7 @@ dependencies = [
 [[package]]
 name = "openzeppelin-pallet-abstractions"
 version = "0.1.0"
-source = "git+https://github.com/OpenZeppelin/openzeppelin-pallet-abstractions?branch=dot-as-a-fee-fixes#f879ca74b3cb81d6a6afce9a7e347d8100632cac"
+source = "git+https://github.com/OpenZeppelin/openzeppelin-pallet-abstractions?branch=dot-as-a-fee-fixes#2e88d23d3d336d4c65b039c431ea3219e8e3b856"
 dependencies = [
  "cumulus-primitives-core",
  "frame-support",
@@ -7171,7 +7171,7 @@ dependencies = [
 [[package]]
 name = "openzeppelin-pallet-abstractions-proc"
 version = "0.1.0"
-source = "git+https://github.com/OpenZeppelin/openzeppelin-pallet-abstractions?branch=dot-as-a-fee-fixes#f879ca74b3cb81d6a6afce9a7e347d8100632cac"
+source = "git+https://github.com/OpenZeppelin/openzeppelin-pallet-abstractions?branch=dot-as-a-fee-fixes#2e88d23d3d336d4c65b039c431ea3219e8e3b856"
 dependencies = [
  "darling",
  "openzeppelin-pallet-abstractions",
