@@ -312,6 +312,82 @@ impl fp_rpc::ConvertTransaction<opaque::UncheckedExtrinsic> for TransactionConve
 
 #[cfg(test)]
 mod tests {
+    mod assets_to_block_author {
+        use frame_support::traits::{
+            fungibles::{Balanced, Credit},
+            OnInitialize,
+        };
+        use pallet_asset_tx_payment::HandleCredit;
+        use parity_scale_codec::Encode;
+        use sp_core::H256;
+        use sp_runtime::{
+            testing::{Digest, DigestItem},
+            ConsensusEngineId,
+        };
+
+        use crate::{
+            configs::AssetsToBlockAuthor, AccountId, Assets, Authorship, Balance, Runtime,
+            RuntimeOrigin, Session, System,
+        };
+
+        pub const MOCK_ENGINE_ID: ConsensusEngineId = [b'M', b'O', b'C', b'K'];
+        #[test]
+        fn handle_credit_works_when_author_exists() {
+            new_test_ext().execute_with(|| {
+                // Setup
+                let mut data = [0u8; 32];
+                let author: AccountId = AccountId::from(data);
+                const ASSET_ID: u128 = 1;
+                const AMOUNT: Balance = 100;
+
+                let mut digest = Digest::default();
+                digest.push(DigestItem::PreRuntime(MOCK_ENGINE_ID, author.encode()));
+                // For unit tests we are updating storage of author in a straightforward way
+                frame_support::storage::unhashed::put(
+                    &frame_support::storage::storage_prefix(b"Authorship", b"Author"),
+                    &author,
+                );
+                // Create asset and mint initial supply
+                assert!(Assets::force_create(
+                    RuntimeOrigin::root(),
+                    ASSET_ID.into(),
+                    author,
+                    true,
+                    1
+                )
+                .is_ok());
+
+                // Create credit using issue
+                let credit = Assets::issue(ASSET_ID, AMOUNT);
+
+                // Handle credit
+                AssetsToBlockAuthor::<Runtime, ()>::handle_credit(credit);
+
+                // Verify author received the assets
+                assert_eq!(Assets::balance(ASSET_ID, author), AMOUNT);
+            });
+        }
+
+        #[test]
+        fn handle_credit_drops_when_no_author() {
+            new_test_ext().execute_with(|| {
+                // Setup
+                const ASSET_ID: u128 = 1;
+                const AMOUNT: Balance = 100;
+
+                // Create credit using issue
+                let credit = Assets::issue(ASSET_ID, AMOUNT);
+
+                // Handle credit (should not panic)
+                AssetsToBlockAuthor::<Runtime, ()>::handle_credit(credit);
+            });
+        }
+
+        fn new_test_ext() -> sp_io::TestExternalities {
+            use sp_runtime::BuildStorage;
+            frame_system::GenesisConfig::<Runtime>::default().build_storage().unwrap().into()
+        }
+    }
     mod transaction_converter {
         use core::str::FromStr;
 

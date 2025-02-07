@@ -1,0 +1,99 @@
+:source-highlighter: highlight.js
+:highlightjs-languages: rust
+:github-icon: pass:[<svg class="icon"><use href="#github-icon"/></svg>]
+
+= Pay DOT as a Fee
+
+This feature allows you to set DOT (or any other registered asset) as a fee for transaction execution. Here are the steps that you will need to execute to support it.
+
+== Configuration
+
+All you need to configure to start using this feature is an Oracle. You can use some service from any oracle service (like Chainlink, Pyth and others who support Substrate runtimes) or set up a development-mode solution.
+
+=== 1. Add Oracle Members
+
+To add oracle members, you'll need to submit transactions with sudo or root privileges:
+
+[source,bash]
+----
+# Add a member (replace with actual address)
+subxt tx --url "ws://localhost:9944" \
+    --suri "<sudo-suri>" \
+    pallet-membership add_member \
+    --account "<oracle-public-key>"
+
+# Verify members
+subxt query --url "ws://localhost:9944" \
+    pallet-membership members
+----
+
+=== 2. Format Oracle Values
+
+Oracle values should be formatted according to your runtime's `OracleValue` type. Here's an example for price data:
+
+// TODO: fix values
+[source,rust]
+----
+// Example price format
+type Price = FixedU128;  // price with 18 decimals
+type CurrencyId = u32;   // for generic template, for EVM we use u128
+----
+
+=== 3. Submit Oracle Data
+
+Here's how to submit oracle data using the CLI:
+
+[source,bash]
+----
+# Submit price feed for DOT/USD
+subxt tx --url "ws://localhost:9944" \
+    --suri "<oracle-member-key>" \
+    orml-oracle feed_values \
+    --values '[[1, "12000000000000000000"]]'  # replace the CurrencyId with DOT's AssetId and the number with price of native DOT in native tokens
+----
+
+=== 4. Query Oracle Data
+
+To verify the submitted data:
+
+[source,bash]
+----
+# Query latest price
+subxt query --url "ws://localhost:9944" \
+    orml-oracle get \
+    --key 1  # CurrencyId
+----
+
+== Development Testing
+
+For development purposes, you can set up automated price feeds:
+
+[source,bash]
+----
+#!/bin/bash
+
+while true; do
+    # Generate random price between $10-15
+    PRICE=$((RANDOM % 5000 + 10000))
+    PRICE_WITH_DECIMALS="${PRICE}000000000000000"
+    
+    subxt tx --url "ws://localhost:9944" \
+        --suri "<oracle-member-key>" \
+        orml-oracle feed_values \
+        --values "[[1, \"$PRICE_WITH_DECIMALS\"]]"
+        
+    sleep 60  # Wait 1 minute before next update
+done
+----
+
+== Opting out
+
+If you want to opt out of this feature, then you can just replace the `pallet_asset_tx_payment` with `pallet_transaction_payment` piece in `SignedExtra`:
+
+[source,patch]
+pub type SignedExtra = (
+...
+-    pallet_asset_tx_payment::ChargeAssetTxPayment<Runtime>,
++    pallet_transaction_payment::ChargeTransactionPayment<Runtime>,
+...
+);
