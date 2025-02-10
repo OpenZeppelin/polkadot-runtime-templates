@@ -17,16 +17,16 @@ use crate::{
 // Our AssetType. For now we only handle Xcm Assets
 #[derive(Clone, Eq, Debug, PartialEq, Ord, PartialOrd, Encode, Decode, TypeInfo)]
 pub enum AssetType {
-    Xcm(xcm::v3::Location),
+    Xcm(xcm::v4::Location),
 }
 impl Default for AssetType {
     fn default() -> Self {
-        Self::Xcm(xcm::v3::Location::here())
+        Self::Xcm(xcm::v4::Location::here())
     }
 }
 
-impl From<xcm::v3::Location> for AssetType {
-    fn from(location: xcm::v3::Location) -> Self {
+impl From<xcm::v4::Location> for AssetType {
+    fn from(location: xcm::v4::Location) -> Self {
         Self::Xcm(location)
     }
 }
@@ -40,7 +40,7 @@ impl TryFrom<Location> for AssetType {
     }
 }
 
-impl From<AssetType> for Option<xcm::v3::Location> {
+impl From<AssetType> for Option<xcm::v4::Location> {
     fn from(val: AssetType) -> Self {
         match val {
             AssetType::Xcm(location) => Some(location),
@@ -155,7 +155,7 @@ impl pallet_asset_manager::AssetRegistrar<Runtime> for AssetRegistrar {
         // This is the dispatch info of destroy
         RuntimeCall::Assets(pallet_assets::Call::<Runtime>::start_destroy { id: asset.into() })
             .get_dispatch_info()
-            .weight
+            .call_weight
     }
 }
 
@@ -272,18 +272,18 @@ mod tests {
             let default_asset_type = AssetType::default();
             assert_eq!(
                 default_asset_type,
-                AssetType::Xcm(xcm::v3::Location {
+                AssetType::Xcm(xcm::v4::Location {
                     parents: 0,
-                    interior: xcm::v3::Junctions::Here
+                    interior: xcm::v4::Junctions::Here
                 })
             );
         }
 
         #[test]
         fn test_asset_type_from_location_v3() {
-            let location = xcm::v3::Location {
+            let location = xcm::v4::Location {
                 parents: 0,
-                interior: xcm::v3::Junctions::X1(xcm::v3::Junction::OnlyChild),
+                interior: xcm::v4::Junctions::X1(xcm::v4::Junction::OnlyChild),
             };
             let asset_type = AssetType::from(location);
 
@@ -294,8 +294,8 @@ mod tests {
         fn test_asset_type_try_from_location_v4() {
             let location =
                 xcm::latest::Location { parents: 0, interior: xcm::latest::Junctions::Here };
-            let old_location: xcm::v3::Location =
-                xcm::v3::Location { parents: 0, interior: xcm::v3::Junctions::Here };
+            let old_location: xcm::v4::Location =
+                xcm::v4::Location { parents: 0, interior: xcm::v4::Junctions::Here };
             let asset_type = AssetType::try_from(location)
                 .expect("AssetType conversion from location v4 failed");
 
@@ -304,15 +304,15 @@ mod tests {
 
         #[test]
         fn test_asset_type_into_location() {
-            let location = xcm::v3::Location { parents: 0, interior: xcm::v3::Junctions::Here };
+            let location = xcm::v4::Location { parents: 0, interior: xcm::v4::Junctions::Here };
             let asset_type = AssetType::Xcm(location);
-            let converted: Option<xcm::v3::Location> = asset_type.into();
+            let converted: Option<xcm::v4::Location> = asset_type.into();
             assert_eq!(converted, Some(location));
         }
 
         #[test]
         fn test_asset_type_into_asset_id() {
-            let location = xcm::v3::Location { parents: 0, interior: xcm::v3::Junctions::Here };
+            let location = xcm::v4::Location { parents: 0, interior: xcm::v4::Junctions::Here };
             let expected_asset_id: u32 = 3068126878;
             let asset_type = AssetType::Xcm(location);
 

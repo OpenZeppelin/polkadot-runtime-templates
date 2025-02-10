@@ -31,6 +31,7 @@ impl ConsensusWeight for OpenZeppelinRuntime {
 impl AssetsWeight for OpenZeppelinRuntime {
     type AssetManager = weights::pallet_asset_manager::WeightInfo<Runtime>;
     type Assets = weights::pallet_assets::WeightInfo<Runtime>;
+    type TransactionPayment = weights::pallet_transaction_payment::WeightInfo<Runtime>;
 }
 
 impl GovernanceWeight for OpenZeppelinRuntime {
