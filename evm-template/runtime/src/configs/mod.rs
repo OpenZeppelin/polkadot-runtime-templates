@@ -313,21 +313,17 @@ impl fp_rpc::ConvertTransaction<opaque::UncheckedExtrinsic> for TransactionConve
 #[cfg(test)]
 mod tests {
     mod assets_to_block_author {
-        use frame_support::traits::{
-            fungibles::{Balanced, Credit},
-            OnInitialize,
-        };
+        use frame_support::traits::fungibles::Balanced;
         use pallet_asset_tx_payment::HandleCredit;
         use parity_scale_codec::Encode;
-        use sp_core::H256;
         use sp_runtime::{
             testing::{Digest, DigestItem},
             ConsensusEngineId,
         };
 
         use crate::{
-            configs::AssetsToBlockAuthor, AccountId, Assets, Authorship, Balance, Runtime,
-            RuntimeOrigin, Session, System,
+            configs::AssetsToBlockAuthor, AccountId, Assets, Balance, Runtime,
+            RuntimeOrigin,
         };
 
         pub const MOCK_ENGINE_ID: ConsensusEngineId = [b'M', b'O', b'C', b'K'];
@@ -335,7 +331,7 @@ mod tests {
         fn handle_credit_works_when_author_exists() {
             new_test_ext().execute_with(|| {
                 // Setup
-                let mut data = [0u8; 32];
+                let data = [0u8; 32];
                 let author: AccountId = AccountId::from(data);
                 const ASSET_ID: u128 = 1;
                 const AMOUNT: Balance = 100;
