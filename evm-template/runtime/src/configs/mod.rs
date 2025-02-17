@@ -322,8 +322,7 @@ mod tests {
         };
 
         use crate::{
-            configs::AssetsToBlockAuthor, AccountId, Assets, Balance, Runtime,
-            RuntimeOrigin,
+            configs::AssetsToBlockAuthor, AccountId, Assets, Balance, Runtime, RuntimeOrigin,
         };
 
         pub const MOCK_ENGINE_ID: ConsensusEngineId = [b'M', b'O', b'C', b'K'];
