@@ -1,0 +1,209 @@
+:source-highlighter: highlight.js
+:highlightjs-languages: rust
+:github-icon: pass:[<svg class="icon"><use href="#github-icon"/></svg>]
+
+= OpenZeppelin Pallet Abstractions
+
+=== Introduction
+
+link:https://github.com/OpenZeppelin/openzeppelin-pallet-abstractions[openzeppelin-pallet-abstractions] is a Rust macro library designed to simplify and secure the configuration of Polkadot parachain runtimes. By reducing repetitive boilerplate and providing sensible defaults, the library helps developers configure their runtimes with fewer lines of code while ensuring flexibility for customizations.
+
+Note: This library has not been audited yet and should not be used in production environments.
+
+=== 1. Installation
+To start using the `openzeppelin-pallet-abstractions`, add it as a dependency in your Cargo.toml file:
+```toml
+[dependencies]
+openzeppelin-pallet-abstractions = { git = "https://github.com/OpenZeppelin/openzeppelin-pallet-abstractions", tag = "v0.1.0" }
+```
+Then, import the required macros in your runtime configuration file.
+
+=== 2. Basic Usage
+
+The library offers a collection of macros for configuring various core runtime elements such as system settings, assets, governance, consensus mechanisms, EVM integration, and XCM compatibility. Let’s walk through a basic example setup:
+
+===== 1. System configuration
+The `impl_openzeppelin_system!` macro facilitates the setup of foundational runtime components by implementing the `SystemConfig` trait for your custom runtime structure.
+```rust
+use openzeppelin_pallet_abstractions::{impl_openzeppelin_system, SystemConfig};
+
+pub struct OpenZeppelinRuntime;
+
+impl SystemConfig for OpenZeppelinRuntime {
+    type AccountId = AccountId;
+    type ExistentialDeposit = ConstU128<EXISTENTIAL_DEPOSIT>;
+    type PreimageOrigin = EnsureRoot<AccountId>;
+    type ScheduleOrigin = EnsureRoot<AccountId>;
+    type Version = Version;
+    // Additional configurations...
+}
+impl_openzeppelin_system!(OpenZeppelinRuntime);
+```
+This expands to configure multiple core pallets like `frame_system`, `pallet_timestamp`, `parachain_info`, and others essential for a functioning parachain runtime.
+
+===== 2. Additional configurations
+
+Further configuration can be achieved for pallets grouped by functionality, such as Assets, Consensus, EVM, Governance, and XCM. Each grouping has its own macro and configuration trait, making it easier to set up advanced components without redundant code.
+
+Example setup for additional configurations in an EVM-based runtime:
+```rust
+use openzeppelin_pallet_abstractions::{
+    impl_openzeppelin_assets, impl_openzeppelin_consensus, impl_openzeppelin_evm,
+    impl_openzeppelin_governance, impl_openzeppelin_xcm, AssetsConfig,
+    ConsensusConfig, EvmConfig, GovernanceConfig, XcmConfig,
+};
+
+impl ConsensusConfig for OpenZeppelinRuntime {
+    type CollatorSelectionUpdateOrigin = CollatorSelectionUpdateOrigin;
+}
+
+impl GovernanceConfig for OpenZeppelinRuntime {
+    type ConvictionVoteLockingPeriod = ConstU32<{ 7 * DAYS }>;
+    type DispatchWhitelistedOrigin = EitherOf<EnsureRoot<AccountId>, WhitelistedCaller>;
+    // Additional configurations...
+}
+
+// Further configuration implementations...
+
+impl_openzeppelin_assets!(OpenZeppelinRuntime);
+impl_openzeppelin_consensus!(OpenZeppelinRuntime);
+impl_openzeppelin_governance!(OpenZeppelinRuntime);
+impl_openzeppelin_xcm!(OpenZeppelinRuntime);
+impl_openzeppelin_evm!(OpenZeppelinRuntime);
+```
+
+===== 3. Advanced Configuration Options
+
+Each macro allows optional parameters to override the default values. This enables fine-tuning of runtime settings according to the specific needs of your parachain while retaining the benefits of standardized, secure defaults.
+
+Default Overrides: Customize specific parameters like `ExistentialDeposit`, `BaseXcmWeight`, or `AssetId` while relying on default values for other settings.
+Custom Implementations: Integrate custom types (like `EitherOf`, `ConstU32`) or origins (`EnsureRoot`, `WhitelistedCaller`) for advanced use cases.
+
+===== 4. Security Considerations
+
+While the library is built with security in mind, it’s essential to review each configuration for your specific runtime and context.
+
+===== 5. Contributing and Feedback
+We encourage contributions from the community to improve the library. Please refer to the link:https://github.com/OpenZeppelin/openzeppelin-pallet-abstractions/blob/main/CONTRIBUTING.MD[CONTRIBUTING.md] for guidelines.
+
+=== 3. Using Procedural Macros in OpenZeppelin Pallet Abstractions
+
+==== 1. `construct_runtime!` Macro
+
+The `construct_runtime!` macro simplifies the assembly of runtime modules by abstracting over both OpenZeppelin abstractions and standard pallets. This is useful for developers aiming to build a runtime quickly, without manually managing each pallet’s configuration.
+
+===== Usage Example
+
+To use the macro, annotate a module with `#[openzeppelin_construct_runtime]` and define structs for each desired abstraction or regular pallet. Here’s a basic example:
+```rust
+#[openzeppelin_construct_runtime]
+mod runtime {
+    #[abstraction]
+    struct System; // Available abstractions: System, Consensus, XCM, Assets, Governance, EVM.
+    #[pallet]
+    type Pallet = pallet_crate; // Regular pallets defined with `#[pallet]` mimic the `construct_runtime!` structure.
+}
+```
+Note: Pallet index assignments are handled automatically by this macro. If you require explicit control over pallet indices, please consider submitting a link:https://github.com/OpenZeppelin/openzeppelin-pallet-abstractions/issues[feature request].
+
+===== Supported Abstractions and their Pallets:
+* System -- frame_system, pallet_timestamp, parachain_info, pallet_scheduler, pallet_preimage, pallet_proxy, pallet_balances, pallet_utility, cumulus_pallet_parachain_system, pallet_multisig, pallet_session
+* Assets -- pallet_assets, pallet_transaction_payment, pallet_asset_manager
+* Consensus -- pallet_authorship, pallet_aura, cumulus_pallet_aura_ext, pallet_collator_selection
+* Governance -- pallet_sudo, pallet_treasury, pallet_conviction_voting, pallet_whitelist, pallet_custom_origins, pallet_referenda
+* XCM -- pallet_message_queue, cumulus_pallet_xcmp_queue, pallet_xcm, cumulus_pallet_xcm, pallet_xcm_transactor, orml_xtokens, pallet_xcm_weight_trader
+* EVM -- pallet_ethereum, pallet_evm, pallet_base_fee, pallet_evm_chain_id, pallet_erc20_xcm_bridge
+
+==== 2. `impl_runtime_apis!` Macro
+
+The `The impl_runtime_apis!` macro provides a clean interface for implementing runtime APIs. This macro reduces boilerplate by allowing you to specify types and structs, automatically generating the required API implementations.
+
+===== Usage Example
+
+To use this macro, annotate a module with `#[openzeppelin_runtime_apis]` and define the types and abstractions needed.
+
+```rust
+#[openzeppelin_runtime_apis]
+mod apis {
+    type Runtime = Runtime;   // The runtime generated by `construct_runtime!`
+    type Block = Block;       // Block type required by all abstractions
+
+    #[abstraction]
+    mod assets {
+        type TransactionPayment = TransactionPayment;
+        type RuntimeCall = RuntimeCall;
+        type Balance = Balance;
+    }
+
+    // Additional `impl` blocks can be added as necessary.
+}
+```
+
+===== Supported Abstractions, APIs, and Required Configurations:
+[cols="1,1,1", options="header"]
+|===
+| Abstraction name | Implemented APIs | Required configs
+
+| EVM 
+| * `fp_rpc::EthereumRuntimeRPCApi` +  
+  * `fp_rpc::ConvertTransactionRuntimeApi`  
+| * `RuntimeCall` -- runtime call generated by `construct_runtime` macro +  
+  * `Executive` -- `frame_executive::Executive` specification used by parachain system +  
+  * `Ethereum` -- `pallet_ethereum` pallet struct generated by `construct_runtime` macro 
+
+| assets
+| * `pallet_transaction_payment_rpc_runtime_api::TransactionPaymentApi` +  
+  * `pallet_transaction_payment_rpc_runtime_api::TransactionPaymentCallApi`
+| * `TransactionPayment` -- `pallet_transaction_payment` struct pallet generated by `construct_runtime` macro +  
+  * `RuntimeCall` -- runtime call generated by `construct_runtime` macro +  
+  * `Balance` -- type used for balance specification (e.g., in `pallet_balances` config) 
+
+| consensus 
+| * `sp_consensus_aura::AuraApi` +  
+  * `sp_session::SessionKeys` +  
+  * `cumulus_primitives_aura::AuraUnincludedSegmentApi` (if `async-backing` feature is enabled)  
+| * `SessionKeys` -- struct generated by `impl_opaque_keys` macro +  
+  * `Aura` -- `pallet_aura` struct pallet generated by `construct_runtime` macro (only if `async-backing` feature is not enabled) +  
+  * `SlotDuration` -- constant used for slot duration definition (only if `async-backing` feature is enabled) +  
+  * `ConsensusHook` -- type used in `cumulus_pallet_parachain_system::Config::ConsensusHook` (only if `async-backing` feature is enabled) 
+
+| system 
+| * `sp_api::Core` +  
+  * `sp_api::Metadata` +  
+  * `sp_block_builder::BlockBuilder` +  
+  * `sp_transaction_pool::runtime_api::TaggedTransactionQueue` +  
+  * `sp_offchain::OffchainWorkerApi` +  
+  * `frame_system_rpc_runtime_api::AccountNonceApi` +  
+  * `cumulus_primitives_core::CollectCollationInfo` +  
+  * `frame_try_runtime::TryRuntime` (under a `try-runtime` feature) +  
+  * `sp_genesis_builder::GenesisBuilder` 
+| * `Executive` -- `frame_executive::Executive` specification used by parachain system +  
+  * `System` -- `frame_system` pallet struct generated by `construct_runtime` macro +  
+  * `ParachainSystem` -- `cumulus_pallet_parachain_system` pallet struct generated by `construct_runtime` macro +  
+  * `RuntimeVersion` -- runtime version, generated by `sp_version::runtime_version` +  
+  * `AccountId` -- account id type specified in `frame_system::Config` +  
+  * `Nonce` -- nonce type specified in `frame_system::Config` +  
+  * `RuntimeGenesisConfig` -- type generated by `construct_runtime` macro +  
+  * `RuntimeBlockWeights` -- type implementing `Get<BlockWeights>`, often built by `BlockWeights::builder` 
+
+| benchmarks 
+| * `frame_benchmarking::Benchmark` (under `runtime-benchmarks` feature) 
+| * `Assets` -- `pallet_assets` pallet struct generated by `construct_runtime` macro +  
+  * `AssetManager` -- `pallet_asset_manager` pallet struct generated by `construct_runtime` macro +  
+  * `AssetType` -- struct describing foreign assets in XCM configuration +  
+  * `RuntimeOrigin` -- type generated by `construct_runtime` macro +  
+  * `RelayLocation` -- `Location` type pointing to the relaychain +  
+  * `System` -- `frame_system` pallet struct generated by `construct_runtime` macro +  
+  * `ParachainSystem` -- `cumulus_pallet_parachain_system` pallet struct generated by `construct_runtime` macro +  
+  * `ExistentialDeposit` -- type describing existential deposit +  
+  * `AssetId` -- type describing internal asset id +  
+  * `XCMConfig` -- struct implementing `xcm_executor::Config`, generated by XCM abstraction as `XcmExecutorConfig` +  
+  * `AccountId` -- account id type specified in `frame_system::Config` +  
+  * `Cents` -- constant representing 1/100 of the native token +  
+  * `FeeAssetId` -- asset for XCM fees, generated by XCM abstraction +  
+  * `TransactionByteFee` -- fee per byte of data, generated by assets abstraction +  
+  * `Address` -- type describing address format for accounts +  
+  * `Balances` -- `pallet_balances` pallet struct generated by `construct_runtime` macro 
+|===
+
+This macro allows for clear modularization of APIs, facilitating easier maintenance and extension of runtime functionalities.
