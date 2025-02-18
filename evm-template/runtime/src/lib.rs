@@ -40,7 +40,8 @@ use crate::{
 pub use crate::{
     configs::RuntimeBlockWeights,
     types::{
-        AccountId, Balance, Block, BlockNumber, Executive, Nonce, Signature, UncheckedExtrinsic,
+        AccountId, AssetId, Balance, Block, BlockNumber, Executive, Nonce, Signature,
+        UncheckedExtrinsic,
     },
 };
 #[cfg(feature = "runtime-benchmarks")]
@@ -50,7 +51,7 @@ use crate::{
         XcmExecutorConfig,
     },
     constants::currency::{CENTS, EXISTENTIAL_DEPOSIT},
-    types::{Address, AssetId},
+    types::Address,
 };
 #[cfg(feature = "async-backing")]
 use crate::{constants::SLOT_DURATION, types::ConsensusHook};
@@ -240,6 +241,8 @@ mod apis {
         type RuntimeCall = RuntimeCall;
         type TransactionPayment = TransactionPayment;
         type Balance = Balance;
+        type Oracle = Oracle;
+        type OracleKey = AssetId;
     }
 
     mod consensus {
@@ -294,6 +297,8 @@ mod apis {
         type RuntimeCall = RuntimeCall;
         type Executive = Executive;
         type Ethereum = Ethereum;
+        type Oracle = Oracle;
+        type OracleKey = AssetId;
     }
 
     mod assets {

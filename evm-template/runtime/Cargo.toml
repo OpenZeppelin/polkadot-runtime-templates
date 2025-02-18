@@ -29,11 +29,13 @@ frame-system = { workspace = true }
 frame-system-benchmarking = { workspace = true, optional = true }
 frame-system-rpc-runtime-api = { workspace = true }
 frame-try-runtime = { workspace = true, optional = true }
+pallet-asset-tx-payment = { workspace = true }
 pallet-assets = { workspace = true }
 pallet-aura = { workspace = true }
 pallet-authorship = { workspace = true }
 pallet-balances = { workspace = true, features = [ "insecure_zero_ed" ] }
 pallet-conviction-voting = { workspace = true }
+pallet-membership = { workspace = true }
 pallet-message-queue = { workspace = true }
 pallet-multisig = { workspace = true }
 pallet-preimage = { workspace = true }
@@ -100,6 +102,8 @@ pallet-evm-precompile-sha3fips = { workspace = true }
 pallet-evm-precompile-simple = { workspace = true }
 
 # ORML
+orml-oracle = { workspace = true }
+orml-oracle-runtime-api = { workspace = true }
 orml-traits = { workspace = true }
 orml-xcm-support = { workspace = true }
 orml-xtokens = { workspace = true }
@@ -157,8 +161,11 @@ std = [
 	"log/std",
 	"nimbus-primitives/std",
 	"openzeppelin-pallet-abstractions/std",
+	"orml-oracle-runtime-api/std",
+	"orml-oracle/std",
 	"orml-xtokens/std",
 	"pallet-asset-manager/std",
+	"pallet-asset-tx-payment/std",
 	"pallet-assets/std",
 	"pallet-aura/std",
 	"pallet-author-inherent/std",
@@ -172,6 +179,7 @@ std = [
 	"pallet-ethereum/std",
 	"pallet-evm-chain-id/std",
 	"pallet-evm/std",
+	"pallet-membership/std",
 	"pallet-message-queue/std",
 	"pallet-multisig/std",
 	"pallet-preimage/std",
@@ -228,7 +236,9 @@ runtime-benchmarks = [
 	"frame-system/runtime-benchmarks",
 	"hex-literal",
 	"nimbus-primitives/runtime-benchmarks",
+	"orml-oracle/runtime-benchmarks",
 	"pallet-asset-manager/runtime-benchmarks",
+	"pallet-asset-tx-payment/runtime-benchmarks",
 	"pallet-assets/runtime-benchmarks",
 	"pallet-author-inherent/runtime-benchmarks",
 	"pallet-balances/runtime-benchmarks",
@@ -237,6 +247,7 @@ runtime-benchmarks = [
 	"pallet-conviction-voting/runtime-benchmarks",
 	"pallet-ethereum/runtime-benchmarks",
 	"pallet-evm/runtime-benchmarks",
+	"pallet-membership/runtime-benchmarks",
 	"pallet-message-queue/runtime-benchmarks",
 	"pallet-multisig/runtime-benchmarks",
 	"pallet-preimage/runtime-benchmarks",
@@ -270,8 +281,10 @@ try-runtime = [
 	"frame-system/try-runtime",
 	"frame-try-runtime/try-runtime",
 	"nimbus-primitives/try-runtime",
+	"orml-oracle/try-runtime",
 	"orml-xtokens/try-runtime",
 	"pallet-asset-manager/try-runtime",
+	"pallet-asset-tx-payment/try-runtime",
 	"pallet-assets/try-runtime",
 	"pallet-aura/try-runtime",
 	"pallet-author-inherent/try-runtime",
@@ -284,6 +297,7 @@ try-runtime = [
 	"pallet-erc20-xcm-bridge/try-runtime",
 	"pallet-ethereum/try-runtime",
 	"pallet-evm-chain-id/try-runtime",
+	"pallet-membership/try-runtime",
 	"pallet-message-queue/try-runtime",
 	"pallet-multisig/try-runtime",
 	"pallet-preimage/try-runtime",
