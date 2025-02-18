@@ -28,8 +28,8 @@ serde_json = "1.0.121"
 smallvec = "1.11.0"
 
 # TODO: update to release
-openzeppelin-pallet-abstractions = { git = "https://github.com/OpenZeppelin/openzeppelin-pallet-abstractions", default-features = false, tag = "v0.1-rc3" }
-openzeppelin-pallet-abstractions-proc = { git = "https://github.com/OpenZeppelin/openzeppelin-pallet-abstractions", default-features = false, tag = "v0.1-rc3" }
+openzeppelin-pallet-abstractions = { git = "https://github.com/OpenZeppelin/openzeppelin-pallet-abstractions", branch = "dot-as-a-fee-fixes", default-features = false }
+openzeppelin-pallet-abstractions-proc = { git = "https://github.com/OpenZeppelin/openzeppelin-pallet-abstractions", branch = "dot-as-a-fee-fixes", default-features = false }
 
 # Substrate
 frame-benchmarking = { git = "https://github.com/paritytech/polkadot-sdk", default-features = false, tag = "polkadot-stable2407-1" }
@@ -41,11 +41,13 @@ frame-system = { git = "https://github.com/paritytech/polkadot-sdk", default-fea
 frame-system-benchmarking = { git = "https://github.com/paritytech/polkadot-sdk", default-features = false, tag = "polkadot-stable2407-1" }
 frame-system-rpc-runtime-api = { git = "https://github.com/paritytech/polkadot-sdk", default-features = false, tag = "polkadot-stable2407-1" }
 frame-try-runtime = { git = "https://github.com/paritytech/polkadot-sdk", default-features = false, tag = "polkadot-stable2407-1" }
+pallet-asset-tx-payment = { git = "https://github.com/paritytech/polkadot-sdk", default-features = false, tag = "polkadot-stable2407-1" }
 pallet-assets = { git = "https://github.com/paritytech/polkadot-sdk", default-features = false, tag = "polkadot-stable2407-1" }
 pallet-aura = { git = "https://github.com/paritytech/polkadot-sdk", default-features = false, tag = "polkadot-stable2407-1" }
 pallet-authorship = { git = "https://github.com/paritytech/polkadot-sdk", default-features = false, tag = "polkadot-stable2407-1" }
 pallet-balances = { git = "https://github.com/paritytech/polkadot-sdk", default-features = false, tag = "polkadot-stable2407-1" }
 pallet-conviction-voting = { git = "https://github.com/paritytech/polkadot-sdk", default-features = false, tag = "polkadot-stable2407-1" }
+pallet-membership = { git = "https://github.com/paritytech/polkadot-sdk", default-features = false, tag = "polkadot-stable2407-1" }
 pallet-message-queue = { git = "https://github.com/paritytech/polkadot-sdk", default-features = false, tag = "polkadot-stable2407-1" }
 pallet-multisig = { git = "https://github.com/paritytech/polkadot-sdk", default-features = false, tag = "polkadot-stable2407-1" }
 pallet-preimage = { git = "https://github.com/paritytech/polkadot-sdk", default-features = false, tag = "polkadot-stable2407-1" }
@@ -171,6 +173,8 @@ pallet-evm-precompile-sha3fips = { git = "https://github.com/OpenZeppelin/fronti
 pallet-evm-precompile-simple = { git = "https://github.com/OpenZeppelin/frontier", branch = "polkadot-stable2407-1", default-features = false }
 
 # ORML
+orml-oracle = { git = "https://github.com/OpenZeppelin/open-runtime-module-library", branch = "polkadot-stable2407-1", default-features = false }
+orml-oracle-runtime-api = { git = "https://github.com/OpenZeppelin/open-runtime-module-library", branch = "polkadot-stable2407-1", default-features = false }
 orml-traits = { git = "https://github.com/OpenZeppelin/open-runtime-module-library", branch = "polkadot-stable2407-1", default-features = false }
 orml-xcm-support = { git = "https://github.com/OpenZeppelin/open-runtime-module-library", branch = "polkadot-stable2407-1", default-features = false }
 orml-xtokens = { git = "https://github.com/OpenZeppelin/open-runtime-module-library", branch = "polkadot-stable2407-1", default-features = false }

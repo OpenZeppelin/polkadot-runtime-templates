@@ -145,9 +145,17 @@ pallet-xcm-weight-trader = { git = "https://github.com/OpenZeppelin/moonbeam.git
 xcm-primitives = { git = "https://github.com/OpenZeppelin/moonbeam.git", branch = "polkadot-stable2417", default-features = false }
 
 # ORML
+<<<<<<< HEAD
 orml-traits = { git = "https://github.com/OpenZeppelin/open-runtime-module-library", branch = "polkadot-stable2412", default-features = false }
 orml-xcm-support = { git = "https://github.com/OpenZeppelin/open-runtime-module-library", branch = "polkadot-stable2412", default-features = false }
 orml-xtokens = { git = "https://github.com/OpenZeppelin/open-runtime-module-library", branch = "polkadot-stable2412", default-features = false }
+=======
+orml-oracle = { git = "https://github.com/OpenZeppelin/open-runtime-module-library", branch = "polkadot-stable2407-1", default-features = false }
+orml-oracle-runtime-api = { git = "https://github.com/OpenZeppelin/open-runtime-module-library", branch = "polkadot-stable2407-1", default-features = false }
+orml-traits = { git = "https://github.com/OpenZeppelin/open-runtime-module-library", branch = "polkadot-stable2407-1", default-features = false }
+orml-xcm-support = { git = "https://github.com/OpenZeppelin/open-runtime-module-library", branch = "polkadot-stable2407-1", default-features = false }
+orml-xtokens = { git = "https://github.com/OpenZeppelin/open-runtime-module-library", branch = "polkadot-stable2407-1", default-features = false }
+>>>>>>> main
 
 # Fuzzer
 ziggy = { version = "1.0.2", default-features = false }
