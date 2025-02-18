@@ -3,9 +3,11 @@ use std::{
     time::{Duration, Instant},
 };
 
+#[cfg(not(feature = "tanssi"))]
+use frame_support::traits::Get;
 use frame_support::{
     dispatch::GetDispatchInfo,
-    traits::{Get, IntegrityTest, TryState, TryStateSelect},
+    traits::{IntegrityTest, TryState, TryStateSelect},
     weights::{constants::WEIGHT_REF_TIME_PER_SECOND, Weight},
 };
 use frame_system::Account;
@@ -26,15 +28,21 @@ use sp_runtime::{
 use sp_state_machine::BasicExternalities;
 
 fn generate_genesis(accounts: &[AccountId]) -> Storage {
-    use generic_runtime_template::{
-        BalancesConfig, CollatorSelectionConfig, RuntimeGenesisConfig, SessionConfig, SessionKeys,
-    };
+    use generic_runtime_template::{BalancesConfig, RuntimeGenesisConfig};
+    #[cfg(not(feature = "tanssi"))]
+    use generic_runtime_template::{CollatorSelectionConfig, SessionConfig, SessionKeys};
+    #[cfg(not(feature = "tanssi"))]
     use sp_consensus_aura::sr25519::AuthorityId as AuraId;
-    use sp_runtime::{app_crypto::ByteArray, BuildStorage};
+    #[cfg(not(feature = "tanssi"))]
+    use sp_runtime::app_crypto::ByteArray;
+    use sp_runtime::BuildStorage;
 
     // Configure endowed accounts with initial balance of 1 << 60.
     let balances = accounts.iter().cloned().map(|k| (k, 1 << 60)).collect();
+
+    #[cfg(not(feature = "tanssi"))]
     let invulnerables: Vec<AccountId> = vec![[0; 32].into()];
+    #[cfg(not(feature = "tanssi"))]
     let session_keys = vec![(
         [0; 32].into(),
         [0; 32].into(),
@@ -45,14 +53,14 @@ fn generate_genesis(accounts: &[AccountId]) -> Storage {
     RuntimeGenesisConfig {
         system: Default::default(),
         balances: BalancesConfig { balances },
-        aura: Default::default(),
+        #[cfg(not(feature = "tanssi"))]
         session: SessionConfig { keys: session_keys },
+        #[cfg(not(feature = "tanssi"))]
         collator_selection: CollatorSelectionConfig {
             invulnerables,
             candidacy_bond: 1 << 57,
             desired_candidates: 1,
         },
-        aura_ext: Default::default(),
         parachain_info: Default::default(),
         parachain_system: Default::default(),
         polkadot_xcm: Default::default(),
@@ -294,6 +302,7 @@ fn recursive_call_filter(call: &RuntimeCall, origin: usize) -> bool {
         RuntimeCall::System(
             frame_system::Call::set_code { .. } | frame_system::Call::kill_prefix { .. },
         ) => false,
+        #[cfg(not(feature = "tanssi"))]
         RuntimeCall::CollatorSelection(
             pallet_collator_selection::Call::set_desired_candidates { max },
         ) => *max < <Runtime as pallet_collator_selection::Config>::MaxCandidates::get(),

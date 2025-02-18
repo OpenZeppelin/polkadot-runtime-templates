@@ -141,12 +141,7 @@ mod runtime_tests {
     fn assets_constants() {
         assert_eq!(<Runtime as pallet_assets::Config>::AssetDeposit::get(), 10 * CENTS);
 
-        // TODO: uncomment once patch is merged and updated RC is released and pointed to in deps
-        //assert_eq!(<Runtime as pallet_assets::Config>::AssetAccountDeposit::get(), deposit(1, 16));
-        assert_eq!(
-            <Runtime as pallet_assets::Config>::AssetAccountDeposit::get(),
-            EXISTENTIAL_DEPOSIT
-        );
+        assert_eq!(<Runtime as pallet_assets::Config>::AssetAccountDeposit::get(), deposit(1, 16));
 
         assert_eq!(<Runtime as pallet_assets::Config>::ApprovalDeposit::get(), EXISTENTIAL_DEPOSIT);
 
@@ -237,7 +232,11 @@ mod runtime_tests {
             pallet_id_to_string(PalletId(*b"PotStake"))
         );
 
+<<<<<<< HEAD
         assert_eq!(configs::Period::get(), 6 * HOURS);
+=======
+        assert_eq!(configs::SessionLength::get(), 6 * HOURS);
+>>>>>>> v3
 
         assert_eq!(configs::StakingAdminBodyId::get(), BodyId::Defense);
 
