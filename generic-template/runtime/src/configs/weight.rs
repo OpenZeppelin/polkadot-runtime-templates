@@ -33,7 +33,10 @@ impl AssetsWeight for OpenZeppelinRuntime {
     type Assets = weights::pallet_assets::WeightInfo<Runtime>;
     // TODO: fix weight on release
     type OracleMembership = ();
-    type OrmlOracle = (); // TODO: fix weight
+    type OrmlOracle = ();
+    // TODO: fix weight
+    type TransactionPayment = pallet_transaction_payment::weights::SubstrateWeight<Runtime>; //TODO: fix weight
+    type AssetTxPayment = ();//TODO: fix weight
 }
 
 impl GovernanceWeight for OpenZeppelinRuntime {
