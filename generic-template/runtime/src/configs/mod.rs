@@ -199,6 +199,7 @@ impl AssetsConfig for OpenZeppelinRuntime {
     type RootOperatorAccountId = RootOperatorAccountId;
     type Timestamp = Timestamp;
     type WeightToFee = WeightToFee;
+    type BenchmarkHelper = ();
 }
 
 #[cfg(feature = "tanssi")]

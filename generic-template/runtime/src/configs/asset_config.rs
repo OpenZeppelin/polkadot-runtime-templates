@@ -7,7 +7,7 @@ use sp_std::{
     convert::{From, Into},
     prelude::*,
 };
-use xcm::latest::Location;
+use xcm::{latest::Location, v3::MultiLocation};
 
 use crate::{
     types::{AccountId, AssetId, Balance},
@@ -22,6 +22,21 @@ pub enum AssetType {
 impl Default for AssetType {
     fn default() -> Self {
         Self::Xcm(xcm::v4::Location::here())
+    }
+}
+
+#[cfg(feature="runtime-benchmarks")]
+fn convert_v3_to_v4(v3: MultiLocation) -> Option<xcm::v4::Location> {
+    Some(xcm::v4::Location {
+        parents: v3.parents,
+        interior: xcm::v4::Junctions::try_from(v3.interior).ok()?, // Returns None if conversion fails
+    })
+}
+
+#[cfg(feature="runtime-benchmarks")]
+impl From<MultiLocation> for AssetType {
+    fn from(value: MultiLocation) -> Self {
+        Self::Xcm(convert_v3_to_v4(value).unwrap_or(xcm::v4::Location::default()))
     }
 }
 
@@ -265,6 +280,8 @@ mod tests {
     }
 
     mod asset_type {
+        use std::sync::Arc;
+
         use crate::{configs::AssetType, types::AssetId};
 
         #[test]
@@ -283,9 +300,9 @@ mod tests {
         fn test_asset_type_from_location_v3() {
             let location = xcm::v4::Location {
                 parents: 0,
-                interior: xcm::v4::Junctions::X1(xcm::v4::Junction::OnlyChild),
+                interior: xcm::v4::Junctions::X1(Arc::new([xcm::v4::Junction::OnlyChild])),
             };
-            let asset_type = AssetType::from(location);
+            let asset_type = AssetType::from(location.clone());
 
             assert_eq!(asset_type, AssetType::Xcm(location));
         }
@@ -305,7 +322,7 @@ mod tests {
         #[test]
         fn test_asset_type_into_location() {
             let location = xcm::v4::Location { parents: 0, interior: xcm::v4::Junctions::Here };
-            let asset_type = AssetType::Xcm(location);
+            let asset_type = AssetType::Xcm(location.clone());
             let converted: Option<xcm::v4::Location> = asset_type.into();
             assert_eq!(converted, Some(location));
         }
