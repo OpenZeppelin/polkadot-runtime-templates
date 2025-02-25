@@ -25,7 +25,7 @@ impl Default for AssetType {
     }
 }
 
-#[cfg(feature="runtime-benchmarks")]
+#[cfg(feature = "runtime-benchmarks")]
 fn convert_v3_to_v4(v3: MultiLocation) -> Option<xcm::v4::Location> {
     Some(xcm::v4::Location {
         parents: v3.parents,
@@ -33,7 +33,7 @@ fn convert_v3_to_v4(v3: MultiLocation) -> Option<xcm::v4::Location> {
     })
 }
 
-#[cfg(feature="runtime-benchmarks")]
+#[cfg(feature = "runtime-benchmarks")]
 impl From<MultiLocation> for AssetType {
     fn from(value: MultiLocation) -> Self {
         Self::Xcm(convert_v3_to_v4(value).unwrap_or(xcm::v4::Location::default()))

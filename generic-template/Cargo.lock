@@ -4148,7 +4148,7 @@ dependencies = [
  "frame-benchmarking-cli",
  "futures 0.3.31",
  "generic-runtime-template",
- "jsonrpsee 0.23.2",
+ "jsonrpsee 0.24.8",
  "log",
  "nimbus-consensus",
  "pallet-transaction-payment-rpc",
@@ -5276,10 +5276,8 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "62b089779ad7f80768693755a031cc14a7766aba707cbe886674e3f79e9b7e47"
 dependencies = [
  "jsonrpsee-core 0.23.2",
- "jsonrpsee-server 0.23.2",
  "jsonrpsee-types 0.23.2",
  "jsonrpsee-ws-client 0.23.2",
- "tokio",
 ]
 
 [[package]]
@@ -5290,7 +5288,7 @@ checksum = "834af00800e962dee8f7bfc0f60601de215e73e78e5497d733a2919da837d3c8"
 dependencies = [
  "jsonrpsee-core 0.24.8",
  "jsonrpsee-proc-macros",
- "jsonrpsee-server 0.24.8",
+ "jsonrpsee-server",
  "jsonrpsee-types 0.24.8",
  "jsonrpsee-ws-client 0.24.8",
  "tokio",
@@ -5396,16 +5394,10 @@ dependencies = [
  "anyhow",
  "async-trait",
  "beef",
- "bytes",
  "futures-timer",
  "futures-util",
- "http 1.2.0",
- "http-body 1.0.1",
- "http-body-util",
  "jsonrpsee-types 0.23.2",
- "parking_lot 0.12.3",
  "pin-project",
- "rand",
  "rustc-hash 1.1.0",
  "serde",
  "serde_json",
@@ -5472,34 +5464,6 @@ dependencies = [
  "proc-macro2",
  "quote",
  "syn 2.0.98",
-]
-
-[[package]]
-name = "jsonrpsee-server"
-version = "0.23.2"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "654afab2e92e5d88ebd8a39d6074483f3f2bfdf91c5ac57fe285e7127cdd4f51"
-dependencies = [
- "anyhow",
- "futures-util",
- "http 1.2.0",
- "http-body 1.0.1",
- "http-body-util",
- "hyper 1.6.0",
- "hyper-util",
- "jsonrpsee-core 0.23.2",
- "jsonrpsee-types 0.23.2",
- "pin-project",
- "route-recognizer",
- "serde",
- "serde_json",
- "soketto 0.8.1",
- "thiserror 1.0.69",
- "tokio",
- "tokio-stream",
- "tokio-util",
- "tower",
- "tracing",
 ]
 
 [[package]]

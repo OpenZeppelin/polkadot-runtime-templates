@@ -192,6 +192,7 @@ impl AssetsConfig for OpenZeppelinRuntime {
     type AssetRegistrarMetadata = AssetRegistrarMetadata;
     type AssetType = AssetType;
     type AssetsToBlockAuthor = parachains_common::impls::AssetsToBlockAuthor<Runtime, ()>;
+    type BenchmarkHelper = ();
     type CreateOrigin = AsEnsureOriginWithArg<EnsureSigned<AccountId>>;
     type ForceOrigin = EnsureRoot<AccountId>;
     type ForeignAssetModifierOrigin = EnsureRoot<AccountId>;
@@ -199,7 +200,6 @@ impl AssetsConfig for OpenZeppelinRuntime {
     type RootOperatorAccountId = RootOperatorAccountId;
     type Timestamp = Timestamp;
     type WeightToFee = WeightToFee;
-    type BenchmarkHelper = ();
 }
 
 #[cfg(feature = "tanssi")]
