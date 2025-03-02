@@ -47,8 +47,9 @@ parameter_types! {
     };
 }
 
-/// Type for specifying how a `Location` can be converted into an
-/// `AccountId`. This is used when determining ownership of accounts for asset
+/// Type for specifying how a `Location` can be converted into an `AccountId`.
+///
+/// This is used when determining ownership of accounts for asset
 /// transacting and when attempting to use XCM `Transact` in order to determine
 /// the dispatch Origin.
 pub type LocationToAccountId = (
@@ -98,8 +99,9 @@ pub type LocalFungiblesTransactor = FungiblesAdapter<
 /// Means for transacting assets on this chain.
 pub type AssetTransactors = (LocalAssetTransactor, LocalFungiblesTransactor);
 
-/// This is the type we use to convert an (incoming) XCM origin into a local
-/// `Origin` instance, ready for dispatching a transaction with Xcm's
+/// Type used to convert an (incoming) XCM origin into a local `Origin` instance
+///
+/// Local `Origin` instance is ready for dispatching a transaction with Xcm's
 /// `Transact`. There is an `OriginKind` which can biases the kind of local
 /// `Origin` it will become.
 pub type XcmOriginToTransactDispatchOrigin = (
@@ -331,8 +333,9 @@ impl Reserve for RelativeReserveProvider {
     }
 }
 
-/// This struct offers uses RelativeReserveProvider to output relative views of multilocations
-/// However, additionally accepts a Location that aims at representing the chain part
+/// Struct that uses RelativeReserveProvider to output relative views of multilocations
+///
+/// Additionally accepts a Location that aims at representing the chain part
 /// (parent: 1, Parachain(paraId)) of the absolute representation of our chain.
 /// If a token reserve matches against this absolute view, we return  Some(Location::here())
 /// This helps users by preventing errors when they try to transfer a token through xtokens

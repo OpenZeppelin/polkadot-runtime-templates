@@ -7,7 +7,7 @@ use sp_std::{
     convert::{From, Into},
     prelude::*,
 };
-use xcm::{latest::Location, v3::MultiLocation};
+use xcm::latest::Location;
 
 use crate::{
     types::{AccountId, AssetId, Balance},

@@ -1,5 +1,7 @@
+extern crate alloc;
+
 use frame_support::weights::{constants::WEIGHT_REF_TIME_PER_SECOND, Weight};
-use sp_runtime::{create_runtime_str, Perbill};
+use sp_runtime::Perbill;
 use sp_version::RuntimeVersion;
 
 use crate::{apis, types::BlockNumber};
@@ -26,8 +28,8 @@ pub const POLY_DEGREE: u8 = 1;
 
 #[sp_version::runtime_version]
 pub const VERSION: RuntimeVersion = RuntimeVersion {
-    spec_name: create_runtime_str!("template-parachain"),
-    impl_name: create_runtime_str!("template-parachain"),
+    spec_name: alloc::borrow::Cow::Borrowed("template-parachain"),
+    impl_name: alloc::borrow::Cow::Borrowed("template-parachain"),
     authoring_version: 1,
     spec_version: 1,
     impl_version: 0,
