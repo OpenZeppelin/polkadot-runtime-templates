@@ -30,7 +30,7 @@ fn dmp() {
             Parachain(1),
             Xcm(vec![Transact {
                 origin_kind: OriginKind::SovereignAccount,
-                require_weight_at_most: Weight::from_parts(INITIAL_BALANCE as u64, 1024 * 1024),
+                fallback_max_weight: Some(Weight::from_parts(INITIAL_BALANCE as u64, 1024 * 1024)),
                 call: remark.encode().into(),
             }]),
         ));
@@ -58,7 +58,7 @@ fn ump() {
             Parent,
             Xcm(vec![Transact {
                 origin_kind: OriginKind::SovereignAccount,
-                require_weight_at_most: Weight::from_parts(INITIAL_BALANCE as u64, 1024 * 1024),
+                fallback_max_weight: Some(Weight::from_parts(INITIAL_BALANCE as u64, 1024 * 1024)),
                 call: remark.encode().into(),
             }]),
         ));
@@ -86,7 +86,7 @@ fn xcmp() {
             (Parent, Parachain(2)),
             Xcm(vec![Transact {
                 origin_kind: OriginKind::SovereignAccount,
-                require_weight_at_most: Weight::from_parts(INITIAL_BALANCE as u64, 1024 * 1024),
+                fallback_max_weight: Some(Weight::from_parts(INITIAL_BALANCE as u64, 1024 * 1024)),
                 call: remark.encode().into(),
             }]),
         ));
@@ -118,7 +118,7 @@ fn remote_locking_and_unlocking() {
     Relay::execute_with(|| {
         use pallet_balances::{BalanceLock, Reasons};
         assert_eq!(
-            relay_chain::Balances::locks(child_account_id(2)),
+            relay_chain::Balances::locks(&child_account_id(2)),
             vec![BalanceLock { id: *b"py/xcmlk", amount: locked_amount, reasons: Reasons::All }]
         );
     });
@@ -146,7 +146,7 @@ fn remote_locking_and_unlocking() {
         use pallet_balances::{BalanceLock, Reasons};
         // Lock is reduced
         assert_eq!(
-            relay_chain::Balances::locks(child_account_id(2)),
+            relay_chain::Balances::locks(&child_account_id(2)),
             vec![BalanceLock {
                 id: *b"py/xcmlk",
                 amount: locked_amount - 50,

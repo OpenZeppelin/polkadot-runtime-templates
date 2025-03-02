@@ -16,13 +16,11 @@ use xcm::latest::{prelude::*, Junction::PalletInstance};
 use xcm_builder::{
     AccountId32Aliases, Case, FixedWeightBounds, FungibleAdapter, FungiblesAdapter,
     IsChildSystemParachain, IsConcrete, NoChecking, ParentIsPreset, RelayChainAsNative,
-    SiblingParachainAsNative, SiblingParachainConvertsVia, SignedAccountId32AsNative,
-    SignedToAccountId32, SovereignSignedViaLocation, WithUniqueTopic, XcmFeeManagerFromComponents,
-    XcmFeeToAccount,
+    SendXcmFeeToAccount, SiblingParachainAsNative, SiblingParachainConvertsVia,
+    SignedAccountId32AsNative, SignedToAccountId32, SovereignSignedViaLocation, WithUniqueTopic,
+    XcmFeeManagerFromComponents,
 };
-use xcm_primitives::{
-    AbsoluteAndRelativeReserve, UtilityAvailableCalls, UtilityEncodeCall, XcmTransact,
-};
+use xcm_primitives::{UtilityAvailableCalls, UtilityEncodeCall, XcmTransact};
 
 use crate::{
     configs::{MaxInstructions, ParachainSystem, Runtime, RuntimeCall, UnitWeightCost, XcmpQueue},
@@ -49,8 +47,9 @@ parameter_types! {
     };
 }
 
-/// Type for specifying how a `Location` can be converted into an
-/// `AccountId`. This is used when determining ownership of accounts for asset
+/// Type for specifying how a `Location` can be converted into an `AccountId`.
+///
+/// This is used when determining ownership of accounts for asset
 /// transacting and when attempting to use XCM `Transact` in order to determine
 /// the dispatch Origin.
 pub type LocationToAccountId = (
@@ -100,8 +99,9 @@ pub type LocalFungiblesTransactor = FungiblesAdapter<
 /// Means for transacting assets on this chain.
 pub type AssetTransactors = (LocalAssetTransactor, LocalFungiblesTransactor);
 
-/// This is the type we use to convert an (incoming) XCM origin into a local
-/// `Origin` instance, ready for dispatching a transaction with Xcm's
+/// Type used to convert an (incoming) XCM origin into a local `Origin` instance
+///
+/// Local `Origin` instance is ready for dispatching a transaction with Xcm's
 /// `Transact`. There is an `OriginKind` which can biases the kind of local
 /// `Origin` it will become.
 pub type XcmOriginToTransactDispatchOrigin = (
@@ -124,7 +124,7 @@ pub type XcmOriginToTransactDispatchOrigin = (
 
 pub type FeeManager = XcmFeeManagerFromComponents<
     IsChildSystemParachain<primitives::Id>,
-    XcmFeeToAccount<AssetTransactors, AccountId, TreasuryAccount>,
+    SendXcmFeeToAccount<AssetTransactors, TreasuryAccount>,
 >;
 
 /// Matches foreign assets from a given origin.
@@ -311,6 +311,50 @@ impl Reserve for BridgedAssetReserveProvider {
         } else {
             None
         }
+    }
+}
+
+// Provide reserve in relative path view
+// Self tokens are represeneted as Here
+// Moved from Moonbeam to implement orml_traits::location::Reserve after Moonbeam
+// removed ORML dependencies
+pub struct RelativeReserveProvider;
+
+impl Reserve for RelativeReserveProvider {
+    fn reserve(asset: &Asset) -> Option<Location> {
+        let AssetId(location) = &asset.id;
+        if location.parents == 0
+            && !matches!(location.first_interior(), Some(Junction::Parachain(_)))
+        {
+            Some(Location::here())
+        } else {
+            Some(location.chain_location())
+        }
+    }
+}
+
+/// Struct that uses RelativeReserveProvider to output relative views of multilocations
+///
+/// Additionally accepts a Location that aims at representing the chain part
+/// (parent: 1, Parachain(paraId)) of the absolute representation of our chain.
+/// If a token reserve matches against this absolute view, we return  Some(Location::here())
+/// This helps users by preventing errors when they try to transfer a token through xtokens
+/// to our chain (either inserting the relative or the absolute value).
+// Moved from Moonbeam to implement orml_traits::location::Reserve after Moonbeam
+// removed ORML dependencies
+pub struct AbsoluteAndRelativeReserve<AbsoluteMultiLocation>(PhantomData<AbsoluteMultiLocation>);
+impl<AbsoluteMultiLocation> Reserve for AbsoluteAndRelativeReserve<AbsoluteMultiLocation>
+where
+    AbsoluteMultiLocation: Get<Location>,
+{
+    fn reserve(asset: &Asset) -> Option<Location> {
+        RelativeReserveProvider::reserve(asset).map(|relative_reserve| {
+            if relative_reserve == AbsoluteMultiLocation::get() {
+                Location::here()
+            } else {
+                relative_reserve
+            }
+        })
     }
 }
 
