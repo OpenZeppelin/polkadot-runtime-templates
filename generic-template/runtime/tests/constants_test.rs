@@ -25,7 +25,7 @@ mod runtime_tests {
         constants::{currency::*, *},
         BlockNumber, Runtime,
     };
-    use sp_runtime::{create_runtime_str, Perbill};
+    use sp_runtime::Perbill;
     use sp_version::RuntimeVersion;
     use xcm::latest::prelude::BodyId;
 
@@ -34,8 +34,8 @@ mod runtime_tests {
         assert_eq!(
             VERSION,
             RuntimeVersion {
-                spec_name: create_runtime_str!("template-parachain"),
-                impl_name: create_runtime_str!("template-parachain"),
+                spec_name: std::borrow::Cow::Borrowed("template-parachain"),
+                impl_name: std::borrow::Cow::Borrowed("template-parachain"),
                 authoring_version: 1,
                 spec_version: 1,
                 impl_version: 0,
