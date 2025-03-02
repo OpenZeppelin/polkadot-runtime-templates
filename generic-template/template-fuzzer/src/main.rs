@@ -164,7 +164,7 @@ fn initialize_block(block: u32) {
     Executive::initialize_block(parent_header);
 
     // We apply the timestamp extrinsic for the current block.
-    Executive::apply_extrinsic(UncheckedExtrinsic::new_unsigned(RuntimeCall::Timestamp(
+    Executive::apply_extrinsic(UncheckedExtrinsic::new_bare(RuntimeCall::Timestamp(
         pallet_timestamp::Call::set { now: current_timestamp },
     )))
     .unwrap()
@@ -199,7 +199,7 @@ fn initialize_block(block: u32) {
         cumulus_pallet_parachain_system::Call::set_validation_data { data }
     };
 
-    Executive::apply_extrinsic(UncheckedExtrinsic::new_unsigned(RuntimeCall::ParachainSystem(
+    Executive::apply_extrinsic(UncheckedExtrinsic::new_bare(RuntimeCall::ParachainSystem(
         parachain_validation_data,
     )))
     .unwrap()
