@@ -8,6 +8,8 @@ use sp_std::{
     prelude::*,
 };
 use xcm::latest::Location;
+#[cfg(feature = "runtime-benchmarks")]
+use xcm::v3::MultiLocation;
 
 use crate::{
     types::{AccountId, AssetId, Balance},
