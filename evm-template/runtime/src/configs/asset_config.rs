@@ -14,19 +14,6 @@ use crate::{
     AssetManager, Assets, Runtime, RuntimeCall, RuntimeOrigin,
 };
 
-// Required for runtime benchmarks
-pallet_assets::runtime_benchmarks_enabled! {
-    pub struct BenchmarkHelper;
-    impl<AssetIdParameter> pallet_assets::BenchmarkHelper<AssetIdParameter> for BenchmarkHelper
-    where
-        AssetIdParameter: From<u128>,
-    {
-        fn create_asset_id_parameter(id: u32) -> AssetIdParameter {
-            (id as u128).into()
-        }
-    }
-}
-
 // Our AssetType. For now we only handle Xcm Assets
 #[derive(Clone, Eq, Debug, PartialEq, Ord, PartialOrd, Encode, Decode, TypeInfo)]
 pub enum AssetType {
