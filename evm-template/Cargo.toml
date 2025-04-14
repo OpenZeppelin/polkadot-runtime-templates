@@ -147,31 +147,31 @@ parachains-common = { git = "https://github.com/paritytech/polkadot-sdk", rev = 
 
 # EVM
 ethereum = { git = "https://github.com/rust-ethereum/ethereum", rev = "3be0d8fd4c2ad1ba216b69ef65b9382612efc8ba" }
-fc-api = { git = "https://github.com/OpenZeppelin/frontier", branch = "master", default-features = false }
-fc-consensus = { git = "https://github.com/OpenZeppelin/frontier", branch = "master", default-features = false }
-fc-db = { git = "https://github.com/OpenZeppelin/frontier", branch = "master", default-features = false }
-fc-mapping-sync = { git = "https://github.com/OpenZeppelin/frontier", branch = "master", default-features = false }
-fc-rpc = { git = "https://github.com/OpenZeppelin/frontier", branch = "master", default-features = false }
-fc-rpc-core = { git = "https://github.com/OpenZeppelin/frontier", branch = "master", default-features = false }
-fc-storage = { git = "https://github.com/OpenZeppelin/frontier", branch = "master", default-features = false }
-fp-account = { git = "https://github.com/OpenZeppelin/frontier", branch = "master", default-features = false, features = [
+fc-api = { git = "https://github.com/OpenZeppelin/frontier", branch = "polkadot-branch-stable2412", default-features = false }
+fc-consensus = { git = "https://github.com/OpenZeppelin/frontier", branch = "polkadot-branch-stable2412", default-features = false }
+fc-db = { git = "https://github.com/OpenZeppelin/frontier", branch = "polkadot-branch-stable2412", default-features = false }
+fc-mapping-sync = { git = "https://github.com/OpenZeppelin/frontier", branch = "polkadot-branch-stable2412", default-features = false }
+fc-rpc = { git = "https://github.com/OpenZeppelin/frontier", branch = "polkadot-branch-stable2412", default-features = false }
+fc-rpc-core = { git = "https://github.com/OpenZeppelin/frontier", branch = "polkadot-branch-stable2412", default-features = false }
+fc-storage = { git = "https://github.com/OpenZeppelin/frontier", branch = "polkadot-branch-stable2412", default-features = false }
+fp-account = { git = "https://github.com/OpenZeppelin/frontier", branch = "polkadot-branch-stable2412", default-features = false, features = [
 	"serde",
 ] }
-fp-dynamic-fee = { git = "https://github.com/OpenZeppelin/frontier", branch = "master", default-features = false }
-fp-evm = { git = "https://github.com/OpenZeppelin/frontier", branch = "master", default-features = false }
-fp-rpc = { git = "https://github.com/OpenZeppelin/frontier", branch = "master", default-features = false }
-fp-self-contained = { git = "https://github.com/OpenZeppelin/frontier", branch = "master", default-features = false }
-pallet-base-fee = { git = "https://github.com/OpenZeppelin/frontier", branch = "master", default-features = false }
-pallet-ethereum = { git = "https://github.com/OpenZeppelin/frontier", branch = "master", default-features = false, features = [
+fp-dynamic-fee = { git = "https://github.com/OpenZeppelin/frontier", branch = "polkadot-branch-stable2412", default-features = false }
+fp-evm = { git = "https://github.com/OpenZeppelin/frontier", branch = "polkadot-branch-stable2412", default-features = false }
+fp-rpc = { git = "https://github.com/OpenZeppelin/frontier", branch = "polkadot-branch-stable2412", default-features = false }
+fp-self-contained = { git = "https://github.com/OpenZeppelin/frontier", branch = "polkadot-branch-stable2412", default-features = false }
+pallet-base-fee = { git = "https://github.com/OpenZeppelin/frontier", branch = "polkadot-branch-stable2412", default-features = false }
+pallet-ethereum = { git = "https://github.com/OpenZeppelin/frontier", branch = "polkadot-branch-stable2412", default-features = false, features = [
 	"forbid-evm-reentrancy",
 ] }
-pallet-evm = { git = "https://github.com/OpenZeppelin/frontier", branch = "master", default-features = false, features = [
+pallet-evm = { git = "https://github.com/OpenZeppelin/frontier", branch = "polkadot-branch-stable2412", default-features = false, features = [
 	"forbid-evm-reentrancy",
 ] }
-pallet-evm-chain-id = { git = "https://github.com/OpenZeppelin/frontier", branch = "master", default-features = false }
-pallet-evm-precompile-modexp = { git = "https://github.com/OpenZeppelin/frontier", branch = "master", default-features = false }
-pallet-evm-precompile-sha3fips = { git = "https://github.com/OpenZeppelin/frontier", branch = "master", default-features = false }
-pallet-evm-precompile-simple = { git = "https://github.com/OpenZeppelin/frontier", branch = "master", default-features = false }
+pallet-evm-chain-id = { git = "https://github.com/OpenZeppelin/frontier", branch = "polkadot-branch-stable2412", default-features = false }
+pallet-evm-precompile-modexp = { git = "https://github.com/OpenZeppelin/frontier", branch = "polkadot-branch-stable2412", default-features = false }
+pallet-evm-precompile-sha3fips = { git = "https://github.com/OpenZeppelin/frontier", branch = "polkadot-branch-stable2412", default-features = false }
+pallet-evm-precompile-simple = { git = "https://github.com/OpenZeppelin/frontier", branch = "polkadot-branch-stable2412", default-features = false }
 
 # ORML
 orml-oracle = { git = "https://github.com/OpenZeppelin/open-runtime-module-library", branch = "polkadot-branch-stable2412", default-features = false }
@@ -202,8 +202,10 @@ dp-consensus = { git = "https://github.com/OpenZeppelin/dancekit", branch = "pol
 pallet-cc-authorities-noting = { git = "https://github.com/OpenZeppelin/dancekit", branch = "polkadot-branch-stable2412", default-features = false }
 
 # Tanssi
-# TODO: put it on a branch
-tc-consensus = { git = "https://github.com/4meta5/tanssi", branch = "master", default-features = false }
+tc-consensus = { git = "https://github.com/4meta5/tanssi", branch = "polkadot-branch-stable2412", default-features = false }
+
+[patch."https://github.com/paritytech/polkadot-sdk"]
+pallet-migrations = { version = "=9.0.0", optional = true }
 
 [workspace.lints.clippy]
 large_enum_variant = "allow"
