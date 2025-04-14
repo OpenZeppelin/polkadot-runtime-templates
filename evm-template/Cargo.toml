@@ -28,11 +28,11 @@ serde_json = "1.0.121"
 smallvec = "1.11.0"
 
 # TODO: update to release
-openzeppelin-pallet-abstractions = { git = "https://github.com/OpenZeppelin/openzeppelin-pallet-abstractions", branch = "amar-upgrade-polkadot2412", default-features = false }
-openzeppelin-pallet-abstractions-proc = { git = "https://github.com/OpenZeppelin/openzeppelin-pallet-abstractions", branch = "amar-upgrade-polkadot2412", default-features = false }
+openzeppelin-pallet-abstractions = { git = "https://github.com/OpenZeppelin/openzeppelin-pallet-abstractions", branch = "polkadot-branch-stable2412", default-features = false }
+openzeppelin-pallet-abstractions-proc = { git = "https://github.com/OpenZeppelin/openzeppelin-pallet-abstractions", branch = "polkadot-branch-stable2412", default-features = false }
 
 # Substrate
-frame-benchmarking = { git = "https://github.com/paritytech/polkadot-sdk", rev = "110d90bb85f866cc757287526022a66f3d576524", default-features = false }
+frame-benchmarking = { git = "https://github.com/paritytech/polkadot-sdk", branch = "stable2412", default-features = false }
 frame-benchmarking-cli = { git = "https://github.com/paritytech/polkadot-sdk", rev = "110d90bb85f866cc757287526022a66f3d576524", default-features = false }
 frame-executive = { git = "https://github.com/paritytech/polkadot-sdk", rev = "110d90bb85f866cc757287526022a66f3d576524", default-features = false }
 frame-metadata-hash-extension = { git = "https://github.com/paritytech/polkadot-sdk", rev = "110d90bb85f866cc757287526022a66f3d576524", default-features = false }
@@ -205,6 +205,7 @@ pallet-cc-authorities-noting = { git = "https://github.com/OpenZeppelin/dancekit
 tc-consensus = { git = "https://github.com/4meta5/tanssi", branch = "polkadot-branch-stable2412", default-features = false }
 
 [patch."https://github.com/paritytech/polkadot-sdk"]
+# Make pallet-migrations optional to avoid the error
 pallet-migrations = { version = "=9.0.0", optional = true }
 
 [workspace.lints.clippy]
