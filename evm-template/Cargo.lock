@@ -1210,15 +1210,15 @@ dependencies = [
 [[package]]
 name = "ccp-authorities-noting-inherent"
 version = "0.1.0"
-source = "git+https://github.com/OpenZeppelin/dancekit?branch=polkadot-branch-stable2412#37e9218e4039942a803fc8a1b7a76ed52aab5a3d"
+source = "git+https://github.com/OpenZeppelin/dancekit?rev=37e9218e4039942a803fc8a1b7a76ed52aab5a3d#37e9218e4039942a803fc8a1b7a76ed52aab5a3d"
 dependencies = [
  "async-trait",
  "cumulus-primitives-core 0.17.0 (git+https://github.com/paritytech/polkadot-sdk?rev=110d90bb85f866cc757287526022a66f3d576524)",
  "cumulus-primitives-parachain-inherent 0.17.0 (git+https://github.com/paritytech/polkadot-sdk?rev=110d90bb85f866cc757287526022a66f3d576524)",
  "cumulus-relay-chain-interface 0.21.0 (git+https://github.com/paritytech/polkadot-sdk?rev=110d90bb85f866cc757287526022a66f3d576524)",
- "dc-orchestrator-chain-interface",
+ "dc-orchestrator-chain-interface 0.1.0 (git+https://github.com/OpenZeppelin/dancekit?rev=37e9218e4039942a803fc8a1b7a76ed52aab5a3d)",
  "dp-collator-assignment",
- "dp-core",
+ "dp-core 0.1.0 (git+https://github.com/OpenZeppelin/dancekit?rev=37e9218e4039942a803fc8a1b7a76ed52aab5a3d)",
  "nimbus-primitives",
  "parity-scale-codec",
  "scale-info",
@@ -2920,8 +2920,30 @@ source = "git+https://github.com/OpenZeppelin/dancekit?branch=polkadot-branch-st
 dependencies = [
  "async-trait",
  "cumulus-primitives-core 0.17.0 (git+https://github.com/paritytech/polkadot-sdk?rev=110d90bb85f866cc757287526022a66f3d576524)",
- "dp-container-chain-genesis-data",
- "dp-core",
+ "dp-container-chain-genesis-data 0.1.0 (git+https://github.com/OpenZeppelin/dancekit?branch=polkadot-branch-stable2412)",
+ "dp-core 0.1.0 (git+https://github.com/OpenZeppelin/dancekit?branch=polkadot-branch-stable2412)",
+ "futures",
+ "jsonrpsee 0.24.9",
+ "nimbus-primitives",
+ "parity-scale-codec",
+ "polkadot-overseer 21.0.0",
+ "sc-client-api 38.0.0 (git+https://github.com/paritytech/polkadot-sdk?rev=110d90bb85f866cc757287526022a66f3d576524)",
+ "serde",
+ "sp-api 35.0.0 (git+https://github.com/paritytech/polkadot-sdk?rev=110d90bb85f866cc757287526022a66f3d576524)",
+ "sp-blockchain 38.0.0 (git+https://github.com/paritytech/polkadot-sdk?rev=110d90bb85f866cc757287526022a66f3d576524)",
+ "sp-state-machine 0.44.0 (git+https://github.com/paritytech/polkadot-sdk?rev=110d90bb85f866cc757287526022a66f3d576524)",
+ "thiserror 1.0.69",
+]
+
+[[package]]
+name = "dc-orchestrator-chain-interface"
+version = "0.1.0"
+source = "git+https://github.com/OpenZeppelin/dancekit?rev=37e9218e4039942a803fc8a1b7a76ed52aab5a3d#37e9218e4039942a803fc8a1b7a76ed52aab5a3d"
+dependencies = [
+ "async-trait",
+ "cumulus-primitives-core 0.17.0 (git+https://github.com/paritytech/polkadot-sdk?rev=110d90bb85f866cc757287526022a66f3d576524)",
+ "dp-container-chain-genesis-data 0.1.0 (git+https://github.com/OpenZeppelin/dancekit?rev=37e9218e4039942a803fc8a1b7a76ed52aab5a3d)",
+ "dp-core 0.1.0 (git+https://github.com/OpenZeppelin/dancekit?rev=37e9218e4039942a803fc8a1b7a76ed52aab5a3d)",
  "futures",
  "jsonrpsee 0.24.9",
  "nimbus-primitives",
@@ -3206,9 +3228,21 @@ dependencies = [
 ]
 
 [[package]]
+name = "dp-chain-state-snapshot"
+version = "0.1.0"
+source = "git+https://github.com/OpenZeppelin/dancekit?rev=37e9218e4039942a803fc8a1b7a76ed52aab5a3d#37e9218e4039942a803fc8a1b7a76ed52aab5a3d"
+dependencies = [
+ "cumulus-primitives-core 0.17.0 (git+https://github.com/paritytech/polkadot-sdk?rev=110d90bb85f866cc757287526022a66f3d576524)",
+ "parity-scale-codec",
+ "sp-runtime 40.1.0 (git+https://github.com/paritytech/polkadot-sdk?rev=110d90bb85f866cc757287526022a66f3d576524)",
+ "sp-state-machine 0.44.0 (git+https://github.com/paritytech/polkadot-sdk?rev=110d90bb85f866cc757287526022a66f3d576524)",
+ "sp-trie 38.0.0 (git+https://github.com/paritytech/polkadot-sdk?rev=110d90bb85f866cc757287526022a66f3d576524)",
+]
+
+[[package]]
 name = "dp-collator-assignment"
 version = "0.1.0"
-source = "git+https://github.com/OpenZeppelin/dancekit?branch=polkadot-branch-stable2412#37e9218e4039942a803fc8a1b7a76ed52aab5a3d"
+source = "git+https://github.com/OpenZeppelin/dancekit?rev=37e9218e4039942a803fc8a1b7a76ed52aab5a3d#37e9218e4039942a803fc8a1b7a76ed52aab5a3d"
 dependencies = [
  "cumulus-primitives-core 0.17.0 (git+https://github.com/paritytech/polkadot-sdk?rev=110d90bb85f866cc757287526022a66f3d576524)",
  "frame-support 39.0.0 (git+https://github.com/paritytech/polkadot-sdk?rev=110d90bb85f866cc757287526022a66f3d576524)",
@@ -3229,6 +3263,23 @@ dependencies = [
 name = "dp-consensus"
 version = "0.1.0"
 source = "git+https://github.com/OpenZeppelin/dancekit?branch=polkadot-branch-stable2412#37e9218e4039942a803fc8a1b7a76ed52aab5a3d"
+dependencies = [
+ "cumulus-primitives-core 0.17.0 (git+https://github.com/paritytech/polkadot-sdk?rev=110d90bb85f866cc757287526022a66f3d576524)",
+ "frame-support 39.0.0 (git+https://github.com/paritytech/polkadot-sdk?rev=110d90bb85f866cc757287526022a66f3d576524)",
+ "frame-system 39.1.0 (git+https://github.com/paritytech/polkadot-sdk?rev=110d90bb85f866cc757287526022a66f3d576524)",
+ "nimbus-primitives",
+ "parity-scale-codec",
+ "scale-info",
+ "sp-api 35.0.0 (git+https://github.com/paritytech/polkadot-sdk?rev=110d90bb85f866cc757287526022a66f3d576524)",
+ "sp-consensus-aura 0.41.0 (git+https://github.com/paritytech/polkadot-sdk?rev=110d90bb85f866cc757287526022a66f3d576524)",
+ "sp-runtime 40.1.0 (git+https://github.com/paritytech/polkadot-sdk?rev=110d90bb85f866cc757287526022a66f3d576524)",
+ "sp-std 14.0.0 (git+https://github.com/paritytech/polkadot-sdk?rev=110d90bb85f866cc757287526022a66f3d576524)",
+]
+
+[[package]]
+name = "dp-consensus"
+version = "0.1.0"
+source = "git+https://github.com/OpenZeppelin/dancekit?rev=37e9218e4039942a803fc8a1b7a76ed52aab5a3d#37e9218e4039942a803fc8a1b7a76ed52aab5a3d"
 dependencies = [
  "cumulus-primitives-core 0.17.0 (git+https://github.com/paritytech/polkadot-sdk?rev=110d90bb85f866cc757287526022a66f3d576524)",
  "frame-support 39.0.0 (git+https://github.com/paritytech/polkadot-sdk?rev=110d90bb85f866cc757287526022a66f3d576524)",
@@ -3265,9 +3316,39 @@ dependencies = [
 ]
 
 [[package]]
+name = "dp-container-chain-genesis-data"
+version = "0.1.0"
+source = "git+https://github.com/OpenZeppelin/dancekit?rev=37e9218e4039942a803fc8a1b7a76ed52aab5a3d#37e9218e4039942a803fc8a1b7a76ed52aab5a3d"
+dependencies = [
+ "frame-support 39.0.0 (git+https://github.com/paritytech/polkadot-sdk?rev=110d90bb85f866cc757287526022a66f3d576524)",
+ "hex-literal 0.3.4",
+ "log",
+ "parity-scale-codec",
+ "scale-info",
+ "serde",
+ "sp-core 35.0.0 (git+https://github.com/paritytech/polkadot-sdk?rev=110d90bb85f866cc757287526022a66f3d576524)",
+ "sp-std 14.0.0 (git+https://github.com/paritytech/polkadot-sdk?rev=110d90bb85f866cc757287526022a66f3d576524)",
+]
+
+[[package]]
 name = "dp-core"
 version = "0.1.0"
 source = "git+https://github.com/OpenZeppelin/dancekit?branch=polkadot-branch-stable2412#37e9218e4039942a803fc8a1b7a76ed52aab5a3d"
+dependencies = [
+ "cumulus-primitives-core 0.17.0 (git+https://github.com/paritytech/polkadot-sdk?rev=110d90bb85f866cc757287526022a66f3d576524)",
+ "frame-support 39.0.0 (git+https://github.com/paritytech/polkadot-sdk?rev=110d90bb85f866cc757287526022a66f3d576524)",
+ "hex-literal 0.3.4",
+ "parity-scale-codec",
+ "sp-core 35.0.0 (git+https://github.com/paritytech/polkadot-sdk?rev=110d90bb85f866cc757287526022a66f3d576524)",
+ "sp-io 39.0.0 (git+https://github.com/paritytech/polkadot-sdk?rev=110d90bb85f866cc757287526022a66f3d576524)",
+ "sp-runtime 40.1.0 (git+https://github.com/paritytech/polkadot-sdk?rev=110d90bb85f866cc757287526022a66f3d576524)",
+ "sp-std 14.0.0 (git+https://github.com/paritytech/polkadot-sdk?rev=110d90bb85f866cc757287526022a66f3d576524)",
+]
+
+[[package]]
+name = "dp-core"
+version = "0.1.0"
+source = "git+https://github.com/OpenZeppelin/dancekit?rev=37e9218e4039942a803fc8a1b7a76ed52aab5a3d#37e9218e4039942a803fc8a1b7a76ed52aab5a3d"
 dependencies = [
  "cumulus-primitives-core 0.17.0 (git+https://github.com/paritytech/polkadot-sdk?rev=110d90bb85f866cc757287526022a66f3d576524)",
  "frame-support 39.0.0 (git+https://github.com/paritytech/polkadot-sdk?rev=110d90bb85f866cc757287526022a66f3d576524)",
@@ -3657,13 +3738,13 @@ dependencies = [
  "cumulus-primitives-storage-weight-reclaim 9.0.0 (git+https://github.com/paritytech/polkadot-sdk?rev=110d90bb85f866cc757287526022a66f3d576524)",
  "cumulus-primitives-timestamp",
  "cumulus-primitives-utility",
- "dp-consensus",
+ "dp-consensus 0.1.0 (git+https://github.com/OpenZeppelin/dancekit?rev=37e9218e4039942a803fc8a1b7a76ed52aab5a3d)",
  "ethereum",
  "fp-account 1.0.0-dev (git+https://github.com/OpenZeppelin/frontier?branch=polkadot-branch-stable2412)",
  "fp-evm 3.0.0-dev (git+https://github.com/OpenZeppelin/frontier?branch=polkadot-branch-stable2412)",
  "fp-rpc",
  "fp-self-contained",
- "frame-benchmarking 39.0.0 (git+https://github.com/paritytech/polkadot-sdk?branch=stable2412)",
+ "frame-benchmarking 39.0.0 (git+https://github.com/paritytech/polkadot-sdk?rev=110d90bb85f866cc757287526022a66f3d576524)",
  "frame-executive",
  "frame-metadata-hash-extension",
  "frame-support 39.0.0 (git+https://github.com/paritytech/polkadot-sdk?rev=110d90bb85f866cc757287526022a66f3d576524)",
@@ -3777,7 +3858,7 @@ dependencies = [
  "fp-dynamic-fee",
  "fp-evm 3.0.0-dev (git+https://github.com/OpenZeppelin/frontier?branch=polkadot-branch-stable2412)",
  "fp-rpc",
- "frame-benchmarking 39.0.0 (git+https://github.com/paritytech/polkadot-sdk?branch=stable2412)",
+ "frame-benchmarking 39.0.0 (git+https://github.com/paritytech/polkadot-sdk?rev=110d90bb85f866cc757287526022a66f3d576524)",
  "frame-benchmarking-cli",
  "futures",
  "hex",
@@ -9156,14 +9237,14 @@ dependencies = [
 [[package]]
 name = "pallet-cc-authorities-noting"
 version = "0.1.0"
-source = "git+https://github.com/OpenZeppelin/dancekit?branch=polkadot-branch-stable2412#37e9218e4039942a803fc8a1b7a76ed52aab5a3d"
+source = "git+https://github.com/OpenZeppelin/dancekit?rev=37e9218e4039942a803fc8a1b7a76ed52aab5a3d#37e9218e4039942a803fc8a1b7a76ed52aab5a3d"
 dependencies = [
  "ccp-authorities-noting-inherent",
  "cumulus-pallet-parachain-system",
  "cumulus-primitives-core 0.17.0 (git+https://github.com/paritytech/polkadot-sdk?rev=110d90bb85f866cc757287526022a66f3d576524)",
- "dp-chain-state-snapshot",
+ "dp-chain-state-snapshot 0.1.0 (git+https://github.com/OpenZeppelin/dancekit?rev=37e9218e4039942a803fc8a1b7a76ed52aab5a3d)",
  "dp-collator-assignment",
- "dp-core",
+ "dp-core 0.1.0 (git+https://github.com/OpenZeppelin/dancekit?rev=37e9218e4039942a803fc8a1b7a76ed52aab5a3d)",
  "frame-benchmarking 39.0.0 (git+https://github.com/paritytech/polkadot-sdk?rev=110d90bb85f866cc757287526022a66f3d576524)",
  "frame-support 39.0.0 (git+https://github.com/paritytech/polkadot-sdk?rev=110d90bb85f866cc757287526022a66f3d576524)",
  "frame-system 39.1.0 (git+https://github.com/paritytech/polkadot-sdk?rev=110d90bb85f866cc757287526022a66f3d576524)",
@@ -9951,8 +10032,8 @@ version = "0.1.0"
 source = "git+https://github.com/4meta5/tanssi?branch=polkadot-branch-stable2412#92364a480d0d7b0c9be07b99d5c520ea6280f4ff"
 dependencies = [
  "cumulus-primitives-core 0.17.0 (git+https://github.com/paritytech/polkadot-sdk?rev=110d90bb85f866cc757287526022a66f3d576524)",
- "dp-chain-state-snapshot",
- "dp-container-chain-genesis-data",
+ "dp-chain-state-snapshot 0.1.0 (git+https://github.com/OpenZeppelin/dancekit?branch=polkadot-branch-stable2412)",
+ "dp-container-chain-genesis-data 0.1.0 (git+https://github.com/OpenZeppelin/dancekit?branch=polkadot-branch-stable2412)",
  "frame-benchmarking 39.0.0 (git+https://github.com/paritytech/polkadot-sdk?rev=110d90bb85f866cc757287526022a66f3d576524)",
  "frame-support 39.0.0 (git+https://github.com/paritytech/polkadot-sdk?rev=110d90bb85f866cc757287526022a66f3d576524)",
  "frame-system 39.1.0 (git+https://github.com/paritytech/polkadot-sdk?rev=110d90bb85f866cc757287526022a66f3d576524)",
@@ -9974,7 +10055,7 @@ name = "pallet-registrar-runtime-api"
 version = "0.1.0"
 source = "git+https://github.com/4meta5/tanssi?branch=polkadot-branch-stable2412#92364a480d0d7b0c9be07b99d5c520ea6280f4ff"
 dependencies = [
- "dp-container-chain-genesis-data",
+ "dp-container-chain-genesis-data 0.1.0 (git+https://github.com/OpenZeppelin/dancekit?branch=polkadot-branch-stable2412)",
  "frame-support 39.0.0 (git+https://github.com/paritytech/polkadot-sdk?rev=110d90bb85f866cc757287526022a66f3d576524)",
  "pallet-registrar",
  "parity-scale-codec",
@@ -10449,7 +10530,7 @@ name = "pallet-xcm-core-buyer"
 version = "0.1.0"
 source = "git+https://github.com/4meta5/tanssi?branch=polkadot-branch-stable2412#92364a480d0d7b0c9be07b99d5c520ea6280f4ff"
 dependencies = [
- "dp-core",
+ "dp-core 0.1.0 (git+https://github.com/OpenZeppelin/dancekit?branch=polkadot-branch-stable2412)",
  "frame-benchmarking 39.0.0 (git+https://github.com/paritytech/polkadot-sdk?rev=110d90bb85f866cc757287526022a66f3d576524)",
  "frame-support 39.0.0 (git+https://github.com/paritytech/polkadot-sdk?rev=110d90bb85f866cc757287526022a66f3d576524)",
  "frame-system 39.1.0 (git+https://github.com/paritytech/polkadot-sdk?rev=110d90bb85f866cc757287526022a66f3d576524)",
@@ -20117,8 +20198,8 @@ dependencies = [
  "cumulus-client-parachain-inherent 0.15.0 (git+https://github.com/paritytech/polkadot-sdk?rev=110d90bb85f866cc757287526022a66f3d576524)",
  "cumulus-primitives-core 0.17.0 (git+https://github.com/paritytech/polkadot-sdk?rev=110d90bb85f866cc757287526022a66f3d576524)",
  "cumulus-relay-chain-interface 0.21.0 (git+https://github.com/paritytech/polkadot-sdk?rev=110d90bb85f866cc757287526022a66f3d576524)",
- "dc-orchestrator-chain-interface",
- "dp-consensus",
+ "dc-orchestrator-chain-interface 0.1.0 (git+https://github.com/OpenZeppelin/dancekit?branch=polkadot-branch-stable2412)",
+ "dp-consensus 0.1.0 (git+https://github.com/OpenZeppelin/dancekit?branch=polkadot-branch-stable2412)",
  "fc-rpc",
  "futures",
  "log",
@@ -20231,11 +20312,11 @@ checksum = "8f50febec83f5ee1df3015341d8bd429f2d1cc62bcba7ea2076759d315084683"
 [[package]]
 name = "test-relay-sproof-builder"
 version = "0.1.0"
-source = "git+https://github.com/OpenZeppelin/dancekit?branch=polkadot-branch-stable2412#37e9218e4039942a803fc8a1b7a76ed52aab5a3d"
+source = "git+https://github.com/OpenZeppelin/dancekit?rev=37e9218e4039942a803fc8a1b7a76ed52aab5a3d#37e9218e4039942a803fc8a1b7a76ed52aab5a3d"
 dependencies = [
  "cumulus-primitives-core 0.17.0 (git+https://github.com/paritytech/polkadot-sdk?rev=110d90bb85f866cc757287526022a66f3d576524)",
  "dp-collator-assignment",
- "dp-core",
+ "dp-core 0.1.0 (git+https://github.com/OpenZeppelin/dancekit?rev=37e9218e4039942a803fc8a1b7a76ed52aab5a3d)",
  "frame-support 39.0.0 (git+https://github.com/paritytech/polkadot-sdk?rev=110d90bb85f866cc757287526022a66f3d576524)",
  "parity-scale-codec",
  "sp-runtime 40.1.0 (git+https://github.com/paritytech/polkadot-sdk?rev=110d90bb85f866cc757287526022a66f3d576524)",
@@ -20610,8 +20691,8 @@ version = "0.1.0"
 source = "git+https://github.com/4meta5/tanssi?branch=polkadot-branch-stable2412#92364a480d0d7b0c9be07b99d5c520ea6280f4ff"
 dependencies = [
  "cumulus-primitives-core 0.17.0 (git+https://github.com/paritytech/polkadot-sdk?rev=110d90bb85f866cc757287526022a66f3d576524)",
- "dp-chain-state-snapshot",
- "dp-container-chain-genesis-data",
+ "dp-chain-state-snapshot 0.1.0 (git+https://github.com/OpenZeppelin/dancekit?branch=polkadot-branch-stable2412)",
+ "dp-container-chain-genesis-data 0.1.0 (git+https://github.com/OpenZeppelin/dancekit?branch=polkadot-branch-stable2412)",
  "frame-support 39.0.0 (git+https://github.com/paritytech/polkadot-sdk?rev=110d90bb85f866cc757287526022a66f3d576524)",
  "impl-trait-for-tuples",
  "macro_rules_attribute",

@@ -32,7 +32,7 @@ openzeppelin-pallet-abstractions = { git = "https://github.com/OpenZeppelin/open
 openzeppelin-pallet-abstractions-proc = { git = "https://github.com/OpenZeppelin/openzeppelin-pallet-abstractions", branch = "polkadot-branch-stable2412", default-features = false }
 
 # Substrate
-frame-benchmarking = { git = "https://github.com/paritytech/polkadot-sdk", branch = "stable2412", default-features = false }
+frame-benchmarking = { git = "https://github.com/paritytech/polkadot-sdk", rev = "110d90bb85f866cc757287526022a66f3d576524", default-features = false }
 frame-benchmarking-cli = { git = "https://github.com/paritytech/polkadot-sdk", rev = "110d90bb85f866cc757287526022a66f3d576524", default-features = false }
 frame-executive = { git = "https://github.com/paritytech/polkadot-sdk", rev = "110d90bb85f866cc757287526022a66f3d576524", default-features = false }
 frame-metadata-hash-extension = { git = "https://github.com/paritytech/polkadot-sdk", rev = "110d90bb85f866cc757287526022a66f3d576524", default-features = false }
@@ -197,9 +197,9 @@ nimbus-primitives = { git = "https://github.com/OpenZeppelin/moonkit", branch = 
 pallet-author-inherent = { git = "https://github.com/OpenZeppelin/moonkit", branch = "polkadot-branch-stable2412", default-features = false }
 
 # Dancekit
-ccp-authorities-noting-inherent = { git = "https://github.com/OpenZeppelin/dancekit", branch = "polkadot-branch-stable2412", default-features = false }
-dp-consensus = { git = "https://github.com/OpenZeppelin/dancekit", branch = "polkadot-branch-stable2412", default-features = false }
-pallet-cc-authorities-noting = { git = "https://github.com/OpenZeppelin/dancekit", branch = "polkadot-branch-stable2412", default-features = false }
+ccp-authorities-noting-inherent = { git = "https://github.com/OpenZeppelin/dancekit", rev = "37e9218e4039942a803fc8a1b7a76ed52aab5a3d", default-features = false }
+dp-consensus = { git = "https://github.com/OpenZeppelin/dancekit", rev = "37e9218e4039942a803fc8a1b7a76ed52aab5a3d", default-features = false }
+pallet-cc-authorities-noting = { git = "https://github.com/OpenZeppelin/dancekit", rev = "37e9218e4039942a803fc8a1b7a76ed52aab5a3d", default-features = false }
 
 # Tanssi
 tc-consensus = { git = "https://github.com/4meta5/tanssi", branch = "polkadot-branch-stable2412", default-features = false }
