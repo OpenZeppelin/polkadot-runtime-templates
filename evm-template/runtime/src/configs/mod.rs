@@ -71,7 +71,7 @@ use xcm_builder::{
 };
 use xcm_config::*;
 use xcm_executor::XcmExecutor;
-use xcm_primitives::{AbsoluteAndRelativeReserve, AccountIdToLocation, AsAssetType};
+use xcm_primitives::{AccountIdToLocation, AsAssetType};
 
 #[cfg(feature = "runtime-benchmarks")]
 use crate::benchmark::{OpenHrmpChannel, PayWithEnsure};
@@ -176,7 +176,8 @@ impl XcmConfig for OpenZeppelinRuntime {
     type SelfReserve = SelfReserve;
     type SovereignAccountDispatcherOrigin = EnsureRoot<AccountId>;
     type Trader = pallet_xcm_weight_trader::Trader<Runtime>;
-    type TransactorReserveProvider = AbsoluteAndRelativeReserve<SelfLocationAbsolute>;
+    type TransactorReserveProvider =
+        xcm_primitives::AbsoluteAndRelativeReserve<SelfLocationAbsolute>;
     type Transactors = Transactors;
     type UniversalLocation = UniversalLocation;
     type WeightToFee = WeightToFee;
