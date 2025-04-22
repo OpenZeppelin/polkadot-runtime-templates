@@ -24,7 +24,8 @@ use xcm_builder::{
 };
 use xcm_executor::traits::{ConvertLocation, FeeReason, JustTry, TransactAsset};
 use xcm_primitives::{
-    AbsoluteAndRelativeReserve, AsAssetType, UtilityAvailableCalls, UtilityEncodeCall, XcmTransact,
+    AbsoluteAndRelativeReserve, AsAssetType, Reserve as _R, UtilityAvailableCalls,
+    UtilityEncodeCall, XcmTransact,
 };
 
 use crate::{
