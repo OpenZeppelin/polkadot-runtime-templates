@@ -107,9 +107,7 @@ substrate-wasm-builder = { git = "https://github.com/paritytech/polkadot-sdk", r
 
 # Polkadot
 pallet-xcm = { git = "https://github.com/paritytech/polkadot-sdk", rev = "110d90bb85f866cc757287526022a66f3d576524", default-features = false }
-polkadot-cli = { git = "https://github.com/paritytech/polkadot-sdk", rev = "110d90bb85f866cc757287526022a66f3d576524", features = [
-	"rococo-native",
-] }
+polkadot-cli = { git = "https://github.com/paritytech/polkadot-sdk", rev = "110d90bb85f866cc757287526022a66f3d576524", default-features = false}
 polkadot-parachain-primitives = { git = "https://github.com/paritytech/polkadot-sdk", rev = "110d90bb85f866cc757287526022a66f3d576524", default-features = false }
 polkadot-primitives = { git = "https://github.com/paritytech/polkadot-sdk", rev = "110d90bb85f866cc757287526022a66f3d576524", default-features = false }
 polkadot-runtime-common = { git = "https://github.com/paritytech/polkadot-sdk", rev = "110d90bb85f866cc757287526022a66f3d576524", default-features = false }
@@ -204,9 +202,9 @@ pallet-cc-authorities-noting = { git = "https://github.com/OpenZeppelin/dancekit
 # Tanssi
 tc-consensus = { git = "https://github.com/4meta5/tanssi", branch = "polkadot-branch-stable2412", default-features = false }
 
-[patch."https://github.com/paritytech/polkadot-sdk"]
+# [patch."https://github.com/paritytech/polkadot-sdk"]
 # Make pallet-migrations optional to avoid the error
-pallet-migrations = { version = "=9.0.0", optional = true }
+# pallet-migrations = { version = "=9.0.0", optional = true }
 
 [workspace.lints.clippy]
 large_enum_variant = "allow"
