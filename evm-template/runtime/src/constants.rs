@@ -1,6 +1,6 @@
 use frame_support::weights::{constants::WEIGHT_REF_TIME_PER_SECOND, Weight};
-use sp_runtime::{create_runtime_str, Perbill};
-use sp_version::RuntimeVersion;
+use sp_runtime::Perbill;
+use sp_version::{Cow, RuntimeVersion};
 
 use crate::types::BlockNumber;
 
@@ -35,8 +35,8 @@ pub const POLY_DEGREE: u8 = 1;
 
 #[sp_version::runtime_version]
 pub const VERSION: RuntimeVersion = RuntimeVersion {
-    spec_name: create_runtime_str!("template-parachain"),
-    impl_name: create_runtime_str!("template-parachain"),
+    spec_name: Cow::Borrowed("template-parachain"),
+    impl_name: Cow::Borrowed("template-parachain"),
     authoring_version: 1,
     spec_version: 1,
     impl_version: 0,
