@@ -296,9 +296,9 @@ mod tests {
         fn test_asset_type_from_location_v3() {
             let location = xcm::v4::Location {
                 parents: 0,
-                interior: xcm::v4::Junctions::X1(xcm::v4::Junction::OnlyChild),
+                interior: xcm::v4::Junctions::X1([xcm::v4::Junction::OnlyChild].into()),
             };
-            let asset_type = AssetType::from(location);
+            let asset_type = AssetType::from(location.clone());
 
             assert_eq!(asset_type, AssetType::Xcm(location));
         }
@@ -318,7 +318,7 @@ mod tests {
         #[test]
         fn test_asset_type_into_location() {
             let location = xcm::v4::Location { parents: 0, interior: xcm::v4::Junctions::Here };
-            let asset_type = AssetType::Xcm(location);
+            let asset_type = AssetType::Xcm(location.clone());
             let converted: Option<xcm::v4::Location> = asset_type.into();
             assert_eq!(converted, Some(location));
         }

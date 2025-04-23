@@ -29,7 +29,7 @@ mod runtime_tests {
         BlockNumber, Runtime,
     };
     use frame_support::{pallet_prelude::Weight, traits::TypedGet, PalletId};
-    use sp_runtime::{create_runtime_str, Perbill};
+    use sp_runtime::{Cow, Perbill};
     use sp_version::RuntimeVersion;
     use xcm::latest::prelude::BodyId;
 
@@ -39,14 +39,14 @@ mod runtime_tests {
         assert_eq!(
             VERSION,
             RuntimeVersion {
-                spec_name: create_runtime_str!("template-parachain"),
-                impl_name: create_runtime_str!("template-parachain"),
+                spec_name: Cow::Borrowed("template-parachain"),
+                impl_name: Cow::Borrowed("template-parachain"),
                 authoring_version: 1,
                 spec_version: 1,
                 impl_version: 0,
                 apis: evm_runtime_template::RUNTIME_API_VERSIONS,
                 transaction_version: 1,
-                state_version: 1,
+                system_version: 1,
             }
         );
     }
