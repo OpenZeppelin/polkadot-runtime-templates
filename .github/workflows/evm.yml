@@ -28,10 +28,10 @@ env:
   WASM_BUILD_CLEAN_TARGET: 1
   # stripping symbols and optimizing for binary size
   RUSTFLAGS: -C strip=symbols -C opt-level=s
-  # Enable sscache
-  RUSTC_WRAPPER: "sccache"
-  SCCACHE_GHA_ENABLED: "true"
-  SCCACHE_CACHE_SIZE: "50GB"
+  # Disable sscache until migrate backend from legacy service
+  # RUSTC_WRAPPER: "sccache"
+  # SCCACHE_CACHE_SIZE: "50GB"
+  SCCACHE_GHA_ENABLED: "false"
 
 jobs:
   evm-clippy-fmt-test:
