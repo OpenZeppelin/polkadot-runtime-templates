@@ -90,7 +90,7 @@ where
     let mut module = RpcExtension::new(());
     let FullDeps { client, pool, deny_unsafe, eth } = deps;
 
-    module.merge(System::new(client.clone(), pool, deny_unsafe).into_rpc())?;
+    module.merge(System::new(client.clone(), pool).into_rpc())?;
     module.merge(TransactionPayment::new(client).into_rpc())?;
     let module = create_eth::<_, _, _, _, _, _, _, DefaultEthConfig<C, BE>>(
         module,

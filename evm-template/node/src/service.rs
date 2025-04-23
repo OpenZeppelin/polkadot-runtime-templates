@@ -105,7 +105,13 @@ pub fn new_partial(
         })
         .transpose()?;
 
-    let executor = sc_service::new_wasm_executor(config);
+    let executor = ParachainExecutor::builder()
+        .with_execution_method(config.executor.wasm_method)
+        .with_onchain_heap_alloc_strategy(heap_pages)
+        .with_offchain_heap_alloc_strategy(heap_pages)
+        .with_max_runtime_instances(config.executor.max_runtime_instances)
+        .with_runtime_cache_size(config.executor.runtime_cache_size)
+        .build();
 
     let (client, backend, keystore_container, task_manager) =
         sc_service::new_full_parts_record_import::<Block, RuntimeApi, _>(
@@ -123,12 +129,15 @@ pub fn new_partial(
         telemetry
     });
 
-    let transaction_pool = sc_transaction_pool::BasicPool::new_full(
-        config.transaction_pool.clone(),
-        config.role.is_authority().into(),
-        config.prometheus_registry(),
-        task_manager.spawn_essential_handle(),
-        client.clone(),
+    let transaction_pool = Arc::from(
+        sc_transaction_pool::Builder::new(
+            task_manager.spawn_essential_handle(),
+            client.clone(),
+            config.role.is_authority().into(),
+        )
+        .with_options(config.transaction_pool.clone())
+        .with_prometheus(config.prometheus_registry())
+        .build(),
     );
 
     #[cfg(feature = "tanssi")]
@@ -252,8 +261,10 @@ async fn start_node_impl(
     let (_, mut telemetry, telemetry_worker_handle, frontier_backend, overrides) = params.other;
 
     let frontier_backend = Arc::new(frontier_backend);
-    let net_config: FullNetworkConfiguration<Block, H256, sc_network::NetworkWorker<_, _>> =
-        sc_network::config::FullNetworkConfiguration::new(&parachain_config.network);
+    let net_config = FullNetworkConfiguration::<_, _, sc_network::NetworkWorker<Block, Hash>>::new(
+        &parachain_config.network,
+        parachain_config.prometheus_config.as_ref().map(|cfg| cfg.registry.clone()),
+    );
 
     let client = params.client.clone();
     let backend = params.backend.clone();
@@ -421,7 +432,7 @@ async fn start_node_impl(
         // Putting a link in there and swapping out the requirements for your
         // own are probably a good idea. The requirements for a para-chain are
         // dictated by its relay-chain.
-        match SUBSTRATE_REFERENCE_HARDWARE.check_hardware(&hwbench) {
+        match SUBSTRATE_REFERENCE_HARDWARE.check_hardware(&hwbench, false) {
             Err(err) if validator => {
                 log::warn!(
                     "⚠️  The hardware does not meet the minimal requirements {} for role \

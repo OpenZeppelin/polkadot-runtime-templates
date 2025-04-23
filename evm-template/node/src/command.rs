@@ -231,7 +231,7 @@ pub fn run() -> Result<()> {
 				let hwbench = (!cli.no_hardware_benchmarks)
 					.then_some(config.database.path().map(|database_path| {
 						let _ = std::fs::create_dir_all(database_path);
-						sc_sysinfo::gather_hwbench(Some(database_path))
+						sc_sysinfo::gather_hwbench(Some(database_path), &SUBSTRATE_REFERENCE_HARDWARE)
 					}))
 					.flatten();
 
@@ -310,7 +310,7 @@ impl CliConfiguration<Self> for RelayChainCli {
         Ok(self.shared_params().base_path()?.or_else(|| self.base_path.clone().map(Into::into)))
     }
 
-    fn rpc_addr(&self, default_listen_port: u16) -> Result<Option<SocketAddr>> {
+    fn rpc_addr(&self, default_listen_port: u16) -> sc_cli::Result<Option<Vec<RpcEndpoint>>> {
         self.base.base.rpc_addr(default_listen_port)
     }
 
@@ -322,15 +322,9 @@ impl CliConfiguration<Self> for RelayChainCli {
         self.base.base.prometheus_config(default_listen_port, chain_spec)
     }
 
-    fn init<F>(
-        &self,
-        _support_url: &String,
-        _impl_version: &String,
-        _logger_hook: F,
-        _config: &sc_service::Configuration,
-    ) -> Result<()>
+    fn init<F>(&self, _support_url: &String, _impl_version: &String, _logger_hook: F) -> Result<()>
     where
-        F: FnOnce(&mut sc_cli::LoggerBuilder, &sc_service::Configuration),
+        F: FnOnce(&mut sc_cli::LoggerBuilder),
     {
         unreachable!("PolkadotCli is never initialized; qed");
     }
