@@ -9,7 +9,6 @@ use std::sync::Arc;
 
 use evm_runtime_template::{opaque::Block, AccountId, Balance, Nonce};
 use sc_client_api::{backend::Backend, AuxStore, BlockchainEvents, StorageProvider, UsageProvider};
-pub use sc_rpc::DenyUnsafe;
 use sc_rpc::SubscriptionTaskExecutor;
 use sc_transaction_pool::ChainApi;
 use sc_transaction_pool_api::TransactionPool;
@@ -32,8 +31,6 @@ pub struct FullDeps<C, P, A: ChainApi, CT, CIDP> {
     pub client: Arc<C>,
     /// Transaction pool instance.
     pub pool: Arc<P>,
-    /// Whether to deny unsafe calls
-    pub deny_unsafe: DenyUnsafe,
     /// Ethereum-compatibility specific dependencies.
     pub eth: EthDeps<Block, C, P, A, CT, CIDP>,
 }
@@ -88,7 +85,7 @@ where
     use substrate_frame_rpc_system::{System, SystemApiServer};
 
     let mut module = RpcExtension::new(());
-    let FullDeps { client, pool, deny_unsafe, eth } = deps;
+    let FullDeps { client, pool, eth } = deps;
 
     module.merge(System::new(client.clone(), pool).into_rpc())?;
     module.merge(TransactionPayment::new(client).into_rpc())?;

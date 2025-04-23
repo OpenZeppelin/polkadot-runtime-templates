@@ -31,14 +31,13 @@ use evm_runtime_template::{configs::TransactionConverter, opaque::Block, Runtime
 use frame_benchmarking_cli::SUBSTRATE_REFERENCE_HARDWARE;
 use sc_client_api::Backend;
 use sc_consensus::ImportQueue;
-use sc_executor::WasmExecutor;
+use sc_executor::{HeapAllocStrategy, WasmExecutor, DEFAULT_HEAP_ALLOC_STRATEGY};
 use sc_network::{config::FullNetworkConfiguration, NetworkBlock};
 use sc_service::{Configuration, PartialComponents, TFullBackend, TFullClient, TaskManager};
 #[cfg(not(feature = "tanssi"))]
 use sc_telemetry::TelemetryHandle;
 use sc_telemetry::{Telemetry, TelemetryWorker, TelemetryWorkerHandle};
 use sc_transaction_pool_api::OffchainTransactionPoolFactory;
-use sp_core::H256;
 #[cfg(not(feature = "tanssi"))]
 use sp_core::U256;
 #[cfg(not(feature = "tanssi"))]
@@ -76,7 +75,7 @@ pub type Service = PartialComponents<
     ParachainBackend,
     (),
     sc_consensus::DefaultImportQueue<Block>,
-    sc_transaction_pool::FullPool<Block, ParachainClient>,
+    sc_transaction_pool::TransactionPoolHandle<Block, ParachainClient>,
     (
         ParachainBlockImport,
         Option<Telemetry>,
@@ -104,6 +103,11 @@ pub fn new_partial(
             Ok((worker, telemetry))
         })
         .transpose()?;
+
+    let heap_pages = config
+        .executor
+        .default_heap_pages
+        .map_or(DEFAULT_HEAP_ALLOC_STRATEGY, |h| HeapAllocStrategy::Static { extra_pages: h as _ });
 
     let executor = ParachainExecutor::builder()
         .with_execution_method(config.executor.wasm_method)
@@ -324,7 +328,7 @@ async fn start_node_impl(
                 is_validator: parachain_config.role.is_authority(),
                 enable_http_requests: false,
                 custom_extensions: move |_| vec![],
-            })
+            })?
             .run(client.clone(), task_manager.spawn_handle())
             .boxed(),
         );
@@ -337,7 +341,7 @@ async fn start_node_impl(
 
     let rpc_builder = {
         let client = client.clone();
-        let transaction_pool = transaction_pool.clone();
+        let pool = transaction_pool.clone();
         #[cfg(not(feature = "tanssi"))]
         let target_gas_price = eth_config.target_gas_price;
         let enable_dev_signer = eth_config.enable_dev_signer;
@@ -370,11 +374,11 @@ async fn start_node_impl(
         let fee_history_cache = fee_history_cache.clone();
         let pubsub_notification_sinks = pubsub_notification_sinks.clone();
 
-        Box::new(move |deny_unsafe, subscription_task_executor| {
+        Box::new(move |subscription_task_executor| {
             let eth = crate::rpc::EthDeps {
                 client: client.clone(),
-                pool: transaction_pool.clone(),
-                graph: transaction_pool.pool().clone(),
+                pool: pool.clone(),
+                graph: pool.pool().clone(),
                 converter: Some(TransactionConverter),
                 is_authority: validator,
                 enable_dev_signer,
@@ -395,12 +399,7 @@ async fn start_node_impl(
                 #[cfg(not(feature = "tanssi"))]
                 pending_create_inherent_data_providers,
             };
-            let deps = crate::rpc::FullDeps {
-                client: client.clone(),
-                pool: transaction_pool.clone(),
-                deny_unsafe,
-                eth,
-            };
+            let deps = crate::rpc::FullDeps { client: client.clone(), pool: pool.clone(), eth };
 
             crate::rpc::create_full(
                 deps,
@@ -558,7 +557,7 @@ fn start_consensus(
     telemetry: Option<TelemetryHandle>,
     task_manager: &TaskManager,
     relay_chain_interface: Arc<dyn RelayChainInterface>,
-    transaction_pool: Arc<sc_transaction_pool::FullPool<Block, ParachainClient>>,
+    transaction_pool: Arc<sc_transaction_pool::TransactionPoolHandle<Block, ParachainClient>>,
     keystore: KeystorePtr,
     relay_chain_slot_duration: Duration,
     para_id: ParaId,
