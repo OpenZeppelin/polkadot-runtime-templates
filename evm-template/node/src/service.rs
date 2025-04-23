@@ -373,12 +373,18 @@ async fn start_node_impl(
         let overrides = overrides.clone();
         let fee_history_cache = fee_history_cache.clone();
         let pubsub_notification_sinks = pubsub_notification_sinks.clone();
-
+        let graph_api = Arc::new(sc_transaction_pool::FullChainApi::new(
+            client.clone(),
+            None,
+            &task_manager.spawn_essential_handle(),
+        ));
+        let graph =
+            Arc::new(sc_transaction_pool::Pool::new(Default::default(), true.into(), graph_api));
         Box::new(move |subscription_task_executor| {
             let eth = crate::rpc::EthDeps {
                 client: client.clone(),
                 pool: pool.clone(),
-                graph: pool.pool().clone(),
+                graph: graph.clone(),
                 converter: Some(TransactionConverter),
                 is_authority: validator,
                 enable_dev_signer,
