@@ -52,7 +52,7 @@ fn generate_genesis(accounts: &[AccountId]) -> Storage {
         system: Default::default(),
         balances: BalancesConfig { balances },
         #[cfg(not(feature = "tanssi"))]
-        session: SessionConfig { keys: session_keys },
+        session: SessionConfig { keys: session_keys, non_authority_keys: vec![] },
         #[cfg(not(feature = "tanssi"))]
         collator_selection: CollatorSelectionConfig {
             invulnerables,
@@ -115,7 +115,7 @@ fn process_input(accounts: &[AccountId], genesis: &Storage, data: &[u8]) {
                 initialize_block(block);
             }
 
-            weight.saturating_accrue(extrinsic.get_dispatch_info().weight);
+            weight.saturating_accrue(extrinsic.get_dispatch_info().call_weight);
             if weight.ref_time() >= 2 * WEIGHT_REF_TIME_PER_SECOND {
                 println!("Extrinsic would exhaust block weight, skipping");
                 continue;
@@ -170,7 +170,7 @@ fn initialize_block(block: u32) {
     Executive::initialize_block(parent_header);
 
     // We apply the timestamp extrinsic for the current block.
-    Executive::apply_extrinsic(UncheckedExtrinsic::new_unsigned(RuntimeCall::Timestamp(
+    Executive::apply_extrinsic(UncheckedExtrinsic::new_bare(RuntimeCall::Timestamp(
         pallet_timestamp::Call::set { now: current_timestamp },
     )))
     .unwrap()
@@ -205,7 +205,7 @@ fn initialize_block(block: u32) {
         cumulus_pallet_parachain_system::Call::set_validation_data { data }
     };
 
-    Executive::apply_extrinsic(UncheckedExtrinsic::new_unsigned(RuntimeCall::ParachainSystem(
+    Executive::apply_extrinsic(UncheckedExtrinsic::new_bare(RuntimeCall::ParachainSystem(
         parachain_validation_data,
     )))
     .unwrap()
@@ -295,7 +295,7 @@ fn check_invariants(block: u32, initial_total_issuance: Balance) {
         counted_free += info.data.free;
         counted_reserved += info.data.reserved;
         let max_lock: Balance =
-            Balances::locks(account).iter().map(|l| l.amount).max().unwrap_or_default();
+            Balances::locks(&account).iter().map(|l| l.amount).max().unwrap_or_default();
         assert_eq!(max_lock, info.data.frozen, "Max lock should be equal to frozen balance");
         let sum_holds: Balance = Holds::<Runtime>::get(account).iter().map(|l| l.amount).sum();
         assert!(
