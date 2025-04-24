@@ -8,6 +8,8 @@ use sp_std::{
     prelude::*,
 };
 use xcm::latest::Location;
+#[cfg(feature = "runtime-benchmarks")]
+use xcm::v3::MultiLocation;
 
 use crate::{
     types::{AccountId, AssetId, Balance},
@@ -41,6 +43,21 @@ impl Default for AssetType {
 impl From<xcm::v4::Location> for AssetType {
     fn from(location: xcm::v4::Location) -> Self {
         Self::Xcm(location)
+    }
+}
+
+#[cfg(feature = "runtime-benchmarks")]
+fn convert_v3_to_v4(v3: MultiLocation) -> Option<xcm::v4::Location> {
+    Some(xcm::v4::Location {
+        parents: v3.parents,
+        interior: xcm::v4::Junctions::try_from(v3.interior).ok()?, // Returns None if conversion fails
+    })
+}
+
+#[cfg(feature = "runtime-benchmarks")]
+impl From<MultiLocation> for AssetType {
+    fn from(value: MultiLocation) -> Self {
+        Self::Xcm(convert_v3_to_v4(value).unwrap_or(xcm::v4::Location::default()))
     }
 }
 
