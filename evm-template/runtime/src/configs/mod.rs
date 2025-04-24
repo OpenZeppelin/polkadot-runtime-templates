@@ -233,8 +233,6 @@ impl AssetsConfig for OpenZeppelinRuntime {
     type AssetRegistrarMetadata = AssetRegistrarMetadata;
     type AssetType = AssetType;
     type AssetsToBlockAuthor = AssetsToBlockAuthor<Runtime, ()>;
-    #[cfg(feature = "runtime-benchmarks")]
-    type BenchmarkHelper = BenchmarkHelper;
     type CreateOrigin = AsEnsureOriginWithArg<EnsureSigned<AccountId>>;
     type ForceOrigin = EnsureRoot<AccountId>;
     type ForeignAssetModifierOrigin = EnsureRoot<AccountId>;

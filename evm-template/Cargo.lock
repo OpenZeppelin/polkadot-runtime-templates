@@ -2469,9 +2469,9 @@ dependencies = [
 
 [[package]]
 name = "cxx"
-version = "1.0.157"
+version = "1.0.158"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "3d6354e975ea4ec28033ec3a36fa9baa1a02e3eb22ad740eeb4929370d4f5ba8"
+checksum = "a71ea7f29c73f7ffa64c50b83c9fe4d3a6d4be89a86b009eb80d5a6d3429d741"
 dependencies = [
  "cc",
  "cxxbridge-cmd",
@@ -2483,9 +2483,9 @@ dependencies = [
 
 [[package]]
 name = "cxx-build"
-version = "1.0.157"
+version = "1.0.158"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "8b4400e26ea4b99417e4263b1ce2d8452404d750ba0809a7bd043072593d430d"
+checksum = "36a8232661d66dcf713394726157d3cfe0a89bfc85f52d6e9f9bbc2306797fe7"
 dependencies = [
  "cc",
  "codespan-reporting",
@@ -2497,9 +2497,9 @@ dependencies = [
 
 [[package]]
 name = "cxxbridge-cmd"
-version = "1.0.157"
+version = "1.0.158"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "31860c98f69fc14da5742c5deaf78983e846c7b27804ca8c8319e32eef421bde"
+checksum = "4f44296c8693e9ea226a48f6a122727f77aa9e9e338380cb021accaeeb7ee279"
 dependencies = [
  "clap",
  "codespan-reporting",
@@ -2510,15 +2510,15 @@ dependencies = [
 
 [[package]]
 name = "cxxbridge-flags"
-version = "1.0.157"
+version = "1.0.158"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b0402a66013f3b8d3d9f2d7c9994656cc81e671054822b0728d7454d9231892f"
+checksum = "c42f69c181c176981ae44ba9876e2ea41ce8e574c296b38d06925ce9214fb8e4"
 
 [[package]]
 name = "cxxbridge-macro"
-version = "1.0.157"
+version = "1.0.158"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "64c0b38f32d68f3324a981645ee39b2d686af36d03c98a386df3716108c9feae"
+checksum = "8faff5d4467e0709448187df29ccbf3b0982cc426ee444a193f87b11afb565a8"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -2772,9 +2772,9 @@ dependencies = [
 
 [[package]]
 name = "derive_more"
-version = "0.99.19"
+version = "0.99.20"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "3da29a38df43d6f156149c9b43ded5e018ddff2a855cf2cfd62e8cd7d079c69f"
+checksum = "6edb4b64a43d977b8e99788fe3a04d483834fba1215a7e02caa415b626497f7f"
 dependencies = [
  "convert_case",
  "proc-macro2",
@@ -9006,7 +9006,7 @@ dependencies = [
 [[package]]
 name = "pallet-registrar"
 version = "0.1.0"
-source = "git+https://github.com/4meta5/tanssi?branch=polkadot-branch-stable2412#92364a480d0d7b0c9be07b99d5c520ea6280f4ff"
+source = "git+https://github.com/4meta5/tanssi?branch=polkadot-branch-stable2412#b283c45069f457298d3243016df67e735538f6ea"
 dependencies = [
  "cumulus-primitives-core",
  "dp-chain-state-snapshot 0.1.0 (git+https://github.com/OpenZeppelin/dancekit?branch=polkadot-branch-stable2412)",
@@ -9030,7 +9030,7 @@ dependencies = [
 [[package]]
 name = "pallet-registrar-runtime-api"
 version = "0.1.0"
-source = "git+https://github.com/4meta5/tanssi?branch=polkadot-branch-stable2412#92364a480d0d7b0c9be07b99d5c520ea6280f4ff"
+source = "git+https://github.com/4meta5/tanssi?branch=polkadot-branch-stable2412#b283c45069f457298d3243016df67e735538f6ea"
 dependencies = [
  "dp-container-chain-genesis-data 0.1.0 (git+https://github.com/OpenZeppelin/dancekit?branch=polkadot-branch-stable2412)",
  "frame-support",
@@ -9385,7 +9385,7 @@ dependencies = [
 [[package]]
 name = "pallet-xcm-core-buyer"
 version = "0.1.0"
-source = "git+https://github.com/4meta5/tanssi?branch=polkadot-branch-stable2412#92364a480d0d7b0c9be07b99d5c520ea6280f4ff"
+source = "git+https://github.com/4meta5/tanssi?branch=polkadot-branch-stable2412#b283c45069f457298d3243016df67e735538f6ea"
 dependencies = [
  "dp-core 0.1.0 (git+https://github.com/OpenZeppelin/dancekit?branch=polkadot-branch-stable2412)",
  "frame-benchmarking",
@@ -9411,7 +9411,7 @@ dependencies = [
 [[package]]
 name = "pallet-xcm-core-buyer-runtime-api"
 version = "0.1.0"
-source = "git+https://github.com/4meta5/tanssi?branch=polkadot-branch-stable2412#92364a480d0d7b0c9be07b99d5c520ea6280f4ff"
+source = "git+https://github.com/4meta5/tanssi?branch=polkadot-branch-stable2412#b283c45069f457298d3243016df67e735538f6ea"
 dependencies = [
  "frame-support",
  "pallet-xcm-core-buyer",
@@ -9840,7 +9840,7 @@ name = "polkadot-availability-distribution"
 version = "21.0.0"
 source = "git+https://github.com/paritytech/polkadot-sdk?rev=110d90bb85f866cc757287526022a66f3d576524#110d90bb85f866cc757287526022a66f3d576524"
 dependencies = [
- "derive_more 0.99.19",
+ "derive_more 0.99.20",
  "fatality",
  "futures",
  "parity-scale-codec",
@@ -9959,7 +9959,7 @@ name = "polkadot-dispute-distribution"
 version = "21.1.0"
 source = "git+https://github.com/paritytech/polkadot-sdk?rev=110d90bb85f866cc757287526022a66f3d576524#110d90bb85f866cc757287526022a66f3d576524"
 dependencies = [
- "derive_more 0.99.19",
+ "derive_more 0.99.20",
  "fatality",
  "futures",
  "futures-timer",
@@ -10064,7 +10064,7 @@ source = "git+https://github.com/paritytech/polkadot-sdk?rev=110d90bb85f866cc757
 dependencies = [
  "async-trait",
  "bitvec",
- "derive_more 0.99.19",
+ "derive_more 0.99.20",
  "futures",
  "futures-timer",
  "itertools 0.11.0",
@@ -10412,7 +10412,7 @@ dependencies = [
  "async-channel 1.9.0",
  "async-trait",
  "bitvec",
- "derive_more 0.99.19",
+ "derive_more 0.99.20",
  "fatality",
  "futures",
  "hex",
@@ -10471,7 +10471,7 @@ source = "git+https://github.com/paritytech/polkadot-sdk?rev=110d90bb85f866cc757
 dependencies = [
  "async-trait",
  "bitvec",
- "derive_more 0.99.19",
+ "derive_more 0.99.20",
  "fatality",
  "futures",
  "orchestra",
@@ -10499,7 +10499,7 @@ version = "21.0.0"
 source = "git+https://github.com/paritytech/polkadot-sdk?rev=110d90bb85f866cc757287526022a66f3d576524#110d90bb85f866cc757287526022a66f3d576524"
 dependencies = [
  "async-trait",
- "derive_more 0.99.19",
+ "derive_more 0.99.20",
  "fatality",
  "futures",
  "futures-channel",
@@ -10556,7 +10556,7 @@ version = "15.0.0"
 source = "git+https://github.com/paritytech/polkadot-sdk?rev=110d90bb85f866cc757287526022a66f3d576524#110d90bb85f866cc757287526022a66f3d576524"
 dependencies = [
  "bounded-collections",
- "derive_more 0.99.19",
+ "derive_more 0.99.20",
  "parity-scale-codec",
  "polkadot-core-primitives",
  "scale-info",
@@ -10699,7 +10699,7 @@ source = "git+https://github.com/paritytech/polkadot-sdk?rev=110d90bb85f866cc757
 dependencies = [
  "bitflags 1.3.2",
  "bitvec",
- "derive_more 0.99.19",
+ "derive_more 0.99.20",
  "frame-benchmarking",
  "frame-support",
  "frame-system",
@@ -11161,7 +11161,7 @@ checksum = "a172e6cc603231f2cf004232eabcecccc0da53ba576ab286ef7baa0cfc7927ad"
 dependencies = [
  "coarsetime",
  "crossbeam-queue",
- "derive_more 0.99.19",
+ "derive_more 0.99.20",
  "futures",
  "futures-timer",
  "nanorand",
@@ -11690,7 +11690,7 @@ version = "2.0.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "87413ebb313323d431e85d0afc5a68222aaed972843537cbfe5f061cf1b4bcab"
 dependencies = [
- "derive_more 0.99.19",
+ "derive_more 0.99.20",
  "fs-err",
  "static_init",
  "thiserror 1.0.69",
@@ -12350,7 +12350,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "58c4eb8a81997cf040a091d1f7e1938aeab6749d3a0dfa73af43cdc32393483d"
 dependencies = [
  "byteorder",
- "derive_more 0.99.19",
+ "derive_more 0.99.20",
  "twox-hash",
 ]
 
@@ -13474,7 +13474,7 @@ name = "sc-sysinfo"
 version = "41.0.0"
 source = "git+https://github.com/paritytech/polkadot-sdk?rev=110d90bb85f866cc757287526022a66f3d576524#110d90bb85f866cc757287526022a66f3d576524"
 dependencies = [
- "derive_more 0.99.19",
+ "derive_more 0.99.20",
  "futures",
  "libc",
  "log",
@@ -13628,7 +13628,7 @@ version = "0.13.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "e98f3262c250d90e700bb802eb704e1f841e03331c2eb815e46516c4edbf5b27"
 dependencies = [
- "derive_more 0.99.19",
+ "derive_more 0.99.20",
  "parity-scale-codec",
  "primitive-types 0.12.2",
  "scale-bits",
@@ -13655,7 +13655,7 @@ version = "0.7.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "528464e6ae6c8f98e2b79633bf79ef939552e795e316579dab09c61670d56602"
 dependencies = [
- "derive_more 0.99.19",
+ "derive_more 0.99.20",
  "parity-scale-codec",
  "primitive-types 0.12.2",
  "scale-bits",
@@ -13734,7 +13734,7 @@ checksum = "8cd6ab090d823e75cfdb258aad5fe92e13f2af7d04b43a55d607d25fcc38c811"
 dependencies = [
  "base58",
  "blake2 0.10.6",
- "derive_more 0.99.19",
+ "derive_more 0.99.20",
  "either",
  "frame-metadata 15.1.0",
  "parity-scale-codec",
@@ -14242,7 +14242,7 @@ dependencies = [
  "bs58",
  "chacha20",
  "crossbeam-queue",
- "derive_more 0.99.19",
+ "derive_more 0.99.20",
  "ed25519-zebra",
  "either",
  "event-listener 2.5.3",
@@ -14296,7 +14296,7 @@ dependencies = [
  "bs58",
  "chacha20",
  "crossbeam-queue",
- "derive_more 0.99.19",
+ "derive_more 0.99.20",
  "ed25519-zebra",
  "either",
  "event-listener 4.0.3",
@@ -14346,7 +14346,7 @@ dependencies = [
  "async-lock 2.8.0",
  "base64 0.21.7",
  "blake2-rfc",
- "derive_more 0.99.19",
+ "derive_more 0.99.20",
  "either",
  "event-listener 2.5.3",
  "fnv",
@@ -14382,7 +14382,7 @@ dependencies = [
  "async-lock 3.4.0",
  "base64 0.21.7",
  "blake2-rfc",
- "derive_more 0.99.19",
+ "derive_more 0.99.20",
  "either",
  "event-listener 4.0.3",
  "fnv",
@@ -15915,7 +15915,7 @@ checksum = "61c41af27dd6d1e27b1b16b489db798443478cef1f06a660c96db617ba5de3b1"
 [[package]]
 name = "tc-consensus"
 version = "0.1.0"
-source = "git+https://github.com/4meta5/tanssi?branch=polkadot-branch-stable2412#92364a480d0d7b0c9be07b99d5c520ea6280f4ff"
+source = "git+https://github.com/4meta5/tanssi?branch=polkadot-branch-stable2412#b283c45069f457298d3243016df67e735538f6ea"
 dependencies = [
  "async-backing-primitives",
  "async-trait",
@@ -16313,16 +16313,16 @@ dependencies = [
 
 [[package]]
 name = "tokio-util"
-version = "0.7.14"
+version = "0.7.15"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "6b9590b93e6fcc1739458317cccd391ad3955e2bde8913edf6f95f9e65a8f034"
+checksum = "66a539a9ad6d5d281510d5bd368c973d636c02dbf8a67300bfb6b950696ad7df"
 dependencies = [
  "bytes",
  "futures-core",
  "futures-io",
  "futures-sink",
  "futures-util",
- "hashbrown 0.14.5",
+ "hashbrown 0.15.2",
  "pin-project-lite",
  "tokio",
 ]
@@ -16416,7 +16416,7 @@ checksum = "8df9b6e13f2d32c91b9bd719c00d1958837bc7dec474d94952798cc8e69eeec3"
 [[package]]
 name = "tp-traits"
 version = "0.1.0"
-source = "git+https://github.com/4meta5/tanssi?branch=polkadot-branch-stable2412#92364a480d0d7b0c9be07b99d5c520ea6280f4ff"
+source = "git+https://github.com/4meta5/tanssi?branch=polkadot-branch-stable2412#b283c45069f457298d3243016df67e735538f6ea"
 dependencies = [
  "cumulus-primitives-core",
  "dp-chain-state-snapshot 0.1.0 (git+https://github.com/OpenZeppelin/dancekit?branch=polkadot-branch-stable2412)",
@@ -16435,7 +16435,7 @@ dependencies = [
 [[package]]
 name = "tp-xcm-core-buyer"
 version = "0.1.0"
-source = "git+https://github.com/4meta5/tanssi?branch=polkadot-branch-stable2412#92364a480d0d7b0c9be07b99d5c520ea6280f4ff"
+source = "git+https://github.com/4meta5/tanssi?branch=polkadot-branch-stable2412#b283c45069f457298d3243016df67e735538f6ea"
 dependencies = [
  "frame-support",
  "parity-scale-codec",
@@ -17864,9 +17864,9 @@ checksum = "589f6da84c646204747d1270a2a5661ea66ed1cced2631d546fdfb155959f9ec"
 
 [[package]]
 name = "winnow"
-version = "0.7.6"
+version = "0.7.7"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "63d3fcd9bba44b03821e7d699eeee959f3126dcc4aa8e4ae18ec617c2a5cea10"
+checksum = "6cb8234a863ea0e8cd7284fcdd4f145233eb00fee02bbdd9861aec44e6477bc5"
 dependencies = [
  "memchr",
 ]
