@@ -826,7 +826,7 @@ mod tests {
 
             // Test case where the reserve doesn't match the absolute location
             let junction = Junction::Parachain(2000);
-            let junction_array = Arc::new([junction.clone()]);
+            let junction_array = Arc::new([junction]);
 
             let asset = Asset {
                 id: AssetId(Location { parents: 1, interior: Junctions::X1(junction_array) }),
