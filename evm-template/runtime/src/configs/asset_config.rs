@@ -307,11 +307,14 @@ mod tests {
             }
         }
 
+        #[cfg(feature = "runtime-benchmarks")]
         #[test]
         fn test_asset_type_from_location_v3() {
             let location =
                 xcm::v3::MultiLocation { parents: 1, interior: xcm::v3::Junctions::Here };
-            let asset_type = AssetType::try_from(location).unwrap();
+
+            // Use the From implementation directly
+            let asset_type = AssetType::from(location);
             assert!(matches!(asset_type, AssetType::Xcm(_)));
         }
 

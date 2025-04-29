@@ -709,10 +709,8 @@ mod tests {
     }
 
     mod reserve_providers {
-        use std::sync::Arc;
-
         use frame_support::traits::Get;
-        use orml_traits::location::{Parse, Reserve};
+        use orml_traits::location::Reserve;
         use xcm::latest::{Asset, AssetId, Fungibility, Junction, Junctions, Location};
 
         use crate::configs::{
