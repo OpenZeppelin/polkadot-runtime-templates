@@ -71,7 +71,7 @@ use xcm_builder::{
 };
 use xcm_config::*;
 use xcm_executor::XcmExecutor;
-use xcm_primitives::{AbsoluteAndRelativeReserve, AccountIdToLocation, AsAssetType};
+use xcm_primitives::{AccountIdToLocation, AsAssetType};
 
 #[cfg(feature = "runtime-benchmarks")]
 use crate::benchmark::{OpenHrmpChannel, PayWithEnsure};
@@ -176,7 +176,8 @@ impl XcmConfig for OpenZeppelinRuntime {
     type SelfReserve = SelfReserve;
     type SovereignAccountDispatcherOrigin = EnsureRoot<AccountId>;
     type Trader = pallet_xcm_weight_trader::Trader<Runtime>;
-    type TransactorReserveProvider = AbsoluteAndRelativeReserve<SelfLocationAbsolute>;
+    type TransactorReserveProvider =
+        xcm_primitives::AbsoluteAndRelativeReserve<SelfLocationAbsolute>;
     type Transactors = Transactors;
     type UniversalLocation = UniversalLocation;
     type WeightToFee = WeightToFee;
@@ -232,8 +233,6 @@ impl AssetsConfig for OpenZeppelinRuntime {
     type AssetRegistrarMetadata = AssetRegistrarMetadata;
     type AssetType = AssetType;
     type AssetsToBlockAuthor = AssetsToBlockAuthor<Runtime, ()>;
-    #[cfg(feature = "runtime-benchmarks")]
-    type BenchmarkHelper = BenchmarkHelper;
     type CreateOrigin = AsEnsureOriginWithArg<EnsureSigned<AccountId>>;
     type ForceOrigin = EnsureRoot<AccountId>;
     type ForeignAssetModifierOrigin = EnsureRoot<AccountId>;
@@ -290,7 +289,7 @@ pub struct TransactionConverter;
 
 impl fp_rpc::ConvertTransaction<UncheckedExtrinsic> for TransactionConverter {
     fn convert_transaction(&self, transaction: pallet_ethereum::Transaction) -> UncheckedExtrinsic {
-        UncheckedExtrinsic::new_unsigned(
+        UncheckedExtrinsic::new_bare(
             pallet_ethereum::Call::<Runtime>::transact { transaction }.into(),
         )
     }
@@ -301,7 +300,7 @@ impl fp_rpc::ConvertTransaction<opaque::UncheckedExtrinsic> for TransactionConve
         &self,
         transaction: pallet_ethereum::Transaction,
     ) -> opaque::UncheckedExtrinsic {
-        let extrinsic = UncheckedExtrinsic::new_unsigned(
+        let extrinsic = UncheckedExtrinsic::new_bare(
             pallet_ethereum::Call::<Runtime>::transact { transaction }.into(),
         );
         let encoded = extrinsic.encode();

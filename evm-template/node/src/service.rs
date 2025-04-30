@@ -31,14 +31,13 @@ use evm_runtime_template::{configs::TransactionConverter, opaque::Block, Runtime
 use frame_benchmarking_cli::SUBSTRATE_REFERENCE_HARDWARE;
 use sc_client_api::Backend;
 use sc_consensus::ImportQueue;
-use sc_executor::WasmExecutor;
+use sc_executor::{HeapAllocStrategy, WasmExecutor, DEFAULT_HEAP_ALLOC_STRATEGY};
 use sc_network::{config::FullNetworkConfiguration, NetworkBlock};
 use sc_service::{Configuration, PartialComponents, TFullBackend, TFullClient, TaskManager};
 #[cfg(not(feature = "tanssi"))]
 use sc_telemetry::TelemetryHandle;
 use sc_telemetry::{Telemetry, TelemetryWorker, TelemetryWorkerHandle};
 use sc_transaction_pool_api::OffchainTransactionPoolFactory;
-use sp_core::H256;
 #[cfg(not(feature = "tanssi"))]
 use sp_core::U256;
 #[cfg(not(feature = "tanssi"))]
@@ -76,7 +75,7 @@ pub type Service = PartialComponents<
     ParachainBackend,
     (),
     sc_consensus::DefaultImportQueue<Block>,
-    sc_transaction_pool::FullPool<Block, ParachainClient>,
+    sc_transaction_pool::TransactionPoolHandle<Block, ParachainClient>,
     (
         ParachainBlockImport,
         Option<Telemetry>,
@@ -105,7 +104,18 @@ pub fn new_partial(
         })
         .transpose()?;
 
-    let executor = sc_service::new_wasm_executor(config);
+    let heap_pages = config
+        .executor
+        .default_heap_pages
+        .map_or(DEFAULT_HEAP_ALLOC_STRATEGY, |h| HeapAllocStrategy::Static { extra_pages: h as _ });
+
+    let executor = ParachainExecutor::builder()
+        .with_execution_method(config.executor.wasm_method)
+        .with_onchain_heap_alloc_strategy(heap_pages)
+        .with_offchain_heap_alloc_strategy(heap_pages)
+        .with_max_runtime_instances(config.executor.max_runtime_instances)
+        .with_runtime_cache_size(config.executor.runtime_cache_size)
+        .build();
 
     let (client, backend, keystore_container, task_manager) =
         sc_service::new_full_parts_record_import::<Block, RuntimeApi, _>(
@@ -123,12 +133,15 @@ pub fn new_partial(
         telemetry
     });
 
-    let transaction_pool = sc_transaction_pool::BasicPool::new_full(
-        config.transaction_pool.clone(),
-        config.role.is_authority().into(),
-        config.prometheus_registry(),
-        task_manager.spawn_essential_handle(),
-        client.clone(),
+    let transaction_pool = Arc::from(
+        sc_transaction_pool::Builder::new(
+            task_manager.spawn_essential_handle(),
+            client.clone(),
+            config.role.is_authority().into(),
+        )
+        .with_options(config.transaction_pool.clone())
+        .with_prometheus(config.prometheus_registry())
+        .build(),
     );
 
     #[cfg(feature = "tanssi")]
@@ -252,8 +265,10 @@ async fn start_node_impl(
     let (_, mut telemetry, telemetry_worker_handle, frontier_backend, overrides) = params.other;
 
     let frontier_backend = Arc::new(frontier_backend);
-    let net_config: FullNetworkConfiguration<Block, H256, sc_network::NetworkWorker<_, _>> =
-        sc_network::config::FullNetworkConfiguration::new(&parachain_config.network);
+    let net_config = FullNetworkConfiguration::<_, _, sc_network::NetworkWorker<Block, Hash>>::new(
+        &parachain_config.network,
+        parachain_config.prometheus_config.as_ref().map(|cfg| cfg.registry.clone()),
+    );
 
     let client = params.client.clone();
     let backend = params.backend.clone();
@@ -313,7 +328,7 @@ async fn start_node_impl(
                 is_validator: parachain_config.role.is_authority(),
                 enable_http_requests: false,
                 custom_extensions: move |_| vec![],
-            })
+            })?
             .run(client.clone(), task_manager.spawn_handle())
             .boxed(),
         );
@@ -326,7 +341,7 @@ async fn start_node_impl(
 
     let rpc_builder = {
         let client = client.clone();
-        let transaction_pool = transaction_pool.clone();
+        let pool = transaction_pool.clone();
         #[cfg(not(feature = "tanssi"))]
         let target_gas_price = eth_config.target_gas_price;
         let enable_dev_signer = eth_config.enable_dev_signer;
@@ -358,12 +373,18 @@ async fn start_node_impl(
         let overrides = overrides.clone();
         let fee_history_cache = fee_history_cache.clone();
         let pubsub_notification_sinks = pubsub_notification_sinks.clone();
-
-        Box::new(move |deny_unsafe, subscription_task_executor| {
+        let graph_api = Arc::new(sc_transaction_pool::FullChainApi::new(
+            client.clone(),
+            None,
+            &task_manager.spawn_essential_handle(),
+        ));
+        let graph =
+            Arc::new(sc_transaction_pool::Pool::new(Default::default(), true.into(), graph_api));
+        Box::new(move |subscription_task_executor| {
             let eth = crate::rpc::EthDeps {
                 client: client.clone(),
-                pool: transaction_pool.clone(),
-                graph: transaction_pool.pool().clone(),
+                pool: pool.clone(),
+                graph: graph.clone(),
                 converter: Some(TransactionConverter),
                 is_authority: validator,
                 enable_dev_signer,
@@ -384,12 +405,7 @@ async fn start_node_impl(
                 #[cfg(not(feature = "tanssi"))]
                 pending_create_inherent_data_providers,
             };
-            let deps = crate::rpc::FullDeps {
-                client: client.clone(),
-                pool: transaction_pool.clone(),
-                deny_unsafe,
-                eth,
-            };
+            let deps = crate::rpc::FullDeps { client: client.clone(), pool: pool.clone(), eth };
 
             crate::rpc::create_full(
                 deps,
@@ -421,7 +437,7 @@ async fn start_node_impl(
         // Putting a link in there and swapping out the requirements for your
         // own are probably a good idea. The requirements for a para-chain are
         // dictated by its relay-chain.
-        match SUBSTRATE_REFERENCE_HARDWARE.check_hardware(&hwbench) {
+        match SUBSTRATE_REFERENCE_HARDWARE.check_hardware(&hwbench, false) {
             Err(err) if validator => {
                 log::warn!(
                     "⚠️  The hardware does not meet the minimal requirements {} for role \
@@ -547,7 +563,7 @@ fn start_consensus(
     telemetry: Option<TelemetryHandle>,
     task_manager: &TaskManager,
     relay_chain_interface: Arc<dyn RelayChainInterface>,
-    transaction_pool: Arc<sc_transaction_pool::FullPool<Block, ParachainClient>>,
+    transaction_pool: Arc<sc_transaction_pool::TransactionPoolHandle<Block, ParachainClient>>,
     keystore: KeystorePtr,
     relay_chain_slot_duration: Duration,
     para_id: ParaId,

@@ -23,9 +23,7 @@ use xcm_builder::{
     WithComputedOrigin, WithUniqueTopic, XcmFeeManagerFromComponents,
 };
 use xcm_executor::traits::{ConvertLocation, FeeReason, JustTry, TransactAsset};
-use xcm_primitives::{
-    AbsoluteAndRelativeReserve, AsAssetType, UtilityAvailableCalls, UtilityEncodeCall, XcmTransact,
-};
+use xcm_primitives::{AsAssetType, UtilityAvailableCalls, UtilityEncodeCall, XcmTransact};
 
 use crate::{
     configs::{
@@ -419,6 +417,50 @@ impl Reserve for BridgedAssetReserveProvider {
     }
 }
 
+// Provide reserve in relative path view
+// Self tokens are represeneted as Here
+// Moved from Moonbeam to implement orml_traits::location::Reserve after Moonbeam
+// removed ORML dependencies
+pub struct RelativeReserveProvider;
+
+impl Reserve for RelativeReserveProvider {
+    fn reserve(asset: &Asset) -> Option<Location> {
+        let AssetId(location) = &asset.id;
+        if location.parents == 0
+            && !matches!(location.first_interior(), Some(Junction::Parachain(_)))
+        {
+            Some(Location::here())
+        } else {
+            Some(location.chain_location())
+        }
+    }
+}
+
+/// Struct that uses RelativeReserveProvider to output relative views of multilocations
+///
+/// Additionally accepts a Location that aims at representing the chain part
+/// (parent: 1, Parachain(paraId)) of the absolute representation of our chain.
+/// If a token reserve matches against this absolute view, we return  Some(Location::here())
+/// This helps users by preventing errors when they try to transfer a token through xtokens
+/// to our chain (either inserting the relative or the absolute value).
+// Moved from Moonbeam to implement orml_traits::location::Reserve after Moonbeam
+// removed ORML dependencies
+pub struct AbsoluteAndRelativeReserve<AbsoluteMultiLocation>(PhantomData<AbsoluteMultiLocation>);
+impl<AbsoluteMultiLocation> Reserve for AbsoluteAndRelativeReserve<AbsoluteMultiLocation>
+where
+    AbsoluteMultiLocation: Get<Location>,
+{
+    fn reserve(asset: &Asset) -> Option<Location> {
+        RelativeReserveProvider::reserve(asset).map(|relative_reserve| {
+            if relative_reserve == AbsoluteMultiLocation::get() {
+                Location::here()
+            } else {
+                relative_reserve
+            }
+        })
+    }
+}
+
 pub struct ReserveProviders;
 
 impl Reserve for ReserveProviders {
@@ -639,34 +681,177 @@ mod tests {
         #[test]
         fn test_transactors_destination_relay() {
             let transactor = Transactors::Relay;
-            let expected_location = Location::parent();
-
-            let result = transactor.destination();
-
-            assert_eq!(result, expected_location);
+            let destination = transactor.destination();
+            assert_eq!(destination, Location::parent());
         }
 
         #[test]
         fn test_transactors_encode_call() {
             sp_io::TestExternalities::default().execute_with(|| {
                 let transactor = Transactors::Relay;
-                let call = UtilityAvailableCalls::AsDerivative(1u16, Vec::<u8>::new());
-
-                let encoded_call = transactor.encode_call(call);
-                assert!(!encoded_call.is_empty());
+                let call = UtilityAvailableCalls::AsDerivative(0, vec![]);
+                let encoded = transactor.encode_call(call);
+                assert!(!encoded.is_empty());
             });
         }
 
         #[test]
         fn test_transactors_try_from_valid() {
-            let result = Transactors::try_from(0u8);
-            assert_eq!(result, Ok(Transactors::Relay));
+            let transactor = Transactors::try_from(0u8);
+            assert!(transactor.is_ok());
         }
 
         #[test]
         fn test_transactors_try_from_invalid() {
-            let result = Transactors::try_from(1u8);
-            assert!(result.is_err());
+            let transactor = Transactors::try_from(1u8);
+            assert!(transactor.is_err());
+        }
+    }
+
+    mod reserve_providers {
+        use frame_support::traits::Get;
+        use orml_traits::location::Reserve;
+        use xcm::latest::{Asset, AssetId, Fungibility, Junction, Junctions, Location};
+
+        use crate::configs::{
+            AbsoluteAndRelativeReserve, RelativeReserveProvider, SelfLocationAbsolute,
+        };
+
+        #[test]
+        fn test_relative_reserve_provider_here() {
+            // Test case for a local asset (parents = 0, no Parachain junction)
+            let local_asset = Asset {
+                id: AssetId(Location { parents: 0, interior: Junctions::Here }),
+                fun: Fungibility::Fungible(100),
+            };
+
+            let reserve = RelativeReserveProvider::reserve(&local_asset);
+            assert_eq!(reserve, Some(Location::here()));
+        }
+
+        #[test]
+        fn test_relative_reserve_provider_local_with_junctions() {
+            // Test case for a local asset with junctions but not Parachain
+            use std::sync::Arc;
+
+            let junction = Junction::AccountId32 { network: None, id: [0; 32] };
+            let junction_array = Arc::new([junction]);
+
+            let local_asset_with_junctions = Asset {
+                id: AssetId(Location { parents: 0, interior: Junctions::X1(junction_array) }),
+                fun: Fungibility::Fungible(100),
+            };
+
+            let reserve = RelativeReserveProvider::reserve(&local_asset_with_junctions);
+            assert_eq!(reserve, Some(Location::here()));
+        }
+
+        #[test]
+        fn test_relative_reserve_provider_parachain() {
+            // Test case for a parachain asset
+            use std::sync::Arc;
+
+            let junction = Junction::Parachain(1000);
+            let junction_array = Arc::new([junction]);
+
+            let parachain_asset = Asset {
+                id: AssetId(Location {
+                    parents: 0,
+                    interior: Junctions::X1(junction_array.clone()),
+                }),
+                fun: Fungibility::Fungible(100),
+            };
+
+            let reserve = RelativeReserveProvider::reserve(&parachain_asset);
+            // Should return the chain location, not Here
+            let expected = Location { parents: 0, interior: Junctions::X1(junction_array) };
+            assert_eq!(reserve, Some(expected));
+        }
+
+        #[test]
+        fn test_relative_reserve_provider_parent() {
+            // Test case for a parent asset
+            let parent_asset = Asset {
+                id: AssetId(Location { parents: 1, interior: Junctions::Here }),
+                fun: Fungibility::Fungible(100),
+            };
+
+            let reserve = RelativeReserveProvider::reserve(&parent_asset);
+            // Should return the chain location
+            let location = parent_asset.id.0.clone();
+            assert_eq!(reserve, Some(location));
+        }
+
+        #[test]
+        fn test_absolute_and_relative_reserve_matches_absolute() {
+            // Create a mock implementation of AbsoluteMultiLocation
+            use std::sync::Arc;
+
+            struct MockAbsoluteLocation;
+            impl Get<Location> for MockAbsoluteLocation {
+                fn get() -> Location {
+                    let junction = Junction::Parachain(1000);
+                    let junction_array = Arc::new([junction]);
+                    Location { parents: 1, interior: Junctions::X1(junction_array) }
+                }
+            }
+
+            // Test case where the reserve matches the absolute location
+            let junction = Junction::Parachain(1000);
+            let junction_array = Arc::new([junction]);
+
+            let asset = Asset {
+                id: AssetId(Location { parents: 1, interior: Junctions::X1(junction_array) }),
+                fun: Fungibility::Fungible(100),
+            };
+
+            let reserve = AbsoluteAndRelativeReserve::<MockAbsoluteLocation>::reserve(&asset);
+            // Should return Here since it matches the absolute location
+            assert_eq!(reserve, Some(Location::here()));
+        }
+
+        #[test]
+        fn test_absolute_and_relative_reserve_different_location() {
+            // Create a mock implementation of AbsoluteMultiLocation
+            use std::sync::Arc;
+
+            struct MockAbsoluteLocation;
+            impl Get<Location> for MockAbsoluteLocation {
+                fn get() -> Location {
+                    let junction = Junction::Parachain(1000);
+                    let junction_array = Arc::new([junction]);
+                    Location { parents: 1, interior: Junctions::X1(junction_array) }
+                }
+            }
+
+            // Test case where the reserve doesn't match the absolute location
+            let junction = Junction::Parachain(2000);
+            let junction_array = Arc::new([junction]);
+
+            let asset = Asset {
+                id: AssetId(Location { parents: 1, interior: Junctions::X1(junction_array) }),
+                fun: Fungibility::Fungible(100),
+            };
+
+            let reserve = AbsoluteAndRelativeReserve::<MockAbsoluteLocation>::reserve(&asset);
+            // Should return the relative reserve since it doesn't match the absolute location
+            let expected = Location { parents: 1, interior: Junctions::X1(Arc::new([junction])) };
+            assert_eq!(reserve, Some(expected));
+        }
+
+        #[test]
+        fn test_absolute_and_relative_reserve_with_self_location() {
+            // We need to use TestExternalities for this test
+            sp_io::TestExternalities::default().execute_with(|| {
+                // Test with the actual SelfLocationAbsolute
+                let self_location = SelfLocationAbsolute::get();
+                let asset =
+                    Asset { id: AssetId(self_location.clone()), fun: Fungibility::Fungible(100) };
+
+                let reserve = AbsoluteAndRelativeReserve::<SelfLocationAbsolute>::reserve(&asset);
+                // Should return Here since it matches the self location
+                assert_eq!(reserve, Some(Location::here()));
+            });
         }
     }
 }
