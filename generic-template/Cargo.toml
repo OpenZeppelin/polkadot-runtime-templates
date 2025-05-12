@@ -155,11 +155,11 @@ orml-xtokens = { git = "https://github.com/OpenZeppelin/open-runtime-module-libr
 ziggy = { version = "1.0.2", default-features = false }
 
 # Tanssi
-dp-consensus = { git = "https://github.com/OpenZeppelin/dancekit", branch = "polkadot-stable2412", default-features = false }
-nimbus-consensus = { git = "https://github.com/OpenZeppelin/moonkit", branch = "polkadot-stable2412", default-features = false }
-nimbus-primitives = { git = "https://github.com/OpenZeppelin/moonkit", branch = "polkadot-stable2412", default-features = false }
-pallet-author-inherent = { git = "https://github.com/OpenZeppelin/moonkit", branch = "polkadot-stable2412", default-features = false }
-pallet-cc-authorities-noting = { git = "https://github.com/OpenZeppelin/dancekit", branch = "polkadot-stable2412", default-features = false }
+dp-consensus = { git = "https://github.com/OpenZeppelin/dancekit", branch = "polkadot-stable2503", default-features = false }
+nimbus-consensus = { git = "https://github.com/OpenZeppelin/moonkit", branch = "polkadot-stable2503", default-features = false }
+nimbus-primitives = { git = "https://github.com/OpenZeppelin/moonkit", branch = "polkadot-stable2503", default-features = false }
+pallet-author-inherent = { git = "https://github.com/OpenZeppelin/moonkit", branch = "polkadot-stable2503", default-features = false }
+pallet-cc-authorities-noting = { git = "https://github.com/OpenZeppelin/dancekit", branch = "polkadot-stable2503", default-features = false }
 
 [workspace.lints.clippy]
 large_enum_variant = "allow"
