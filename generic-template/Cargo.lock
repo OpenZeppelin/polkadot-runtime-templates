@@ -617,7 +617,7 @@ dependencies = [
  "impl-trait-for-tuples",
  "pallet-asset-conversion 22.0.0",
  "pallet-assets",
- "pallet-xcm 19.1.0",
+ "pallet-xcm",
  "parachains-common",
  "parity-scale-codec",
  "scale-info",
@@ -4434,7 +4434,7 @@ dependencies = [
  "pallet-treasury 39.0.0",
  "pallet-utility",
  "pallet-whitelist",
- "pallet-xcm 19.1.0",
+ "pallet-xcm",
  "pallet-xcm-transactor",
  "pallet-xcm-weight-trader",
  "parachains-common",
@@ -7308,38 +7308,38 @@ dependencies = [
 [[package]]
 name = "orml-oracle"
 version = "1.1.0"
-source = "git+https://github.com/OpenZeppelin/open-runtime-module-library?branch=polkadot-stable2412#356540a0001e04a525d8f3c95d11b1618f0e84a4"
+source = "git+https://github.com/OpenZeppelin/open-runtime-module-library?branch=polkadot-stable2503#8eb87752765acacae0f1f788dfc5583da668772c"
 dependencies = [
- "frame-benchmarking 39.0.0",
- "frame-support 39.0.0",
- "frame-system 39.1.0",
+ "frame-benchmarking 40.0.0",
+ "frame-support 40.1.0",
+ "frame-system 40.1.0",
  "orml-traits",
  "orml-utilities",
  "parity-scale-codec",
  "scale-info",
  "serde",
- "sp-application-crypto 39.0.0 (git+https://github.com/paritytech/polkadot-sdk?rev=54a4ec0a11558fb82ea17575c9bbff5fb785e394)",
- "sp-io 39.0.0 (git+https://github.com/paritytech/polkadot-sdk?rev=54a4ec0a11558fb82ea17575c9bbff5fb785e394)",
- "sp-runtime 40.1.0 (git+https://github.com/paritytech/polkadot-sdk?rev=54a4ec0a11558fb82ea17575c9bbff5fb785e394)",
- "sp-std 14.0.0 (git+https://github.com/paritytech/polkadot-sdk?rev=54a4ec0a11558fb82ea17575c9bbff5fb785e394)",
+ "sp-application-crypto 40.1.0",
+ "sp-io 40.0.0",
+ "sp-runtime 41.1.0",
+ "sp-std 14.0.0 (git+https://github.com/paritytech/polkadot-sdk?tag=polkadot-stable2503)",
 ]
 
 [[package]]
 name = "orml-oracle-runtime-api"
 version = "1.1.0"
-source = "git+https://github.com/OpenZeppelin/open-runtime-module-library?branch=polkadot-stable2412#356540a0001e04a525d8f3c95d11b1618f0e84a4"
+source = "git+https://github.com/OpenZeppelin/open-runtime-module-library?branch=polkadot-stable2503#8eb87752765acacae0f1f788dfc5583da668772c"
 dependencies = [
  "parity-scale-codec",
- "sp-api 35.0.0 (git+https://github.com/paritytech/polkadot-sdk?rev=54a4ec0a11558fb82ea17575c9bbff5fb785e394)",
- "sp-std 14.0.0 (git+https://github.com/paritytech/polkadot-sdk?rev=54a4ec0a11558fb82ea17575c9bbff5fb785e394)",
+ "sp-api 36.0.1",
+ "sp-std 14.0.0 (git+https://github.com/paritytech/polkadot-sdk?tag=polkadot-stable2503)",
 ]
 
 [[package]]
 name = "orml-traits"
 version = "1.1.0"
-source = "git+https://github.com/OpenZeppelin/open-runtime-module-library?branch=polkadot-stable2412#356540a0001e04a525d8f3c95d11b1618f0e84a4"
+source = "git+https://github.com/OpenZeppelin/open-runtime-module-library?branch=polkadot-stable2503#8eb87752765acacae0f1f788dfc5583da668772c"
 dependencies = [
- "frame-support 39.0.0",
+ "frame-support 40.1.0",
  "impl-trait-for-tuples",
  "num-traits",
  "orml-utilities",
@@ -7347,61 +7347,61 @@ dependencies = [
  "paste",
  "scale-info",
  "serde",
- "sp-core 35.0.0 (git+https://github.com/paritytech/polkadot-sdk?rev=54a4ec0a11558fb82ea17575c9bbff5fb785e394)",
- "sp-io 39.0.0 (git+https://github.com/paritytech/polkadot-sdk?rev=54a4ec0a11558fb82ea17575c9bbff5fb785e394)",
- "sp-runtime 40.1.0 (git+https://github.com/paritytech/polkadot-sdk?rev=54a4ec0a11558fb82ea17575c9bbff5fb785e394)",
- "sp-std 14.0.0 (git+https://github.com/paritytech/polkadot-sdk?rev=54a4ec0a11558fb82ea17575c9bbff5fb785e394)",
- "staging-xcm 15.0.1",
+ "sp-core 36.1.0",
+ "sp-io 40.0.0",
+ "sp-runtime 41.1.0",
+ "sp-std 14.0.0 (git+https://github.com/paritytech/polkadot-sdk?tag=polkadot-stable2503)",
+ "staging-xcm 16.1.0",
 ]
 
 [[package]]
 name = "orml-utilities"
 version = "1.1.0"
-source = "git+https://github.com/OpenZeppelin/open-runtime-module-library?branch=polkadot-stable2412#356540a0001e04a525d8f3c95d11b1618f0e84a4"
+source = "git+https://github.com/OpenZeppelin/open-runtime-module-library?branch=polkadot-stable2503#8eb87752765acacae0f1f788dfc5583da668772c"
 dependencies = [
- "frame-support 39.0.0",
+ "frame-support 40.1.0",
  "parity-scale-codec",
  "scale-info",
  "serde",
- "sp-core 35.0.0 (git+https://github.com/paritytech/polkadot-sdk?rev=54a4ec0a11558fb82ea17575c9bbff5fb785e394)",
- "sp-io 39.0.0 (git+https://github.com/paritytech/polkadot-sdk?rev=54a4ec0a11558fb82ea17575c9bbff5fb785e394)",
- "sp-runtime 40.1.0 (git+https://github.com/paritytech/polkadot-sdk?rev=54a4ec0a11558fb82ea17575c9bbff5fb785e394)",
- "sp-std 14.0.0 (git+https://github.com/paritytech/polkadot-sdk?rev=54a4ec0a11558fb82ea17575c9bbff5fb785e394)",
+ "sp-core 36.1.0",
+ "sp-io 40.0.0",
+ "sp-runtime 41.1.0",
+ "sp-std 14.0.0 (git+https://github.com/paritytech/polkadot-sdk?tag=polkadot-stable2503)",
 ]
 
 [[package]]
 name = "orml-xcm-support"
 version = "1.1.0"
-source = "git+https://github.com/OpenZeppelin/open-runtime-module-library?branch=polkadot-stable2412#356540a0001e04a525d8f3c95d11b1618f0e84a4"
+source = "git+https://github.com/OpenZeppelin/open-runtime-module-library?branch=polkadot-stable2503#8eb87752765acacae0f1f788dfc5583da668772c"
 dependencies = [
- "frame-support 39.0.0",
+ "frame-support 40.1.0",
  "orml-traits",
  "parity-scale-codec",
- "sp-runtime 40.1.0 (git+https://github.com/paritytech/polkadot-sdk?rev=54a4ec0a11558fb82ea17575c9bbff5fb785e394)",
- "sp-std 14.0.0 (git+https://github.com/paritytech/polkadot-sdk?rev=54a4ec0a11558fb82ea17575c9bbff5fb785e394)",
- "staging-xcm 15.0.1",
- "staging-xcm-executor 18.0.0",
+ "sp-runtime 41.1.0",
+ "sp-std 14.0.0 (git+https://github.com/paritytech/polkadot-sdk?tag=polkadot-stable2503)",
+ "staging-xcm 16.1.0",
+ "staging-xcm-executor 19.1.0",
 ]
 
 [[package]]
 name = "orml-xtokens"
 version = "1.1.0"
-source = "git+https://github.com/OpenZeppelin/open-runtime-module-library?branch=polkadot-stable2412#356540a0001e04a525d8f3c95d11b1618f0e84a4"
+source = "git+https://github.com/OpenZeppelin/open-runtime-module-library?branch=polkadot-stable2503#8eb87752765acacae0f1f788dfc5583da668772c"
 dependencies = [
- "frame-support 39.0.0",
- "frame-system 39.1.0",
+ "frame-support 40.1.0",
+ "frame-system 40.1.0",
  "log",
  "orml-traits",
  "orml-xcm-support",
- "pallet-xcm 18.0.0",
+ "pallet-xcm",
  "parity-scale-codec",
  "scale-info",
  "serde",
- "sp-io 39.0.0 (git+https://github.com/paritytech/polkadot-sdk?rev=54a4ec0a11558fb82ea17575c9bbff5fb785e394)",
- "sp-runtime 40.1.0 (git+https://github.com/paritytech/polkadot-sdk?rev=54a4ec0a11558fb82ea17575c9bbff5fb785e394)",
- "sp-std 14.0.0 (git+https://github.com/paritytech/polkadot-sdk?rev=54a4ec0a11558fb82ea17575c9bbff5fb785e394)",
- "staging-xcm 15.0.1",
- "staging-xcm-executor 18.0.0",
+ "sp-io 40.0.0",
+ "sp-runtime 41.1.0",
+ "sp-std 14.0.0 (git+https://github.com/paritytech/polkadot-sdk?tag=polkadot-stable2503)",
+ "staging-xcm 16.1.0",
+ "staging-xcm-executor 19.1.0",
 ]
 
 [[package]]
@@ -8892,29 +8892,6 @@ dependencies = [
 
 [[package]]
 name = "pallet-xcm"
-version = "18.0.0"
-source = "git+https://github.com/paritytech/polkadot-sdk?rev=54a4ec0a11558fb82ea17575c9bbff5fb785e394#54a4ec0a11558fb82ea17575c9bbff5fb785e394"
-dependencies = [
- "bounded-collections",
- "frame-benchmarking 39.0.0",
- "frame-support 39.0.0",
- "frame-system 39.1.0",
- "pallet-balances 40.0.0",
- "parity-scale-codec",
- "scale-info",
- "serde",
- "sp-core 35.0.0 (git+https://github.com/paritytech/polkadot-sdk?rev=54a4ec0a11558fb82ea17575c9bbff5fb785e394)",
- "sp-io 39.0.0 (git+https://github.com/paritytech/polkadot-sdk?rev=54a4ec0a11558fb82ea17575c9bbff5fb785e394)",
- "sp-runtime 40.1.0 (git+https://github.com/paritytech/polkadot-sdk?rev=54a4ec0a11558fb82ea17575c9bbff5fb785e394)",
- "staging-xcm 15.0.1",
- "staging-xcm-builder 18.0.0",
- "staging-xcm-executor 18.0.0",
- "tracing",
- "xcm-runtime-apis 0.5.0",
-]
-
-[[package]]
-name = "pallet-xcm"
 version = "19.1.0"
 source = "git+https://github.com/paritytech/polkadot-sdk?tag=polkadot-stable2503#0c0d4ceba45a70f4e8dc40b1ee0cfae1fd759454"
 dependencies = [
@@ -9012,7 +8989,7 @@ dependencies = [
  "pallet-balances 41.1.0",
  "pallet-collator-selection",
  "pallet-message-queue 43.1.0",
- "pallet-xcm 19.1.0",
+ "pallet-xcm",
  "parity-scale-codec",
  "polkadot-primitives 18.1.0",
  "scale-info",
@@ -11623,7 +11600,7 @@ dependencies = [
  "pallet-utility",
  "pallet-vesting 40.1.0",
  "pallet-whitelist",
- "pallet-xcm 19.1.0",
+ "pallet-xcm",
  "pallet-xcm-benchmarks",
  "parity-scale-codec",
  "polkadot-parachain-primitives 16.1.0",
@@ -17932,7 +17909,7 @@ dependencies = [
  "pallet-verify-signature",
  "pallet-vesting 40.1.0",
  "pallet-whitelist",
- "pallet-xcm 19.1.0",
+ "pallet-xcm",
  "pallet-xcm-benchmarks",
  "parity-scale-codec",
  "polkadot-parachain-primitives 16.1.0",
