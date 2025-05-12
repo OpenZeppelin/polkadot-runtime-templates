@@ -5,7 +5,7 @@ use frame_support::{parameter_types, traits::InstanceFilter, weights::Weight, Pa
 use frame_system::EnsureRoot;
 #[cfg(not(feature = "tanssi"))]
 use pallet_xcm::{EnsureXcm, IsVoiceOfBody};
-use parity_scale_codec::{Decode, Encode, MaxEncodedLen};
+use parity_scale_codec::{Decode, DecodeWithMemTracking, Encode, MaxEncodedLen};
 use polkadot_runtime_common::impls::{
     LocatableAssetConverter, VersionedLocatableAsset, VersionedLocationConverter,
 };
@@ -146,6 +146,7 @@ pub type TreasuryPaymaster = PayOverXcm<
     Copy,
     Clone,
     Decode,
+    DecodeWithMemTracking,
     Default,
     Encode,
     Eq,
