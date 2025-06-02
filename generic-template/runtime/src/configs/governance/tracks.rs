@@ -1,5 +1,7 @@
 //! Track configurations for governance.
 
+use sp_runtime::str_array as s;
+
 use super::*;
 use crate::constants::MINUTES;
 
@@ -38,7 +40,7 @@ const TRACKS_DATA: [(u16, pallet_referenda::TrackInfo<Balance, BlockNumber>); 10
     (
         0,
         pallet_referenda::TrackInfo {
-            name: "root",
+            name: s("root"),
             max_deciding: 1,
             decision_deposit: 100 * GRAND,
             prepare_period: 8 * MINUTES,
@@ -52,7 +54,7 @@ const TRACKS_DATA: [(u16, pallet_referenda::TrackInfo<Balance, BlockNumber>); 10
     (
         1,
         pallet_referenda::TrackInfo {
-            name: "whitelisted_caller",
+            name: s("whitelisted_caller"),
             max_deciding: 100,
             decision_deposit: 10 * GRAND,
             prepare_period: 6 * MINUTES,
@@ -66,7 +68,7 @@ const TRACKS_DATA: [(u16, pallet_referenda::TrackInfo<Balance, BlockNumber>); 10
     (
         11,
         pallet_referenda::TrackInfo {
-            name: "treasurer",
+            name: s("treasurer"),
             max_deciding: 10,
             decision_deposit: GRAND,
             prepare_period: 8 * MINUTES,
@@ -80,7 +82,7 @@ const TRACKS_DATA: [(u16, pallet_referenda::TrackInfo<Balance, BlockNumber>); 10
     (
         20,
         pallet_referenda::TrackInfo {
-            name: "referendum_canceller",
+            name: s("referendum_canceller"),
             max_deciding: 1_000,
             decision_deposit: 10 * GRAND,
             prepare_period: 8 * MINUTES,
@@ -94,7 +96,7 @@ const TRACKS_DATA: [(u16, pallet_referenda::TrackInfo<Balance, BlockNumber>); 10
     (
         21,
         pallet_referenda::TrackInfo {
-            name: "referendum_killer",
+            name: s("referendum_killer"),
             max_deciding: 1_000,
             decision_deposit: 50 * GRAND,
             prepare_period: 8 * MINUTES,
@@ -108,7 +110,7 @@ const TRACKS_DATA: [(u16, pallet_referenda::TrackInfo<Balance, BlockNumber>); 10
     (
         30,
         pallet_referenda::TrackInfo {
-            name: "small_tipper",
+            name: s("small_tipper"),
             max_deciding: 200,
             decision_deposit: 3 * CENTS,
             prepare_period: MINUTES,
@@ -122,7 +124,7 @@ const TRACKS_DATA: [(u16, pallet_referenda::TrackInfo<Balance, BlockNumber>); 10
     (
         31,
         pallet_referenda::TrackInfo {
-            name: "big_tipper",
+            name: s("big_tipper"),
             max_deciding: 100,
             decision_deposit: 10 * 3 * CENTS,
             prepare_period: 4 * MINUTES,
@@ -136,7 +138,7 @@ const TRACKS_DATA: [(u16, pallet_referenda::TrackInfo<Balance, BlockNumber>); 10
     (
         32,
         pallet_referenda::TrackInfo {
-            name: "small_spender",
+            name: s("small_spender"),
             max_deciding: 50,
             decision_deposit: 100 * 3 * CENTS,
             prepare_period: 10 * MINUTES,
@@ -150,7 +152,7 @@ const TRACKS_DATA: [(u16, pallet_referenda::TrackInfo<Balance, BlockNumber>); 10
     (
         33,
         pallet_referenda::TrackInfo {
-            name: "medium_spender",
+            name: s("medium_spender"),
             max_deciding: 50,
             decision_deposit: 200 * 3 * CENTS,
             prepare_period: 10 * MINUTES,
@@ -164,7 +166,7 @@ const TRACKS_DATA: [(u16, pallet_referenda::TrackInfo<Balance, BlockNumber>); 10
     (
         34,
         pallet_referenda::TrackInfo {
-            name: "big_spender",
+            name: s("big_spender"),
             max_deciding: 50,
             decision_deposit: 400 * 3 * CENTS,
             prepare_period: 10 * MINUTES,
