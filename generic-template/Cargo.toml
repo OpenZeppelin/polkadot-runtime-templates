@@ -28,6 +28,8 @@ smallvec = "1.11.0"
 # TODO: update to release
 openzeppelin-pallet-abstractions = { git = "https://github.com/OpenZeppelin/openzeppelin-pallet-abstractions", branch = "polkadot-stable2503", default-features = false }
 openzeppelin-pallet-abstractions-proc = { git = "https://github.com/OpenZeppelin/openzeppelin-pallet-abstractions", branch = "polkadot-stable2503", default-features = false }
+# openzeppelin-pallet-abstractions = { path = "../../openzeppelin-pallet-abstractions", default-features = false }
+# openzeppelin-pallet-abstractions-proc = { path = "../../openzeppelin-pallet-abstractions/procedural", default-features = false }
 
 # Substrate
 frame-benchmarking = { git = "https://github.com/paritytech/polkadot-sdk", default-features = false, tag = "polkadot-stable2503" }
