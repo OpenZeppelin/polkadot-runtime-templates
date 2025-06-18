@@ -7173,6 +7173,7 @@ checksum = "d05e27ee213611ffe7d6348b942e8f942b37114c00cc03cec254295a4a17852e"
 [[package]]
 name = "openzeppelin-pallet-abstractions"
 version = "0.1.0"
+source = "git+https://github.com/OpenZeppelin/openzeppelin-pallet-abstractions?branch=polkadot-stable2503#221388e6d618549add1ecab5e7ea09d781eb52ed"
 dependencies = [
  "cumulus-primitives-core",
  "frame-support",
@@ -7185,6 +7186,7 @@ dependencies = [
 [[package]]
 name = "openzeppelin-pallet-abstractions-proc"
 version = "0.1.0"
+source = "git+https://github.com/OpenZeppelin/openzeppelin-pallet-abstractions?branch=polkadot-stable2503#221388e6d618549add1ecab5e7ea09d781eb52ed"
 dependencies = [
  "darling",
  "openzeppelin-pallet-abstractions",
@@ -7358,7 +7360,7 @@ dependencies = [
 [[package]]
 name = "pallet-asset-manager"
 version = "0.1.0"
-source = "git+https://github.com/OpenZeppelin/moonbeam.git?branch=polkadot-stable2503#10e216b5eb01bed2e3c2937549f070a57148721d"
+source = "git+https://github.com/OpenZeppelin/moonbeam.git?branch=polkadot-stable2503#cd57bbc6c45616ba5433f1299c14c6be3139656f"
 dependencies = [
  "frame-benchmarking",
  "frame-support",
@@ -8519,7 +8521,7 @@ dependencies = [
 [[package]]
 name = "pallet-xcm-transactor"
 version = "0.2.0"
-source = "git+https://github.com/OpenZeppelin/moonbeam.git?branch=polkadot-stable2503#10e216b5eb01bed2e3c2937549f070a57148721d"
+source = "git+https://github.com/OpenZeppelin/moonbeam.git?branch=polkadot-stable2503#cd57bbc6c45616ba5433f1299c14c6be3139656f"
 dependencies = [
  "cumulus-primitives-core",
  "frame-benchmarking",
@@ -8541,7 +8543,7 @@ dependencies = [
 [[package]]
 name = "pallet-xcm-weight-trader"
 version = "0.1.0"
-source = "git+https://github.com/OpenZeppelin/moonbeam.git?branch=polkadot-stable2503#10e216b5eb01bed2e3c2937549f070a57148721d"
+source = "git+https://github.com/OpenZeppelin/moonbeam.git?branch=polkadot-stable2503#cd57bbc6c45616ba5433f1299c14c6be3139656f"
 dependencies = [
  "frame-benchmarking",
  "frame-support",
@@ -10408,7 +10410,7 @@ version = "0.13.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "be769465445e8c1474e9c5dac2018218498557af32d9ed057325ec9a41ae81bf"
 dependencies = [
- "heck 0.5.0",
+ "heck 0.4.1",
  "itertools 0.14.0",
  "log",
  "multimap",
@@ -17327,7 +17329,7 @@ dependencies = [
 [[package]]
 name = "xcm-primitives"
 version = "0.1.1"
-source = "git+https://github.com/OpenZeppelin/moonbeam.git?branch=polkadot-stable2503#10e216b5eb01bed2e3c2937549f070a57148721d"
+source = "git+https://github.com/OpenZeppelin/moonbeam.git?branch=polkadot-stable2503#cd57bbc6c45616ba5433f1299c14c6be3139656f"
 dependencies = [
  "cumulus-primitives-core",
  "ethereum",
