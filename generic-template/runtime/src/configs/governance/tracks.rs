@@ -2,7 +2,6 @@
 
 use alloc::borrow::Cow;
 
-use frame_support::traits::{MapSuccess, TryMapSuccess};
 use pallet_referenda::Track;
 use sp_runtime::str_array as s;
 
