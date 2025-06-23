@@ -472,6 +472,8 @@ fn start_consensus(
         collation_request_receiver: None,
         #[cfg(feature = "async-backing")]
         reinitialize: false,
+        #[cfg(feature = "async-backing")]
+        max_pov_percentage: None,
     };
 
     #[cfg(not(feature = "async-backing"))]
