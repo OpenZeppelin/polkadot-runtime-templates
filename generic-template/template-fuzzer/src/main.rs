@@ -52,7 +52,7 @@ fn generate_genesis(accounts: &[AccountId]) -> Storage {
 
     RuntimeGenesisConfig {
         system: Default::default(),
-        balances: BalancesConfig { balances },
+        balances: BalancesConfig { balances, ..Default::default() },
         #[cfg(not(feature = "tanssi"))]
         session: SessionConfig { keys: session_keys, non_authority_keys: vec![] },
         #[cfg(not(feature = "tanssi"))]
