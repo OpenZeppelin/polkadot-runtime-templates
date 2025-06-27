@@ -1,5 +1,5 @@
 use frame_support::{dispatch::GetDispatchInfo, weights::Weight};
-use parity_scale_codec::{Decode, Encode};
+use parity_scale_codec::{Decode, DecodeWithMemTracking, Encode};
 use scale_info::TypeInfo;
 use sp_core::H256;
 use sp_runtime::traits::Hash as THash;
@@ -17,7 +17,9 @@ use crate::{
 };
 
 // Our AssetType. For now we only handle Xcm Assets
-#[derive(Clone, Eq, Debug, PartialEq, Ord, PartialOrd, Encode, Decode, TypeInfo)]
+#[derive(
+    Clone, Eq, Debug, PartialEq, Ord, PartialOrd, Encode, Decode, DecodeWithMemTracking, TypeInfo,
+)]
 pub enum AssetType {
     Xcm(xcm::v4::Location),
 }
@@ -117,7 +119,19 @@ impl AccountIdAssetIdConversion<AccountId, AssetId> for Runtime {
     }
 }
 
-#[derive(Clone, Default, Eq, Debug, PartialEq, Ord, PartialOrd, Encode, Decode, TypeInfo)]
+#[derive(
+    Clone,
+    Default,
+    Eq,
+    Debug,
+    PartialEq,
+    Ord,
+    PartialOrd,
+    Encode,
+    Decode,
+    DecodeWithMemTracking,
+    TypeInfo,
+)]
 pub struct AssetRegistrarMetadata {
     pub name: Vec<u8>,
     pub symbol: Vec<u8>,

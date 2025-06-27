@@ -42,6 +42,7 @@ impl xcm_executor::Config for XcmConfig {
     type UniversalAliases = Nothing;
     type UniversalLocation = constants::UniversalLocation;
     type Weigher = weigher::Weigher;
+    type XcmEventEmitter = PolkadotXcm;
     type XcmRecorder = PolkadotXcm;
     type XcmSender = XcmRouter;
 }
