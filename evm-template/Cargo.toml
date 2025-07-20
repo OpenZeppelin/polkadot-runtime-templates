@@ -199,7 +199,7 @@ ccp-authorities-noting-inherent = { git = "https://github.com/OpenZeppelin/dance
 dp-consensus = { git = "https://github.com/OpenZeppelin/dancekit", branch = "polkadot-stable2503", default-features = false }
 pallet-cc-authorities-noting = { git = "https://github.com/OpenZeppelin/dancekit", branch = "polkadot-stable2503", default-features = false }
 
-# Tanssi TODO
+# Tanssi
 tc-consensus = { git = "https://github.com/4meta5/tanssi", branch = "polkadot-stable2503", default-features = false }
 
 # [patch."https://github.com/paritytech/polkadot-sdk"]
