@@ -52,7 +52,7 @@ fn generate_genesis(accounts: &[AccountId]) -> Storage {
 
     RuntimeGenesisConfig {
         system: Default::default(),
-        balances: BalancesConfig { balances },
+        balances: BalancesConfig { balances, ..Default::default() },
         #[cfg(not(feature = "tanssi"))]
         session: SessionConfig { keys: session_keys, non_authority_keys: vec![] },
         #[cfg(not(feature = "tanssi"))]
@@ -252,7 +252,7 @@ fn recursive_call_filter(call: &RuntimeCall, origin: usize) -> bool {
             pallet_utility::Call::force_batch { calls }
             | pallet_utility::Call::batch { calls }
             | pallet_utility::Call::batch_all { calls },
-        ) => calls.iter().map(|call| recursive_call_filter(call, origin)).all(|e| e),
+        ) => calls.iter().all(|call| recursive_call_filter(call, origin)),
         RuntimeCall::Scheduler(
             pallet_scheduler::Call::schedule_named_after {
                 id: _,

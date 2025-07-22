@@ -3,7 +3,7 @@ use core::marker::PhantomData;
 
 use frame_support::{
     construct_runtime, derive_impl, parameter_types,
-    traits::{ConstU128, ContainsPair, Everything, Nothing},
+    traits::{ConstU128, ContainsPair, Disabled, Everything, Nothing},
     weights::{constants::WEIGHT_REF_TIME_PER_SECOND, Weight},
 };
 use frame_system::EnsureRoot;
@@ -70,6 +70,8 @@ pub type TrustedLockers = TrustedLockerCase<RelayTokenForRelay>;
 impl pallet_xcm::Config for Runtime {
     type AdminOrigin = EnsureRoot<AccountId>;
     type AdvertisedXcmVersion = pallet_xcm::CurrentXcmVersion;
+    // Aliasing is disabled: xcm_executor::Config::Aliasers is set to `Nothing`.
+    type AuthorizedAliasConsideration = Disabled;
     type Currency = Balances;
     type CurrencyMatcher = ();
     type ExecuteXcmOrigin = EnsureXcmOrigin<RuntimeOrigin, LocalOriginToLocation>;
