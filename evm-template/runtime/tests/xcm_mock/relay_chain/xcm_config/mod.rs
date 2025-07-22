@@ -43,6 +43,7 @@ impl Config for XcmConfig {
     type UniversalAliases = Nothing;
     type UniversalLocation = constants::UniversalLocation;
     type Weigher = weigher::Weigher;
+    type XcmEventEmitter = XcmPallet;
     type XcmRecorder = XcmPallet;
     type XcmSender = XcmRouter;
 }
