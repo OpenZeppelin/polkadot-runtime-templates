@@ -297,7 +297,7 @@ async fn start_node_impl(
     #[cfg(not(feature = "tanssi"))]
     let slot_duration = sc_consensus_aura::slot_duration(&*client)?;
 
-    let (network, system_rpc_tx, tx_handler_controller, start_network, sync_service) =
+    let (network, system_rpc_tx, tx_handler_controller, sync_service) =
         build_network(BuildNetworkParams {
             parachain_config: &parachain_config,
             net_config,
@@ -521,8 +521,6 @@ async fn start_node_impl(
         )?;
     }
 
-    start_network.start_network();
-
     Ok((task_manager, client))
 }
 
@@ -623,6 +621,8 @@ fn start_consensus(
         collation_request_receiver: None,
         #[cfg(feature = "async-backing")]
         reinitialize: false,
+        #[cfg(feature = "async-backing")]
+        max_pov_percentage: None,
     };
 
     #[cfg(not(feature = "async-backing"))]

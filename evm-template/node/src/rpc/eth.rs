@@ -32,7 +32,7 @@ pub struct EthDeps<B: BlockT, C, P, A: ChainApi, CT, CIDP> {
     /// Transaction pool instance.
     pub pool: Arc<P>,
     /// Graph pool instance.
-    pub graph: Arc<Pool<A>>,
+    pub graph: Arc<Pool<A, ()>>,
     /// Ethereum transaction converter.
     pub converter: Option<CT>,
     /// The Node authority flag
@@ -128,10 +128,10 @@ where
     }
 
     io.merge(
-        Eth::<B, C, P, CT, BE, A, CIDP, EC>::new(
+        Eth::<B, C, P, CT, BE, CIDP, EC>::new(
             client.clone(),
             pool.clone(),
-            graph.clone(),
+            pool.clone(),
             converter,
             sync.clone(),
             signers,
