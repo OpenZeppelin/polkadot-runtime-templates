@@ -10,7 +10,6 @@ use std::sync::Arc;
 use evm_runtime_template::{opaque::Block, AccountId, Balance, Nonce};
 use sc_client_api::{backend::Backend, AuxStore, BlockchainEvents, StorageProvider, UsageProvider};
 use sc_rpc::SubscriptionTaskExecutor;
-use sc_transaction_pool::ChainApi;
 use sc_transaction_pool_api::TransactionPool;
 use sp_api::{CallApiAt, ProvideRuntimeApi};
 use sp_block_builder::BlockBuilder;
@@ -26,13 +25,13 @@ use crate::rpc::eth::create_eth;
 pub type RpcExtension = jsonrpsee::RpcModule<()>;
 
 /// Full client dependencies
-pub struct FullDeps<C, P, A: ChainApi, CT, CIDP> {
+pub struct FullDeps<C, P, CT, CIDP> {
     /// The client instance to use.
     pub client: Arc<C>,
     /// Transaction pool instance.
     pub pool: Arc<P>,
     /// Ethereum-compatibility specific dependencies.
-    pub eth: EthDeps<Block, C, P, A, CT, CIDP>,
+    pub eth: EthDeps<Block, C, P, CT, CIDP>,
 }
 
 pub struct DefaultEthConfig<C, BE>(std::marker::PhantomData<(C, BE)>);
@@ -48,8 +47,8 @@ where
 }
 
 /// Instantiate all RPC extensions.
-pub fn create_full<C, P, A, CT, CIDP, BE>(
-    deps: FullDeps<C, P, A, CT, CIDP>,
+pub fn create_full<C, P, CT, CIDP, BE>(
+    deps: FullDeps<C, P, CT, CIDP>,
     subscription_task_executor: SubscriptionTaskExecutor,
     pubsub_notification_sinks: Arc<
         fc_mapping_sync::EthereumBlockNotificationSinks<
@@ -75,8 +74,7 @@ where
     C::Api: BlockBuilder<Block>,
     C::Api: fp_rpc::ConvertTransactionRuntimeApi<Block>,
     C::Api: fp_rpc::EthereumRuntimeRPCApi<Block>,
-    P: TransactionPool<Block = Block> + Sync + Send + 'static,
-    A: ChainApi<Block = Block> + 'static,
+    P: TransactionPool<Block = Block, Hash = sp_core::H256> + Sync + Send + 'static,
     CIDP: CreateInherentDataProviders<Block, ()> + Send + 'static,
     CT: fp_rpc::ConvertTransaction<<Block as BlockT>::Extrinsic> + Send + Sync + 'static,
     BE: Backend<Block> + 'static,
@@ -89,7 +87,7 @@ where
 
     module.merge(System::new(client.clone(), pool).into_rpc())?;
     module.merge(TransactionPayment::new(client).into_rpc())?;
-    let module = create_eth::<_, _, _, _, _, _, _, DefaultEthConfig<C, BE>>(
+    let module = create_eth::<_, _, _, _, _, _, DefaultEthConfig<C, BE>>(
         module,
         eth,
         subscription_task_executor,
