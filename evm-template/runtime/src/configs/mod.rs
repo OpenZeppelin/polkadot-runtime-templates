@@ -105,12 +105,6 @@ use crate::{
     System, Timestamp, Treasury, UncheckedExtrinsic, WeightToFee, XcmpQueue,
 };
 
-impl sp_core::Get<sp_version::RuntimeVersion> for Runtime {
-    fn get() -> sp_version::RuntimeVersion {
-        VERSION
-    }
-}
-
 // OpenZeppelin runtime wrappers configuration
 pub struct OpenZeppelinRuntime;
 impl SystemConfig for OpenZeppelinRuntime {
