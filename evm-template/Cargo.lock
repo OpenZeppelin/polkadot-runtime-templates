@@ -2328,7 +2328,7 @@ dependencies = [
  "cumulus-primitives-parachain-inherent",
  "cumulus-primitives-proof-size-hostfunction",
  "environmental",
- "frame-benchmarking",
+ "frame-benchmarking 40.0.0",
  "frame-support 40.1.0",
  "frame-system 40.1.0",
  "impl-trait-for-tuples",
@@ -2368,7 +2368,7 @@ name = "cumulus-pallet-session-benchmarking"
 version = "21.0.0"
 source = "git+https://github.com/paritytech/polkadot-sdk?tag=polkadot-stable2503#0c0d4ceba45a70f4e8dc40b1ee0cfae1fd759454"
 dependencies = [
- "frame-benchmarking",
+ "frame-benchmarking 40.0.0",
  "frame-support 40.1.0",
  "frame-system 40.1.0",
  "pallet-session",
@@ -2384,7 +2384,7 @@ dependencies = [
  "cumulus-primitives-storage-weight-reclaim",
  "derive-where",
  "docify",
- "frame-benchmarking",
+ "frame-benchmarking 40.0.0",
  "frame-support 40.1.0",
  "frame-system 40.1.0",
  "log",
@@ -2418,7 +2418,7 @@ dependencies = [
  "bounded-collections",
  "bp-xcm-bridge-hub-router",
  "cumulus-primitives-core",
- "frame-benchmarking",
+ "frame-benchmarking 40.0.0",
  "frame-support 40.1.0",
  "frame-system 40.1.0",
  "log",
@@ -2492,7 +2492,7 @@ dependencies = [
  "cumulus-primitives-core",
  "cumulus-primitives-proof-size-hostfunction",
  "docify",
- "frame-benchmarking",
+ "frame-benchmarking 40.0.0",
  "frame-support 40.1.0",
  "frame-system 40.1.0",
  "log",
@@ -3614,7 +3614,7 @@ dependencies = [
  "fp-evm",
  "fp-rpc",
  "fp-self-contained",
- "frame-benchmarking",
+ "frame-benchmarking 40.0.0",
  "frame-executive",
  "frame-metadata-hash-extension",
  "frame-support 40.1.0",
@@ -3728,7 +3728,7 @@ dependencies = [
  "fp-dynamic-fee",
  "fp-evm",
  "fp-rpc",
- "frame-benchmarking",
+ "frame-benchmarking 40.0.0",
  "frame-benchmarking-cli",
  "futures",
  "hex",
@@ -4296,6 +4296,28 @@ checksum = "28dd6caf6059519a65843af8fe2a3ae298b14b80179855aeb4adc2c1934ee619"
 
 [[package]]
 name = "frame-benchmarking"
+version = "39.0.0"
+source = "git+https://github.com/paritytech/polkadot-sdk?rev=110d90bb85f866cc757287526022a66f3d576524#110d90bb85f866cc757287526022a66f3d576524"
+dependencies = [
+ "frame-support 39.0.0",
+ "frame-support-procedural 31.0.1",
+ "frame-system 39.1.0",
+ "log",
+ "parity-scale-codec",
+ "paste",
+ "scale-info",
+ "sp-api 35.0.0",
+ "sp-application-crypto 39.0.0",
+ "sp-core 35.0.0",
+ "sp-io 39.0.0",
+ "sp-runtime 40.1.0",
+ "sp-runtime-interface 29.0.0",
+ "sp-storage 22.0.0 (git+https://github.com/paritytech/polkadot-sdk?rev=110d90bb85f866cc757287526022a66f3d576524)",
+ "static_assertions",
+]
+
+[[package]]
+name = "frame-benchmarking"
 version = "40.0.0"
 source = "git+https://github.com/paritytech/polkadot-sdk?tag=polkadot-stable2503#0c0d4ceba45a70f4e8dc40b1ee0cfae1fd759454"
 dependencies = [
@@ -4330,7 +4352,7 @@ dependencies = [
  "comfy-table",
  "cumulus-client-parachain-inherent",
  "cumulus-primitives-proof-size-hostfunction",
- "frame-benchmarking",
+ "frame-benchmarking 40.0.0",
  "frame-support 40.1.0",
  "frame-system 40.1.0",
  "gethostname",
@@ -4701,7 +4723,7 @@ name = "frame-system-benchmarking"
 version = "40.0.0"
 source = "git+https://github.com/paritytech/polkadot-sdk?tag=polkadot-stable2503#0c0d4ceba45a70f4e8dc40b1ee0cfae1fd759454"
 dependencies = [
- "frame-benchmarking",
+ "frame-benchmarking 40.0.0",
  "frame-support 40.1.0",
  "frame-system 40.1.0",
  "parity-scale-codec",
@@ -7575,6 +7597,7 @@ version = "0.9.0"
 source = "git+https://github.com/OpenZeppelin/moonkit?branch=polkadot-branch-stable2412#833d60bdf2f08ff7bd8500134b08afd2d82cba65"
 dependencies = [
  "async-trait",
+ "frame-benchmarking 39.0.0",
  "frame-support 39.0.0",
  "frame-system 39.1.0",
  "parity-scale-codec",
@@ -7592,7 +7615,7 @@ version = "0.9.0"
 source = "git+https://github.com/OpenZeppelin/moonkit?branch=polkadot-stable2503#4985a2b50a9987b06efd2b3f8b410a065da7734b"
 dependencies = [
  "async-trait",
- "frame-benchmarking",
+ "frame-benchmarking 40.0.0",
  "frame-support 40.1.0",
  "frame-system 40.1.0",
  "parity-scale-codec",
@@ -7996,7 +8019,7 @@ name = "orml-oracle"
 version = "1.1.0"
 source = "git+https://github.com/OpenZeppelin/open-runtime-module-library?branch=polkadot-stable2503#8eb87752765acacae0f1f788dfc5583da668772c"
 dependencies = [
- "frame-benchmarking",
+ "frame-benchmarking 40.0.0",
  "frame-support 40.1.0",
  "frame-system 40.1.0",
  "orml-traits",
@@ -8101,7 +8124,7 @@ name = "pallet-asset-conversion"
 version = "22.0.0"
 source = "git+https://github.com/paritytech/polkadot-sdk?tag=polkadot-stable2503#0c0d4ceba45a70f4e8dc40b1ee0cfae1fd759454"
 dependencies = [
- "frame-benchmarking",
+ "frame-benchmarking 40.0.0",
  "frame-support 40.1.0",
  "frame-system 40.1.0",
  "log",
@@ -8119,7 +8142,7 @@ name = "pallet-asset-manager"
 version = "0.1.0"
 source = "git+https://github.com/OpenZeppelin/moonbeam.git?branch=polkadot-stable2503#ef035d28747b49f8ac24ca675b903ecb20a94195"
 dependencies = [
- "frame-benchmarking",
+ "frame-benchmarking 40.0.0",
  "frame-support 40.1.0",
  "frame-system 40.1.0",
  "log",
@@ -8138,7 +8161,7 @@ name = "pallet-asset-rate"
 version = "19.0.0"
 source = "git+https://github.com/paritytech/polkadot-sdk?tag=polkadot-stable2503#0c0d4ceba45a70f4e8dc40b1ee0cfae1fd759454"
 dependencies = [
- "frame-benchmarking",
+ "frame-benchmarking 40.0.0",
  "frame-support 40.1.0",
  "frame-system 40.1.0",
  "parity-scale-codec",
@@ -8152,7 +8175,7 @@ name = "pallet-asset-tx-payment"
 version = "40.0.0"
 source = "git+https://github.com/paritytech/polkadot-sdk?tag=polkadot-stable2503#0c0d4ceba45a70f4e8dc40b1ee0cfae1fd759454"
 dependencies = [
- "frame-benchmarking",
+ "frame-benchmarking 40.0.0",
  "frame-support 40.1.0",
  "frame-system 40.1.0",
  "pallet-transaction-payment",
@@ -8169,7 +8192,7 @@ name = "pallet-assets"
 version = "42.0.0"
 source = "git+https://github.com/paritytech/polkadot-sdk?tag=polkadot-stable2503#0c0d4ceba45a70f4e8dc40b1ee0cfae1fd759454"
 dependencies = [
- "frame-benchmarking",
+ "frame-benchmarking 40.0.0",
  "frame-support 40.1.0",
  "frame-system 40.1.0",
  "impl-trait-for-tuples",
@@ -8201,7 +8224,7 @@ name = "pallet-author-inherent"
 version = "0.9.0"
 source = "git+https://github.com/OpenZeppelin/moonkit?branch=polkadot-stable2503#4985a2b50a9987b06efd2b3f8b410a065da7734b"
 dependencies = [
- "frame-benchmarking",
+ "frame-benchmarking 40.0.0",
  "frame-support 40.1.0",
  "frame-system 40.1.0",
  "log",
@@ -8248,7 +8271,7 @@ name = "pallet-babe"
 version = "40.0.0"
 source = "git+https://github.com/paritytech/polkadot-sdk?tag=polkadot-stable2503#0c0d4ceba45a70f4e8dc40b1ee0cfae1fd759454"
 dependencies = [
- "frame-benchmarking",
+ "frame-benchmarking 40.0.0",
  "frame-support 40.1.0",
  "frame-system 40.1.0",
  "log",
@@ -8273,7 +8296,7 @@ source = "git+https://github.com/paritytech/polkadot-sdk?tag=polkadot-stable2503
 dependencies = [
  "aquamarine",
  "docify",
- "frame-benchmarking",
+ "frame-benchmarking 40.0.0",
  "frame-election-provider-support",
  "frame-support 40.1.0",
  "frame-system 40.1.0",
@@ -8293,7 +8316,7 @@ version = "41.1.0"
 source = "git+https://github.com/paritytech/polkadot-sdk?tag=polkadot-stable2503#0c0d4ceba45a70f4e8dc40b1ee0cfae1fd759454"
 dependencies = [
  "docify",
- "frame-benchmarking",
+ "frame-benchmarking 40.0.0",
  "frame-support 40.1.0",
  "frame-system 40.1.0",
  "log",
@@ -8343,7 +8366,7 @@ source = "git+https://github.com/paritytech/polkadot-sdk?tag=polkadot-stable2503
 dependencies = [
  "array-bytes",
  "binary-merkle-tree 16.0.0 (git+https://github.com/paritytech/polkadot-sdk?tag=polkadot-stable2503)",
- "frame-benchmarking",
+ "frame-benchmarking 40.0.0",
  "frame-support 40.1.0",
  "frame-system 40.1.0",
  "log",
@@ -8366,7 +8389,7 @@ name = "pallet-bounties"
 version = "39.0.0"
 source = "git+https://github.com/paritytech/polkadot-sdk?tag=polkadot-stable2503#0c0d4ceba45a70f4e8dc40b1ee0cfae1fd759454"
 dependencies = [
- "frame-benchmarking",
+ "frame-benchmarking 40.0.0",
  "frame-support 40.1.0",
  "frame-system 40.1.0",
  "log",
@@ -8384,7 +8407,7 @@ version = "0.19.1"
 source = "git+https://github.com/paritytech/polkadot-sdk?tag=polkadot-stable2503#0c0d4ceba45a70f4e8dc40b1ee0cfae1fd759454"
 dependencies = [
  "bitvec",
- "frame-benchmarking",
+ "frame-benchmarking 40.0.0",
  "frame-support 40.1.0",
  "frame-system 40.1.0",
  "log",
@@ -8407,7 +8430,7 @@ dependencies = [
  "dp-chain-state-snapshot",
  "dp-collator-assignment",
  "dp-core",
- "frame-benchmarking",
+ "frame-benchmarking 40.0.0",
  "frame-support 40.1.0",
  "frame-system 40.1.0",
  "hex",
@@ -8430,7 +8453,7 @@ name = "pallet-child-bounties"
 version = "39.0.0"
 source = "git+https://github.com/paritytech/polkadot-sdk?tag=polkadot-stable2503#0c0d4ceba45a70f4e8dc40b1ee0cfae1fd759454"
 dependencies = [
- "frame-benchmarking",
+ "frame-benchmarking 40.0.0",
  "frame-support 40.1.0",
  "frame-system 40.1.0",
  "log",
@@ -8448,7 +8471,7 @@ name = "pallet-collator-selection"
 version = "21.0.0"
 source = "git+https://github.com/paritytech/polkadot-sdk?tag=polkadot-stable2503#0c0d4ceba45a70f4e8dc40b1ee0cfae1fd759454"
 dependencies = [
- "frame-benchmarking",
+ "frame-benchmarking 40.0.0",
  "frame-support 40.1.0",
  "frame-system 40.1.0",
  "log",
@@ -8468,7 +8491,7 @@ version = "40.1.0"
 source = "git+https://github.com/paritytech/polkadot-sdk?tag=polkadot-stable2503#0c0d4ceba45a70f4e8dc40b1ee0cfae1fd759454"
 dependencies = [
  "assert_matches",
- "frame-benchmarking",
+ "frame-benchmarking 40.0.0",
  "frame-support 40.1.0",
  "frame-system 40.1.0",
  "parity-scale-codec",
@@ -8498,7 +8521,7 @@ name = "pallet-democracy"
 version = "40.1.0"
 source = "git+https://github.com/paritytech/polkadot-sdk?tag=polkadot-stable2503#0c0d4ceba45a70f4e8dc40b1ee0cfae1fd759454"
 dependencies = [
- "frame-benchmarking",
+ "frame-benchmarking 40.0.0",
  "frame-support 40.1.0",
  "frame-system 40.1.0",
  "log",
@@ -8515,7 +8538,7 @@ name = "pallet-election-provider-multi-phase"
 version = "39.1.0"
 source = "git+https://github.com/paritytech/polkadot-sdk?tag=polkadot-stable2503#0c0d4ceba45a70f4e8dc40b1ee0cfae1fd759454"
 dependencies = [
- "frame-benchmarking",
+ "frame-benchmarking 40.0.0",
  "frame-election-provider-support",
  "frame-support 40.1.0",
  "frame-system 40.1.0",
@@ -8537,7 +8560,7 @@ name = "pallet-election-provider-support-benchmarking"
 version = "39.0.0"
 source = "git+https://github.com/paritytech/polkadot-sdk?tag=polkadot-stable2503#0c0d4ceba45a70f4e8dc40b1ee0cfae1fd759454"
 dependencies = [
- "frame-benchmarking",
+ "frame-benchmarking 40.0.0",
  "frame-election-provider-support",
  "frame-system 40.1.0",
  "parity-scale-codec",
@@ -8550,7 +8573,7 @@ name = "pallet-elections-phragmen"
 version = "41.1.0"
 source = "git+https://github.com/paritytech/polkadot-sdk?tag=polkadot-stable2503#0c0d4ceba45a70f4e8dc40b1ee0cfae1fd759454"
 dependencies = [
- "frame-benchmarking",
+ "frame-benchmarking 40.0.0",
  "frame-support 40.1.0",
  "frame-system 40.1.0",
  "log",
@@ -8621,7 +8644,7 @@ dependencies = [
  "evm",
  "fp-account",
  "fp-evm",
- "frame-benchmarking",
+ "frame-benchmarking 40.0.0",
  "frame-support 40.1.0",
  "frame-system 40.1.0",
  "hash-db",
@@ -8680,7 +8703,7 @@ version = "39.0.0"
 source = "git+https://github.com/paritytech/polkadot-sdk?tag=polkadot-stable2503#0c0d4ceba45a70f4e8dc40b1ee0cfae1fd759454"
 dependencies = [
  "docify",
- "frame-benchmarking",
+ "frame-benchmarking 40.0.0",
  "frame-election-provider-support",
  "frame-support 40.1.0",
  "frame-system 40.1.0",
@@ -8697,7 +8720,7 @@ name = "pallet-grandpa"
 version = "40.0.0"
 source = "git+https://github.com/paritytech/polkadot-sdk?tag=polkadot-stable2503#0c0d4ceba45a70f4e8dc40b1ee0cfae1fd759454"
 dependencies = [
- "frame-benchmarking",
+ "frame-benchmarking 40.0.0",
  "frame-support 40.1.0",
  "frame-system 40.1.0",
  "log",
@@ -8720,7 +8743,7 @@ version = "40.1.0"
 source = "git+https://github.com/paritytech/polkadot-sdk?tag=polkadot-stable2503#0c0d4ceba45a70f4e8dc40b1ee0cfae1fd759454"
 dependencies = [
  "enumflags2",
- "frame-benchmarking",
+ "frame-benchmarking 40.0.0",
  "frame-support 40.1.0",
  "frame-system 40.1.0",
  "log",
@@ -8735,7 +8758,7 @@ name = "pallet-im-online"
 version = "39.1.0"
 source = "git+https://github.com/paritytech/polkadot-sdk?tag=polkadot-stable2503#0c0d4ceba45a70f4e8dc40b1ee0cfae1fd759454"
 dependencies = [
- "frame-benchmarking",
+ "frame-benchmarking 40.0.0",
  "frame-support 40.1.0",
  "frame-system 40.1.0",
  "log",
@@ -8754,7 +8777,7 @@ name = "pallet-indices"
 version = "40.0.0"
 source = "git+https://github.com/paritytech/polkadot-sdk?tag=polkadot-stable2503#0c0d4ceba45a70f4e8dc40b1ee0cfae1fd759454"
 dependencies = [
- "frame-benchmarking",
+ "frame-benchmarking 40.0.0",
  "frame-support 40.1.0",
  "frame-system 40.1.0",
  "parity-scale-codec",
@@ -8769,7 +8792,7 @@ name = "pallet-membership"
 version = "40.0.0"
 source = "git+https://github.com/paritytech/polkadot-sdk?tag=polkadot-stable2503#0c0d4ceba45a70f4e8dc40b1ee0cfae1fd759454"
 dependencies = [
- "frame-benchmarking",
+ "frame-benchmarking 40.0.0",
  "frame-support 40.1.0",
  "frame-system 40.1.0",
  "log",
@@ -8786,7 +8809,7 @@ version = "43.1.0"
 source = "git+https://github.com/paritytech/polkadot-sdk?tag=polkadot-stable2503#0c0d4ceba45a70f4e8dc40b1ee0cfae1fd759454"
 dependencies = [
  "environmental",
- "frame-benchmarking",
+ "frame-benchmarking 40.0.0",
  "frame-support 40.1.0",
  "frame-system 40.1.0",
  "log",
@@ -8805,7 +8828,7 @@ version = "0.2.0"
 source = "git+https://github.com/paritytech/polkadot-sdk?tag=polkadot-stable2503#0c0d4ceba45a70f4e8dc40b1ee0cfae1fd759454"
 dependencies = [
  "docify",
- "frame-benchmarking",
+ "frame-benchmarking 40.0.0",
  "frame-support 40.1.0",
  "frame-system 40.1.0",
  "parity-scale-codec",
@@ -8823,7 +8846,7 @@ version = "10.1.0"
 source = "git+https://github.com/paritytech/polkadot-sdk?tag=polkadot-stable2503#0c0d4ceba45a70f4e8dc40b1ee0cfae1fd759454"
 dependencies = [
  "docify",
- "frame-benchmarking",
+ "frame-benchmarking 40.0.0",
  "frame-support 40.1.0",
  "frame-system 40.1.0",
  "impl-trait-for-tuples",
@@ -8892,7 +8915,7 @@ name = "pallet-nomination-pools-benchmarking"
 version = "38.0.0"
 source = "git+https://github.com/paritytech/polkadot-sdk?tag=polkadot-stable2503#0c0d4ceba45a70f4e8dc40b1ee0cfae1fd759454"
 dependencies = [
- "frame-benchmarking",
+ "frame-benchmarking 40.0.0",
  "frame-election-provider-support",
  "frame-support 40.1.0",
  "frame-system 40.1.0",
@@ -8937,7 +8960,7 @@ name = "pallet-offences-benchmarking"
 version = "40.0.0"
 source = "git+https://github.com/paritytech/polkadot-sdk?tag=polkadot-stable2503#0c0d4ceba45a70f4e8dc40b1ee0cfae1fd759454"
 dependencies = [
- "frame-benchmarking",
+ "frame-benchmarking 40.0.0",
  "frame-election-provider-support",
  "frame-support 40.1.0",
  "frame-system 40.1.0",
@@ -8961,7 +8984,7 @@ version = "0.11.0"
 source = "git+https://github.com/paritytech/polkadot-sdk?tag=polkadot-stable2503#0c0d4ceba45a70f4e8dc40b1ee0cfae1fd759454"
 dependencies = [
  "docify",
- "frame-benchmarking",
+ "frame-benchmarking 40.0.0",
  "frame-support 40.1.0",
  "frame-system 40.1.0",
  "parity-scale-codec",
@@ -8977,7 +9000,7 @@ name = "pallet-preimage"
 version = "40.0.0"
 source = "git+https://github.com/paritytech/polkadot-sdk?tag=polkadot-stable2503#0c0d4ceba45a70f4e8dc40b1ee0cfae1fd759454"
 dependencies = [
- "frame-benchmarking",
+ "frame-benchmarking 40.0.0",
  "frame-support 40.1.0",
  "frame-system 40.1.0",
  "log",
@@ -9003,7 +9026,7 @@ name = "pallet-ranked-collective"
 version = "40.1.0"
 source = "git+https://github.com/paritytech/polkadot-sdk?tag=polkadot-stable2503#0c0d4ceba45a70f4e8dc40b1ee0cfae1fd759454"
 dependencies = [
- "frame-benchmarking",
+ "frame-benchmarking 40.0.0",
  "frame-support 40.1.0",
  "frame-system 40.1.0",
  "impl-trait-for-tuples",
@@ -9021,7 +9044,7 @@ name = "pallet-recovery"
 version = "40.0.0"
 source = "git+https://github.com/paritytech/polkadot-sdk?tag=polkadot-stable2503#0c0d4ceba45a70f4e8dc40b1ee0cfae1fd759454"
 dependencies = [
- "frame-benchmarking",
+ "frame-benchmarking 40.0.0",
  "frame-support 40.1.0",
  "frame-system 40.1.0",
  "parity-scale-codec",
@@ -9036,7 +9059,7 @@ version = "40.1.0"
 source = "git+https://github.com/paritytech/polkadot-sdk?tag=polkadot-stable2503#0c0d4ceba45a70f4e8dc40b1ee0cfae1fd759454"
 dependencies = [
  "assert_matches",
- "frame-benchmarking",
+ "frame-benchmarking 40.0.0",
  "frame-support 40.1.0",
  "frame-system 40.1.0",
  "log",
@@ -9051,13 +9074,13 @@ dependencies = [
 [[package]]
 name = "pallet-registrar"
 version = "0.1.0"
-source = "git+https://github.com/4meta5/tanssi?branch=polkadot-stable2503#2dd41c1fdcec1d99c48baaacd03c7a95943f7ff2"
+source = "git+https://github.com/4meta5/tanssi?branch=polkadot-stable2503#a6323f9f967dc24d5594818f53c1d78daa6e2bf2"
 dependencies = [
  "cumulus-primitives-core",
  "dp-chain-state-snapshot",
  "dp-container-chain-genesis-data",
  "dp-core",
- "frame-benchmarking",
+ "frame-benchmarking 40.0.0",
  "frame-support 40.1.0",
  "frame-system 40.1.0",
  "hex-literal 1.0.0",
@@ -9076,7 +9099,7 @@ dependencies = [
 [[package]]
 name = "pallet-registrar-runtime-api"
 version = "0.1.0"
-source = "git+https://github.com/4meta5/tanssi?branch=polkadot-stable2503#2dd41c1fdcec1d99c48baaacd03c7a95943f7ff2"
+source = "git+https://github.com/4meta5/tanssi?branch=polkadot-stable2503#a6323f9f967dc24d5594818f53c1d78daa6e2bf2"
 dependencies = [
  "dp-container-chain-genesis-data",
  "frame-support 40.1.0",
@@ -9107,7 +9130,7 @@ version = "41.0.0"
 source = "git+https://github.com/paritytech/polkadot-sdk?tag=polkadot-stable2503#0c0d4ceba45a70f4e8dc40b1ee0cfae1fd759454"
 dependencies = [
  "docify",
- "frame-benchmarking",
+ "frame-benchmarking 40.0.0",
  "frame-support 40.1.0",
  "frame-system 40.1.0",
  "log",
@@ -9144,7 +9167,7 @@ name = "pallet-session-benchmarking"
 version = "40.0.0"
 source = "git+https://github.com/paritytech/polkadot-sdk?tag=polkadot-stable2503#0c0d4ceba45a70f4e8dc40b1ee0cfae1fd759454"
 dependencies = [
- "frame-benchmarking",
+ "frame-benchmarking 40.0.0",
  "frame-support 40.1.0",
  "frame-system 40.1.0",
  "pallet-session",
@@ -9160,7 +9183,7 @@ name = "pallet-society"
 version = "40.1.0"
 source = "git+https://github.com/paritytech/polkadot-sdk?tag=polkadot-stable2503#0c0d4ceba45a70f4e8dc40b1ee0cfae1fd759454"
 dependencies = [
- "frame-benchmarking",
+ "frame-benchmarking 40.0.0",
  "frame-support 40.1.0",
  "frame-system 40.1.0",
  "log",
@@ -9177,7 +9200,7 @@ name = "pallet-staking"
 version = "40.1.0"
 source = "git+https://github.com/paritytech/polkadot-sdk?tag=polkadot-stable2503#0c0d4ceba45a70f4e8dc40b1ee0cfae1fd759454"
 dependencies = [
- "frame-benchmarking",
+ "frame-benchmarking 40.0.0",
  "frame-election-provider-support",
  "frame-support 40.1.0",
  "frame-system 40.1.0",
@@ -9218,7 +9241,7 @@ name = "pallet-state-trie-migration"
 version = "44.1.0"
 source = "git+https://github.com/paritytech/polkadot-sdk?tag=polkadot-stable2503#0c0d4ceba45a70f4e8dc40b1ee0cfae1fd759454"
 dependencies = [
- "frame-benchmarking",
+ "frame-benchmarking 40.0.0",
  "frame-support 40.1.0",
  "frame-system 40.1.0",
  "log",
@@ -9235,7 +9258,7 @@ version = "40.0.0"
 source = "git+https://github.com/paritytech/polkadot-sdk?tag=polkadot-stable2503#0c0d4ceba45a70f4e8dc40b1ee0cfae1fd759454"
 dependencies = [
  "docify",
- "frame-benchmarking",
+ "frame-benchmarking 40.0.0",
  "frame-support 40.1.0",
  "frame-system 40.1.0",
  "parity-scale-codec",
@@ -9250,7 +9273,7 @@ version = "39.0.0"
 source = "git+https://github.com/paritytech/polkadot-sdk?tag=polkadot-stable2503#0c0d4ceba45a70f4e8dc40b1ee0cfae1fd759454"
 dependencies = [
  "docify",
- "frame-benchmarking",
+ "frame-benchmarking 40.0.0",
  "frame-support 40.1.0",
  "frame-system 40.1.0",
  "log",
@@ -9268,7 +9291,7 @@ name = "pallet-tips"
 version = "39.0.0"
 source = "git+https://github.com/paritytech/polkadot-sdk?tag=polkadot-stable2503#0c0d4ceba45a70f4e8dc40b1ee0cfae1fd759454"
 dependencies = [
- "frame-benchmarking",
+ "frame-benchmarking 40.0.0",
  "frame-support 40.1.0",
  "frame-system 40.1.0",
  "log",
@@ -9286,7 +9309,7 @@ name = "pallet-transaction-payment"
 version = "40.0.0"
 source = "git+https://github.com/paritytech/polkadot-sdk?tag=polkadot-stable2503#0c0d4ceba45a70f4e8dc40b1ee0cfae1fd759454"
 dependencies = [
- "frame-benchmarking",
+ "frame-benchmarking 40.0.0",
  "frame-support 40.1.0",
  "frame-system 40.1.0",
  "parity-scale-codec",
@@ -9331,7 +9354,7 @@ version = "39.0.0"
 source = "git+https://github.com/paritytech/polkadot-sdk?tag=polkadot-stable2503#0c0d4ceba45a70f4e8dc40b1ee0cfae1fd759454"
 dependencies = [
  "docify",
- "frame-benchmarking",
+ "frame-benchmarking 40.0.0",
  "frame-support 40.1.0",
  "frame-system 40.1.0",
  "impl-trait-for-tuples",
@@ -9349,7 +9372,7 @@ name = "pallet-utility"
 version = "40.0.0"
 source = "git+https://github.com/paritytech/polkadot-sdk?tag=polkadot-stable2503#0c0d4ceba45a70f4e8dc40b1ee0cfae1fd759454"
 dependencies = [
- "frame-benchmarking",
+ "frame-benchmarking 40.0.0",
  "frame-support 40.1.0",
  "frame-system 40.1.0",
  "parity-scale-codec",
@@ -9364,7 +9387,7 @@ name = "pallet-verify-signature"
 version = "0.3.0"
 source = "git+https://github.com/paritytech/polkadot-sdk?tag=polkadot-stable2503#0c0d4ceba45a70f4e8dc40b1ee0cfae1fd759454"
 dependencies = [
- "frame-benchmarking",
+ "frame-benchmarking 40.0.0",
  "frame-support 40.1.0",
  "frame-system 40.1.0",
  "parity-scale-codec",
@@ -9380,7 +9403,7 @@ name = "pallet-vesting"
 version = "40.1.0"
 source = "git+https://github.com/paritytech/polkadot-sdk?tag=polkadot-stable2503#0c0d4ceba45a70f4e8dc40b1ee0cfae1fd759454"
 dependencies = [
- "frame-benchmarking",
+ "frame-benchmarking 40.0.0",
  "frame-support 40.1.0",
  "frame-system 40.1.0",
  "log",
@@ -9405,7 +9428,7 @@ version = "19.1.0"
 source = "git+https://github.com/paritytech/polkadot-sdk?tag=polkadot-stable2503#0c0d4ceba45a70f4e8dc40b1ee0cfae1fd759454"
 dependencies = [
  "bounded-collections",
- "frame-benchmarking",
+ "frame-benchmarking 40.0.0",
  "frame-support 40.1.0",
  "frame-system 40.1.0",
  "pallet-balances",
@@ -9427,7 +9450,7 @@ name = "pallet-xcm-benchmarks"
 version = "20.0.0"
 source = "git+https://github.com/paritytech/polkadot-sdk?tag=polkadot-stable2503#0c0d4ceba45a70f4e8dc40b1ee0cfae1fd759454"
 dependencies = [
- "frame-benchmarking",
+ "frame-benchmarking 40.0.0",
  "frame-support 40.1.0",
  "frame-system 40.1.0",
  "parity-scale-codec",
@@ -9442,10 +9465,10 @@ dependencies = [
 [[package]]
 name = "pallet-xcm-core-buyer"
 version = "0.1.0"
-source = "git+https://github.com/4meta5/tanssi?branch=polkadot-stable2503#2dd41c1fdcec1d99c48baaacd03c7a95943f7ff2"
+source = "git+https://github.com/4meta5/tanssi?branch=polkadot-stable2503#a6323f9f967dc24d5594818f53c1d78daa6e2bf2"
 dependencies = [
  "dp-core",
- "frame-benchmarking",
+ "frame-benchmarking 40.0.0",
  "frame-support 40.1.0",
  "frame-system 40.1.0",
  "log",
@@ -9468,7 +9491,7 @@ dependencies = [
 [[package]]
 name = "pallet-xcm-core-buyer-runtime-api"
 version = "0.1.0"
-source = "git+https://github.com/4meta5/tanssi?branch=polkadot-stable2503#2dd41c1fdcec1d99c48baaacd03c7a95943f7ff2"
+source = "git+https://github.com/4meta5/tanssi?branch=polkadot-stable2503#a6323f9f967dc24d5594818f53c1d78daa6e2bf2"
 dependencies = [
  "frame-support 40.1.0",
  "pallet-xcm-core-buyer",
@@ -9489,7 +9512,7 @@ version = "0.2.0"
 source = "git+https://github.com/OpenZeppelin/moonbeam.git?branch=polkadot-stable2503#ef035d28747b49f8ac24ca675b903ecb20a94195"
 dependencies = [
  "cumulus-primitives-core",
- "frame-benchmarking",
+ "frame-benchmarking 40.0.0",
  "frame-support 40.1.0",
  "frame-system 40.1.0",
  "log",
@@ -9510,7 +9533,7 @@ name = "pallet-xcm-weight-trader"
 version = "0.1.0"
 source = "git+https://github.com/OpenZeppelin/moonbeam.git?branch=polkadot-stable2503#ef035d28747b49f8ac24ca675b903ecb20a94195"
 dependencies = [
- "frame-benchmarking",
+ "frame-benchmarking 40.0.0",
  "frame-support 40.1.0",
  "frame-system 40.1.0",
  "log",
@@ -10650,7 +10673,7 @@ version = "19.1.0"
 source = "git+https://github.com/paritytech/polkadot-sdk?tag=polkadot-stable2503#0c0d4ceba45a70f4e8dc40b1ee0cfae1fd759454"
 dependencies = [
  "bitvec",
- "frame-benchmarking",
+ "frame-benchmarking 40.0.0",
  "frame-election-provider-support",
  "frame-support 40.1.0",
  "frame-system 40.1.0",
@@ -10700,7 +10723,7 @@ version = "20.0.0"
 source = "git+https://github.com/paritytech/polkadot-sdk?tag=polkadot-stable2503#0c0d4ceba45a70f4e8dc40b1ee0cfae1fd759454"
 dependencies = [
  "bs58",
- "frame-benchmarking",
+ "frame-benchmarking 40.0.0",
  "parity-scale-codec",
  "polkadot-primitives",
  "sp-tracing 17.1.0",
@@ -10713,7 +10736,7 @@ source = "git+https://github.com/paritytech/polkadot-sdk?tag=polkadot-stable2503
 dependencies = [
  "bitflags 1.3.2",
  "bitvec",
- "frame-benchmarking",
+ "frame-benchmarking 40.0.0",
  "frame-support 40.1.0",
  "frame-system 40.1.0",
  "impl-trait-for-tuples",
@@ -10768,7 +10791,7 @@ version = "0.9.1"
 source = "git+https://github.com/paritytech/polkadot-sdk?tag=polkadot-stable2503#0c0d4ceba45a70f4e8dc40b1ee0cfae1fd759454"
 dependencies = [
  "docify",
- "frame-benchmarking",
+ "frame-benchmarking 40.0.0",
  "frame-executive",
  "frame-support 40.1.0",
  "frame-system 40.1.0",
@@ -10803,7 +10826,7 @@ version = "23.0.0"
 source = "git+https://github.com/paritytech/polkadot-sdk?tag=polkadot-stable2503#0c0d4ceba45a70f4e8dc40b1ee0cfae1fd759454"
 dependencies = [
  "async-trait",
- "frame-benchmarking",
+ "frame-benchmarking 40.0.0",
  "frame-benchmarking-cli",
  "frame-system 40.1.0",
  "frame-system-rpc-runtime-api",
@@ -11922,7 +11945,7 @@ source = "git+https://github.com/paritytech/polkadot-sdk?tag=polkadot-stable2503
 dependencies = [
  "binary-merkle-tree 16.0.0 (git+https://github.com/paritytech/polkadot-sdk?tag=polkadot-stable2503)",
  "bitvec",
- "frame-benchmarking",
+ "frame-benchmarking 40.0.0",
  "frame-executive",
  "frame-metadata-hash-extension",
  "frame-support 40.1.0",
@@ -15884,7 +15907,7 @@ version = "19.1.0"
 source = "git+https://github.com/paritytech/polkadot-sdk?tag=polkadot-stable2503#0c0d4ceba45a70f4e8dc40b1ee0cfae1fd759454"
 dependencies = [
  "environmental",
- "frame-benchmarking",
+ "frame-benchmarking 40.0.0",
  "frame-support 40.1.0",
  "impl-trait-for-tuples",
  "parity-scale-codec",
@@ -16373,7 +16396,7 @@ checksum = "61c41af27dd6d1e27b1b16b489db798443478cef1f06a660c96db617ba5de3b1"
 [[package]]
 name = "tc-consensus"
 version = "0.1.0"
-source = "git+https://github.com/4meta5/tanssi?branch=polkadot-stable2503#2dd41c1fdcec1d99c48baaacd03c7a95943f7ff2"
+source = "git+https://github.com/4meta5/tanssi?branch=polkadot-stable2503#a6323f9f967dc24d5594818f53c1d78daa6e2bf2"
 dependencies = [
  "async-backing-primitives",
  "async-trait",
@@ -16861,7 +16884,7 @@ checksum = "8df9b6e13f2d32c91b9bd719c00d1958837bc7dec474d94952798cc8e69eeec3"
 [[package]]
 name = "tp-traits"
 version = "0.1.0"
-source = "git+https://github.com/4meta5/tanssi?branch=polkadot-stable2503#2dd41c1fdcec1d99c48baaacd03c7a95943f7ff2"
+source = "git+https://github.com/4meta5/tanssi?branch=polkadot-stable2503#a6323f9f967dc24d5594818f53c1d78daa6e2bf2"
 dependencies = [
  "cumulus-primitives-core",
  "dp-chain-state-snapshot",
@@ -16880,7 +16903,7 @@ dependencies = [
 [[package]]
 name = "tp-xcm-core-buyer"
 version = "0.1.0"
-source = "git+https://github.com/4meta5/tanssi?branch=polkadot-stable2503#2dd41c1fdcec1d99c48baaacd03c7a95943f7ff2"
+source = "git+https://github.com/4meta5/tanssi?branch=polkadot-stable2503#a6323f9f967dc24d5594818f53c1d78daa6e2bf2"
 dependencies = [
  "frame-support 40.1.0",
  "parity-scale-codec",
@@ -17864,7 +17887,7 @@ source = "git+https://github.com/paritytech/polkadot-sdk?tag=polkadot-stable2503
 dependencies = [
  "binary-merkle-tree 16.0.0 (git+https://github.com/paritytech/polkadot-sdk?tag=polkadot-stable2503)",
  "bitvec",
- "frame-benchmarking",
+ "frame-benchmarking 40.0.0",
  "frame-election-provider-support",
  "frame-executive",
  "frame-metadata-hash-extension",
@@ -18553,7 +18576,7 @@ dependencies = [
  "cumulus-primitives-core",
  "ethereum 0.15.0 (git+https://github.com/rust-ethereum/ethereum?rev=3be0d8fd4c2ad1ba216b69ef65b9382612efc8ba)",
  "ethereum-types",
- "frame-benchmarking",
+ "frame-benchmarking 40.0.0",
  "frame-support 40.1.0",
  "frame-system 40.1.0",
  "hex",
