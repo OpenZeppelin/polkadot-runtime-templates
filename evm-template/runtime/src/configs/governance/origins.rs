@@ -60,7 +60,6 @@ pub mod pallet_custom_origins {
                         r => Err(O::from(r)),
                     })
                 }
-                #[cfg(feature = "runtime-benchmarks")]
                 fn try_successful_origin() -> Result<O, ()> {
                     Ok(O::from(Origin::$name))
                 }
@@ -98,7 +97,6 @@ pub mod pallet_custom_origins {
                         r => Err(O::from(r)),
                     })
                 }
-                #[cfg(feature = "runtime-benchmarks")]
                 fn try_successful_origin() -> Result<O, ()> {
                     // By convention the more privileged origins go later, so for greatest chance
                     // of success, we want the last one.

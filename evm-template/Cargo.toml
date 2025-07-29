@@ -36,8 +36,6 @@ frame-system = { git = "https://github.com/paritytech/polkadot-sdk", default-fea
 frame-system-benchmarking = { git = "https://github.com/paritytech/polkadot-sdk", default-features = false, tag = "polkadot-stable2503" }
 frame-system-rpc-runtime-api = { git = "https://github.com/paritytech/polkadot-sdk", default-features = false, tag = "polkadot-stable2503" }
 frame-try-runtime = { git = "https://github.com/paritytech/polkadot-sdk", default-features = false, tag = "polkadot-stable2503" }
-# openzeppelin-pallet-abstractions = { path = "../../openzeppelin-pallet-abstractions", default-features = false }
-# openzeppelin-pallet-abstractions-proc = { path = "../../openzeppelin-pallet-abstractions/procedural", default-features = false }
 openzeppelin-pallet-abstractions = { git = "https://github.com/OpenZeppelin/openzeppelin-pallet-abstractions", branch = "polkadot-stable2503", default-features = false }
 openzeppelin-pallet-abstractions-proc = { git = "https://github.com/OpenZeppelin/openzeppelin-pallet-abstractions", branch = "polkadot-stable2503", default-features = false }
 pallet-asset-tx-payment = { git = "https://github.com/paritytech/polkadot-sdk", default-features = false, tag = "polkadot-stable2503" }
@@ -142,7 +140,7 @@ pallet-collator-selection = { git = "https://github.com/paritytech/polkadot-sdk"
 parachain-info = { package = "staging-parachain-info", git = "https://github.com/paritytech/polkadot-sdk", default-features = false, tag = "polkadot-stable2503" }
 parachains-common = { git = "https://github.com/paritytech/polkadot-sdk", default-features = false, tag = "polkadot-stable2503" }
 
-# EVM TODO
+# EVM
 ethereum = { git = "https://github.com/rust-ethereum/ethereum", rev = "bbb544622208ef6e9890a2dbc224248f6dd13318" }
 fc-api = { git = "https://github.com/OpenZeppelin/frontier", branch = "polkadot-stable2503", default-features = false }
 fc-consensus = { git = "https://github.com/OpenZeppelin/frontier", branch = "polkadot-stable2503", default-features = false }
