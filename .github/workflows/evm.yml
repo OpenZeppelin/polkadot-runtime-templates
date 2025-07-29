@@ -76,8 +76,11 @@ jobs:
         with:
           tool: cargo-nextest
 
-      - name: Run tests and check benchmarking compilation
-        run: cargo nextest run --release --features="runtime-benchmarks"
+      - name: Run tests
+        run: cargo nextest run --release
+
+      - name: Check benchmarking compilation
+        run: cargo check --release --features runtime-benchmarks
 
       - name: Run tests with async backing
         run: cargo nextest run --release --features="async-backing"
