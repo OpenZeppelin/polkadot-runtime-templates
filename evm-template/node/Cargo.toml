@@ -101,7 +101,7 @@ substrate-build-script-utils = { workspace = true }
 [features]
 default = []
 async-backing = []
-runtime-benchmarks = [ "evm-runtime-template/runtime-benchmarks", "frame-benchmarking-cli/runtime-benchmarks", "frame-benchmarking/runtime-benchmarks", "polkadot-cli/runtime-benchmarks", "polkadot-primitives/runtime-benchmarks", "sc-service/runtime-benchmarks", "sp-runtime/runtime-benchmarks" ]
+runtime-benchmarks = [ "evm-runtime-template/runtime-benchmarks", "frame-benchmarking-cli/runtime-benchmarks", "frame-benchmarking/runtime-benchmarks", "polkadot-cli/runtime-benchmarks", "polkadot-primitives/runtime-benchmarks", "sc-service/runtime-benchmarks", "sp-runtime/runtime-benchmarks", "tc-consensus/runtime-benchmarks" ]
 tanssi = []
 try-runtime = [
 	"evm-runtime-template/try-runtime",

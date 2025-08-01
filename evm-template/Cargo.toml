@@ -197,7 +197,7 @@ dp-consensus = { git = "https://github.com/OpenZeppelin/dancekit", branch = "pol
 pallet-cc-authorities-noting = { git = "https://github.com/OpenZeppelin/dancekit", branch = "polkadot-stable2503", default-features = false }
 
 # Tanssi
-tc-consensus = { git = "https://github.com/4meta5/tanssi", branch = "polkadot-stable2503", default-features = false }
+tc-consensus = { git = "https://github.com/KitHat/tanssi", branch = "polkadot-stable2503", default-features = false }
 
 # [patch."https://github.com/paritytech/polkadot-sdk"]
 # Make pallet-migrations optional to avoid the error

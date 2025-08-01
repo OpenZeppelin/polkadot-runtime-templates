@@ -5354,7 +5354,7 @@ dependencies = [
  "httpdate",
  "itoa",
  "pin-project-lite",
- "socket2 0.4.10",
+ "socket2 0.5.10",
  "tokio",
  "tower-service",
  "tracing",
@@ -8907,7 +8907,7 @@ dependencies = [
 [[package]]
 name = "pallet-registrar"
 version = "0.1.0"
-source = "git+https://github.com/4meta5/tanssi?branch=polkadot-stable2503#b5dd22d8f2f1a62fa16ef14ccb476c4b98feb7bb"
+source = "git+https://github.com/KitHat/tanssi?branch=polkadot-stable2503#19475d40f7a7b45b7b0c0044d0ad8371ccf52230"
 dependencies = [
  "cumulus-primitives-core",
  "dp-chain-state-snapshot",
@@ -8932,7 +8932,7 @@ dependencies = [
 [[package]]
 name = "pallet-registrar-runtime-api"
 version = "0.1.0"
-source = "git+https://github.com/4meta5/tanssi?branch=polkadot-stable2503#b5dd22d8f2f1a62fa16ef14ccb476c4b98feb7bb"
+source = "git+https://github.com/KitHat/tanssi?branch=polkadot-stable2503#19475d40f7a7b45b7b0c0044d0ad8371ccf52230"
 dependencies = [
  "dp-container-chain-genesis-data",
  "frame-support",
@@ -9298,7 +9298,7 @@ dependencies = [
 [[package]]
 name = "pallet-xcm-core-buyer"
 version = "0.1.0"
-source = "git+https://github.com/4meta5/tanssi?branch=polkadot-stable2503#b5dd22d8f2f1a62fa16ef14ccb476c4b98feb7bb"
+source = "git+https://github.com/KitHat/tanssi?branch=polkadot-stable2503#19475d40f7a7b45b7b0c0044d0ad8371ccf52230"
 dependencies = [
  "dp-core",
  "frame-benchmarking",
@@ -9324,7 +9324,7 @@ dependencies = [
 [[package]]
 name = "pallet-xcm-core-buyer-runtime-api"
 version = "0.1.0"
-source = "git+https://github.com/4meta5/tanssi?branch=polkadot-stable2503#b5dd22d8f2f1a62fa16ef14ccb476c4b98feb7bb"
+source = "git+https://github.com/KitHat/tanssi?branch=polkadot-stable2503#19475d40f7a7b45b7b0c0044d0ad8371ccf52230"
 dependencies = [
  "frame-support",
  "pallet-xcm-core-buyer",
@@ -15750,7 +15750,7 @@ checksum = "61c41af27dd6d1e27b1b16b489db798443478cef1f06a660c96db617ba5de3b1"
 [[package]]
 name = "tc-consensus"
 version = "0.1.0"
-source = "git+https://github.com/4meta5/tanssi?branch=polkadot-stable2503#b5dd22d8f2f1a62fa16ef14ccb476c4b98feb7bb"
+source = "git+https://github.com/KitHat/tanssi?branch=polkadot-stable2503#19475d40f7a7b45b7b0c0044d0ad8371ccf52230"
 dependencies = [
  "async-backing-primitives",
  "async-trait",
@@ -16238,7 +16238,7 @@ checksum = "8df9b6e13f2d32c91b9bd719c00d1958837bc7dec474d94952798cc8e69eeec3"
 [[package]]
 name = "tp-traits"
 version = "0.1.0"
-source = "git+https://github.com/4meta5/tanssi?branch=polkadot-stable2503#b5dd22d8f2f1a62fa16ef14ccb476c4b98feb7bb"
+source = "git+https://github.com/KitHat/tanssi?branch=polkadot-stable2503#19475d40f7a7b45b7b0c0044d0ad8371ccf52230"
 dependencies = [
  "cumulus-primitives-core",
  "dp-chain-state-snapshot",
@@ -16257,7 +16257,7 @@ dependencies = [
 [[package]]
 name = "tp-xcm-core-buyer"
 version = "0.1.0"
-source = "git+https://github.com/4meta5/tanssi?branch=polkadot-stable2503#b5dd22d8f2f1a62fa16ef14ccb476c4b98feb7bb"
+source = "git+https://github.com/KitHat/tanssi?branch=polkadot-stable2503#19475d40f7a7b45b7b0c0044d0ad8371ccf52230"
 dependencies = [
  "frame-support",
  "parity-scale-codec",
