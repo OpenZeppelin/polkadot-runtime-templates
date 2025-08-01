@@ -297,7 +297,7 @@ async fn start_node_impl(
     #[cfg(not(feature = "tanssi"))]
     let slot_duration = sc_consensus_aura::slot_duration(&*client)?;
 
-    let (network, system_rpc_tx, tx_handler_controller, start_network, sync_service) =
+    let (network, system_rpc_tx, tx_handler_controller, sync_service) =
         build_network(BuildNetworkParams {
             parachain_config: &parachain_config,
             net_config,
@@ -373,18 +373,11 @@ async fn start_node_impl(
         let overrides = overrides.clone();
         let fee_history_cache = fee_history_cache.clone();
         let pubsub_notification_sinks = pubsub_notification_sinks.clone();
-        let graph_api = Arc::new(sc_transaction_pool::FullChainApi::new(
-            client.clone(),
-            None,
-            &task_manager.spawn_essential_handle(),
-        ));
-        let graph =
-            Arc::new(sc_transaction_pool::Pool::new(Default::default(), true.into(), graph_api));
         Box::new(move |subscription_task_executor| {
             let eth = crate::rpc::EthDeps {
                 client: client.clone(),
                 pool: pool.clone(),
-                graph: graph.clone(),
+                graph: pool.clone(),
                 converter: Some(TransactionConverter),
                 is_authority: validator,
                 enable_dev_signer,
@@ -521,8 +514,6 @@ async fn start_node_impl(
         )?;
     }
 
-    start_network.start_network();
-
     Ok((task_manager, client))
 }
 
@@ -623,6 +614,8 @@ fn start_consensus(
         collation_request_receiver: None,
         #[cfg(feature = "async-backing")]
         reinitialize: false,
+        #[cfg(feature = "async-backing")]
+        max_pov_percentage: None,
     };
 
     #[cfg(not(feature = "async-backing"))]

@@ -45,7 +45,9 @@ use openzeppelin_pallet_abstractions::{
 use openzeppelin_pallet_abstractions::{impl_openzeppelin_tanssi, TanssiConfig, TanssiWeight};
 use pallet_asset_tx_payment::HandleCredit;
 use pallet_ethereum::PostLogContent;
-use pallet_evm::{EVMCurrencyAdapter, EnsureAccountId20, IdentityAddressMapping};
+use pallet_evm::{
+    EVMCurrencyAdapter, EnsureAccountId20, FrameSystemAccountProvider, IdentityAddressMapping,
+};
 use parachains_common::{
     impls::AccountIdOf,
     message_queue::{NarrowOriginToSibling, ParaIdToSibling},
@@ -87,7 +89,7 @@ use crate::{
     constants::{
         currency::{deposit, CENTS, EXISTENTIAL_DEPOSIT, MICROCENTS, MILLICENTS},
         AVERAGE_ON_INITIALIZE_RATIO, DAYS, MAXIMUM_BLOCK_WEIGHT, MAX_BLOCK_LENGTH,
-        NORMAL_DISPATCH_RATIO, SLOT_DURATION, WEIGHT_PER_GAS,
+        NORMAL_DISPATCH_RATIO, SLOT_DURATION, VERSION, WEIGHT_PER_GAS,
     },
     opaque,
     types::{

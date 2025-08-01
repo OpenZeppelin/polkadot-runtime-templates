@@ -8,7 +8,7 @@ use frame_support::{
 use orml_traits::{location::Reserve, parameter_type_with_key};
 use orml_xcm_support::MultiNativeAsset;
 use pallet_xcm::XcmPassthrough;
-use parity_scale_codec::{Decode, Encode};
+use parity_scale_codec::{Decode, DecodeWithMemTracking, Encode};
 use polkadot_parachain_primitives::primitives::{self, Sibling};
 use scale_info::TypeInfo;
 use sp_core::H160;
@@ -312,7 +312,9 @@ parameter_type_with_key! {
 }
 
 // Our currencyId. We distinguish for now between SelfReserve, and Others, defined by their Id.
-#[derive(Clone, Eq, Debug, PartialEq, Ord, PartialOrd, Encode, Decode, TypeInfo)]
+#[derive(
+    Clone, Eq, Debug, PartialEq, Ord, PartialOrd, Encode, Decode, DecodeWithMemTracking, TypeInfo,
+)]
 pub enum CurrencyId {
     // Our native token
     SelfReserve,
@@ -483,7 +485,9 @@ impl frame_support::traits::Contains<Location> for AssetFeesFilter {
 // For now we only allow to transact in the relay, although this might change in the future
 // Transactors just defines the chains in which we allow transactions to be issued through
 // xcm
-#[derive(Clone, Eq, Debug, PartialEq, Ord, PartialOrd, Encode, Decode, TypeInfo)]
+#[derive(
+    Clone, Eq, Debug, PartialEq, Ord, PartialOrd, Encode, Decode, DecodeWithMemTracking, TypeInfo,
+)]
 pub enum Transactors {
     Relay,
 }

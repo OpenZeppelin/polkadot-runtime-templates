@@ -1,5 +1,10 @@
 //! Track configurations for governance.
 
+use alloc::borrow::Cow;
+
+use pallet_referenda::Track;
+use sp_runtime::str_array as s;
+
 use super::*;
 use crate::constants::MINUTES;
 
@@ -34,156 +39,155 @@ const APP_WHITELISTED_CALLER: Curve =
 const SUP_WHITELISTED_CALLER: Curve =
     Curve::make_reciprocal(1, 28, percent(20), percent(5), percent(50));
 
-const TRACKS_DATA: [(u16, pallet_referenda::TrackInfo<Balance, BlockNumber>); 10] = [
-    (
-        0,
-        pallet_referenda::TrackInfo {
-            name: "root",
-            max_deciding: 1,
-            decision_deposit: 100 * GRAND,
-            prepare_period: 8 * MINUTES,
-            decision_period: 20 * MINUTES,
-            confirm_period: 12 * MINUTES,
-            min_enactment_period: 5 * MINUTES,
-            min_approval: APP_ROOT,
-            min_support: SUP_ROOT,
-        },
-    ),
-    (
-        1,
-        pallet_referenda::TrackInfo {
-            name: "whitelisted_caller",
-            max_deciding: 100,
-            decision_deposit: 10 * GRAND,
-            prepare_period: 6 * MINUTES,
-            decision_period: 20 * MINUTES,
-            confirm_period: 4 * MINUTES,
-            min_enactment_period: 3 * MINUTES,
-            min_approval: APP_WHITELISTED_CALLER,
-            min_support: SUP_WHITELISTED_CALLER,
-        },
-    ),
-    (
-        11,
-        pallet_referenda::TrackInfo {
-            name: "treasurer",
-            max_deciding: 10,
-            decision_deposit: GRAND,
-            prepare_period: 8 * MINUTES,
-            decision_period: 20 * MINUTES,
-            confirm_period: 8 * MINUTES,
-            min_enactment_period: 5 * MINUTES,
-            min_approval: APP_TREASURER,
-            min_support: SUP_TREASURER,
-        },
-    ),
-    (
-        20,
-        pallet_referenda::TrackInfo {
-            name: "referendum_canceller",
-            max_deciding: 1_000,
-            decision_deposit: 10 * GRAND,
-            prepare_period: 8 * MINUTES,
-            decision_period: 14 * MINUTES,
-            confirm_period: 8 * MINUTES,
-            min_enactment_period: 3 * MINUTES,
-            min_approval: APP_REFERENDUM_CANCELLER,
-            min_support: SUP_REFERENDUM_CANCELLER,
-        },
-    ),
-    (
-        21,
-        pallet_referenda::TrackInfo {
-            name: "referendum_killer",
-            max_deciding: 1_000,
-            decision_deposit: 50 * GRAND,
-            prepare_period: 8 * MINUTES,
-            decision_period: 20 * MINUTES,
-            confirm_period: 8 * MINUTES,
-            min_enactment_period: 3 * MINUTES,
-            min_approval: APP_REFERENDUM_KILLER,
-            min_support: SUP_REFERENDUM_KILLER,
-        },
-    ),
-    (
-        30,
-        pallet_referenda::TrackInfo {
-            name: "small_tipper",
-            max_deciding: 200,
-            decision_deposit: 3 * CENTS,
-            prepare_period: MINUTES,
-            decision_period: 14 * MINUTES,
-            confirm_period: 4 * MINUTES,
-            min_enactment_period: MINUTES,
-            min_approval: APP_SMALL_TIPPER,
-            min_support: SUP_SMALL_TIPPER,
-        },
-    ),
-    (
-        31,
-        pallet_referenda::TrackInfo {
-            name: "big_tipper",
-            max_deciding: 100,
-            decision_deposit: 10 * 3 * CENTS,
-            prepare_period: 4 * MINUTES,
-            decision_period: 14 * MINUTES,
-            confirm_period: 12 * MINUTES,
-            min_enactment_period: 3 * MINUTES,
-            min_approval: APP_BIG_TIPPER,
-            min_support: SUP_BIG_TIPPER,
-        },
-    ),
-    (
-        32,
-        pallet_referenda::TrackInfo {
-            name: "small_spender",
-            max_deciding: 50,
-            decision_deposit: 100 * 3 * CENTS,
-            prepare_period: 10 * MINUTES,
-            decision_period: 20 * MINUTES,
-            confirm_period: 10 * MINUTES,
-            min_enactment_period: 5 * MINUTES,
-            min_approval: APP_SMALL_SPENDER,
-            min_support: SUP_SMALL_SPENDER,
-        },
-    ),
-    (
-        33,
-        pallet_referenda::TrackInfo {
-            name: "medium_spender",
-            max_deciding: 50,
-            decision_deposit: 200 * 3 * CENTS,
-            prepare_period: 10 * MINUTES,
-            decision_period: 20 * MINUTES,
-            confirm_period: 12 * MINUTES,
-            min_enactment_period: 5 * MINUTES,
-            min_approval: APP_MEDIUM_SPENDER,
-            min_support: SUP_MEDIUM_SPENDER,
-        },
-    ),
-    (
-        34,
-        pallet_referenda::TrackInfo {
-            name: "big_spender",
-            max_deciding: 50,
-            decision_deposit: 400 * 3 * CENTS,
-            prepare_period: 10 * MINUTES,
-            decision_period: 20 * MINUTES,
-            confirm_period: 14 * MINUTES,
-            min_enactment_period: 5 * MINUTES,
-            min_approval: APP_BIG_SPENDER,
-            min_support: SUP_BIG_SPENDER,
-        },
-    ),
-];
-
 pub struct TracksInfo;
 impl pallet_referenda::TracksInfo<Balance, BlockNumber> for TracksInfo {
     type Id = u16;
     type RuntimeOrigin = <RuntimeOrigin as frame_support::traits::OriginTrait>::PalletsOrigin;
 
-    fn tracks() -> &'static [(Self::Id, pallet_referenda::TrackInfo<Balance, BlockNumber>)] {
-        &TRACKS_DATA[..]
+    fn tracks() -> impl Iterator<Item = Cow<'static, Track<Self::Id, Balance, BlockNumber>>> {
+        static DATA: [Track<u16, Balance, BlockNumber>; 10] = [
+            Track {
+                id: 0u16,
+                info: pallet_referenda::TrackInfo {
+                    name: s("root"),
+                    max_deciding: 1,
+                    decision_deposit: 100 * GRAND,
+                    prepare_period: 8 * MINUTES,
+                    decision_period: 20 * MINUTES,
+                    confirm_period: 12 * MINUTES,
+                    min_enactment_period: 5 * MINUTES,
+                    min_approval: APP_ROOT,
+                    min_support: SUP_ROOT,
+                },
+            },
+            Track {
+                id: 1u16,
+                info: pallet_referenda::TrackInfo {
+                    name: s("whitelisted_caller"),
+                    max_deciding: 100,
+                    decision_deposit: 10 * GRAND,
+                    prepare_period: 6 * MINUTES,
+                    decision_period: 20 * MINUTES,
+                    confirm_period: 4 * MINUTES,
+                    min_enactment_period: 3 * MINUTES,
+                    min_approval: APP_WHITELISTED_CALLER,
+                    min_support: SUP_WHITELISTED_CALLER,
+                },
+            },
+            Track {
+                id: 11u16,
+                info: pallet_referenda::TrackInfo {
+                    name: s("treasurer"),
+                    max_deciding: 10,
+                    decision_deposit: GRAND,
+                    prepare_period: 8 * MINUTES,
+                    decision_period: 20 * MINUTES,
+                    confirm_period: 8 * MINUTES,
+                    min_enactment_period: 5 * MINUTES,
+                    min_approval: APP_TREASURER,
+                    min_support: SUP_TREASURER,
+                },
+            },
+            Track {
+                id: 20u16,
+                info: pallet_referenda::TrackInfo {
+                    name: s("referendum_canceller"),
+                    max_deciding: 1_000,
+                    decision_deposit: 10 * GRAND,
+                    prepare_period: 8 * MINUTES,
+                    decision_period: 14 * MINUTES,
+                    confirm_period: 8 * MINUTES,
+                    min_enactment_period: 3 * MINUTES,
+                    min_approval: APP_REFERENDUM_CANCELLER,
+                    min_support: SUP_REFERENDUM_CANCELLER,
+                },
+            },
+            Track {
+                id: 21u16,
+                info: pallet_referenda::TrackInfo {
+                    name: s("referendum_killer"),
+                    max_deciding: 1_000,
+                    decision_deposit: 50 * GRAND,
+                    prepare_period: 8 * MINUTES,
+                    decision_period: 20 * MINUTES,
+                    confirm_period: 8 * MINUTES,
+                    min_enactment_period: 3 * MINUTES,
+                    min_approval: APP_REFERENDUM_KILLER,
+                    min_support: SUP_REFERENDUM_KILLER,
+                },
+            },
+            Track {
+                id: 30u16,
+                info: pallet_referenda::TrackInfo {
+                    name: s("small_tipper"),
+                    max_deciding: 200,
+                    decision_deposit: 3 * CENTS,
+                    prepare_period: MINUTES,
+                    decision_period: 14 * MINUTES,
+                    confirm_period: 4 * MINUTES,
+                    min_enactment_period: MINUTES,
+                    min_approval: APP_SMALL_TIPPER,
+                    min_support: SUP_SMALL_TIPPER,
+                },
+            },
+            Track {
+                id: 31u16,
+                info: pallet_referenda::TrackInfo {
+                    name: s("big_tipper"),
+                    max_deciding: 100,
+                    decision_deposit: 10 * 3 * CENTS,
+                    prepare_period: 4 * MINUTES,
+                    decision_period: 14 * MINUTES,
+                    confirm_period: 12 * MINUTES,
+                    min_enactment_period: 3 * MINUTES,
+                    min_approval: APP_BIG_TIPPER,
+                    min_support: SUP_BIG_TIPPER,
+                },
+            },
+            Track {
+                id: 32u16,
+                info: pallet_referenda::TrackInfo {
+                    name: s("small_spender"),
+                    max_deciding: 50,
+                    decision_deposit: 100 * 3 * CENTS,
+                    prepare_period: 10 * MINUTES,
+                    decision_period: 20 * MINUTES,
+                    confirm_period: 10 * MINUTES,
+                    min_enactment_period: 5 * MINUTES,
+                    min_approval: APP_SMALL_SPENDER,
+                    min_support: SUP_SMALL_SPENDER,
+                },
+            },
+            Track {
+                id: 33u16,
+                info: pallet_referenda::TrackInfo {
+                    name: s("medium_spender"),
+                    max_deciding: 50,
+                    decision_deposit: 200 * 3 * CENTS,
+                    prepare_period: 10 * MINUTES,
+                    decision_period: 20 * MINUTES,
+                    confirm_period: 12 * MINUTES,
+                    min_enactment_period: 5 * MINUTES,
+                    min_approval: APP_MEDIUM_SPENDER,
+                    min_support: SUP_MEDIUM_SPENDER,
+                },
+            },
+            Track {
+                id: 34u16,
+                info: pallet_referenda::TrackInfo {
+                    name: s("big_spender"),
+                    max_deciding: 50,
+                    decision_deposit: 400 * 3 * CENTS,
+                    prepare_period: 10 * MINUTES,
+                    decision_period: 20 * MINUTES,
+                    confirm_period: 14 * MINUTES,
+                    min_enactment_period: 5 * MINUTES,
+                    min_approval: APP_BIG_SPENDER,
+                    min_support: SUP_BIG_SPENDER,
+                },
+            },
+        ];
+        DATA.iter().map(Cow::Borrowed)
     }
 
     fn track_for(id: &Self::RuntimeOrigin) -> Result<Self::Id, ()> {
@@ -211,7 +215,6 @@ impl pallet_referenda::TracksInfo<Balance, BlockNumber> for TracksInfo {
         }
     }
 }
-pallet_referenda::impl_tracksinfo_get!(TracksInfo, Balance, BlockNumber);
 
 #[cfg(test)]
 mod tests {
