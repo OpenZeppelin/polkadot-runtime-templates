@@ -55,6 +55,11 @@ We use the `generic-template-node` executable throughout all the commands since 
 ./target/release/generic-template-node build-spec --chain plain-parachain-chainspec.json --disable-default-bootnode --raw > raw-parachain-chainspec.json
 ```
 
+[NOTE]
+====
+At this point, you are free to use the omni-node but if you wish to customize the node then the node included in each template offers a suitable starting point for such customization. The command for using omni-node takes the form: `polkadot-omni-node --chain <chain_spec.json>`. For more information about using omni-node see the relevant link:https://docs.polkadot.com/develop/toolkit/parachains/polkadot-omni-node/[Polkadot Docs]
+====
+
 * Run two nodes and wait until it syncs with the Paseo relay chain. This can take a fairly long time(up to 2 days), so we can use the `fast-unsafe` flag to make the process faster since we are on a testnet(~ 3 hours). `fast` downloads the blocks without executing the transactions, and `unsafe` skips downloading the state proofs(which we are ok with since it is a testnet).
 +
 ```bash
