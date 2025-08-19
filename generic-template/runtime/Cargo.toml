@@ -15,8 +15,8 @@ docify = { workspace = true }
 hex-literal = { workspace = true, optional = true }
 log = { workspace = true }
 parity-scale-codec = { workspace = true, features = [ "derive" ] }
-serde_json = { workspace = true, default-features = false, features = ["alloc"] }
 scale-info = { workspace = true, features = [ "derive" ] }
+serde_json = { workspace = true, default-features = false, features = [ "alloc" ] }
 smallvec = { workspace = true }
 
 openzeppelin-pallet-abstractions = { workspace = true }

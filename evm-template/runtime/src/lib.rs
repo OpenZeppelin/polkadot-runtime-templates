@@ -12,6 +12,7 @@ pub mod configs;
 pub mod constants;
 mod precompiles;
 pub use precompiles::OpenZeppelinPrecompiles;
+mod genesis_config_presets;
 mod types;
 mod weights;
 
@@ -19,6 +20,7 @@ use frame_support::{
     traits::OnFinalize,
     weights::{WeightToFeeCoefficient, WeightToFeeCoefficients, WeightToFeePolynomial},
 };
+pub use genesis_config_presets::PARACHAIN_ID;
 use smallvec::smallvec;
 pub use sp_consensus_aura::sr25519::AuthorityId as AuraId;
 use sp_core::H160;
