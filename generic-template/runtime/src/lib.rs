@@ -10,12 +10,14 @@ include!(concat!(env!("OUT_DIR"), "/wasm_binary.rs"));
 pub mod apis;
 pub mod configs;
 pub mod constants;
+mod genesis_config_presets;
 mod types;
 mod weights;
 
 use frame_support::weights::{
     WeightToFeeCoefficient, WeightToFeeCoefficients, WeightToFeePolynomial,
 };
+pub use genesis_config_presets::PARACHAIN_ID;
 use smallvec::smallvec;
 pub use sp_consensus_aura::sr25519::AuthorityId as AuraId;
 use sp_runtime::impl_opaque_keys;

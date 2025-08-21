@@ -12,6 +12,7 @@ repository = "https://github.com/OpenZeppelin/polkadot-runtime-templates"
 [workspace.dependencies]
 clap = { version = "4.5.3", features = [ "derive" ] }
 color-print = "0.3.4"
+docify = { version = "0.2.9" }
 futures = "0.3.30"
 hex-literal = "0.4.1"
 jsonrpsee = { version = "0.24.3", features = [ "server" ] }
@@ -22,7 +23,7 @@ parity-scale-codec = { version = "3.6.12", default-features = false, features = 
 ] }
 scale-info = { version = "2.11.1", default-features = false }
 serde = { version = "1.0.197", default-features = false }
-serde_json = "1.0.121"
+serde_json = { version = "1.0.121", default-features = false }
 smallvec = "1.11.0"
 
 # TODO: update to release
@@ -84,6 +85,7 @@ sp-core = { git = "https://github.com/paritytech/polkadot-sdk", default-features
 sp-genesis-builder = { git = "https://github.com/paritytech/polkadot-sdk", default-features = false, tag = "polkadot-stable2503" }
 sp-inherents = { git = "https://github.com/paritytech/polkadot-sdk", default-features = false, tag = "polkadot-stable2503" }
 sp-io = { git = "https://github.com/paritytech/polkadot-sdk", default-features = false, tag = "polkadot-stable2503" }
+sp-keyring = { git = "https://github.com/paritytech/polkadot-sdk", default-features = false, tag = "polkadot-stable2503" }
 sp-keystore = { git = "https://github.com/paritytech/polkadot-sdk", default-features = false, tag = "polkadot-stable2503" }
 sp-offchain = { git = "https://github.com/paritytech/polkadot-sdk", default-features = false, tag = "polkadot-stable2503" }
 sp-runtime = { git = "https://github.com/paritytech/polkadot-sdk", default-features = false, tag = "polkadot-stable2503" }

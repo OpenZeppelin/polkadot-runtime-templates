@@ -4234,6 +4234,7 @@ dependencies = [
  "cumulus-primitives-core",
  "cumulus-primitives-timestamp",
  "cumulus-primitives-utility",
+ "docify",
  "dp-consensus",
  "frame-benchmarking",
  "frame-executive",
@@ -4287,6 +4288,7 @@ dependencies = [
  "polkadot-runtime-common",
  "polkadot-runtime-parachains",
  "scale-info",
+ "serde_json",
  "smallvec",
  "sp-api",
  "sp-arithmetic",
@@ -4296,6 +4298,7 @@ dependencies = [
  "sp-genesis-builder",
  "sp-inherents",
  "sp-io",
+ "sp-keyring",
  "sp-offchain",
  "sp-runtime",
  "sp-session",
@@ -7170,7 +7173,7 @@ checksum = "d05e27ee213611ffe7d6348b942e8f942b37114c00cc03cec254295a4a17852e"
 [[package]]
 name = "openzeppelin-pallet-abstractions"
 version = "0.1.0"
-source = "git+https://github.com/OpenZeppelin/openzeppelin-pallet-abstractions?branch=polkadot-stable2503#971a66b7513adbbd1c51fcf74a3f85bf102f7bea"
+source = "git+https://github.com/OpenZeppelin/openzeppelin-pallet-abstractions?branch=polkadot-stable2503#bc6dcabdc7b66f218c39c0f3496710c7b81a4a09"
 dependencies = [
  "cumulus-primitives-core",
  "frame-support",
@@ -7183,7 +7186,7 @@ dependencies = [
 [[package]]
 name = "openzeppelin-pallet-abstractions-proc"
 version = "0.1.0"
-source = "git+https://github.com/OpenZeppelin/openzeppelin-pallet-abstractions?branch=polkadot-stable2503#971a66b7513adbbd1c51fcf74a3f85bf102f7bea"
+source = "git+https://github.com/OpenZeppelin/openzeppelin-pallet-abstractions?branch=polkadot-stable2503#bc6dcabdc7b66f218c39c0f3496710c7b81a4a09"
 dependencies = [
  "darling",
  "openzeppelin-pallet-abstractions",
