@@ -79,7 +79,7 @@ fn testnet_genesis(
                 .into_iter()
                 .map(|(acc, aura)| {
                     (
-                        acc.clone(),                 // account id (AccountId20)
+                        acc,                         // account id (AccountId20)
                         acc,                         // validator id (AccountId20)
                         template_session_keys(aura), // session keys
                     )
