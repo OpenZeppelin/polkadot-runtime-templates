@@ -7789,7 +7789,7 @@ dependencies = [
 [[package]]
 name = "openzeppelin-pallet-abstractions"
 version = "0.1.0"
-source = "git+https://github.com/OpenZeppelin/openzeppelin-pallet-abstractions?branch=polkadot-stable2503#f4488330f19b575e54a4080b55a3d66a9fb4f702"
+source = "git+https://github.com/OpenZeppelin/openzeppelin-pallet-abstractions?branch=polkadot-stable2503#bc6dcabdc7b66f218c39c0f3496710c7b81a4a09"
 dependencies = [
  "cumulus-primitives-core",
  "frame-support",
@@ -7802,7 +7802,7 @@ dependencies = [
 [[package]]
 name = "openzeppelin-pallet-abstractions-proc"
 version = "0.1.0"
-source = "git+https://github.com/OpenZeppelin/openzeppelin-pallet-abstractions?branch=polkadot-stable2503#f4488330f19b575e54a4080b55a3d66a9fb4f702"
+source = "git+https://github.com/OpenZeppelin/openzeppelin-pallet-abstractions?branch=polkadot-stable2503#bc6dcabdc7b66f218c39c0f3496710c7b81a4a09"
 dependencies = [
  "darling",
  "openzeppelin-pallet-abstractions",
