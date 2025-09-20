@@ -21,6 +21,7 @@ smallvec = { workspace = true }
 
 openzeppelin-pallet-abstractions = { workspace = true }
 openzeppelin-pallet-abstractions-proc = { workspace = true }
+precompiles-fhe = { path = "../precompiles-fhe", default-features = false }
 
 # Substrate
 frame-benchmarking = { workspace = true, optional = true }
@@ -205,6 +206,7 @@ std = [
 	"parity-scale-codec/std",
 	"polkadot-parachain-primitives/std",
 	"polkadot-runtime-common/std",
+	"precompiles-fhe/std",
 	"scale-info/std",
 	"serde_json/std",
 	"sp-api/std",
