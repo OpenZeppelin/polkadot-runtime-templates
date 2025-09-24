@@ -1,18 +1,19 @@
 [package]
-name = "precompiles-fhe"
+name = "fhe-precompile"
 authors = { workspace = true }
-description = "Precompiles for FHE"
+description = "Precompile for FHE"
 edition = { workspace = true }
 license = { workspace = true }
 repository = { workspace = true }
 version = "0.1.0"
 
 [dependencies]
-bincode = { version = "2", default-features = false, features = ["alloc", "serde"] }
+pallet-fhe = { path = "../pallet", default-features = false }
+fhe-primitives = { path = "../primitives", default-features = false }
 
-frame-system = { workspace = true }
 fp-evm = { workspace = true }
 pallet-evm = { workspace = true }
+evm = { version = "1.0.0", default-features = false }
 
 parity-scale-codec = { workspace = true, features = ["derive"] }
 scale-info = { workspace = true, features = ["derive"] }
@@ -25,9 +26,8 @@ tfhe = { version = "1.0.0", default-features = false, features = ["boolean", "sh
 [features]
 default = [ "std" ]
 std = [
-    "bincode/std",
     "fp-evm/std",
-    "frame-system/std",
+    "pallet-fhe/std",
     "pallet-evm/std",
 	"parity-scale-codec/std",
     "scale-info/std",
@@ -35,4 +35,3 @@ std = [
     "sp-io/std",
 	"sp-std/std",
 ]
-fhe-dev = []  # enables dev selectors ie setServerKey/seed/dump

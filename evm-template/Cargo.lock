@@ -1010,16 +1010,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "bincode"
-version = "2.0.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "36eaf5d7b090263e8150820482d5d93cd964a81e4019913c972f4edcc6edb740"
-dependencies = [
- "serde",
- "unty",
-]
-
-[[package]]
 name = "bindgen"
 version = "0.65.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -3485,7 +3475,7 @@ dependencies = [
  "crunchy",
  "fixed-hash",
  "impl-codec",
- "impl-rlp",
+ "impl-rlp 0.4.0",
  "impl-serde",
  "scale-info",
  "tiny-keccak",
@@ -3501,7 +3491,7 @@ dependencies = [
  "hash-db",
  "hash256-std-hasher",
  "parity-scale-codec",
- "rlp",
+ "rlp 0.6.1",
  "scale-info",
  "sha3",
  "trie-root",
@@ -3517,7 +3507,7 @@ dependencies = [
  "hash-db",
  "hash256-std-hasher",
  "parity-scale-codec",
- "rlp",
+ "rlp 0.6.1",
  "scale-info",
  "serde",
  "sha3",
@@ -3533,9 +3523,9 @@ dependencies = [
  "ethbloom",
  "fixed-hash",
  "impl-codec",
- "impl-rlp",
+ "impl-rlp 0.4.0",
  "impl-serde",
- "primitive-types",
+ "primitive-types 0.13.1",
  "scale-info",
  "uint 0.10.0",
 ]
@@ -3591,10 +3581,21 @@ dependencies = [
  "evm-runtime",
  "log",
  "parity-scale-codec",
- "primitive-types",
- "rlp",
+ "primitive-types 0.13.1",
+ "rlp 0.6.1",
  "scale-info",
  "serde",
+ "sha3",
+]
+
+[[package]]
+name = "evm"
+version = "1.0.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "5613f50d6a3c50673af439a1231f4306f716bd23108416d81cf416c28f566e10"
+dependencies = [
+ "evm-interpreter",
+ "primitive-types 0.12.2",
  "sha3",
 ]
 
@@ -3604,7 +3605,7 @@ version = "0.42.0"
 source = "git+https://github.com/rust-ethereum/evm?rev=6ca5a72bc8942f4860137155dd9033526fd362a5#6ca5a72bc8942f4860137155dd9033526fd362a5"
 dependencies = [
  "parity-scale-codec",
- "primitive-types",
+ "primitive-types 0.13.1",
  "scale-info",
  "serde",
 ]
@@ -3617,7 +3618,20 @@ dependencies = [
  "environmental",
  "evm-core",
  "evm-runtime",
- "primitive-types",
+ "primitive-types 0.13.1",
+]
+
+[[package]]
+name = "evm-interpreter"
+version = "1.0.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "e09eb9ccf1f3c468f1c101560444a8a4367689246a0b7e83c87963c55bbff1d7"
+dependencies = [
+ "auto_impl",
+ "paste",
+ "primitive-types 0.12.2",
+ "rlp 0.5.2",
+ "sha3",
 ]
 
 [[package]]
@@ -3628,7 +3642,7 @@ dependencies = [
  "auto_impl",
  "environmental",
  "evm-core",
- "primitive-types",
+ "primitive-types 0.13.1",
  "sha3",
 ]
 
@@ -3650,6 +3664,7 @@ dependencies = [
  "docify",
  "dp-consensus",
  "ethereum 0.15.0 (git+https://github.com/rust-ethereum/ethereum?rev=bbb544622208ef6e9890a2dbc224248f6dd13318)",
+ "fhe-precompile",
  "fp-account",
  "fp-evm",
  "fp-rpc",
@@ -3713,7 +3728,6 @@ dependencies = [
  "polkadot-parachain-primitives",
  "polkadot-runtime-common",
  "polkadot-runtime-parachains",
- "precompiles-fhe",
  "scale-info",
  "serde_json",
  "smallvec",
@@ -3984,7 +3998,7 @@ source = "git+https://github.com/OpenZeppelin/frontier?branch=polkadot-stable250
 dependencies = [
  "ethereum 0.15.0 (git+https://github.com/rust-ethereum/ethereum?rev=bbb544622208ef6e9890a2dbc224248f6dd13318)",
  "ethereum-types",
- "evm",
+ "evm 0.42.0",
  "fc-api",
  "fc-mapping-sync",
  "fc-rpc-core",
@@ -4001,7 +4015,7 @@ dependencies = [
  "parity-scale-codec",
  "prometheus",
  "rand 0.9.2",
- "rlp",
+ "rlp 0.6.1",
  "sc-client-api",
  "sc-consensus-aura",
  "sc-network",
@@ -4039,7 +4053,7 @@ dependencies = [
  "ethereum 0.15.0 (git+https://github.com/rust-ethereum/ethereum?rev=bbb544622208ef6e9890a2dbc224248f6dd13318)",
  "ethereum-types",
  "jsonrpsee",
- "rlp",
+ "rlp 0.6.1",
  "rustc-hex",
  "serde",
  "serde_json",
@@ -4081,6 +4095,34 @@ checksum = "c0b50bfb653653f9ca9095b427bed08ab8d75a137839d9ad64eb11810d5b6393"
 dependencies = [
  "rand_core 0.6.4",
  "subtle 2.6.1",
+]
+
+[[package]]
+name = "fhe-precompile"
+version = "0.1.0"
+dependencies = [
+ "evm 1.0.0",
+ "fhe-primitives",
+ "fp-evm",
+ "pallet-evm",
+ "pallet-fhe",
+ "parity-scale-codec",
+ "scale-info",
+ "sp-core",
+ "sp-io",
+ "sp-std",
+ "tfhe",
+]
+
+[[package]]
+name = "fhe-primitives"
+version = "0.1.0"
+dependencies = [
+ "frame-support",
+ "hex-literal 0.4.1",
+ "parity-scale-codec",
+ "scale-info",
+ "sp-runtime",
 ]
 
 [[package]]
@@ -4284,7 +4326,7 @@ version = "3.0.0-dev"
 source = "git+https://github.com/OpenZeppelin/frontier?branch=polkadot-stable2503#0d0d73962c7543cc715bbd5d97c23769e2ee492f"
 dependencies = [
  "environmental",
- "evm",
+ "evm 0.42.0",
  "frame-support",
  "num_enum",
  "parity-scale-codec",
@@ -5685,11 +5727,20 @@ dependencies = [
 
 [[package]]
 name = "impl-rlp"
+version = "0.3.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "f28220f89297a075ddc7245cd538076ee98b01f2a9c23a53a4f1105d5a322808"
+dependencies = [
+ "rlp 0.5.2",
+]
+
+[[package]]
+name = "impl-rlp"
 version = "0.4.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "54ed8ad1f3877f7e775b8cbf30ed1bd3209a95401817f19a0eb4402d13f8cf90"
 dependencies = [
- "rlp",
+ "rlp 0.6.1",
 ]
 
 [[package]]
@@ -6109,7 +6160,7 @@ version = "0.11.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "3e1b8590eb6148af2ea2d75f38e7d29f5ca970d5a4df456b3ef19b8b415d0264"
 dependencies = [
- "primitive-types",
+ "primitive-types 0.13.1",
  "tiny-keccak",
 ]
 
@@ -8506,7 +8557,7 @@ source = "git+https://github.com/OpenZeppelin/frontier?branch=polkadot-stable250
 dependencies = [
  "ethereum 0.15.0 (git+https://github.com/rust-ethereum/ethereum?rev=bbb544622208ef6e9890a2dbc224248f6dd13318)",
  "ethereum-types",
- "evm",
+ "evm 0.42.0",
  "fp-consensus",
  "fp-ethereum",
  "fp-evm",
@@ -8529,7 +8580,7 @@ source = "git+https://github.com/OpenZeppelin/frontier?branch=polkadot-stable250
 dependencies = [
  "cumulus-primitives-storage-weight-reclaim",
  "environmental",
- "evm",
+ "evm 0.42.0",
  "fp-account",
  "fp-evm",
  "frame-benchmarking",
@@ -8601,6 +8652,18 @@ dependencies = [
  "sp-io",
  "sp-runtime",
  "sp-staking",
+]
+
+[[package]]
+name = "pallet-fhe"
+version = "0.1.0"
+dependencies = [
+ "fhe-primitives",
+ "frame-support",
+ "frame-system",
+ "parity-scale-codec",
+ "scale-info",
+ "sp-runtime",
 ]
 
 [[package]]
@@ -11018,22 +11081,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "precompiles-fhe"
-version = "0.1.0"
-dependencies = [
- "bincode 2.0.1",
- "fp-evm",
- "frame-system",
- "pallet-evm",
- "parity-scale-codec",
- "scale-info",
- "sp-core",
- "sp-io",
- "sp-std",
- "tfhe",
-]
-
-[[package]]
 name = "predicates"
 version = "3.1.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -11071,6 +11118,17 @@ dependencies = [
 
 [[package]]
 name = "primitive-types"
+version = "0.12.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "0b34d9fd68ae0b74a41b21c03c2f62847aa0ffea044eee893b4c140b37e244e2"
+dependencies = [
+ "fixed-hash",
+ "impl-rlp 0.3.0",
+ "uint 0.9.5",
+]
+
+[[package]]
+name = "primitive-types"
 version = "0.13.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "d15600a7d856470b7d278b3fe0e311fe28c2526348549f8ef2ff7db3299c87f5"
@@ -11078,7 +11136,7 @@ dependencies = [
  "fixed-hash",
  "impl-codec",
  "impl-num-traits",
- "impl-rlp",
+ "impl-rlp 0.4.0",
  "impl-serde",
  "scale-info",
  "uint 0.10.0",
@@ -11791,6 +11849,16 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "bd124222d17ad93a644ed9d011a40f4fb64aa54275c08cc216524a9ea82fb09f"
 dependencies = [
  "digest 0.10.7",
+]
+
+[[package]]
+name = "rlp"
+version = "0.5.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "bb919243f34364b6bd2fc10ef797edbfa75f33c252e7998527479c6d6b47e1ec"
+dependencies = [
+ "bytes",
+ "rustc-hex",
 ]
 
 [[package]]
@@ -13493,7 +13561,7 @@ checksum = "f8ae9cc099ae85ff28820210732b00f019546f36f33225f509fe25d5816864a0"
 dependencies = [
  "derive_more 1.0.0",
  "parity-scale-codec",
- "primitive-types",
+ "primitive-types 0.13.1",
  "scale-bits",
  "scale-decode-derive",
  "scale-type-resolver",
@@ -13520,7 +13588,7 @@ checksum = "5f9271284d05d0749c40771c46180ce89905fd95aa72a2a2fddb4b7c0aa424db"
 dependencies = [
  "derive_more 1.0.0",
  "parity-scale-codec",
- "primitive-types",
+ "primitive-types 0.13.1",
  "scale-bits",
  "scale-encode-derive",
  "scale-type-resolver",
@@ -14605,7 +14673,7 @@ dependencies = [
  "parity-scale-codec",
  "parking_lot 0.12.4",
  "paste",
- "primitive-types",
+ "primitive-types 0.13.1",
  "rand 0.8.5",
  "scale-info",
  "schnorrkel 0.11.5",
@@ -14891,7 +14959,7 @@ dependencies = [
  "impl-trait-for-tuples",
  "parity-scale-codec",
  "polkavm-derive",
- "primitive-types",
+ "primitive-types 0.13.1",
  "sp-externalities",
  "sp-runtime-interface-proc-macro",
  "sp-std",
@@ -15622,7 +15690,7 @@ dependencies = [
  "jsonrpsee",
  "parity-scale-codec",
  "polkadot-sdk",
- "primitive-types",
+ "primitive-types 0.13.1",
  "scale-bits",
  "scale-decode 0.14.0",
  "scale-encode",
@@ -15676,7 +15744,7 @@ dependencies = [
  "keccak-hash",
  "parity-scale-codec",
  "polkadot-sdk",
- "primitive-types",
+ "primitive-types 0.13.1",
  "scale-bits",
  "scale-decode 0.14.0",
  "scale-encode",
@@ -16006,7 +16074,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "81d2bfa12b8ed34e6c70d04489c9201daefde2030bc48f437eeba2ee14bcb46a"
 dependencies = [
  "aligned-vec",
- "bincode 1.3.3",
+ "bincode",
  "bytemuck",
  "dyn-stack",
  "itertools 0.14.0",
@@ -16758,12 +16826,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "8ecb6da28b8a351d773b68d5825ac39017e680750f980f3a1a85cd8dd28a47c1"
 
 [[package]]
-name = "unty"
-version = "0.0.4"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "6d49784317cd0d1ee7ec5c716dd598ec5b4483ea832a2dced265471cc0f690ae"
-
-[[package]]
 name = "url"
 version = "2.5.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -17182,7 +17244,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "f907fdead3153cb9bfb7a93bbd5b62629472dc06dee83605358c64c52ed3dda9"
 dependencies = [
  "anyhow",
- "bincode 1.3.3",
+ "bincode",
  "cfg-if",
  "indexmap 1.9.3",
  "libc",
@@ -17220,7 +17282,7 @@ checksum = "c86437fa68626fe896e5afc69234bb2b5894949083586535f200385adfd71213"
 dependencies = [
  "anyhow",
  "base64 0.21.7",
- "bincode 1.3.3",
+ "bincode",
  "directories-next",
  "file-per-thread-logger",
  "log",
@@ -17296,7 +17358,7 @@ checksum = "0de48df552cfca1c9b750002d3e07b45772dd033b0b206d5c0968496abf31244"
 dependencies = [
  "addr2line 0.19.0",
  "anyhow",
- "bincode 1.3.3",
+ "bincode",
  "cfg-if",
  "cpp_demangle",
  "gimli 0.27.3",
