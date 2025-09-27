@@ -1,14 +1,9 @@
 #![cfg_attr(not(feature = "std"), no_std)]
 
-extern crate alloc;
-
-use alloc::vec::Vec;
-
-use fhe_primitives::{AlgoId, CtBlob, ParamsId, PubKeyBlob, ServerKeyRef};
-use frame_support::{pallet_prelude::*, traits::ConstU32};
+pub mod ops;
+use frame_support::pallet_prelude::*;
 use frame_system::pallet_prelude::*;
-use parity_scale_codec::{Decode, Encode, MaxEncodedLen};
-use scale_info::TypeInfo;
+pub use ops::*;
 
 #[frame_support::pallet]
 pub mod pallet {
@@ -18,80 +13,120 @@ pub mod pallet {
     pub trait Config: frame_system::Config {
         /// Runtime event
         type RuntimeEvent: From<Event<Self>> + IsType<<Self as frame_system::Config>::RuntimeEvent>;
-        /// Max ciphertext bytes allowed on-chain.
-        #[pallet::constant]
-        type MaxCiphertextBytes: Get<u32>;
 
-        /// Max public key bytes allowed on-chain (if you store it).
-        #[pallet::constant]
-        type MaxPubKeyBytes: Get<u32>;
+        /// Operations exposed by the FHE coprocessor injected by the Runtime
+        type RuntimeFhe: FheOps;
 
-        /// Weight info (use () for now).
+        /// Weight info
         type WeightInfo: WeightData;
     }
 
-    /// Keep weights minimal for now.
     pub trait WeightData {
-        fn request() -> Weight;
-        fn set_pubkey() -> Weight;
-        fn ingest() -> Weight;
+        fn set_operator() -> Weight;
+        fn confidential_transfer() -> Weight;
+        fn request_decryption() -> Weight;
+        fn decrypt() -> Weight;
     }
     impl WeightData for () {
-        fn request() -> Weight {
+        fn set_operator() -> Weight {
             Weight::from_parts(10_000, 0)
         }
 
-        fn set_pubkey() -> Weight {
+        fn confidential_transfer() -> Weight {
             Weight::from_parts(10_000, 0)
         }
 
-        fn ingest() -> Weight {
+        fn request_decryption() -> Weight {
+            Weight::from_parts(10_000, 0)
+        }
+
+        fn decrypt() -> Weight {
             Weight::from_parts(10_000, 0)
         }
     }
 
-    /// Optional storage if you want to keep a registry of server keys (off-chain referenced).
+    /// Storage for operators
+    /// (Holder, Operator, AssetId) => Until
     #[pallet::storage]
-    pub type ServerKeyById<T: Config> =
-        StorageMap<_, Blake2_128Concat, [u8; 32], ServerKeyRef, OptionQuery>;
+    pub type Operators<T: Config> = StorageNMap<
+        _,
+        (
+            NMapKey<Blake2_128Concat, T::AccountId>, // Holder
+            NMapKey<Blake2_128Concat, AssetId>,      // AssetId
+            NMapKey<Blake2_128Concat, T::AccountId>, // Operator
+        ),
+        BlockNumberFor<T>, //Until
+        OptionQuery,
+    >;
 
-    /// Example storage for async results: context_id -> ciphertext
+    /// Storage for encrypted total supply
+    /// AssetId => Cipher
     #[pallet::storage]
-    pub type ResultByContext<T: Config> =
-        StorageMap<_, Blake2_128Concat, [u8; 32], CtBlob, OptionQuery>;
+    pub type TotalSupply<T: Config> = StorageMap<_, Blake2_128Concat, AssetId, Cipher, OptionQuery>;
+
+    /// Storage for encrypted balances
+    /// (AssetId, Holder) => Cipher
+    #[pallet::storage]
+    pub type Balances<T: Config> = StorageDoubleMap<
+        _,
+        Blake2_128Concat,
+        AssetId,
+        Blake2_128Concat,
+        T::AccountId,
+        Cipher,
+        OptionQuery,
+    >;
+
+    #[pallet::storage]
+    pub type DisclosureId<T: Config> = StorageValue<_, RequestId, ValueQuery>;
+
+    /// Storage for requests to decrypt and publicly disclose encrypted amounts
+    /// RequestId => Encrypted
+    /// Decrypted amount emitted via Event and NOT stored here
+    #[pallet::storage]
+    pub type Disclosures<T: Config> =
+        StorageMap<_, Blake2_128Concat, RequestId, Cipher, OptionQuery>;
 
     #[pallet::event]
     #[pallet::generate_deposit(pub(super) fn deposit_event)]
     pub enum Event<T: Config> {
-        /// Request emitted for off-chain coprocessor (FRAME event—your relayer can listen to these).
-        FheAddRequested {
-            who: T::AccountId,
-            params: ParamsId,
-            a_len: u32,
-            b_len: u32,
-            context: [u8; 32],
+        OperatorSet {
+            asset: AssetId,
+            holder: T::AccountId,
+            operator: T::AccountId,
+            until: BlockNumberFor<T>,
         },
-        FheSubRequested {
-            who: T::AccountId,
-            params: ParamsId,
-            a_len: u32,
-            b_len: u32,
-            context: [u8; 32],
+        ConfidentialTransfer {
+            asset: AssetId,
+            from: T::AccountId,
+            to: T::AccountId,
+            transferred: Cipher,
         },
-        FheCmpRequested {
-            who: T::AccountId,
-            params: ParamsId,
-            a_len: u32,
-            b_len: u32,
-            context: [u8; 32],
+        ConfidentialMint {
+            asset: AssetId,
+            to: T::AccountId,
+            minted: Cipher,
         },
-        /// Coprocessor posted the result.
-        FheResultIngested { context: [u8; 32], params: ParamsId, len: u32 },
+        ConfidentialBurn {
+            asset: AssetId,
+            from: T::AccountId,
+            burned: Cipher,
+        },
+        DecryptionRequested {
+            encrypted: Cipher,
+        },
+        AmountDisclosed {
+            encrypted: Cipher,
+            amount: Balance,
+        },
     }
 
     #[pallet::error]
     pub enum Error<T> {
-        ResultAlreadyExists,
+        ZeroBalance,
+        DisclosureIdOverflowed,
+        DecryptionRequestNotFound,
+        InvalidDecryptionProof,
     }
 
     #[pallet::pallet]
@@ -99,96 +134,170 @@ pub mod pallet {
 
     #[pallet::call]
     impl<T: Config> Pallet<T> {
-        /// Request an ADD evaluation: emits Event that relayer/coprocessor can pick up.
         #[pallet::call_index(0)]
-        #[pallet::weight(T::WeightInfo::request())]
-        pub fn request_add(
+        #[pallet::weight(T::WeightInfo::set_operator())]
+        pub fn set_operator(
             origin: OriginFor<T>,
-            params: ParamsId,
-            ct_a: CtBlob,
-            ct_b: CtBlob,
-            context: [u8; 32],
+            asset: AssetId,
+            operator: T::AccountId,
+            until: BlockNumberFor<T>,
         ) -> DispatchResult {
-            let who = ensure_signed(origin)?;
-            // size enforced by bounded input length
-            Self::deposit_event(Event::FheAddRequested {
-                who,
-                params,
-                a_len: ct_a.payload.len() as u32,
-                b_len: ct_b.payload.len() as u32,
-                context,
-            });
+            let holder = ensure_signed(origin)?;
+            // Per ERC7984.sol do NOT check until < current_block (saves gas/weight)
+            Operators::<T>::insert((holder.clone(), asset, operator.clone()), until);
+            Self::deposit_event(Event::OperatorSet { asset, holder, operator, until });
             Ok(())
         }
 
-        /// Request a SUB evaluation: emits Event that relayer/coprocessor can pick up.
         #[pallet::call_index(1)]
-        #[pallet::weight(T::WeightInfo::request())]
-        pub fn request_sub(
+        #[pallet::weight(T::WeightInfo::confidential_transfer())]
+        pub fn confidential_transfer(
             origin: OriginFor<T>,
-            params: ParamsId,
-            ct_a: CtBlob,
-            ct_b: CtBlob,
-            context: [u8; 32],
+            asset: AssetId,
+            to: T::AccountId,
+            amount: Cipher,
         ) -> DispatchResult {
-            let who = ensure_signed(origin)?;
-            // size enforced by bounded input length
-            Self::deposit_event(Event::FheSubRequested {
-                who,
-                params,
-                a_len: ct_a.payload.len() as u32,
-                b_len: ct_b.payload.len() as u32,
-                context,
-            });
+            let from = ensure_signed(origin)?;
+            let transferred =
+                Self::try_confidential_transfer(&asset, Some(&from), Some(&to), &amount)?;
+            Self::deposit_event(Event::ConfidentialTransfer { asset, from, to, transferred });
             Ok(())
         }
 
-        /// Request an CMP evaluation: emits Event that relayer/coprocessor can pick up.
         #[pallet::call_index(2)]
-        #[pallet::weight(T::WeightInfo::request())]
-        pub fn request_cmp(
+        #[pallet::weight(T::WeightInfo::confidential_transfer())]
+        pub fn confidential_mint(
             origin: OriginFor<T>,
-            params: ParamsId,
-            ct_a: CtBlob,
-            ct_b: CtBlob,
-            context: [u8; 32],
+            asset: AssetId,
+            to: T::AccountId,
+            amount: Cipher,
         ) -> DispatchResult {
-            let who = ensure_signed(origin)?;
-            // size enforced by bounded input length
-            Self::deposit_event(Event::FheCmpRequested {
-                who,
-                params,
-                a_len: ct_a.payload.len() as u32,
-                b_len: ct_b.payload.len() as u32,
-                context,
-            });
+            ensure_root(origin)?; //TODO configurable origin
+            let minted = Self::try_confidential_transfer(&asset, None, Some(&to), &amount)?;
+            Self::deposit_event(Event::ConfidentialMint { asset, to, minted });
             Ok(())
         }
 
         #[pallet::call_index(3)]
-        #[pallet::weight(T::WeightInfo::set_pubkey())]
-        pub fn set_pubkey(origin: OriginFor<T>, pubkey: PubKeyBlob) -> DispatchResult {
-            let who = ensure_signed(origin)?;
-            // TODO: associate PubkeyBlob with AccountId
+        #[pallet::weight(T::WeightInfo::confidential_transfer())]
+        pub fn confidential_burn(
+            origin: OriginFor<T>,
+            asset: AssetId,
+            from: T::AccountId,
+            amount: Cipher,
+        ) -> DispatchResult {
+            ensure_root(origin)?; //TODO configurable origin
+            let burned = Self::try_confidential_transfer(&asset, Some(&from), None, &amount)?;
+            Self::deposit_event(Event::ConfidentialBurn { asset, from, burned });
             Ok(())
         }
 
-        /// Coprocessor/relayer posts a result ciphertext tied to `context`.
         #[pallet::call_index(4)]
-        #[pallet::weight(T::WeightInfo::ingest())]
-        pub fn ingest_result(
-            origin: OriginFor<T>,
-            params: ParamsId,
-            context: [u8; 32],
-            ct_out: CtBlob,
-        ) -> DispatchResult {
-            let _who = ensure_signed(origin)?;
-            // TODO: ensure associated with pubkey
-            ensure!(ResultByContext::<T>::get(context).is_none(), Error::<T>::ResultAlreadyExists);
-            let len = ct_out.payload.len() as u32;
-            ResultByContext::<T>::insert(context, ct_out);
-            Self::deposit_event(Event::FheResultIngested { context, params, len });
+        #[pallet::weight(T::WeightInfo::request_decryption())]
+        pub fn request_decryption(origin: OriginFor<T>, encrypted: Cipher) -> DispatchResult {
+            let _ = ensure_signed(origin)?; //TODO: permissions
+            let request = DisclosureId::<T>::get();
+            Disclosures::<T>::insert(request, encrypted);
+            DisclosureId::<T>::set(
+                request.checked_add(1).ok_or(Error::<T>::DisclosureIdOverflowed)?,
+            );
+            <T as Config>::RuntimeFhe::request_decryption(encrypted);
+            Self::deposit_event(Event::DecryptionRequested { encrypted });
             Ok(())
+        }
+
+        #[pallet::call_index(5)]
+        #[pallet::weight(T::WeightInfo::decrypt())]
+        pub fn decrypt(
+            origin: OriginFor<T>,
+            request: RequestId,
+            amount: Balance,
+            proof: Cipher, //decryption proof (create new type?)
+        ) -> DispatchResult {
+            let _ = ensure_signed(origin)?; //TODO: permissions?
+            let encrypted =
+                Disclosures::<T>::get(request).ok_or(Error::<T>::DecryptionRequestNotFound)?;
+            ensure!(
+                <T as Config>::RuntimeFhe::check_signatures(request, amount, proof),
+                Error::<T>::InvalidDecryptionProof
+            );
+            Self::deposit_event(Event::AmountDisclosed { encrypted, amount });
+            Ok(())
+        }
+    }
+
+    impl<T: Config> Pallet<T> {
+        /// Try to execute confidential transfer
+        /// Propagates error if unsuccessful otherwise returns amount transferred
+        /// which is encrypted and hidden for all except participants
+        fn try_confidential_transfer(
+            asset: &AssetId,
+            from: Option<&T::AccountId>,
+            to: Option<&T::AccountId>,
+            amount: &Cipher,
+        ) -> Result<Cipher, Error<T>> {
+            // debit or mint
+            let (success, _) = if let Some(f) = from {
+                let from_bal = Balances::<T>::get(asset.clone(), f.clone()).unwrap_or_default();
+                ensure!(
+                    <T as Config>::RuntimeFhe::is_initialized(asset.clone(), from_bal.clone()),
+                    Error::<T>::ZeroBalance
+                );
+
+                let (s, ptr) = <T as Config>::RuntimeFhe::try_decrease(
+                    asset.clone(),
+                    from_bal,
+                    amount.clone(),
+                );
+                <T as Config>::RuntimeFhe::allow_this(asset.clone(), ptr.clone());
+                <T as Config>::RuntimeFhe::allow_to::<T>(asset.clone(), ptr.clone(), f);
+
+                Balances::<T>::insert(asset.clone(), f.clone(), ptr.clone());
+                (s, ptr)
+            } else {
+                let total = TotalSupply::<T>::get(asset).unwrap_or_default();
+                let (s, ptr) =
+                    <T as Config>::RuntimeFhe::try_increase(asset.clone(), total, amount.clone());
+                <T as Config>::RuntimeFhe::allow_this(asset.clone(), ptr.clone());
+                TotalSupply::<T>::insert(asset, ptr.clone());
+                (s, ptr)
+            };
+
+            // transferred = success ? amount : 0
+            let zero = <T as Config>::RuntimeFhe::as_zero();
+            let transferred = <T as Config>::RuntimeFhe::select(
+                asset.clone(),
+                success.clone(),
+                amount.clone(),
+                zero,
+            );
+
+            // credit or burn
+            if let Some(tacct) = to {
+                let to_bal = Balances::<T>::get(asset.clone(), tacct.clone()).unwrap_or_default();
+                let sum =
+                    <T as Config>::RuntimeFhe::add(asset.clone(), to_bal, transferred.clone());
+                <T as Config>::RuntimeFhe::allow_this(asset.clone(), sum.clone());
+                <T as Config>::RuntimeFhe::allow_to::<T>(asset.clone(), sum.clone(), tacct);
+
+                Balances::<T>::insert(asset.clone(), tacct.clone(), sum);
+            } else {
+                let total = TotalSupply::<T>::get(asset).unwrap_or_default();
+                let new_total =
+                    <T as Config>::RuntimeFhe::sub(asset.clone(), total, transferred.clone());
+                <T as Config>::RuntimeFhe::allow_this(asset.clone(), new_total.clone());
+                TotalSupply::<T>::insert(asset, new_total);
+            }
+
+            if let Some(f) = from {
+                <T as Config>::RuntimeFhe::allow_to::<T>(asset.clone(), transferred.clone(), f);
+            }
+            if let Some(t) = to {
+                <T as Config>::RuntimeFhe::allow_to::<T>(asset.clone(), transferred.clone(), t);
+            }
+            <T as Config>::RuntimeFhe::allow_this(*asset, transferred.clone());
+
+            Ok(transferred)
         }
     }
 }

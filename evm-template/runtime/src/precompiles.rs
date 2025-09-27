@@ -6,7 +6,7 @@ use pallet_evm::{
 use pallet_evm_precompile_modexp::Modexp;
 use pallet_evm_precompile_sha3fips::Sha3FIPS256;
 use pallet_evm_precompile_simple::{ECRecover, ECRecoverPublicKey, Identity, Ripemd160, Sha256};
-use precompiles_fhe::{FheAlu, FHE_ALU_ADDR};
+// use precompile_fhe::{Fhe, FHE_ADDR};
 use sp_core::H160;
 
 #[derive(Default)]
@@ -29,8 +29,8 @@ where
             hash(5),
             hash(1024),
             hash(1025), // NEW: FHE_ALU at 0x...1001. We use the constant from the crate
-            // to avoid mismatches with the Solidity shim.
-            FHE_ALU_ADDR,
+                        // to avoid mismatches with the Solidity shim.
+                        //FHE_ALU_ADDR,
         ]
     }
 }
@@ -50,8 +50,8 @@ where
             a if a == hash(1024) => Some(Sha3FIPS256::execute(handle)),
             a if a == hash(1025) => Some(ECRecoverPublicKey::execute(handle)),
             // NEW: FHE_ALU (real tfhe-rs ALU; dev selectors enabled via `fhe-dev` feature)
-            a if a == FHE_ALU_ADDR => Some(FheAlu::<R>::execute(handle)),
-            _ => None,
+            // a if a == FHE_ALU_ADDR => Some(FheAlu::<R>::execute(handle)),
+            // _ => None,
         }
     }
 

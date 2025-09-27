@@ -21,7 +21,7 @@ smallvec = { workspace = true }
 
 openzeppelin-pallet-abstractions = { workspace = true }
 openzeppelin-pallet-abstractions-proc = { workspace = true }
-fhe-precompile = { path = "../fhe/precompile", default-features = false }
+# fhe-precompile = { path = "../fhe/precompile", default-features = false }
 
 # Substrate
 frame-benchmarking = { workspace = true, optional = true }
@@ -149,7 +149,7 @@ std = [
 	"cumulus-primitives-core/std",
 	"cumulus-primitives-utility/std",
 	"dp-consensus/std",
-	"fhe-precompile/std",
+	# "fhe-precompile/std",
 	"fp-account/std",
 	"fp-account/std",
 	"fp-evm/std",
