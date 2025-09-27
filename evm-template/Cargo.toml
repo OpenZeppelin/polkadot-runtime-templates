@@ -1,5 +1,5 @@
 [workspace]
-members = [ "node", "runtime", "template-fuzzer", "fhe/pallet", "fhe/precompile", "fhe/primitives", ]
+members = [ "node", "runtime", "template-fuzzer", "fhe/pallet", "fhe/primitives", ]
 resolver = "2"
 
 [workspace.package]

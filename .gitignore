@@ -31,3 +31,6 @@ coverage
 
 # fuzzing output
 **/template-fuzzer/output
+
+# TODO remove before merging TODO
+evm-template/fhe/PLAN.md
