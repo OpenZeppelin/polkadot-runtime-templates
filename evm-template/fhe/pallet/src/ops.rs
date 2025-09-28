@@ -6,18 +6,16 @@ pub type AssetId = u128;
 pub type Cipher = [u8; 32];
 pub type RequestId = u64;
 
-// TODO: Remove all instances and usage of AssetId from here
-// and the Runtime Interface
 pub trait FheOps {
-    fn add(asset: AssetId, a: Cipher, b: Cipher) -> Cipher;
-    fn sub(asset: AssetId, x: Cipher, d: Cipher) -> Cipher;
-    fn select(asset: AssetId, c: Cipher, x: Cipher, y: Cipher) -> Cipher;
-    fn try_increase(asset: AssetId, a: Cipher, b: Cipher) -> (Cipher, Cipher);
-    fn try_decrease(asset: AssetId, x: Cipher, d: Cipher) -> (Cipher, Cipher);
+    fn add(a: Cipher, b: Cipher) -> Cipher;
+    fn sub(x: Cipher, d: Cipher) -> Cipher;
+    fn select(c: Cipher, x: Cipher, y: Cipher) -> Cipher;
+    fn try_increase(a: Cipher, b: Cipher) -> (Cipher, Cipher);
+    fn try_decrease(x: Cipher, d: Cipher) -> (Cipher, Cipher);
     fn as_zero() -> Cipher;
-    fn is_initialized(asset: AssetId, x: Cipher) -> bool;
-    fn allow_this(asset: AssetId, x: Cipher);
-    fn allow_to<T: frame_system::Config>(asset: AssetId, x: Cipher, who: &T::AccountId);
+    fn is_initialized(x: Cipher) -> bool;
+    fn allow_this(x: Cipher);
+    fn allow_to<T: frame_system::Config>(x: Cipher, who: &T::AccountId);
     fn request_decryption(x: Cipher);
     fn check_signatures(request: RequestId, amount: Balance, proof: Cipher) -> bool;
 }
@@ -25,23 +23,23 @@ pub trait FheOps {
 #[cfg(test)]
 // Default implementation for mock runtimes. Do NOT use in production.
 impl FheOps for () {
-    fn add(_asset: AssetId, _a: Cipher, _b: Cipher) -> Cipher {
+    fn add(_a: Cipher, _b: Cipher) -> Cipher {
         Default::default()
     }
 
-    fn sub(_asset: AssetId, _x: Cipher, _d: Cipher) -> Cipher {
+    fn sub(_x: Cipher, _d: Cipher) -> Cipher {
         Default::default()
     }
 
-    fn select(_asset: AssetId, _c: Cipher, _x: Cipher, _y: Cipher) -> Cipher {
+    fn select(_c: Cipher, _x: Cipher, _y: Cipher) -> Cipher {
         Default::default()
     }
 
-    fn try_increase(_asset: AssetId, _a: Cipher, _b: Cipher) -> (Cipher, Cipher) {
+    fn try_increase(_a: Cipher, _b: Cipher) -> (Cipher, Cipher) {
         Default::default()
     }
 
-    fn try_decrease(_asset: AssetId, _x: Cipher, _d: Cipher) -> (Cipher, Cipher) {
+    fn try_decrease(_x: Cipher, _d: Cipher) -> (Cipher, Cipher) {
         Default::default()
     }
 
@@ -49,13 +47,13 @@ impl FheOps for () {
         Default::default()
     }
 
-    fn is_initialized(_asset: AssetId, _x: Cipher) -> bool {
+    fn is_initialized(_x: Cipher) -> bool {
         true
     }
 
-    fn allow_this(_asset: AssetId, _x: Cipher) {}
+    fn allow_this(_x: Cipher) {}
 
-    fn allow_to<T: frame_system::Config>(_asset: AssetId, _x: Cipher, _who: &T::AccountId) {}
+    fn allow_to<T: frame_system::Config>(_x: Cipher, _who: &T::AccountId) {}
 
     fn request_decryption(_x: Cipher) {}
 

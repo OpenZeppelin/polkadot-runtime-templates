@@ -240,62 +240,51 @@ pub mod pallet {
             let (success, _) = if let Some(f) = from {
                 let from_bal = Balances::<T>::get(asset.clone(), f.clone()).unwrap_or_default();
                 ensure!(
-                    <T as Config>::RuntimeFhe::is_initialized(asset.clone(), from_bal.clone()),
+                    <T as Config>::RuntimeFhe::is_initialized(from_bal.clone()),
                     Error::<T>::ZeroBalance
                 );
 
-                let (s, ptr) = <T as Config>::RuntimeFhe::try_decrease(
-                    asset.clone(),
-                    from_bal,
-                    amount.clone(),
-                );
-                <T as Config>::RuntimeFhe::allow_this(asset.clone(), ptr.clone());
-                <T as Config>::RuntimeFhe::allow_to::<T>(asset.clone(), ptr.clone(), f);
+                let (s, ptr) = <T as Config>::RuntimeFhe::try_decrease(from_bal, amount.clone());
+                <T as Config>::RuntimeFhe::allow_this(ptr.clone());
+                <T as Config>::RuntimeFhe::allow_to::<T>(ptr.clone(), f);
 
-                Balances::<T>::insert(asset.clone(), f.clone(), ptr.clone());
+                Balances::<T>::insert(asset, f.clone(), ptr.clone());
                 (s, ptr)
             } else {
                 let total = TotalSupply::<T>::get(asset).unwrap_or_default();
-                let (s, ptr) =
-                    <T as Config>::RuntimeFhe::try_increase(asset.clone(), total, amount.clone());
-                <T as Config>::RuntimeFhe::allow_this(asset.clone(), ptr.clone());
+                let (s, ptr) = <T as Config>::RuntimeFhe::try_increase(total, amount.clone());
+                <T as Config>::RuntimeFhe::allow_this(ptr.clone());
                 TotalSupply::<T>::insert(asset, ptr.clone());
                 (s, ptr)
             };
 
             // transferred = success ? amount : 0
             let zero = <T as Config>::RuntimeFhe::as_zero();
-            let transferred = <T as Config>::RuntimeFhe::select(
-                asset.clone(),
-                success.clone(),
-                amount.clone(),
-                zero,
-            );
+            let transferred =
+                <T as Config>::RuntimeFhe::select(success.clone(), amount.clone(), zero);
 
             // credit or burn
             if let Some(tacct) = to {
                 let to_bal = Balances::<T>::get(asset.clone(), tacct.clone()).unwrap_or_default();
-                let sum =
-                    <T as Config>::RuntimeFhe::add(asset.clone(), to_bal, transferred.clone());
-                <T as Config>::RuntimeFhe::allow_this(asset.clone(), sum.clone());
-                <T as Config>::RuntimeFhe::allow_to::<T>(asset.clone(), sum.clone(), tacct);
+                let sum = <T as Config>::RuntimeFhe::add(to_bal, transferred.clone());
+                <T as Config>::RuntimeFhe::allow_this(sum.clone());
+                <T as Config>::RuntimeFhe::allow_to::<T>(sum.clone(), tacct);
 
                 Balances::<T>::insert(asset.clone(), tacct.clone(), sum);
             } else {
                 let total = TotalSupply::<T>::get(asset).unwrap_or_default();
-                let new_total =
-                    <T as Config>::RuntimeFhe::sub(asset.clone(), total, transferred.clone());
-                <T as Config>::RuntimeFhe::allow_this(asset.clone(), new_total.clone());
+                let new_total = <T as Config>::RuntimeFhe::sub(total, transferred.clone());
+                <T as Config>::RuntimeFhe::allow_this(new_total.clone());
                 TotalSupply::<T>::insert(asset, new_total);
             }
 
             if let Some(f) = from {
-                <T as Config>::RuntimeFhe::allow_to::<T>(asset.clone(), transferred.clone(), f);
+                <T as Config>::RuntimeFhe::allow_to::<T>(transferred.clone(), f);
             }
             if let Some(t) = to {
-                <T as Config>::RuntimeFhe::allow_to::<T>(asset.clone(), transferred.clone(), t);
+                <T as Config>::RuntimeFhe::allow_to::<T>(transferred.clone(), t);
             }
-            <T as Config>::RuntimeFhe::allow_this(*asset, transferred.clone());
+            <T as Config>::RuntimeFhe::allow_this(transferred.clone());
 
             Ok(transferred)
         }
