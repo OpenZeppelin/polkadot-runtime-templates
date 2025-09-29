@@ -2885,8 +2885,8 @@ dependencies = [
  "hex-literal",
  "parity-scale-codec",
  "scale-info",
- "sp-runtime",
  "sp-runtime-interface",
+ "sp-std",
  "tfhe",
 ]
 

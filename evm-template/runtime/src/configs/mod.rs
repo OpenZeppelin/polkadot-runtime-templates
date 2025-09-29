@@ -1,6 +1,6 @@
 pub mod asset_config;
 #[cfg(feature = "fhe")]
-pub mod fhe_config;
+pub mod confidential_assets_config;
 pub mod governance;
 pub mod weight;
 pub mod xcm_config;
@@ -227,6 +227,7 @@ where
     }
 }
 
+// TODO: add confidential assets parameters optionally here
 impl AssetsConfig for OpenZeppelinRuntime {
     type AccountId = AccountId;
     type ApprovalDeposit = ConstU128<MILLICENTS>;

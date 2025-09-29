@@ -212,15 +212,15 @@ pub mod pallet {
         #[pallet::call_index(4)]
         #[pallet::weight(T::WeightInfo::request_decryption())]
         pub fn request_decryption(origin: OriginFor<T>, encrypted: Cipher) -> DispatchResult {
-            let _ = ensure_signed(origin)?; //TODO: permissions
+            ensure_signed(origin)?;
             let request = DisclosureId::<T>::get();
-            Disclosures::<T>::insert(request, encrypted);
+            Disclosures::<T>::insert(request, encrypted.clone());
             DisclosureId::<T>::set(
                 request
                     .checked_add(1)
                     .ok_or(Error::<T>::DisclosureIdOverflowed)?,
             );
-            <T as Config>::RuntimeFhe::request_decryption(encrypted);
+            <T as Config>::RuntimeFhe::request_decryption(encrypted.clone());
             Self::deposit_event(Event::DecryptionRequested { encrypted });
             Ok(())
         }

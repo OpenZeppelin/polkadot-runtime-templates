@@ -3,7 +3,8 @@
 // TODO: move to associated types for the pallet trait Config
 pub type Balance = u128;
 pub type AssetId = u128;
-pub type Cipher = [u8; 32];
+// 128 kiB
+pub type Cipher = sp_runtime::BoundedVec<u8, frame_support::traits::ConstU32<131_072>>;
 pub type RequestId = u64;
 
 pub trait FheOps {
