@@ -1,6 +1,9 @@
 #![cfg_attr(not(feature = "std"), no_std)]
 
+// extern crate alloc;
+
 pub mod ops;
+// pub mod precompiles;
 use frame_support::pallet_prelude::*;
 use frame_system::pallet_prelude::*;
 pub use ops::*;

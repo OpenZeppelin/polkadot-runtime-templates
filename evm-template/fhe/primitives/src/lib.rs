@@ -5,6 +5,7 @@ pub mod fhe;
 #[cfg(feature = "std")]
 use fhe::*;
 use sp_runtime_interface::runtime_interface;
+use sp_runtime::Vec;
 
 #[runtime_interface]
 pub trait FheHost {

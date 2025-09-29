@@ -1,8 +1,6 @@
-//!
-//! -------- Host-side helpers (only compiled with `std`) --------
-//!   Implement these with tfhe-rs + your key/domain routing.
-//!   Keep them PURE/DETERMINISTIC (no IO/time/random).
-//!
+//! Host-side helpers (only compiled with `std`)
+//! Keep PURE/DETERMINISTIC (no IO/time/random).
+
 #[cfg(feature = "std")]
 use bincode::{deserialize, serialize};
 #[cfg(feature = "std")]

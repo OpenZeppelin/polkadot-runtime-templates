@@ -21,7 +21,8 @@ smallvec = { workspace = true }
 
 openzeppelin-pallet-abstractions = { workspace = true }
 openzeppelin-pallet-abstractions-proc = { workspace = true }
-# fhe-precompile = { path = "../fhe/precompile", default-features = false }
+pallet-confidential-assets = { path = "../fhe/pallet", default-features = false }
+fhe-primitives = { path = "../fhe/primitives", default-features = false }
 
 # Substrate
 frame-benchmarking = { workspace = true, optional = true }
@@ -149,7 +150,7 @@ std = [
 	"cumulus-primitives-core/std",
 	"cumulus-primitives-utility/std",
 	"dp-consensus/std",
-	# "fhe-precompile/std",
+	"fhe-primitives/std",
 	"fp-account/std",
 	"fp-account/std",
 	"fp-evm/std",
@@ -180,6 +181,7 @@ std = [
 	"pallet-cc-authorities-noting/std",
 	"pallet-collator-selection/std",
 	"pallet-conviction-voting/std",
+	"pallet-confidential-assets/std",
 	"pallet-erc20-xcm-bridge/std",
 	"pallet-ethereum/std",
 	"pallet-evm-chain-id/std",
@@ -327,6 +329,7 @@ try-runtime = [
 ]
 
 tanssi = []
+fhe = []
 
 # A feature that should be enabled when the runtime should be built for on-chain
 # deployment. This will disable stuff that shouldn't be part of the on-chain wasm

@@ -1,4 +1,6 @@
 pub mod asset_config;
+#[cfg(feature = "fhe")]
+pub mod fhe_config;
 pub mod governance;
 pub mod weight;
 pub mod xcm_config;
