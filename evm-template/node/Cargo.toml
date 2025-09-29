@@ -96,7 +96,7 @@ nimbus-consensus = { workspace = true }
 tc-consensus = { workspace = true }
 
 # FHE
-fhe-primitives = { path = "../fhe/primitives", features = ["std"], optional = true }
+sp-fhe = { path = "../../confidential-assets/primitives", optional = true }
 tfhe = { version = "1.3.3", default-features = false, features = ["integer", "boolean"], optional = true }
 bincode = { version = "1.3.3", optional = true }
 once_cell = { version = "1.19", optional = true }
@@ -118,7 +118,7 @@ txpool = [ "fc-rpc/txpool" ]
 
 # Enable FHE on the node (host) AND flip on runtime's `fhe` feature via dep features
 fhe = [
-  "dep:fhe-primitives",
+  "dep:sp-fhe",
   "dep:tfhe",
   "dep:bincode",
   "dep:once_cell",

@@ -21,8 +21,8 @@ smallvec = { workspace = true }
 
 openzeppelin-pallet-abstractions = { workspace = true }
 openzeppelin-pallet-abstractions-proc = { workspace = true }
-pallet-confidential-assets = { path = "../fhe/pallet", default-features = false }
-fhe-primitives = { path = "../fhe/primitives", default-features = false }
+pallet-confidential-assets = { path = "../../confidential-assets/pallet", default-features = false }
+sp-fhe = { path = "../../confidential-assets/primitives", default-features = false }
 
 # Substrate
 frame-benchmarking = { workspace = true, optional = true }
@@ -150,7 +150,6 @@ std = [
 	"cumulus-primitives-core/std",
 	"cumulus-primitives-utility/std",
 	"dp-consensus/std",
-	"fhe-primitives/std",
 	"fp-account/std",
 	"fp-account/std",
 	"fp-evm/std",
@@ -216,6 +215,7 @@ std = [
 	"sp-block-builder/std",
 	"sp-consensus-aura/std",
 	"sp-core/std",
+	"sp-fhe/std",
 	"sp-genesis-builder/std",
 	"sp-inherents/std",
 	"sp-keyring/std",

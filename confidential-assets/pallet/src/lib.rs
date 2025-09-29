@@ -148,7 +148,12 @@ pub mod pallet {
             let holder = ensure_signed(origin)?;
             // Per ERC7984.sol do NOT check until < current_block (saves gas/weight)
             Operators::<T>::insert((holder.clone(), asset, operator.clone()), until);
-            Self::deposit_event(Event::OperatorSet { asset, holder, operator, until });
+            Self::deposit_event(Event::OperatorSet {
+                asset,
+                holder,
+                operator,
+                until,
+            });
             Ok(())
         }
 
@@ -163,7 +168,12 @@ pub mod pallet {
             let from = ensure_signed(origin)?;
             let transferred =
                 Self::try_confidential_transfer(&asset, Some(&from), Some(&to), &amount)?;
-            Self::deposit_event(Event::ConfidentialTransfer { asset, from, to, transferred });
+            Self::deposit_event(Event::ConfidentialTransfer {
+                asset,
+                from,
+                to,
+                transferred,
+            });
             Ok(())
         }
 
@@ -191,7 +201,11 @@ pub mod pallet {
         ) -> DispatchResult {
             ensure_root(origin)?; //TODO configurable origin
             let burned = Self::try_confidential_transfer(&asset, Some(&from), None, &amount)?;
-            Self::deposit_event(Event::ConfidentialBurn { asset, from, burned });
+            Self::deposit_event(Event::ConfidentialBurn {
+                asset,
+                from,
+                burned,
+            });
             Ok(())
         }
 
@@ -202,7 +216,9 @@ pub mod pallet {
             let request = DisclosureId::<T>::get();
             Disclosures::<T>::insert(request, encrypted);
             DisclosureId::<T>::set(
-                request.checked_add(1).ok_or(Error::<T>::DisclosureIdOverflowed)?,
+                request
+                    .checked_add(1)
+                    .ok_or(Error::<T>::DisclosureIdOverflowed)?,
             );
             <T as Config>::RuntimeFhe::request_decryption(encrypted);
             Self::deposit_event(Event::DecryptionRequested { encrypted });

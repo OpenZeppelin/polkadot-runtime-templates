@@ -1,30 +1,27 @@
 [package]
 name = "pallet-confidential-assets"
 authors = { workspace = true }
-description = "pallet implementing confidential transfers"
+description = "pallet supporting confidential transfers"
 edition = { workspace = true }
 license = { workspace = true }
 repository = { workspace = true }
 version = "0.1.0"
 
 [dependencies]
-pallet-revive = { git = "https://github.com/paritytech/polkadot-sdk", default-features = false, tag = "polkadot-stable2503" }
+#pallet-revive = { git = "https://github.com/paritytech/polkadot-sdk", default-features = false, tag = "polkadot-stable2503" }
 parity-scale-codec = { workspace = true }
 scale-info = { workspace = true }
 frame-support = { workspace = true }
 frame-system  = { workspace = true }
 sp-runtime    = { workspace = true }
 
-fhe-primitives = { path = "../primitives", default-features = false }
-
 [features]
 default = ["std"]
 std = [
-  "fhe-primitives/std",
   "frame-support/std",
   "frame-system/std",
   "sp-runtime/std",
-  "pallet-revive/std",
+  #"pallet-revive/std",
   "parity-scale-codec/std",
   "scale-info/std",
 ]

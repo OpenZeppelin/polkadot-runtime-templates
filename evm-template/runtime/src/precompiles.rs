@@ -20,18 +20,8 @@ where
         Self(Default::default())
     }
 
-    pub fn used_addresses() -> [H160; 8] {
-        [
-            hash(1),
-            hash(2),
-            hash(3),
-            hash(4),
-            hash(5),
-            hash(1024),
-            hash(1025), // NEW: FHE_ALU at 0x...1001. We use the constant from the crate
-                        // to avoid mismatches with the Solidity shim.
-                        //FHE_ALU_ADDR,
-        ]
+    pub fn used_addresses() -> [H160; 7] {
+        [hash(1), hash(2), hash(3), hash(4), hash(5), hash(1024), hash(1025)]
     }
 }
 impl<R> PrecompileSet for OpenZeppelinPrecompiles<R>
@@ -49,9 +39,7 @@ where
             // Frontier precompiles :
             a if a == hash(1024) => Some(Sha3FIPS256::execute(handle)),
             a if a == hash(1025) => Some(ECRecoverPublicKey::execute(handle)),
-            // NEW: FHE_ALU (real tfhe-rs ALU; dev selectors enabled via `fhe-dev` feature)
-            // a if a == FHE_ALU_ADDR => Some(FheAlu::<R>::execute(handle)),
-            // _ => None,
+            _ => None,
         }
     }
 

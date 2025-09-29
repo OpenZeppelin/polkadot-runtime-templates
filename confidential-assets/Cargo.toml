@@ -1,10 +1,10 @@
 [workspace]
-members = [ "node", "runtime", "template-fuzzer", ]
+members = [ "pallet", "primitives" ]
 resolver = "2"
 
 [workspace.package]
 authors = [ "OpenZeppelin" ]
-description = "EVM Runtime template for Polkadot Para{chains, cores}"
+description = "Confidential Assets Pallet and Primitives"
 edition = "2021"
 license = "GPL-3.0-only"
 repository = "https://github.com/OpenZeppelin/polkadot-runtime-templates"
