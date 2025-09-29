@@ -50,17 +50,21 @@ use crate::eth::{
     FrontierBackend, FrontierPartialComponents, StorageOverrideHandler,
 };
 
-#[cfg(not(feature = "runtime-benchmarks"))]
-pub type HostFunctions =
+type BaseHfs =
     (sp_io::SubstrateHostFunctions, cumulus_client_service::storage_proof_size::HostFunctions);
-// TODO: add to host functions here
 
-#[cfg(feature = "runtime-benchmarks")]
-pub type HostFunctions = (
-    sp_io::SubstrateHostFunctions,
-    cumulus_client_service::storage_proof_size::HostFunctions,
-    frame_benchmarking::benchmarking::HostFunctions,
-);
+#[cfg(all(feature = "fhe", feature = "runtime-benchmarks"))]
+pub type HostFunctions =
+    (BaseHfs, frame_benchmarking::benchmarking::HostFunctions, sp_fhe::HostFunctions);
+
+#[cfg(all(not(feature = "fhe"), feature = "runtime-benchmarks"))]
+pub type HostFunctions = (BaseHfs, frame_benchmarking::benchmarking::HostFunctions);
+
+#[cfg(all(feature = "fhe", not(feature = "runtime-benchmarks")))]
+pub type HostFunctions = (BaseHfs, sp_fhe::HostFunctions);
+
+#[cfg(all(not(feature = "fhe"), not(feature = "runtime-benchmarks")))]
+pub type HostFunctions = BaseHfs;
 
 type ParachainExecutor = WasmExecutor<HostFunctions>;
 
