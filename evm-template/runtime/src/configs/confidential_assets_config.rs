@@ -58,7 +58,7 @@ impl FheOps for FheOperator {
         fhe_host::allow_to(x.to_vec(), who_scale.encode())
     }
 
-    // Get from FHEVM coprocessor?
+    // Add back once FhEVM issues resolved
     // #[inline]
     // fn request_decryption(x: Cipher) {
     //     fhe_host::request_decryption(x.to_vec())

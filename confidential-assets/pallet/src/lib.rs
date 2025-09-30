@@ -20,7 +20,7 @@ pub mod pallet {
         type RuntimeEvent: From<Event<Self>> + IsType<<Self as frame_system::Config>::RuntimeEvent>;
 
         /// Operations exposed by the FHE coprocessor injected by the Runtime
-        type RuntimeFhe: FheOps;
+        type RuntimeFhe: FheOps; //+ FhEVM;
 
         /// Weight info
         type WeightInfo: WeightData;
@@ -211,7 +211,7 @@ pub mod pallet {
             Ok(())
         }
 
-        // Get from FHEVM coprocessor?
+        // Add back once FhEVM issue resolved
         // #[pallet::call_index(4)]
         // #[pallet::weight(T::WeightInfo::request_decryption())]
         // pub fn request_decryption(origin: OriginFor<T>, encrypted: Cipher) -> DispatchResult {

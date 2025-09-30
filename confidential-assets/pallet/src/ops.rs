@@ -7,6 +7,7 @@ pub(crate) type AssetId = u128;
 pub type Cipher = sp_runtime::BoundedVec<u8, frame_support::traits::ConstU32<131_072>>;
 pub type RequestId = u64;
 
+// Tfhe-rs
 pub trait FheOps {
     fn add(a: Cipher, b: Cipher) -> Cipher;
     fn sub(x: Cipher, d: Cipher) -> Cipher;
@@ -17,9 +18,12 @@ pub trait FheOps {
     fn is_initialized(x: Cipher) -> bool;
     fn allow_this(x: Cipher);
     fn allow_to<T: frame_system::Config>(x: Cipher, who: &T::AccountId);
-    // Get from FHEVM coprocessor?
-    // fn request_decryption(x: Cipher);
-    // fn check_signatures(request: RequestId, amount: Cipher, proof: Cipher) -> bool;
+}
+
+// FhEVM-rs
+pub trait FhEVM {
+    fn request_decryption(x: Cipher);
+    fn check_signatures(request: RequestId, amount: Cipher, proof: Cipher) -> bool;
 }
 
 #[cfg(test)]
@@ -56,11 +60,13 @@ impl FheOps for () {
     fn allow_this(_x: Cipher) {}
 
     fn allow_to<T: frame_system::Config>(_x: Cipher, _who: &T::AccountId) {}
+}
 
-    // Get from FHEVM coprocessor?
-    // fn request_decryption(_x: Cipher) {}
+#[cfg(test)]
+impl FhEVM for () {
+    fn request_decryption(_x: Cipher) {}
 
-    // fn check_signatures(_request: RequestId, _amount: Cipher, _proof: Cipher) -> bool {
-    //     true
-    // }
+    fn check_signatures(_request: RequestId, _amount: Cipher, _proof: Cipher) -> bool {
+        true
+    }
 }
