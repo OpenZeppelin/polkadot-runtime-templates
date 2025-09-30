@@ -8,6 +8,8 @@ use frame_support::pallet_prelude::*;
 use frame_system::pallet_prelude::*;
 pub use ops::*;
 
+pub use pallet::*;
+
 #[frame_support::pallet]
 pub mod pallet {
     use super::*;
@@ -120,7 +122,7 @@ pub mod pallet {
         },
         AmountDisclosed {
             encrypted: Cipher,
-            amount: Balance,
+            amount: Cipher,
         },
     }
 
@@ -209,40 +211,41 @@ pub mod pallet {
             Ok(())
         }
 
-        #[pallet::call_index(4)]
-        #[pallet::weight(T::WeightInfo::request_decryption())]
-        pub fn request_decryption(origin: OriginFor<T>, encrypted: Cipher) -> DispatchResult {
-            ensure_signed(origin)?;
-            let request = DisclosureId::<T>::get();
-            Disclosures::<T>::insert(request, encrypted.clone());
-            DisclosureId::<T>::set(
-                request
-                    .checked_add(1)
-                    .ok_or(Error::<T>::DisclosureIdOverflowed)?,
-            );
-            <T as Config>::RuntimeFhe::request_decryption(encrypted.clone());
-            Self::deposit_event(Event::DecryptionRequested { encrypted });
-            Ok(())
-        }
+        // Get from FHEVM coprocessor?
+        // #[pallet::call_index(4)]
+        // #[pallet::weight(T::WeightInfo::request_decryption())]
+        // pub fn request_decryption(origin: OriginFor<T>, encrypted: Cipher) -> DispatchResult {
+        //     ensure_signed(origin)?;
+        //     let request = DisclosureId::<T>::get();
+        //     Disclosures::<T>::insert(request, encrypted.clone());
+        //     DisclosureId::<T>::set(
+        //         request
+        //             .checked_add(1)
+        //             .ok_or(Error::<T>::DisclosureIdOverflowed)?,
+        //     );
+        //     <T as Config>::RuntimeFhe::request_decryption(encrypted.clone());
+        //     Self::deposit_event(Event::DecryptionRequested { encrypted });
+        //     Ok(())
+        // }
 
-        #[pallet::call_index(5)]
-        #[pallet::weight(T::WeightInfo::decrypt())]
-        pub fn decrypt(
-            origin: OriginFor<T>,
-            request: RequestId,
-            amount: Balance,
-            proof: Cipher, //decryption proof (create new type?)
-        ) -> DispatchResult {
-            let _ = ensure_signed(origin)?; //TODO: permissions?
-            let encrypted =
-                Disclosures::<T>::get(request).ok_or(Error::<T>::DecryptionRequestNotFound)?;
-            ensure!(
-                <T as Config>::RuntimeFhe::check_signatures(request, amount, proof),
-                Error::<T>::InvalidDecryptionProof
-            );
-            Self::deposit_event(Event::AmountDisclosed { encrypted, amount });
-            Ok(())
-        }
+        // #[pallet::call_index(5)]
+        // #[pallet::weight(T::WeightInfo::decrypt())]
+        // pub fn decrypt(
+        //     origin: OriginFor<T>,
+        //     request: RequestId,
+        //     amount: Cipher, //plaintext
+        //     proof: Cipher, //decryption proof (create new type?)
+        // ) -> DispatchResult {
+        //     let _ = ensure_signed(origin)?; //TODO: permissions?
+        //     let encrypted =
+        //         Disclosures::<T>::get(request).ok_or(Error::<T>::DecryptionRequestNotFound)?;
+        //     ensure!(
+        //         <T as Config>::RuntimeFhe::check_signatures(request, amount.clone(), proof),
+        //         Error::<T>::InvalidDecryptionProof
+        //     );
+        //     Self::deposit_event(Event::AmountDisclosed { encrypted, amount });
+        //     Ok(())
+        // }
     }
 
     impl<T: Config> Pallet<T> {

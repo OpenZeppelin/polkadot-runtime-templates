@@ -195,36 +195,58 @@ pub fn native_version() -> NativeVersion {
 
 use openzeppelin_pallet_abstractions_proc::openzeppelin_construct_runtime;
 
-#[cfg(not(feature = "tanssi"))]
+// 1) no tanssi, no fhe
+#[cfg(all(not(feature = "tanssi"), not(feature = "fhe")))]
 #[openzeppelin_construct_runtime]
 mod runtime {
     struct System;
-
     struct Consensus;
-
     struct XCM;
-
     struct Assets;
-
     struct Governance;
-
     struct EVM;
 }
 
-#[cfg(feature = "tanssi")]
+// 2) no tanssi, with fhe
+#[cfg(all(not(feature = "tanssi"), feature = "fhe"))]
 #[openzeppelin_construct_runtime]
 mod runtime {
     struct System;
-
-    struct Tanssi;
-
+    struct Consensus;
     struct XCM;
-
     struct Assets;
-
     struct Governance;
-
     struct EVM;
+
+    #[pallet]
+    type ConfidentialAssets = pallet_confidential_assets;
+}
+
+// 3) tanssi, no fhe
+#[cfg(all(feature = "tanssi", not(feature = "fhe")))]
+#[openzeppelin_construct_runtime]
+mod runtime {
+    struct System;
+    struct Tanssi;
+    struct XCM;
+    struct Assets;
+    struct Governance;
+    struct EVM;
+}
+
+// 4) tanssi, with fhe
+#[cfg(all(feature = "tanssi", feature = "fhe"))]
+#[openzeppelin_construct_runtime]
+mod runtime {
+    struct System;
+    struct Tanssi;
+    struct XCM;
+    struct Assets;
+    struct Governance;
+    struct EVM;
+
+    #[pallet]
+    type ConfidentialAssets = pallet_confidential_assets;
 }
 
 use openzeppelin_pallet_abstractions_proc::openzeppelin_runtime_apis;

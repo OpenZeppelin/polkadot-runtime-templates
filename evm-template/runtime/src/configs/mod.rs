@@ -227,7 +227,6 @@ where
     }
 }
 
-// TODO: add confidential assets parameters optionally here
 impl AssetsConfig for OpenZeppelinRuntime {
     type AccountId = AccountId;
     type ApprovalDeposit = ConstU128<MILLICENTS>;
