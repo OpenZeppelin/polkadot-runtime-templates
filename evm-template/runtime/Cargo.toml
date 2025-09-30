@@ -179,8 +179,8 @@ std = [
 	"pallet-base-fee/std",
 	"pallet-cc-authorities-noting/std",
 	"pallet-collator-selection/std",
-	"pallet-conviction-voting/std",
 	"pallet-confidential-assets/std",
+	"pallet-conviction-voting/std",
 	"pallet-erc20-xcm-bridge/std",
 	"pallet-ethereum/std",
 	"pallet-evm-chain-id/std",
@@ -328,8 +328,8 @@ try-runtime = [
 	"sp-runtime/try-runtime",
 ]
 
-tanssi = []
 fhe = []
+tanssi = []
 
 # A feature that should be enabled when the runtime should be built for on-chain
 # deployment. This will disable stuff that shouldn't be part of the on-chain wasm
