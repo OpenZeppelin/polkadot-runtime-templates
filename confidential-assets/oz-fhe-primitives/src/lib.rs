@@ -2,6 +2,7 @@
 
 #[cfg(feature = "std")]
 pub mod fhe;
+pub mod oracle;
 #[cfg(feature = "std")]
 use fhe::*;
 use sp_runtime_interface::runtime_interface;

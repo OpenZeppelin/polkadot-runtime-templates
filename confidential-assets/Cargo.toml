@@ -1,5 +1,5 @@
 [workspace]
-members = [ "pallet", "primitives" ]
+members = [ "pallet-confidential-assets", "pallet-fhe-oracle", "oz-fhe-primitives" ]
 resolver = "2"
 
 [workspace.package]

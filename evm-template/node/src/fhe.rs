@@ -15,3 +15,5 @@ pub fn init_fhe() {
     set_server_key(server_key.clone()); // makes it globally usable by tfhe-rs
     SERVER_KEY.set(server_key).ok(); // keep a copy if you’ll add routing later
 }
+
+// TODO: add worker code for

@@ -1,7 +1,7 @@
 [package]
-name = "pallet-confidential-assets"
+name = "pallet-fhe-oracle"
 authors = { workspace = true }
-description = "pallet supporting confidential transfers"
+description = "pallet impl"
 edition = { workspace = true }
 license = { workspace = true }
 repository = { workspace = true }
@@ -15,6 +15,8 @@ frame-support = { workspace = true }
 frame-system  = { workspace = true }
 sp-runtime    = { workspace = true }
 
+oz-fhe-primitives = { path = "../oz-fhe-primitives" }
+
 [features]
 default = ["std"]
 std = [
@@ -24,4 +26,5 @@ std = [
   #"pallet-revive/std",
   "parity-scale-codec/std",
   "scale-info/std",
+  "oz-fhe-primitives/std",
 ]

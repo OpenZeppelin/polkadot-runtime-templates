@@ -57,14 +57,14 @@ type PolkadotHostFunctions =
 pub type HostFunctions = (
     PolkadotHostFunctions,
     frame_benchmarking::benchmarking::HostFunctions,
-    sp_fhe::fhe_host::HostFunctions,
+    oz_fhe_primitives::fhe_host::HostFunctions,
 );
 
 #[cfg(all(not(feature = "fhe"), feature = "runtime-benchmarks"))]
 pub type HostFunctions = (PolkadotHostFunctions, frame_benchmarking::benchmarking::HostFunctions);
 
 #[cfg(all(feature = "fhe", not(feature = "runtime-benchmarks")))]
-pub type HostFunctions = (PolkadotHostFunctions, sp_fhe::fhe_host::HostFunctions);
+pub type HostFunctions = (PolkadotHostFunctions, oz_fhe_primitives::fhe_host::HostFunctions);
 
 #[cfg(all(not(feature = "fhe"), not(feature = "runtime-benchmarks")))]
 pub type HostFunctions = PolkadotHostFunctions;
@@ -199,7 +199,7 @@ pub fn new_partial(
     };
 
     #[cfg(feature = "fhe")]
-    crate::fhe_init::init_fhe();
+    crate::fhe::init_fhe();
 
     Ok(PartialComponents {
         backend,

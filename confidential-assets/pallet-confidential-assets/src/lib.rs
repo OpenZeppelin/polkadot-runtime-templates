@@ -1,7 +1,6 @@
 #![cfg_attr(not(feature = "std"), no_std)]
 
-// extern crate alloc;
-
+pub mod hook;
 pub mod ops;
 // pub mod precompiles;
 use frame_support::pallet_prelude::*;
@@ -20,7 +19,7 @@ pub mod pallet {
         type RuntimeEvent: From<Event<Self>> + IsType<<Self as frame_system::Config>::RuntimeEvent>;
 
         /// Operations exposed by the FHE coprocessor injected by the Runtime
-        type RuntimeFhe: FheOps; //+ FhEVM;
+        type RuntimeFhe: FheOps;
 
         /// Weight info
         type WeightInfo: WeightData;
@@ -29,8 +28,6 @@ pub mod pallet {
     pub trait WeightData {
         fn set_operator() -> Weight;
         fn confidential_transfer() -> Weight;
-        fn request_decryption() -> Weight;
-        fn decrypt() -> Weight;
     }
     impl WeightData for () {
         fn set_operator() -> Weight {
@@ -38,14 +35,6 @@ pub mod pallet {
         }
 
         fn confidential_transfer() -> Weight {
-            Weight::from_parts(10_000, 0)
-        }
-
-        fn request_decryption() -> Weight {
-            Weight::from_parts(10_000, 0)
-        }
-
-        fn decrypt() -> Weight {
             Weight::from_parts(10_000, 0)
         }
     }
@@ -82,16 +71,6 @@ pub mod pallet {
         OptionQuery,
     >;
 
-    #[pallet::storage]
-    pub type DisclosureId<T: Config> = StorageValue<_, RequestId, ValueQuery>;
-
-    /// Storage for requests to decrypt and publicly disclose encrypted amounts
-    /// RequestId => Encrypted
-    /// Decrypted amount emitted via Event and NOT stored here
-    #[pallet::storage]
-    pub type Disclosures<T: Config> =
-        StorageMap<_, Blake2_128Concat, RequestId, Cipher, OptionQuery>;
-
     #[pallet::event]
     #[pallet::generate_deposit(pub(super) fn deposit_event)]
     pub enum Event<T: Config> {
@@ -117,21 +96,15 @@ pub mod pallet {
             from: T::AccountId,
             burned: Cipher,
         },
-        DecryptionRequested {
-            encrypted: Cipher,
-        },
         AmountDisclosed {
-            encrypted: Cipher,
-            amount: Cipher,
+            id: u64,
+            amount: u128,
         },
     }
 
     #[pallet::error]
     pub enum Error<T> {
         ZeroBalance,
-        DisclosureIdOverflowed,
-        DecryptionRequestNotFound,
-        InvalidDecryptionProof,
     }
 
     #[pallet::pallet]
@@ -179,6 +152,8 @@ pub mod pallet {
             Ok(())
         }
 
+        // TODO: impl operator authorized confidential transfer
+
         #[pallet::call_index(2)]
         #[pallet::weight(T::WeightInfo::confidential_transfer())]
         pub fn confidential_mint(
@@ -210,42 +185,6 @@ pub mod pallet {
             });
             Ok(())
         }
-
-        // Add back once FhEVM issue resolved
-        // #[pallet::call_index(4)]
-        // #[pallet::weight(T::WeightInfo::request_decryption())]
-        // pub fn request_decryption(origin: OriginFor<T>, encrypted: Cipher) -> DispatchResult {
-        //     ensure_signed(origin)?;
-        //     let request = DisclosureId::<T>::get();
-        //     Disclosures::<T>::insert(request, encrypted.clone());
-        //     DisclosureId::<T>::set(
-        //         request
-        //             .checked_add(1)
-        //             .ok_or(Error::<T>::DisclosureIdOverflowed)?,
-        //     );
-        //     <T as Config>::RuntimeFhe::request_decryption(encrypted.clone());
-        //     Self::deposit_event(Event::DecryptionRequested { encrypted });
-        //     Ok(())
-        // }
-
-        // #[pallet::call_index(5)]
-        // #[pallet::weight(T::WeightInfo::decrypt())]
-        // pub fn decrypt(
-        //     origin: OriginFor<T>,
-        //     request: RequestId,
-        //     amount: Cipher, //plaintext
-        //     proof: Cipher, //decryption proof (create new type?)
-        // ) -> DispatchResult {
-        //     let _ = ensure_signed(origin)?; //TODO: permissions?
-        //     let encrypted =
-        //         Disclosures::<T>::get(request).ok_or(Error::<T>::DecryptionRequestNotFound)?;
-        //     ensure!(
-        //         <T as Config>::RuntimeFhe::check_signatures(request, amount.clone(), proof),
-        //         Error::<T>::InvalidDecryptionProof
-        //     );
-        //     Self::deposit_event(Event::AmountDisclosed { encrypted, amount });
-        //     Ok(())
-        // }
     }
 
     impl<T: Config> Pallet<T> {

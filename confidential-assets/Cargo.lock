@@ -1996,11 +1996,40 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "c08d65885ee38876c4f86fa503fb49d7b507c2b62552df7c70b2fce627e06381"
 
 [[package]]
+name = "oz-fhe-primitives"
+version = "0.1.0"
+dependencies = [
+ "bincode",
+ "frame-support",
+ "frame-system",
+ "hex-literal",
+ "parity-scale-codec",
+ "scale-info",
+ "serde",
+ "sp-runtime-interface",
+ "sp-std",
+ "tfhe",
+]
+
+[[package]]
 name = "pallet-confidential-assets"
 version = "0.1.0"
 dependencies = [
  "frame-support",
  "frame-system",
+ "oz-fhe-primitives",
+ "parity-scale-codec",
+ "scale-info",
+ "sp-runtime",
+]
+
+[[package]]
+name = "pallet-fhe-oracle"
+version = "0.1.0"
+dependencies = [
+ "frame-support",
+ "frame-system",
+ "oz-fhe-primitives",
  "parity-scale-codec",
  "scale-info",
  "sp-runtime",
@@ -2874,20 +2903,6 @@ dependencies = [
  "environmental",
  "parity-scale-codec",
  "sp-storage",
-]
-
-[[package]]
-name = "sp-fhe"
-version = "0.1.0"
-dependencies = [
- "bincode",
- "frame-support",
- "hex-literal",
- "parity-scale-codec",
- "scale-info",
- "sp-runtime-interface",
- "sp-std",
- "tfhe",
 ]
 
 [[package]]

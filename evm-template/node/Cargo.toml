@@ -98,7 +98,7 @@ tc-consensus = { workspace = true }
 # FHE
 bincode = { version = "1.3.3", optional = true }
 once_cell = { version = "1.19", optional = true }
-sp-fhe = { path = "../../confidential-assets/primitives", optional = true }
+oz-fhe-primitives = { path = "../../confidential-assets/oz-fhe-primitives", optional = true }
 tfhe = { version = "1.3.3", default-features = false, optional = true, features = [ "boolean", "integer" ] }
 
 [build-dependencies]
@@ -120,7 +120,7 @@ txpool = [ "fc-rpc/txpool" ]
 fhe = [
 	"dep:bincode",
 	"dep:once_cell",
-	"dep:sp-fhe",
+	"dep:oz-fhe-primitives",
 	"dep:tfhe",
 	# Forward-enable runtime's `fhe` feature so Wasm compiles calls to FheHost::
 	"evm-runtime-template/fhe",

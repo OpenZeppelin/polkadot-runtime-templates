@@ -20,12 +20,6 @@ pub trait FheOps {
     fn allow_to<T: frame_system::Config>(x: Cipher, who: &T::AccountId);
 }
 
-// FhEVM-rs
-pub trait FhEVM {
-    fn request_decryption(x: Cipher);
-    fn check_signatures(request: RequestId, amount: Cipher, proof: Cipher) -> bool;
-}
-
 #[cfg(test)]
 // Default implementation for mock runtimes. Do NOT use in production.
 impl FheOps for () {
@@ -60,13 +54,4 @@ impl FheOps for () {
     fn allow_this(_x: Cipher) {}
 
     fn allow_to<T: frame_system::Config>(_x: Cipher, _who: &T::AccountId) {}
-}
-
-#[cfg(test)]
-impl FhEVM for () {
-    fn request_decryption(_x: Cipher) {}
-
-    fn check_signatures(_request: RequestId, _amount: Cipher, _proof: Cipher) -> bool {
-        true
-    }
 }

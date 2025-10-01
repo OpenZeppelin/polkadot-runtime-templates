@@ -10,7 +10,7 @@ mod command;
 mod contracts;
 mod eth;
 #[cfg(feature = "fhe")]
-mod fhe_init;
+mod fhe;
 
 #[cfg_attr(feature = "tanssi", path = "tanssi_rpc/mod.rs")]
 mod rpc;

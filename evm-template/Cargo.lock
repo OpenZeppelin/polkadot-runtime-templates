@@ -3662,6 +3662,7 @@ dependencies = [
  "orml-traits",
  "orml-xcm-support",
  "orml-xtokens",
+ "oz-fhe-primitives",
  "pallet-asset-manager",
  "pallet-asset-tx-payment",
  "pallet-assets",
@@ -3712,7 +3713,6 @@ dependencies = [
  "sp-block-builder",
  "sp-consensus-aura",
  "sp-core",
- "sp-fhe",
  "sp-genesis-builder",
  "sp-inherents",
  "sp-io",
@@ -3772,6 +3772,7 @@ dependencies = [
  "log",
  "nimbus-consensus",
  "once_cell",
+ "oz-fhe-primitives",
  "pallet-transaction-payment-rpc",
  "parity-scale-codec",
  "polkadot-cli",
@@ -3802,7 +3803,6 @@ dependencies = [
  "sp-blockchain",
  "sp-consensus-aura",
  "sp-core",
- "sp-fhe",
  "sp-inherents",
  "sp-io",
  "sp-keystore",
@@ -8003,6 +8003,22 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "b15813163c1d831bf4a13c3610c05c0d03b39feb07f7e09fa234dac9b15aaf39"
 
 [[package]]
+name = "oz-fhe-primitives"
+version = "0.1.0"
+dependencies = [
+ "bincode",
+ "frame-support",
+ "frame-system",
+ "hex-literal 0.4.1",
+ "parity-scale-codec",
+ "scale-info",
+ "serde",
+ "sp-runtime-interface",
+ "sp-std",
+ "tfhe",
+]
+
+[[package]]
 name = "pallet-asset-conversion"
 version = "22.0.0"
 source = "git+https://github.com/paritytech/polkadot-sdk?tag=polkadot-stable2503#0c0d4ceba45a70f4e8dc40b1ee0cfae1fd759454"
@@ -8374,6 +8390,7 @@ version = "0.1.0"
 dependencies = [
  "frame-support",
  "frame-system",
+ "oz-fhe-primitives",
  "parity-scale-codec",
  "scale-info",
  "sp-runtime",
@@ -14680,20 +14697,6 @@ dependencies = [
  "environmental",
  "parity-scale-codec",
  "sp-storage",
-]
-
-[[package]]
-name = "sp-fhe"
-version = "0.1.0"
-dependencies = [
- "bincode",
- "frame-support",
- "hex-literal 0.4.1",
- "parity-scale-codec",
- "scale-info",
- "sp-runtime-interface",
- "sp-std",
- "tfhe",
 ]
 
 [[package]]

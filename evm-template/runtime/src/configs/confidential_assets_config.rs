@@ -1,8 +1,8 @@
 //! Runtime pallet-confidential-assets configuration
 
+use oz_fhe_primitives::fhe_host;
 use pallet_confidential_assets::{pallet::Config, Cipher, FheOps};
 use parity_scale_codec::Encode;
-use sp_fhe::fhe_host;
 use sp_runtime::BoundedVec;
 
 use crate::{Runtime, RuntimeEvent};
@@ -57,17 +57,6 @@ impl FheOps for FheOperator {
     fn allow_to<T: frame_system::Config>(x: Cipher, who_scale: &T::AccountId) {
         fhe_host::allow_to(x.to_vec(), who_scale.encode())
     }
-
-    // Add back once FhEVM issues resolved
-    // #[inline]
-    // fn request_decryption(x: Cipher) {
-    //     fhe_host::request_decryption(x.to_vec())
-    // }
-
-    // #[inline]
-    // fn check_signatures(request: RequestId, amount: Cipher, proof: Cipher) -> bool {
-    //     fhe_host::check_signatures(request, amount.to_vec(), proof.to_vec())
-    // }
 }
 
 impl Config for Runtime {

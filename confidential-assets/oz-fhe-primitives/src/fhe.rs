@@ -101,6 +101,7 @@ pub(crate) fn fhe_is_init_impl(x: &Vec<u8>) -> bool {
     !x.is_empty()
 }
 
+// TODO: move inside pallet or into separate pallet
 // Access-control placeholders. Keep pure/deterministic.
 // Record ACL in your own state if you wish, but don't do IO here.
 #[cfg(feature = "std")]
