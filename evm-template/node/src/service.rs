@@ -199,7 +199,7 @@ pub fn new_partial(
     };
 
     #[cfg(feature = "fhe")]
-    crate::fhe::init_fhe();
+    crate::fhe::init();
 
     Ok(PartialComponents {
         backend,
