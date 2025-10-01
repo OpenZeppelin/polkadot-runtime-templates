@@ -71,6 +71,34 @@ pub mod pallet {
         OptionQuery,
     >;
 
+    #[cfg(feature = "std")]
+    #[derive(serde::Serialize, serde::Deserialize)]
+    pub struct GenesisConfig<T: Config> {
+        pub balances: Vec<(AssetId, T::AccountId, Cipher)>,
+        pub totals: Vec<(AssetId, Cipher)>,
+    }
+
+    #[cfg(feature = "std")]
+    impl<T: Config> Default for GenesisConfig<T> {
+        fn default() -> Self {
+            Self {
+                balances: Vec::new(),
+                totals: Vec::new(),
+            }
+        }
+    }
+
+    impl<T: Config> frame_support::traits::BuildGenesisConfig for GenesisConfig<T> {
+        fn build(&self) {
+            for (asset, who, balance) in self.balances.clone() {
+                Balances::<T>::insert(asset, who, balance);
+            }
+            for (asset, total) in self.totals.clone() {
+                TotalSupply::<T>::insert(asset, total);
+            }
+        }
+    }
+
     #[pallet::event]
     #[pallet::generate_deposit(pub(super) fn deposit_event)]
     pub enum Event<T: Config> {

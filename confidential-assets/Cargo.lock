@@ -2020,6 +2020,7 @@ dependencies = [
  "oz-fhe-primitives",
  "parity-scale-codec",
  "scale-info",
+ "serde",
  "sp-runtime",
 ]
 

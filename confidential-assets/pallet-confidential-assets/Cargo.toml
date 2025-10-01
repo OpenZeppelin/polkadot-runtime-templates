@@ -8,6 +8,8 @@ repository = { workspace = true }
 version = "0.1.0"
 
 [dependencies]
+serde = { workspace = true, features = ["derive"], optional = true }
+
 #pallet-revive = { git = "https://github.com/paritytech/polkadot-sdk", default-features = false, tag = "polkadot-stable2503" }
 parity-scale-codec = { workspace = true }
 scale-info = { workspace = true }
@@ -27,4 +29,5 @@ std = [
   "parity-scale-codec/std",
   "scale-info/std",
   "oz-fhe-primitives/std",
+  "dep:serde",
 ]
