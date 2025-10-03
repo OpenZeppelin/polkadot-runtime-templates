@@ -88,6 +88,7 @@ pub mod pallet {
         }
     }
 
+    #[cfg(feature = "std")]
     impl<T: Config> frame_support::traits::BuildGenesisConfig for GenesisConfig<T> {
         fn build(&self) {
             for (asset, who, balance) in self.balances.clone() {

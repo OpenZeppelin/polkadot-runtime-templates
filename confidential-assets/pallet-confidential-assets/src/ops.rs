@@ -3,8 +3,8 @@
 // TODO: move to associated types for the pallet trait Config
 pub type Balance = u128;
 pub(crate) type AssetId = u128;
-// 128 kiB
-pub type Cipher = sp_runtime::BoundedVec<u8, frame_support::traits::ConstU32<131_072>>;
+pub const CIPHER_MAX: u32 = 131_072; // 128 KiB
+pub type Cipher = sp_runtime::BoundedVec<u8, frame_support::traits::ConstU32<CIPHER_MAX>>;
 pub type RequestId = u64;
 
 // Tfhe-rs

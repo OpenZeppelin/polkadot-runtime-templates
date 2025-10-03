@@ -1,0 +1,18 @@
+[package]
+name = "benches"
+authors = { workspace = true }
+description = "benches"
+edition = { workspace = true }
+license = { workspace = true }
+publish = false
+repository = { workspace = true }
+version = "0.0.1"
+
+[dev-dependencies]
+criterion = "0.7"
+once_cell = "1"
+tfhe = { version = "1.3.3", default-features = false, features = ["integer", "boolean"] }
+
+[[bench]]
+name = "fhe_vs_u128"
+harness = false

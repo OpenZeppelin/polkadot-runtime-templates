@@ -1,5 +1,9 @@
 //! Initialize FHE Server
 
+// #![cfg(all(feature = "fhe", test))]
+// uncomment once working
+// pub mod testing;
+
 use once_cell::sync::OnceCell;
 use tfhe::{generate_keys, set_server_key, ClientKey, ConfigBuilder, ServerKey};
 
