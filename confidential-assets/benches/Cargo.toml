@@ -11,8 +11,19 @@ version = "0.0.1"
 [dev-dependencies]
 criterion = "0.7"
 once_cell = "1"
+# FHE
 tfhe = { version = "1.3.3", default-features = false, features = ["integer", "boolean"] }
+# Bulletproofs
+bulletproofs = { git = "https://github.com/zkcrypto/bulletproofs", branch = "main" }
+merlin = "3"
+curve25519-dalek = { version = "4.1.3" }
+rand = "0.8"
+rand_chacha = "0.3"
 
 [[bench]]
 name = "fhe_vs_u128"
+harness = false
+
+[[bench]]
+name = "mw_vs_u128"
 harness = false
