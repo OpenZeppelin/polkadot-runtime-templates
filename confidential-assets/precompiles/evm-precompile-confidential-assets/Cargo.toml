@@ -1,0 +1,25 @@
+[package]
+name = "evm-precompile-confidential-assets"
+authors = { workspace = true }
+description = "Frontier EVM precompile for confidential assets"
+edition = { workspace = true }
+license = { workspace = true }
+repository = { workspace = true }
+version = "0.1.0"
+
+[dependencies]
+parity-scale-codec = { workspace = true }
+scale-info = { workspace = true }
+frame-support = { workspace = true }
+frame-system  = { workspace = true }
+sp-runtime    = { workspace = true }
+
+[features]
+default = ["std"]
+std = [
+  "frame-support/std",
+  "frame-system/std",
+  "sp-runtime/std",
+  "parity-scale-codec/std",
+  "scale-info/std",
+]

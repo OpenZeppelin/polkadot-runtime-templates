@@ -1,0 +1,30 @@
+[package]
+name = "pvm-precompile-confidential-assets"
+authors = { workspace = true }
+description = "PolkaVM precompile for confidential assets"
+edition = { workspace = true }
+license = { workspace = true }
+repository = { workspace = true }
+version = "0.1.0"
+
+[dependencies]
+serde = { workspace = true, features = ["derive"], optional = true }
+
+pallet-revive = { git = "https://github.com/paritytech/polkadot-sdk", default-features = false, tag = "polkadot-stable2503" }
+parity-scale-codec = { workspace = true }
+scale-info = { workspace = true }
+frame-support = { workspace = true }
+frame-system  = { workspace = true }
+sp-runtime    = { workspace = true }
+
+[features]
+default = ["std"]
+std = [
+  "frame-support/std",
+  "frame-system/std",
+  "sp-runtime/std",
+  "pallet-revive/std",
+  "parity-scale-codec/std",
+  "scale-info/std",
+  "dep:serde",
+]
