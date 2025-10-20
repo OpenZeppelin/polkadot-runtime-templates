@@ -1,9 +1,9 @@
 #![cfg_attr(not(feature = "std"), no_std)]
 
-//! # pallet-confidential-assets (Multi-Asset, MW-backed, IERC-7984-inspired)
+//! # pallet-confidential-assets (Multi-Asset, IERC-7984-inspired, Zether-backed)
 //!
 //! User-facing pallet that exposes a **confidential fungible token surface** per `AssetId`,
-//! delegating verification, state updates, balances, and totals to an abstract **MW/FHE backend**.
+//! delegating verification and state updates to an abstract **backend** (here, Zether style).
 //!
 //! ## Mirrors of IERC-7984 (adapted to Substrate + multi-asset)
 //! - `setOperator(holder->operator, until)` → per (holder, asset, operator) with block expiry
@@ -13,146 +13,26 @@
 //! - `confidentialTransferFrom(from, to, amount)` (no proof; ACL-gated)
 //! - `*_and_call` variants call a runtime hook `OnConfidentialTransfer` with `(from, to, asset, transferred, data)`
 //! - Read helpers: `confidential_total_supply`, `confidential_balance_of`, `is_operator`
-//! - Metadata: `name/symbol/decimals/contract_uri` via `AssetMetadata` provider
+//! - **Key management (Solana/Zether-like):** `set_public_key` writes the ElGamal/curve pk via backend
 //!
 //! ## Layers
-//! - `pallet-multi-utxo` → stores opaque commitments by asset.
-//! - `pallet-mimblewimble` → verifies MW txs and writes commitments via UTXO backend.
-//! - `pallet-confidential-assets` → operators, transfer surface, metadata proxy, receiver hooks.
+//! - **pallet-zether** → holds public keys, opaque commitments/ciphertexts, and verifies proofs.
+//! - **pallet-confidential-assets** → operators, transfer surface, metadata proxy, receiver hooks.
 //!
 //! ## Opaque types & ACL
-//! - Encrypted amount types are opaque bytes (to keep no_std & FHE-lib-agnostic).
-//! - "ACL transfers" (no proof) must be authorized by the backend (e.g., view/ACL lists).
+//! - Encrypted amount types are opaque bytes (to keep no_std & crypto-lib-agnostic).
+//! - "ACL transfers" (no proof) must be authorized/validated by the backend.
 //!
-//! ## You implement (in your backend pallets):
-//! - `ConfidentialBackend` (totals, balances, transfer, ACL-transfer, disclose, optional tx submit)
-//! - `AssetMetadataProvider` (name/symbol/decimals/contract_uri per AssetId)
+//! ## You implement (in your backend pallet, e.g., pallet-zether):
+//! - `backend::ConfidentialBackend` (totals, balances, key mgmt, transfer(encrypted/acl), disclose)
 //!
-//! TODO: on/off ramp functionality (shield, unshield, mint, burn)
-//!
+// TODO: on/off ramp functionality
+
+use ca_primitives::*;
 use frame_support::{dispatch::DispatchResult, pallet_prelude::*};
 use frame_system::pallet_prelude::*;
-use parity_scale_codec::{Decode, Encode, MaxEncodedLen};
 use scale_info::TypeInfo;
-use sp_runtime::RuntimeDebug;
 use sp_std::prelude::*;
-
-// ------------------------------
-// Common opaque types (KISS)
-// ------------------------------
-
-/// Opaque ciphertext representing a "confidential" amount (analogous to `euint64`).
-/// Keep bounded to protect PoV. Tune the size cap once your FHE/MW ciphertext is known.
-pub type MaxCiphertextLen = ConstU32<128>;
-pub type EncryptedAmount = BoundedVec<u8, MaxCiphertextLen>;
-
-/// Opaque "external" encrypted amount (analogous to `externalEuint64`),
-/// kept identical here (you may differentiate if your backend needs it).
-pub type ExternalEncryptedAmount = BoundedVec<u8, MaxCiphertextLen>;
-
-/// Proof/aux data blob used by the backend to validate "encrypted" transfers.
-pub type MaxProofLen = ConstU32<8192>;
-pub type InputProof = BoundedVec<u8, MaxProofLen>;
-
-/// Optional data payload for `*_and_call` variants.
-pub type MaxCallbackDataLen = ConstU32<4096>;
-pub type CallbackData = BoundedVec<u8, MaxCallbackDataLen>;
-
-// ------------------------------
-// MW "raw tx" path (optional)
-// ------------------------------
-
-pub type Commitment = [u8; 32];
-
-#[derive(Clone, Encode, Decode, TypeInfo, MaxEncodedLen, RuntimeDebug, PartialEq, Eq)]
-pub struct MwTransaction<AssetId> {
-    pub asset_id: AssetId,
-    pub input_commitments: BoundedVec<Commitment, ConstU32<64>>,
-    pub output_commitments: BoundedVec<Commitment, ConstU32<64>>,
-    pub excess_commitment: Commitment,
-}
-
-/// Optional raw MimbleWimble verification path in case you still submit whole MW txs.
-pub trait MimbleWimbleCompute<AssetId> {
-    fn verify_and_apply(tx: MwTransaction<AssetId>) -> DispatchResult;
-}
-
-// ------------------------------
-// Backend abstraction
-// ------------------------------
-
-/// Backend that holds the **truth** for totals, balances, and executes transfers.
-/// Implement this in your MW/FHE/UTXO layer (e.g., `pallet-mimblewimble` adapter).
-pub trait ConfidentialBackend<AccountId, AssetId> {
-    /// Returns the confidential total supply ciphertext for `asset`.
-    fn total_supply(asset: AssetId) -> EncryptedAmount;
-
-    /// Returns the confidential balance ciphertext for `who` under `asset`.
-    /// Implementation may require a registered view key or ACL in the backend.
-    fn balance_of(asset: AssetId, who: &AccountId) -> EncryptedAmount;
-
-    /// Transfer using an **encrypted input** and a proof.
-    /// Implement must debit `from` (determined by proof/ACL inside backend) and credit `to`,
-    /// and return the encrypted amount actually transferred (may differ from input envelope).
-    fn transfer_encrypted(
-        asset: AssetId,
-        from: &AccountId,
-        to: &AccountId,
-        encrypted_amount: ExternalEncryptedAmount,
-        input_proof: InputProof,
-    ) -> Result<EncryptedAmount, DispatchError>;
-
-    /// Transfer using an **ACL-authorized** encrypted amount (no input proof given here).
-    /// Backend must enforce that `from` (or operator) is already authorized for `amount`.
-    fn transfer_acl(
-        asset: AssetId,
-        from: &AccountId,
-        to: &AccountId,
-        amount: EncryptedAmount,
-    ) -> Result<EncryptedAmount, DispatchError>;
-
-    /// Optional: disclose a ciphertext to a plaintext amount if backend policy allows.
-    fn disclose_amount(
-        asset: AssetId,
-        encrypted_amount: &EncryptedAmount,
-        who: &AccountId,
-    ) -> Result<u64, DispatchError>;
-}
-
-/// Metadata provider per asset (names, symbols, etc.).
-/// Implement against your multi-asset registry or a separate pallet.
-pub trait AssetMetadataProvider<AssetId> {
-    fn name(asset: AssetId) -> Vec<u8>;
-    fn symbol(asset: AssetId) -> Vec<u8>;
-    fn decimals(asset: AssetId) -> u8;
-    fn contract_uri(asset: AssetId) -> Vec<u8>;
-}
-
-/// Optional receiver hook (like IERC7984Receiver.onConfidentialTransferReceived).
-/// Default `()` does nothing.
-pub trait OnConfidentialTransfer<AccountId, AssetId> {
-    /// Called after successful transfer if the extrinsic is an `*_and_call` variant.
-    /// Return `Ok(())` to accept; `Err` to revert (pallet will bubble up error).
-    fn on_confidential_transfer_received(
-        from: &AccountId,
-        to: &AccountId,
-        asset: &AssetId,
-        transferred: &EncryptedAmount,
-        data: &CallbackData,
-    ) -> Result<(), DispatchError>;
-}
-
-impl<AccountId, AssetId> OnConfidentialTransfer<AccountId, AssetId> for () {
-    fn on_confidential_transfer_received(
-        _from: &AccountId,
-        _to: &AccountId,
-        _asset: &AssetId,
-        _transferred: &EncryptedAmount,
-        _data: &CallbackData,
-    ) -> Result<(), DispatchError> {
-        Ok(())
-    }
-}
 
 #[frame_support::pallet]
 pub mod pallet {
@@ -166,11 +46,8 @@ pub mod pallet {
         /// Asset identifier type used across the stack.
         type AssetId: Parameter + Member + Copy + Ord + MaxEncodedLen + TypeInfo;
 
-        /// Backend that verifies & applies confidential ops (MW/FHE/UTXO).
+        /// Backend that verifies & applies confidential ops (Zether).
         type Backend: ConfidentialBackend<Self::AccountId, Self::AssetId>;
-
-        /// Optional Raw MW path (keep your existing integration)
-        type MwBackend: MimbleWimbleCompute<Self::AssetId>;
 
         /// Asset metadata provider (name/symbol/decimals/contract_uri).
         type AssetMetadata: AssetMetadataProvider<Self::AssetId>;
@@ -184,8 +61,8 @@ pub mod pallet {
 
     /// Minimal weight trait; replace with real benches later.
     pub trait WeightData {
+        fn set_public_key() -> Weight;
         fn set_operator() -> Weight;
-        fn submit_confidential_tx(inputs: u32, outputs: u32) -> Weight;
         fn confidential_transfer() -> Weight;
         fn confidential_transfer_from() -> Weight;
         fn confidential_transfer_and_call() -> Weight;
@@ -193,11 +70,11 @@ pub mod pallet {
         fn disclose_amount() -> Weight;
     }
     impl WeightData for () {
-        fn set_operator() -> Weight {
+        fn set_public_key() -> Weight {
             Weight::from_parts(10_000, 0)
         }
-        fn submit_confidential_tx(_i: u32, _o: u32) -> Weight {
-            Weight::from_parts(20_000, 0)
+        fn set_operator() -> Weight {
+            Weight::from_parts(10_000, 0)
         }
         fn confidential_transfer() -> Weight {
             Weight::from_parts(20_000, 0)
@@ -253,8 +130,8 @@ pub mod pallet {
             amount: u64,
             discloser: T::AccountId,
         },
-        /// Raw MW path accepted a tx.
-        ConfidentialTxApplied { asset: T::AssetId },
+        /// Per-account public key was set/updated.
+        PublicKeySet { who: T::AccountId },
     }
 
     #[pallet::error]
@@ -296,7 +173,7 @@ pub mod pallet {
             }
         }
 
-        // ---- RENAMED to avoid conflict with FRAME's Pallet::name() ----
+        // Metadata pass-through
         pub fn asset_name(asset: T::AssetId) -> Vec<u8> {
             T::AssetMetadata::name(asset)
         }
@@ -312,13 +189,23 @@ pub mod pallet {
     }
 
     // ------------------------------
-    // Calls
+    // Calls (only public API you expose)
     // ------------------------------
 
     #[pallet::call]
     impl<T: Config> Pallet<T> {
-        /// Set/extend an operator for a holder & asset (no checks on `until` at write time).
+        /// Register or update the caller's Zether/Solana-like ElGamal public key in the backend.
         #[pallet::call_index(0)]
+        #[pallet::weight(T::WeightInfo::set_public_key())]
+        pub fn set_public_key(origin: OriginFor<T>, elgamal_pk: PublicKeyBytes) -> DispatchResult {
+            let who = ensure_signed(origin)?;
+            T::Backend::set_public_key(&who, &elgamal_pk).map_err(|_| Error::<T>::BackendError)?;
+            Self::deposit_event(Event::PublicKeySet { who });
+            Ok(())
+        }
+
+        /// Set/extend an operator for a holder & asset (no checks on `until` at write time).
+        #[pallet::call_index(1)]
         #[pallet::weight(T::WeightInfo::set_operator())]
         pub fn set_operator(
             origin: OriginFor<T>,
@@ -334,23 +221,6 @@ pub mod pallet {
                 operator,
                 until,
             });
-            Ok(())
-        }
-
-        /// Submit a raw MimbleWimble tx to the backend (optional path).
-        #[pallet::call_index(1)]
-        #[pallet::weight({
-            let ins = tx.input_commitments.len() as u32;
-            let outs = tx.output_commitments.len() as u32;
-            T::WeightInfo::submit_confidential_tx(ins, outs)
-        })]
-        pub fn submit_confidential_tx(
-            origin: OriginFor<T>,
-            tx: MwTransaction<T::AssetId>,
-        ) -> DispatchResult {
-            let _ = ensure_signed(origin)?;
-            <T as Config>::MwBackend::verify_and_apply(tx.clone())?;
-            Self::deposit_event(Event::ConfidentialTxApplied { asset: tx.asset_id });
             Ok(())
         }
 

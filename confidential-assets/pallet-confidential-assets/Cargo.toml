@@ -17,6 +17,8 @@ frame-system  = { workspace = true }
 sp-runtime    = { workspace = true }
 sp-std = { workspace = true }
 
+ca-primitives = { path = "../ca-primitives", default-features = false }
+
 [features]
 default = ["std"]
 std = [
@@ -27,4 +29,5 @@ std = [
   "parity-scale-codec/std",
   "scale-info/std",
   "dep:serde",
+  "ca-primitives/std",
 ]

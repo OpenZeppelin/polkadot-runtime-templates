@@ -1,11 +1,8 @@
 [workspace]
 members = [
-    "primitives-confidential-assets",
-    "pallets/pallet-confidential-assets",
-    "pallets/pallet-multi-utxo",
-    "pallets/pallet-mimblewimble",
-    "precompiles/evm-precompile-confidential-assets",
-    "precompiles/pvm-precompile-confidential-assets",
+    "ca-primitives",
+    "pallet-confidential-assets",
+    "pallet-zether",
 ]
 resolver = "2"
 

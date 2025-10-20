@@ -1,7 +1,7 @@
 [package]
-name = "pallet-mimblewimble"
+name = "pallet-zether"
 authors = { workspace = true }
-description = "pallet implementing mimblewimble style cut through"
+description = "confidential assets cryptographic backend"
 edition = { workspace = true }
 license = { workspace = true }
 repository = { workspace = true }
@@ -15,11 +15,11 @@ frame-system  = { workspace = true }
 sp-runtime    = { workspace = true }
 sp-std = { workspace = true }
 
-primitives-confidential-assets = { path = "../../primitives-confidential-assets", default-features = false }
-
 # no_std crypto
 curve25519-dalek = { version = "4.1", default-features = false, features = ["alloc"] }
 blake2 = { version = "0.10", default-features = false }
+
+ca-primitives = { path = "../ca-primitives", default-features = false }
 
 [features]
 default = ["std"]
@@ -31,5 +31,5 @@ std = [
   "parity-scale-codec/std",
   "scale-info/std",
   "blake2/std",
-  "primitives-confidential-assets/std",
+  "ca-primitives/std",
 ]
