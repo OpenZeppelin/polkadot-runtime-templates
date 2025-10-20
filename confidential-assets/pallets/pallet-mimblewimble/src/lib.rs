@@ -172,43 +172,38 @@ pub mod pallet {
         /// - Excess = amount_to_to.
         fn to_mw_tx(
             asset: T::AssetId,
-            from: &T::AccountId,
-            _to: &T::AccountId,
             encrypted_amount: ExternalEncryptedAmount,
             input_proof: InputProof,
         ) -> Result<MwTransaction<T::AssetId>, DispatchError> {
-            // Silence `unused` in this KISS PoC (you'll enforce these later).
-            let _ = input_proof;
+            // In a real impl, you'd parse `input_proof` to:
+            // - select unspent inputs (nullifiers or membership proofs)
+            // - derive outputs (recipient tag) and change
+            // For now: minimal PoC that expects both input+output commits inside the proof.
+            let _ = input_proof; // placeholder until you wire real parsing
 
-            // 1) Pick ONE input owned by `from`.
-            let input_commit = T::UtxoBackend::iter_owned(asset, from)
-                .next()
-                .ok_or(DispatchError::Other("InsufficientFundsOrACL"))?;
-
-            // 2) Convert the requested transfer amount into a 32-byte commitment.
-            //    (We require `encrypted_amount.len() == 32` in this PoC.)
+            // KISS PoC: interpret `encrypted_amount` as a single 32-byte commitment we’re transferring.
             let out_commit = super::cipher_to_c32(&encrypted_amount)?;
 
-            // 3) Build MW tx:
-            //    inputs  = [input_commit]
-            //    outputs = [out_commit, input_commit]  // "change" is re-inserting the input
-            //    excess  = out_commit
-            use frame_support::BoundedVec;
+            // Also pick ONE input from the global pool to make the tx verify (PoC only).
+            // Replace with proper input selection derived from `input_proof`.
+            let input_commit = T::UtxoBackend::iter_unspent(asset)
+                .next()
+                .ok_or(DispatchError::Other("NoInputsAvailable"))?;
 
+            use frame_support::BoundedVec;
             let inputs = BoundedVec::try_from(vec![input_commit])
                 .map_err(|_| DispatchError::Other("TooManyInputs"))?;
 
+            // Outputs: [amount_to_recipient, change (= input)] so: sum(out)-sum(in)=out_commit
             let outputs = BoundedVec::try_from(vec![out_commit, input_commit])
                 .map_err(|_| DispatchError::Other("TooManyOutputs"))?;
 
-            let tx = MwTransaction::<T::AssetId> {
+            Ok(MwTransaction {
                 asset_id: asset,
                 input_commitments: inputs,
                 output_commitments: outputs,
                 excess_commitment: out_commit,
-            };
-
-            Ok(tx)
+            })
         }
 
         /// Optional: try to reveal a plaintext amount if policy allows.
@@ -246,13 +241,11 @@ pub mod pallet {
 
         fn transfer_encrypted(
             asset: T::AssetId,
-            from: &T::AccountId,
-            to: &T::AccountId,
             encrypted_amount: ExternalEncryptedAmount,
             input_proof: InputProof,
         ) -> Result<EncryptedAmount, DispatchError> {
             // 1) Build a concrete MW tx from the opaque envelope+proof.
-            let tx = Self::to_mw_tx(asset, from, to, encrypted_amount, input_proof)?;
+            let tx = Self::to_mw_tx(asset, encrypted_amount, input_proof)?;
 
             // 2) Verify & apply via your existing pallet API.
             Self::verify_and_apply(tx.clone())?;
@@ -262,44 +255,11 @@ pub mod pallet {
         }
 
         fn transfer_acl(
-            asset: T::AssetId,
-            from: &T::AccountId,
-            _to: &T::AccountId,
-            amount: EncryptedAmount,
+            _asset: T::AssetId,
+            _amount: EncryptedAmount,
         ) -> Result<EncryptedAmount, DispatchError> {
-            // KISS PoC: spend one owned input and produce ONE output equal to `amount`.
-            // We treat `amount` bytes as a compressed commitment ([u8; 32]).
-            use frame_support::BoundedVec;
-
-            // Pick a single input owned by `from`.
-            let mut inputs: Vec<Commitment> = Vec::new();
-            if let Some(first) = T::UtxoBackend::iter_owned(asset, from).next() {
-                inputs.push(first);
-            }
-            ensure!(
-                !inputs.is_empty(),
-                DispatchError::Other("InsufficientFundsOrACL")
-            );
-
-            // Convert `amount` -> commitment (must be exactly 32 bytes).
-            let out_commit = super::cipher_to_c32(&amount)?;
-
-            // Build minimal tx: 1 input -> 1 output
-            let tx = MwTransaction::<T::AssetId> {
-                asset_id: asset,
-                input_commitments: BoundedVec::try_from(inputs)
-                    .map_err(|_| DispatchError::Other("TooManyInputs"))?,
-                output_commitments: BoundedVec::try_from(vec![out_commit])
-                    .map_err(|_| DispatchError::Other("TooManyOutputs"))?,
-                // For this PoC, treat `amount` commitment as the "excess".
-                excess_commitment: out_commit,
-            };
-
-            // Verify & apply (performs cut-through + inserts output).
-            <Self as MimbleWimbleCompute<T::AssetId>>::verify_and_apply(tx)?;
-
-            // Return the same encrypted amount we were asked to transfer.
-            Ok(amount)
+            // TODO
+            todo!()
         }
 
         fn disclose_amount(

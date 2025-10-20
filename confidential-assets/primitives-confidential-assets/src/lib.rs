@@ -77,23 +77,18 @@ pub trait ConfidentialBackend<AccountId, AssetId> {
     /// Implementation may require a registered view key or ACL in the backend.
     fn balance_of(asset: AssetId, who: &AccountId) -> EncryptedAmount;
 
-    /// Transfer using an **encrypted input** and a proof.
-    /// Implement must debit `from` (determined by proof/ACL inside backend) and credit `to`,
+    /// Transfer using an **encrypted input** and a proof
     /// and return the encrypted amount actually transferred (may differ from input envelope).
     fn transfer_encrypted(
         asset: AssetId,
-        from: &AccountId,
-        to: &AccountId,
         encrypted_amount: ExternalEncryptedAmount,
         input_proof: InputProof,
     ) -> Result<EncryptedAmount, DispatchError>;
 
     /// Transfer using an **ACL-authorized** encrypted amount (no input proof given here).
-    /// Backend must enforce that `from` (or operator) is already authorized for `amount`.
+    /// Backend must enforce that from (or operator) is already authorized for `amount`.
     fn transfer_acl(
         asset: AssetId,
-        from: &AccountId,
-        to: &AccountId,
         amount: EncryptedAmount,
     ) -> Result<EncryptedAmount, DispatchError>;
 
