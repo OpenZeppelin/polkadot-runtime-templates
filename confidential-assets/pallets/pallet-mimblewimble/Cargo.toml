@@ -15,6 +15,8 @@ frame-system  = { workspace = true }
 sp-runtime    = { workspace = true }
 sp-std = { workspace = true }
 
+primitives-confidential-assets = { path = "../../primitives-confidential-assets", default-features = false }
+
 # no_std crypto
 curve25519-dalek = { version = "4.1", default-features = false, features = ["alloc"] }
 blake2 = { version = "0.10", default-features = false }
@@ -29,4 +31,5 @@ std = [
   "parity-scale-codec/std",
   "scale-info/std",
   "blake2/std",
+  "primitives-confidential-assets/std",
 ]

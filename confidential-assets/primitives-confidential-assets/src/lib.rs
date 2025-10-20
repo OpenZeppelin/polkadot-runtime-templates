@@ -1,17 +1,8 @@
 //! Primitives shared between confidential assets pallets and precompiles
-
 use frame_support::{pallet_prelude::*, BoundedVec};
 use parity_scale_codec::{Decode, Encode, MaxEncodedLen};
 use scale_info::TypeInfo;
 use sp_std::prelude::*;
-
-/// Abstract trait allowing access to UTXO storage.
-///
-/// Implemented by `pallet-multi-utxo`.
-pub trait UtxoStorage<AssetId> {
-    fn insert_commitment(asset: AssetId, commitment: Commitment);
-    fn remove_commitment(asset: AssetId, commitment: &Commitment) -> bool;
-}
 
 /// Opaque ciphertext representing a "confidential" amount (analogous to `euint64`).
 /// Keep bounded to protect PoV. Tune the size cap once your FHE/MW ciphertext is known.
@@ -42,6 +33,29 @@ pub struct MwTransaction<AssetId> {
     pub input_commitments: BoundedVec<Commitment, ConstU32<64>>,
     pub output_commitments: BoundedVec<Commitment, ConstU32<64>>,
     pub excess_commitment: Commitment,
+}
+
+/// Abstract trait allowing access to UTXO storage.
+///
+/// Implemented by `pallet-multi-utxo`.
+pub trait UtxoStorage<AssetId> {
+    fn insert_commitment(asset: AssetId, commitment: Commitment);
+    fn remove_commitment(asset: AssetId, commitment: &Commitment) -> bool;
+
+    // NEW: Iterate all unspent outputs for a given asset.
+    fn iter_unspent(asset: AssetId) -> Box<dyn Iterator<Item = Commitment>>;
+
+    // NEW: Iterate unspent outputs *owned by* `who` (for ACL/balance views).
+    // Ownership can be a simple index you maintain (commitment -> owner AccountId).
+    // If you don't want to store owners, you can back this by an offchain indexer initially.
+    fn iter_owned<AccountId: Clone>(
+        asset: AssetId,
+        who: &AccountId,
+    ) -> Box<dyn Iterator<Item = Commitment>>;
+
+    // Batch ops for performance:
+    fn extend_commitments(asset: AssetId, commits: &[Commitment]);
+    fn remove_commitments(asset: AssetId, commits: &[Commitment]) -> usize;
 }
 
 /// Optional raw MimbleWimble verification path in case you still submit whole MW txs.
