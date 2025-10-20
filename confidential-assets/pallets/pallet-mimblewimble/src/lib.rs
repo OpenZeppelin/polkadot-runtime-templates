@@ -101,19 +101,9 @@ pub mod pallet {
         /// Submit a MimbleWimble transaction for verification & cut-through.
         #[pallet::call_index(0)]
         #[pallet::weight(<Pallet<T>>::weight_for_submit())]
-        pub fn submit(
-            origin: OriginFor<T>,
-            tx: MwTransaction<T::AssetId>,
-            commitment: Commitment,
-        ) -> DispatchResult {
+        pub fn submit(origin: OriginFor<T>, tx: MwTransaction<T::AssetId>) -> DispatchResult {
             let _ = ensure_signed(origin)?;
-            ensure!(
-                Self::verify_commitments(&tx),
-                Error::<T>::UnbalancedCommitments
-            );
-            T::UtxoBackend::insert_commitment(tx.asset_id, commitment);
-            Self::deposit_event(Event::MwTransactionApplied(tx.asset_id));
-            Ok(())
+            Self::verify_and_apply(tx)
         }
     }
 

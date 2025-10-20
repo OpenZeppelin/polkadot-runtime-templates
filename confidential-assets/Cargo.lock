@@ -2709,6 +2709,7 @@ dependencies = [
  "scale-info",
  "serde",
  "sp-runtime",
+ "sp-std",
 ]
 
 [[package]]

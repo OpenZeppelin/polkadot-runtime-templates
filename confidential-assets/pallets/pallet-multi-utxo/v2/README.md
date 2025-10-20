@@ -9,3 +9,5 @@ In MimbeWimble you still end up with an unspent set of commitments. With multipl
 - enables light-client inclusion proofs “UTXO X for Asset A exists” without mixing other assets
 
 State bloat control. Verify heavy proofs during the extrinsic, but do not store them. After verification, you only persist the minimal UTXO record (commitment + tiny metadata) in the child trie. This keeps state small.
+
+## v3: use accumulators so state bloat is no longer a problem at all
