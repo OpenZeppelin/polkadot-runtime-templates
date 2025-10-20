@@ -1,5 +1,6 @@
 [workspace]
 members = [
+    "primitives-confidential-assets",
     "pallets/pallet-confidential-assets",
     "pallets/pallet-multi-utxo",
     "pallets/pallet-mimblewimble",

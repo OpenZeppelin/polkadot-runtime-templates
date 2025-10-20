@@ -3199,6 +3199,20 @@ dependencies = [
 ]
 
 [[package]]
+name = "primitives-confidential-assets"
+version = "0.1.0"
+dependencies = [
+ "blake2",
+ "curve25519-dalek",
+ "frame-support",
+ "frame-system",
+ "parity-scale-codec",
+ "scale-info",
+ "sp-runtime",
+ "sp-std",
+]
+
+[[package]]
 name = "proc-macro-crate"
 version = "3.4.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"

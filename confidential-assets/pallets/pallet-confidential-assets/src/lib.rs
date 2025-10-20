@@ -27,7 +27,9 @@
 //! ## You implement (in your backend pallets):
 //! - `ConfidentialBackend` (totals, balances, transfer, ACL-transfer, disclose, optional tx submit)
 //! - `AssetMetadataProvider` (name/symbol/decimals/contract_uri per AssetId)
-
+//!
+//! TODO: on/off ramp functionality (shield, unshield, mint, burn)
+//!
 use frame_support::{dispatch::DispatchResult, pallet_prelude::*};
 use frame_system::pallet_prelude::*;
 use parity_scale_codec::{Decode, Encode, MaxEncodedLen};
