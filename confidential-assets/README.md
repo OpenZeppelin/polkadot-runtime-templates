@@ -4,16 +4,16 @@ Primitives, pallets, and precompiles used to implement confidential assets on Po
 
 ## Pallets
 
-- [`pallet-multi-utxo`](./pallets/pallet-multi-utxo/)
-- [`pallet-mimblewimble`](./pallets/pallet-mimblewimble/)
-- [`pallet-confidential-assets`](./pallets/pallet-confidential-assets/)
+- [`pallet-zether`](./pallet-zether): implements an on-chain cryptographic backend for confidential transfers
+- [`pallet-confidential-assets`](./pallet-confidential-assets/): implements and exposes the [OpenZeppelin Confidential Contracts Standard](https://github.com/OpenZeppelin/openzeppelin-confidential-contracts/blob/master/contracts/interfaces/IERC7984.sol) for multiple assets
+- [`ca-primitives`](./ca-primitives/): types and traits shared between the decoupled pallets described above
 
 ## Precompiles
 
 The precompile interfaces follow the [OpenZeppelin Confidential Contracts Standard](https://github.com/OpenZeppelin/openzeppelin-confidential-contracts/blob/master/contracts/interfaces/IERC7984.sol).
 
-- [`evm-precompile-confidential-assets`](./precompiles/evm-precompile-confidential-assets/)
-- [`pvm-precompile-confidential-assets`](./precompiles/pvm-precompile-confidential-assets/)
+- `frontier-precompile-confidential-assets`
+- `polkavm-precompile-confidential-assets`
 
 ## Research
 
