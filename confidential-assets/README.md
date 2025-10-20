@@ -17,4 +17,5 @@ The precompile interfaces follow the [OpenZeppelin Confidential Contracts Standa
 
 ## Research
 
-[Research benchmarking cryptographic backends for confidential assets](https://github.com/4meta5/polkadot-confidential-assets-backends)
+* [Research benchmarking cryptographic backends for confidential assets](https://github.com/4meta5/polkadot-confidential-assets-backends)
+* [OpenZeppelin Confidential Contracts Standard](https://github.com/OpenZeppelin/openzeppelin-confidential-contracts/blob/master/contracts/interfaces/IERC7984.sol)
