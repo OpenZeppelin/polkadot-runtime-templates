@@ -1,6 +1,6 @@
 #![cfg_attr(not(feature = "std"), no_std)]
 
-//! # pallet-zether (backend-only, ZK/crypto + storage)
+//! # pallet-zk-elgamal (backend-only, ZK/crypto + storage)
 //!
 //! A minimal **backend pallet** that implements the `ConfidentialBackend` trait from
 //! `pallet-confidential-assets`. It stores:

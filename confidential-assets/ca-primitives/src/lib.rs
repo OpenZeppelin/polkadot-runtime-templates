@@ -88,7 +88,8 @@ impl<AccountId, AssetId> OnConfidentialTransfer<AccountId, AssetId> for () {
 
 /// Abstract verifier boundary. Implement in the runtime.
 ///
-// TODO for impl:
+// TODO:
+// - verify_{mint, burn}_and_apply
 // - check range proofs/non-negativity,
 // - link ElGamal delta to balance commitments,
 // - ensure conservation, domain separation (chain-id/pallet-id/asset),

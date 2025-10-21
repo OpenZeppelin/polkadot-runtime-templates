@@ -1,7 +1,7 @@
 [package]
-name = "pallet-zether"
+name = "pallet-zk-elgamal-verifier"
 authors = { workspace = true }
-description = "confidential assets cryptographic backend"
+description = "Pallet to verify ZK ElGamal Proofs by Prover"
 edition = { workspace = true }
 license = { workspace = true }
 repository = { workspace = true }
@@ -18,8 +18,11 @@ sp-std = { workspace = true }
 # no_std crypto
 curve25519-dalek = { version = "4.1", default-features = false, features = ["alloc"] }
 blake2 = { version = "0.10", default-features = false }
+merlin            = { version = "3", default-features = false }
+subtle            = { version = "2", default-features = false }
 
 ca-primitives = { path = "../ca-primitives", default-features = false }
+sha2 = { version = "0.10.9", default-features = false }
 
 [features]
 default = ["std"]
@@ -32,4 +35,7 @@ std = [
   "scale-info/std",
   "blake2/std",
   "ca-primitives/std",
+  "merlin/std",
+  "subtle/std",
+  "sha2/std",
 ]

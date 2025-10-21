@@ -1,0 +1,35 @@
+[package]
+name = "pallet-zk-elgamal"
+authors = { workspace = true }
+description = "confidential assets cryptographic backend"
+edition = { workspace = true }
+license = { workspace = true }
+repository = { workspace = true }
+version = "0.1.0"
+
+[dependencies]
+parity-scale-codec = { workspace = true }
+scale-info = { workspace = true }
+frame-support = { workspace = true }
+frame-system  = { workspace = true }
+sp-runtime    = { workspace = true }
+sp-std = { workspace = true }
+
+# no_std crypto
+curve25519-dalek = { version = "4.1", default-features = false, features = ["alloc"] }
+blake2 = { version = "0.10", default-features = false }
+
+ca-primitives = { path = "../ca-primitives", default-features = false }
+
+[features]
+default = ["std"]
+std = [
+  "frame-support/std",
+  "frame-system/std",
+  "sp-runtime/std",
+  "sp-std/std",
+  "parity-scale-codec/std",
+  "scale-info/std",
+  "blake2/std",
+  "ca-primitives/std",
+]

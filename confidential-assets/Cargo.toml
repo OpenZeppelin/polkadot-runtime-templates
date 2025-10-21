@@ -2,7 +2,9 @@
 members = [
     "ca-primitives",
     "pallet-confidential-assets",
-    "pallet-zether",
+    "pallet-zk-elgamal",
+	"pallet-zk-elgamal-verifier",
+	"zk-elgamal-prover",
 ]
 resolver = "2"
 
