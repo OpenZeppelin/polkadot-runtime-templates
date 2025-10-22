@@ -1,5 +1,10 @@
 #![cfg_attr(not(feature = "std"), no_std)]
 
+extern crate alloc;
+
+mod range_verifier;
+pub use range_verifier::{BpRangeVerifier, RangeProofVerifier};
+
 use frame_support::pallet_prelude::*;
 use sp_std::vec::Vec;
 
@@ -39,18 +44,6 @@ pub mod pallet {
         InvalidEncoding,
         InvalidPoint,
         InvalidProof,
-    }
-
-    // --------- Range proof trait remains pluggable ---------
-    pub trait RangeProofVerifier {
-        /// Verify a range proof bound to `commit` and transcript context bytes.
-        /// `transcript_label` can distinguish "from_new" vs "to_new".
-        fn verify_range_proof(
-            transcript_label: &[u8],
-            context: &[u8],
-            commit_compressed: &[u8; 32],
-            proof_bytes: &[u8],
-        ) -> core::result::Result<(), ()>;
     }
 
     // ========= New, primitives-backed parsing/bundle types =========
@@ -191,7 +184,7 @@ pub mod pallet {
             let from_new = from_old - proof.delta_comm;
             let to_new = to_old + proof.delta_comm;
 
-            // --- Range proofs (optional but recommended) ---
+            // --- Range proofs ---
             // Bind them to the SAME transcript context bytes so the proof can’t be replayed elsewhere.
             let ctx_bytes = transcript_context_bytes(&t);
             let from_new_bytes = point_to_bytes(&from_new);

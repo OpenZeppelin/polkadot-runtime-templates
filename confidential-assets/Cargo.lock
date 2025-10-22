@@ -2079,13 +2079,16 @@ name = "pallet-zk-elgamal-verifier"
 version = "0.1.0"
 dependencies = [
  "blake2",
+ "bulletproofs",
  "ca-primitives",
  "curve25519-dalek",
+ "curve25519-dalek-ng",
  "frame-support",
  "frame-system",
  "merlin",
  "parity-scale-codec",
  "primitives-zk-elgamal",
+ "rand_core 0.6.4",
  "scale-info",
  "sha2 0.10.9",
  "sp-runtime",

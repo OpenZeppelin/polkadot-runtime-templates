@@ -16,10 +16,13 @@ sp-runtime    = { workspace = true }
 sp-std = { workspace = true }
 
 # no_std crypto
+bulletproofs      = { version = "4", default-features = false }
 curve25519-dalek = { version = "4.1", default-features = false, features = ["alloc"] }
 blake2 = { version = "0.10", default-features = false }
 merlin            = { version = "3", default-features = false }
 subtle            = { version = "2", default-features = false }
+curve25519-dalek-ng = { version = "4.1.1", default-features = false, features = ["alloc"] }
+rand_core = { version = "0.6", default-features = false } # only for traits
 
 ca-primitives = { path = "../ca-primitives", default-features = false }
 primitives-zk-elgamal = { path = "../primitives-zk-elgamal", default-features = false }
@@ -40,4 +43,7 @@ std = [
   "merlin/std",
   "subtle/std",
   "sha2/std",
+  "curve25519-dalek-ng/std",
+  "bulletproofs/std",
+  "rand_core/std",
 ]
