@@ -1,7 +1,7 @@
 [package]
-name = "pallet-zk-elgamal-verifier"
+name = "primitives-zk-elgamal"
 authors = { workspace = true }
-description = "Pallet to verify ZK ElGamal Proofs by Prover"
+description = "Primitives shared between ZK ElGamal Verifier and Prover"
 edition = { workspace = true }
 license = { workspace = true }
 repository = { workspace = true }
@@ -14,6 +14,7 @@ frame-support = { workspace = true }
 frame-system  = { workspace = true }
 sp-runtime    = { workspace = true }
 sp-std = { workspace = true }
+serde = { workspace = true, optional = true }
 
 # no_std crypto
 curve25519-dalek = { version = "4.1", default-features = false, features = ["alloc"] }
@@ -21,8 +22,6 @@ blake2 = { version = "0.10", default-features = false }
 merlin            = { version = "3", default-features = false }
 subtle            = { version = "2", default-features = false }
 
-ca-primitives = { path = "../ca-primitives", default-features = false }
-primitives-zk-elgamal = { path = "../primitives-zk-elgamal", default-features = false }
 sha2 = { version = "0.10.9", default-features = false }
 
 [features]
@@ -35,9 +34,8 @@ std = [
   "parity-scale-codec/std",
   "scale-info/std",
   "blake2/std",
-  "ca-primitives/std",
-  "primitives-zk-elgamal/std",
   "merlin/std",
   "subtle/std",
   "sha2/std",
+  "dep:serde",
 ]

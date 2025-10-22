@@ -2,6 +2,7 @@
 members = [
     "ca-primitives",
     "pallet-confidential-assets",
+	"primitives-zk-elgamal",
     "pallet-zk-elgamal",
 	"pallet-zk-elgamal-verifier",
 	"zk-elgamal-prover",

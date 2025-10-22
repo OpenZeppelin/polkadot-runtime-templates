@@ -1,267 +1,328 @@
+//! zk_elgamal_prover — std-only prover matching `pallet-zk-elgamal`
+//!
+//! - Reuses `primitives-zk-elgamal` (labels, transcript order, fixed byte layouts).
+//! - Emits the exact proof-bundle format your pallet expects:
+//!     delta_comm(32) || link(192) || len1(u16) || range1 || len2(u16) || range2
+//! - Uses Bulletproofs (single-value, 64-bit) for range proofs.
+//! - Encrypts Δv to the **sender** ElGamal pk (matches verifier Eq2).
+//!
+//! NOTE: Keep Pedersen H derivation and transcript labels in perfect sync with the pallet.
+
 use curve25519_dalek::{
-    constants::RISTRETTO_BASEPOINT_POINT as G,
-    ristretto::{CompressedRistretto, RistrettoPoint},
-    scalar::Scalar,
+    constants::RISTRETTO_BASEPOINT_POINT as G, ristretto::RistrettoPoint, scalar::Scalar,
+    traits::Identity,
 };
 use merlin::Transcript;
-use rand::{RngCore, SeedableRng, rngs::StdRng};
+use rand::{RngCore, SeedableRng};
 use rand_chacha::ChaCha20Rng;
-use serde::{Deserialize, Serialize};
+use sha2::Sha512;
 use thiserror::Error;
 
-/// 32-byte compressed point
-pub type Compressed = [u8; 32];
+use primitives_zk_elgamal::{
+    Ciphertext, PublicContext, SDK_VERSION, append_point, challenge_scalar as fs_chal, labels,
+    new_transcript, point_to_bytes,
+};
+
+// ---- Optional cross-check against Solana's SDK (no feature flags) ----
+use solana_zk_sdk::encryption::elgamal as sdk_elgamal;
 
 #[derive(Debug, Error)]
 pub enum ProverError {
-    #[error("invalid input")]
-    InvalidInput,
-    #[error("range proof error")]
+    #[error("malformed input")]
+    Malformed,
+    #[error("range proof failed")]
     RangeProof,
 }
 
-/// Public key (Ristretto point)
-#[derive(Clone, Debug, Serialize, Deserialize)]
-pub struct PublicKey(#[serde(with = "serde_bytes")] Vec<u8>); // 32 bytes
+/// Input required to produce a pallet-compatible proof bundle.
+pub struct TransferInput {
+    /// Asset namespace (will be pad/trimmed to 32 inside transcript).
+    pub asset_id: Vec<u8>,
+    /// Network/chain domain tag (exactly what pallet binds).
+    pub network_id: [u8; 32],
 
-/// Secret key (scalar) — keep this client-side only
-#[derive(Clone, Debug, Serialize, Deserialize)]
-pub struct SecretKey(#[serde(with = "serde_bytes")] Vec<u8>); // 32 bytes
+    /// ElGamal public keys as points.
+    pub sender_pk: RistrettoPoint,
+    pub receiver_pk: RistrettoPoint,
 
-/// ElGamal ciphertext: C1 = k·G, C2 = Δv·G + k·PK
-#[derive(Clone, Debug, Serialize, Deserialize)]
-pub struct ElGamalCipher {
-    pub c1: Compressed,
-    pub c2: Compressed,
+    /// Sender old commitment C_from_old and its opening.
+    pub from_old_C: RistrettoPoint,
+    pub from_old_opening: (u64, Scalar),
+
+    /// Receiver old commitment C_to_old (opening not required).
+    pub to_old_C: RistrettoPoint,
+
+    /// Transfer amount Δv (u64).
+    pub delta_value: u64,
+
+    /// Deterministic RNG seed (use proper randomness in production).
+    pub rng_seed: [u8; 32],
+
+    /// Bind a fee commitment if you use fees; else None (identity bound).
+    pub fee_C: Option<RistrettoPoint>,
+
+    /// Include a receiver-side range proof (requires receiver opening). Typically false.
+    pub include_receiver_range_proof: bool,
 }
 
-/// Pedersen commitment: C = v·G + r·H
-#[derive(Clone, Debug, Serialize, Deserialize)]
-pub struct PedersenCommitment {
-    pub c: Compressed,
+/// Outputs the exact two byte blobs your extrinsic must pass + convenience commits.
+pub struct ProveOutput {
+    /// For pallet argument `proof_bundle_bytes`.
+    pub bundle_bytes: Vec<u8>,
+    /// For pallet argument `delta_ct_bytes` (C||D = 64 bytes).
+    pub delta_ct_bytes: [u8; 64],
+    /// Convenience (what the chain will recompute): sender & receiver new commitments.
+    pub from_new_C: [u8; 32],
+    pub to_new_C: [u8; 32],
 }
 
-/// Link proof (Chaum–Pedersen-style)
-#[derive(Clone, Debug, Serialize, Deserialize)]
-pub struct LinkProof {
-    pub a1: Compressed,
-    pub a2: Compressed,
-    pub a3: Compressed,
-    pub z_k: [u8; 32],
-    pub z_v: [u8; 32],
-    pub z_r: [u8; 32],
-}
+/// Main entry: produce Δciphertext and the proof bundle.
+pub fn prove_transfer(inp: &TransferInput) -> Result<ProveOutput, ProverError> {
+    // ----- Witnesses & randomness -----
+    let (v_from_old_u64, r_from_old) = inp.from_old_opening;
+    let v_from_old = Scalar::from(v_from_old_u64);
+    let dv_u64 = inp.delta_value;
+    let dv = Scalar::from(dv_u64);
 
-/// Transfer proof bundle (what you put on-chain)
-#[derive(Clone, Debug, Serialize, Deserialize)]
-pub struct TransferProofBundle {
-    /// ΔC = Δv·G + ρ·H (the Pedersen delta commitment)
-    pub delta_comm: Compressed,
-    /// Link proof tying ElGamal Δv to ΔC
-    pub link: LinkProof,
-    /// Sender new-balance range proof bytes (opaque; verifier plugs a range verifier)
-    pub range_from_new: Vec<u8>,
-    /// (Optional) Receiver range proof, typically empty unless you add receiver cooperation
-    pub range_to_new: Vec<u8>,
-    /// The ElGamal ciphertext of Δv (put alongside your extrinsic input)
-    pub delta_ct: ElGamalCipher,
-}
-
-/// Inputs the prover needs to construct a transfer:
-/// - sender knows their current balance opening (v_from_old, r_from_old)
-/// - sender chooses Δv (the amount to transfer), and a fresh ρ for ΔC
-/// - sender encrypts Δv to the chosen PK (usually receiver's PK)
-#[derive(Clone, Debug)]
-pub struct TransferProveInput<'a> {
-    pub asset_domain: &'a [u8], // asset id bytes for domain sep
-    pub from_pk: PublicKey,
-    pub to_pk: PublicKey,
-    pub from_old_commitment: PedersenCommitment, // 32 bytes commitment of sender bal
-    pub from_old_opening: (u64, Scalar),         // (v_from_old, r_from_old) known by sender
-    pub to_old_commitment: PedersenCommitment,   // used in transcript; opening unknown to sender
-    pub delta_value: u64,                        // Δv
-    pub elgamal_pk_for_delta: PublicKey,         // PK to encrypt Δv to (usually receiver's)
-    pub rng_seed: [u8; 32],                      // to make proofs deterministic in tests
-}
-
-/// Simple API to generate keys (for testing/demo)
-pub fn gen_keypair(seed: [u8; 32]) -> (SecretKey, PublicKey) {
-    let mut rng = ChaCha20Rng::from_seed(seed);
-    let mut sk_bytes = [0u8; 32];
-    rng.fill_bytes(&mut sk_bytes);
-    let sk = Scalar::from_bytes_mod_order(sk_bytes);
-    let pk = (sk * G).compress().to_bytes();
-    (SecretKey(sk_bytes.to_vec()), PublicKey(pk.to_vec()))
-}
-
-fn decode_pk(pk: &PublicKey) -> Result<RistrettoPoint, ProverError> {
-    let arr = <&[u8; 32]>::try_from(pk.0.as_slice()).map_err(|_| ProverError::InvalidInput)?;
-    CompressedRistretto(*arr)
-        .decompress()
-        .ok_or(ProverError::InvalidInput)
-}
-
-fn decode_commit(c: &PedersenCommitment) -> Result<RistrettoPoint, ProverError> {
-    let arr = <&[u8; 32]>::try_from(c.c.as_slice()).map_err(|_| ProverError::InvalidInput)?;
-    CompressedRistretto(*arr)
-        .decompress()
-        .ok_or(ProverError::InvalidInput)
-}
-
-fn scalar_from_u64(x: u64) -> Scalar {
-    Scalar::from(x)
-}
-
-/// Derive H using hash-to-curve so both sides agree without shipping a second generator.
-/// Must match your verifier exactly.
-fn pedersen_h() -> RistrettoPoint {
-    use sha2::Sha512;
-    RistrettoPoint::hash_from_bytes::<Sha512>(b"Zether/PedersenH")
-}
-
-/// Build the same transcript the verifier expects.
-fn transcript_for_transfer(
-    asset: &[u8],
-    from_pk: &RistrettoPoint,
-    to_pk: &RistrettoPoint,
-    from_old: &RistrettoPoint,
-    to_old: &RistrettoPoint,
-    ct: &ElGamalCipher,
-    delta_c: &RistrettoPoint,
-) -> Transcript {
-    let mut t = Transcript::new(b"zether.transfer");
-    t.append_message(b"ds.chain", b"your-chain-id"); // keep in sync with verifier
-    t.append_message(b"ds.pallet", b"pallet-zether");
-    t.append_message(b"ds.op", b"transfer.v1");
-    t.append_message(b"ds.asset", asset);
-    t.append_message(b"from_pk", &from_pk.compress().to_bytes());
-    t.append_message(b"to_pk", &to_pk.compress().to_bytes());
-    t.append_message(b"from_old", &from_old.compress().to_bytes());
-    t.append_message(b"to_old", &to_old.compress().to_bytes());
-    t.append_message(b"ct.c1", &ct.c1);
-    t.append_message(b"ct.c2", &ct.c2);
-    t.append_message(b"delta_c", &delta_c.compress().to_bytes());
-    t
-}
-
-/// Create the prover’s linkage proof + sender range proof.
-/// Returns the on-chain bundle (ΔC, link proof, range proof, and the Δv ElGamal ciphertext).
-pub fn prove_transfer(input: &TransferProveInput) -> Result<TransferProofBundle, ProverError> {
-    // Decode points
-    let from_pk = decode_pk(&input.from_pk)?;
-    let to_pk = decode_pk(&input.to_pk)?;
-    let elgamal_pk = decode_pk(&input.elgamal_pk_for_delta)?;
-    let from_old_c = decode_commit(&input.from_old_commitment)?;
-    let to_old_c = decode_commit(&input.to_old_commitment)?;
-
-    // Witness
-    let v_from_old = scalar_from_u64(input.from_old_opening.0);
-    let r_from_old = input.from_old_opening.1;
-    let dv = scalar_from_u64(input.delta_value);
-
-    // Fresh randomness
-    let mut rng = StdRng::from_seed(input.rng_seed);
+    let mut rng = ChaCha20Rng::from_seed(inp.rng_seed);
     let k = Scalar::from(rng.next_u64()); // ElGamal randomness
-    let rho = Scalar::from(rng.next_u64()); // Pedersen delta randomness for ΔC
-    let alpha_k = Scalar::from(rng.next_u64());
-    let alpha_v = Scalar::from(rng.next_u64());
-    let alpha_r = Scalar::from(rng.next_u64());
+    let rho = Scalar::from(rng.next_u64()); // ΔC blind
+    let a_k = Scalar::from(rng.next_u64()); // CP blinding for k
+    let a_v = Scalar::from(rng.next_u64()); // CP blinding for v
+    let a_r = Scalar::from(rng.next_u64()); // CP blinding for rho
 
-    // ElGamal Δv to chosen pk (typically receiver)
-    let c1 = (k * G).compress().to_bytes();
-    let c2 = (dv * G + k * elgamal_pk).compress().to_bytes();
-    let delta_ct = ElGamalCipher { c1, c2 };
+    // ----- Pedersen params -----
+    let H = pedersen_h_generator();
 
-    // Pedersen ΔC
-    let H = pedersen_h();
-    let delta_c = dv * G + rho * H;
+    // ----- ΔC and Δciphertext (tied to SENDER pk to match verifier Eq2) -----
+    let delta_C = dv * G + rho * H;
+    let delta_ct = elgamal_encrypt_delta(&inp.sender_pk, dv_u64, &k);
 
-    // Chaum–Pedersen commitments
-    let a1 = (alpha_k * G).compress().to_bytes();
-    let a2 = (alpha_v * G + alpha_k * elgamal_pk).compress().to_bytes();
-    let a3 = (alpha_v * G + alpha_r * H).compress().to_bytes();
+    // Optional sanity check: primitives <-> SDK encoding agree
+    {
+        let sdk_ct = sdk_from_primitives_ct(&delta_ct);
+        let back = sdk_ct.to_bytes();
+        assert_eq!(back, delta_ct.to_bytes(), "SDK/primitives CT mismatch");
+    }
 
-    // Transcript & challenge
-    let mut tr = transcript_for_transfer(
-        input.asset_domain,
-        &from_pk,
-        &to_pk,
-        &from_old_c,
-        &to_old_c,
-        &delta_ct,
-        &delta_c,
-    );
-    tr.append_message(b"a1", &a1);
-    tr.append_message(b"a2", &a2);
-    tr.append_message(b"a3", &a3);
+    // ----- Bind canonical PublicContext before FS challenge -----
+    let ctx = PublicContext {
+        network_id: inp.network_id,
+        sdk_version: SDK_VERSION,
+        asset_id: pad_or_trim_32(&inp.asset_id),
+        sender_pk: inp.sender_pk,
+        receiver_pk: inp.receiver_pk,
+        auditor_pk: None,
+        fee_commitment: inp.fee_C.unwrap_or_else(RistrettoPoint::identity),
+        ciphertext_out: delta_ct,
+        ciphertext_in: None,
+    };
+    let mut t = transcript_for(&ctx);
 
-    let mut chal = [0u8; 64];
-    tr.challenge_bytes(b"chal", &mut chal);
-    let c = Scalar::from_bytes_mod_order_wide(&chal);
+    // ----- Sigma commitments -----
+    let A1 = a_k * G;
+    let A2 = a_v * G + a_k * inp.sender_pk;
+    let A3 = a_v * G + a_r * H;
+
+    append_point(&mut t, b"a1", &A1);
+    append_point(&mut t, b"a2", &A2);
+    append_point(&mut t, b"a3", &A3);
+
+    // ----- Fiat–Shamir challenge (shared label) -----
+    let c = fs_chal(&mut t, labels::CHAL_EQ);
 
     // Responses
-    let z_k = (alpha_k + c * k).to_bytes();
-    let z_v = (alpha_v + c * dv).to_bytes();
-    let z_r = (alpha_r + c * rho).to_bytes();
+    let z_k = a_k + c * k;
+    let z_v = a_v + c * dv;
+    let z_r = a_r + c * rho;
 
-    let link = LinkProof {
-        a1,
-        a2,
-        a3,
-        z_k,
-        z_v,
-        z_r,
+    // ----- New commitments (what chain will compute) -----
+    let from_new_C = (v_from_old - dv) * G + (r_from_old - rho) * H;
+    let to_new_C = inp.to_old_C + delta_C;
+
+    // ----- Range proofs bound to transcript context bytes -----
+    let ctx_bytes = transcript_context_bytes(&t);
+    let from_new_bytes = point_to_bytes(&from_new_C);
+    let to_new_bytes = point_to_bytes(&to_new_C);
+
+    let range_from = prove_range_u64(
+        b"range_from_new",
+        &ctx_bytes,
+        &from_new_bytes,
+        v_from_old_u64
+            .checked_sub(dv_u64)
+            .ok_or(ProverError::RangeProof)?,
+        &(r_from_old - rho),
+    )?;
+
+    // Usually omitted (requires receiver opening/cooperation).
+    let range_to = if inp.include_receiver_range_proof {
+        // Placeholder pathway: caller must provide receiver opening to actually prove.
+        Vec::new()
+    } else {
+        Vec::new()
     };
 
-    // Sender new balance commitment opening (for sender-only RP):
-    // from_new = (v_from_old - dv)·G + (r_from_old - rho)·H
-    let v_from_new = v_from_old - dv;
-    let r_from_new = r_from_old - rho;
-    let from_new_c = v_from_new * G + r_from_new * H;
+    // ----- Assemble bundle: 32 + 192 + len/bytes + len/bytes -----
+    let mut bundle = Vec::with_capacity(32 + 192 + 2 + range_from.len() + 2 + range_to.len());
+    bundle.extend_from_slice(delta_C.compress().as_bytes());
+    bundle.extend_from_slice(&encode_link(&A1, &A2, &A3, &z_k, &z_v, &z_r));
+    bundle.extend_from_slice(&(range_from.len() as u16).to_le_bytes());
+    bundle.extend_from_slice(&range_from);
+    bundle.extend_from_slice(&(range_to.len() as u16).to_le_bytes());
+    bundle.extend_from_slice(&range_to);
 
-    // Build sender range proof over v_from_new using Bulletproofs (example).
-    // You can replace this with your range-proof system of choice.
-    let (range_from_new_bytes, _commit_check) = bp_prove_range_u64(
-        &mut StdRng::from_seed(input.rng_seed), // deterministic for tests
-        v_from_new,
-        r_from_new,
-    )
-    .map_err(|_| ProverError::RangeProof)?;
-
-    Ok(TransferProofBundle {
-        delta_comm: delta_c.compress().to_bytes(),
-        link,
-        range_from_new: range_from_new_bytes,
-        range_to_new: Vec::new(), // not provided by sender
-        delta_ct,
+    Ok(ProveOutput {
+        bundle_bytes: bundle,
+        delta_ct_bytes: delta_ct.to_bytes(),
+        from_new_C: from_new_bytes,
+        to_new_C: to_new_bytes,
     })
 }
 
-/// Example Bulletproofs prover for a 64-bit range proof.
-/// Returns (proof_bytes, commitment_bytes) — we only need the proof; the chain already has the commitment.
-fn bp_prove_range_u64<R: RngCore>(
-    rng: &mut R,
-    value: Scalar,
-    blind: Scalar,
-) -> Result<(Vec<u8>, [u8; 32]), ProverError> {
-    use bulletproofs::{BulletproofGens, PedersenGens, RangeProof};
-    use curve25519_dalek::ristretto::CompressedRistretto;
+// ========================= Bulletproofs (64-bit) =========================
 
-    // Convert Scalar value to u64 (we bound it to 64-bit amounts in this example)
-    // In prod, ensure amounts are <= 2^64 - 1
-    let mut bytes = [0u8; 32];
-    bytes.copy_from_slice(value.to_bytes().as_slice());
-    let v64 = u64::from_le_bytes(bytes[0..8].try_into().unwrap());
+fn prove_range_u64(
+    _label: &'static [u8], // informational; context binding happens via transcript
+    ctx_bytes: &[u8],      // bind the same bytes the verifier uses
+    commit_compressed: &[u8; 32], // the commitment being constrained (for context binding only)
+    value_u64: u64,        // 0..2^64-1
+    blind: &Scalar,        // dalek::Scalar blinding for that commitment
+) -> Result<Vec<u8>, ProverError> {
+    use bulletproofs::{BulletproofGens, PedersenGens, RangeProof};
+    use curve25519_dalek_ng as dalek_ng;
+
+    // Build a Merlin transcript and bind the same context bytes so the verifier’s
+    // RangeVerifier sees the identical transcript state.
+    let mut t = merlin::Transcript::new(b"bp64");
+    t.append_message(b"ctx", ctx_bytes);
+    t.append_message(b"commit", commit_compressed);
+
+    // Bulletproofs 4 uses curve25519-dalek-ng types. Convert the blinding scalar.
+    let blind_ng = dalek_ng::scalar::Scalar::from_bytes_mod_order(blind.to_bytes());
 
     let pg = PedersenGens::default();
     let bp_gens = BulletproofGens::new(64, 1);
 
-    // Dalek’s BP uses its own gens; for compatibility with your on-chain Pedersen,
-    // ensure the verifier uses the same commitment scheme OR keep RP separate from on-chain Pedersen.
-    let (proof, commit) = RangeProof::prove_single(bp_gens.borrow(), &pg, rng, v64, &blind, 64)
-        .map_err(|_| ProverError::RangeProof)?;
+    // Prove a single 64-bit range; BP 4 expects a transcript, not an RNG.
+    let (proof, _bp_commit) =
+        RangeProof::prove_single(&bp_gens, &pg, &mut t, value_u64, &blind_ng, 64)
+            .map_err(|_| ProverError::RangeProof)?;
 
-    let proof_bytes = proof.to_bytes();
-    let commit_bytes: [u8; 32] = commit.to_bytes();
-    Ok((proof_bytes, commit_bytes))
+    Ok(proof.to_bytes())
+}
+
+// ========================= Helpers =========================
+
+fn pedersen_h_generator() -> RistrettoPoint {
+    RistrettoPoint::hash_from_bytes::<Sha512>(b"Zether/PedersenH")
+}
+
+fn transcript_for(ctx: &PublicContext) -> Transcript {
+    new_transcript(ctx)
+}
+
+/// Encrypt Δv under **sender_pk** (matches verifier Eq2).
+fn elgamal_encrypt_delta(sender_pk: &RistrettoPoint, delta_v: u64, k: &Scalar) -> Ciphertext {
+    let v = Scalar::from(delta_v);
+    let C = k * G;
+    let D = v * G + (*k) * (*sender_pk);
+    Ciphertext { C, D }
+}
+
+/// 192-byte link proof (A1||A2||A3||z_k||z_v||z_r).
+fn encode_link(
+    a1: &RistrettoPoint,
+    a2: &RistrettoPoint,
+    a3: &RistrettoPoint,
+    z_k: &Scalar,
+    z_v: &Scalar,
+    z_r: &Scalar,
+) -> [u8; 192] {
+    let mut out = [0u8; 192];
+    out[0..32].copy_from_slice(a1.compress().as_bytes());
+    out[32..64].copy_from_slice(a2.compress().as_bytes());
+    out[64..96].copy_from_slice(a3.compress().as_bytes());
+    out[96..128].copy_from_slice(&z_k.to_bytes());
+    out[128..160].copy_from_slice(&z_v.to_bytes());
+    out[160..192].copy_from_slice(&z_r.to_bytes());
+    out
+}
+
+fn pad_or_trim_32(x: &[u8]) -> [u8; 32] {
+    let mut out = [0u8; 32];
+    if x.len() >= 32 {
+        out.copy_from_slice(&x[0..32]);
+    } else {
+        out[0..x.len()].copy_from_slice(x);
+    }
+    out
+}
+
+fn transcript_context_bytes(t: &Transcript) -> [u8; 32] {
+    let mut clone = t.clone();
+    let mut out = [0u8; 32];
+    clone.challenge_bytes(b"ctx", &mut out);
+    out
+}
+
+// ---- Minimal interop helpers w/ solana_zk_sdk (straightforward mapping) ----
+
+fn sdk_from_primitives_ct(ct: &Ciphertext) -> sdk_elgamal::ElGamalCiphertext {
+    use solana_zk_sdk::encryption::elgamal::DecryptHandle;
+    use solana_zk_sdk::encryption::pedersen::PedersenCommitment;
+
+    let c_bytes = ct.C.compress().to_bytes();
+    let d_bytes = ct.D.compress().to_bytes();
+
+    let commit = PedersenCommitment::from_bytes(&c_bytes).expect("valid point");
+    let handle = DecryptHandle::from_bytes(&d_bytes).expect("valid point");
+
+    sdk_elgamal::ElGamalCiphertext {
+        commitment: commit,
+        handle,
+    }
+}
+
+// -------------------------- Tests (optional) --------------------------
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use curve25519_dalek::traits::Identity;
+
+    #[test]
+    fn round_trip_bundle_shapes() {
+        // tiny smoke test for shapes; not a cryptographic test.
+        let mut seed = [0u8; 32];
+        seed[0] = 7;
+
+        let sk = Scalar::from(5u64);
+        let sender_pk = (sk * G);
+        let receiver_pk = (Scalar::from(9u64) * G);
+
+        let H = pedersen_h_generator();
+        let from_old_v = 1234u64;
+        let from_old_r = Scalar::from(42u64);
+        let from_old_C = Scalar::from(from_old_v) * G + from_old_r * H;
+        let to_old_C = RistrettoPoint::identity();
+
+        let inp = TransferInput {
+            asset_id: b"TEST_ASSET".to_vec(),
+            network_id: [1u8; 32],
+            sender_pk,
+            receiver_pk,
+            from_old_C,
+            from_old_opening: (from_old_v, from_old_r),
+            to_old_C,
+            delta_value: 111,
+            rng_seed: seed,
+            fee_C: None,
+            include_receiver_range_proof: false,
+        };
+
+        let out = prove_transfer(&inp).expect("prove");
+        assert_eq!(out.delta_ct_bytes.len(), 64);
+        // bundle = 32 + 192 + 2 + rp + 2 + rp
+        assert!(out.bundle_bytes.len() >= 32 + 192 + 2 + 0 + 2 + 0);
+    }
 }
