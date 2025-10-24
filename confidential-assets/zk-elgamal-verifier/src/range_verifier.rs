@@ -91,14 +91,17 @@ pub struct BulletproofRangeVerifier;
 
 impl RangeProofVerifier for BulletproofRangeVerifier {
     fn verify_range_proof(
-        transcript_label: &[u8],
+        _transcript_label: &[u8], // unused to keep parity with prover
         context: &[u8],
         commit_compressed: &[u8; 32],
         proof_bytes: &[u8],
     ) -> Result<(), ()> {
-        // Merlin requires a `'static` label for initialization.
-        let mut t = Transcript::new(b"oz_confidential::range_proof_v1");
-        t.append_message(b"label", transcript_label);
+        use bulletproofs::{BulletproofGens, PedersenGens, RangeProof};
+        use curve25519_dalek_ng::ristretto::CompressedRistretto;
+        use merlin::Transcript;
+
+        // IMPORTANT: must match prover exactly
+        let mut t = Transcript::new(b"bp64");
         t.append_message(b"ctx", context);
         t.append_message(b"commit", commit_compressed);
 
@@ -107,6 +110,11 @@ impl RangeProofVerifier for BulletproofRangeVerifier {
         let pedersen_gens = PedersenGens::default();
         let v = CompressedRistretto(*commit_compressed);
 
-        verify_single_no_entropy(&proof, &bp_gens, &pedersen_gens, &mut t, &v, 64)
+        // Deterministic RNG seeded from transcript is fine; keep your helper
+        let mut det_rng = SeededXorShift64::from_transcript(&mut t);
+
+        proof
+            .verify_single_with_rng(&bp_gens, &pedersen_gens, &mut t, &v, 64, &mut det_rng)
+            .map_err(|_| ())
     }
 }

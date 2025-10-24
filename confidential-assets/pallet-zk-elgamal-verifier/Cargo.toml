@@ -36,6 +36,8 @@ zk-elgamal-verifier = { path = "../zk-elgamal-verifier" }
 zk-elgamal-prover = { path = "../zk-elgamal-prover" }
 sp-core = { workspace = true }
 sp-io = { workspace = true }
+rand              = { version = "0.9.2", features = ["std", "std_rng"] }
+rand_chacha       = "0.9"
 
 [features]
 default = ["std"]

@@ -89,16 +89,15 @@ impl<AccountId, AssetId> OnConfidentialTransfer<AccountId, AssetId> for () {
 /// Abstract verifier boundary. Implement in the runtime.
 ///
 // TODO:
-// - verify_{mint, burn}_and_apply
-// - check range proofs/non-negativity,
-// - link ElGamal delta to balance commitments,
-// - ensure conservation, domain separation (chain-id/pallet-id/asset),
-// - optionally support auditor/view keys.
+// - verify_{mint, burn}_{to_send, received}
 pub trait ZkVerifier {
     type Error;
 
     /// Verify a transfer and **compute the new opaque per-account ciphertexts**.
-    fn verify_transfer_and_apply(
+    /// Requires receiver to call `pallet_zk_elgamal::accept_pending` to move from
+    /// pending to available confidential balance for sending which internally calls
+    /// `verify_transfer_to_receiver`.
+    fn verify_transfer_sent(
         asset: &[u8],
         from_pk: &[u8],
         to_pk: &[u8],
@@ -110,7 +109,7 @@ pub trait ZkVerifier {
     // returns (from_new_balance_cipher, to_new_balance_cipher, new_total_supply_cipher)
 
     /// ACL transfer: same as above but without proof. Implementation must enforce policy.
-    fn apply_acl_transfer(
+    fn acl_transfer_sent(
         asset: &[u8],
         from_pk: &[u8],
         to_pk: &[u8],
@@ -118,7 +117,17 @@ pub trait ZkVerifier {
         to_old: &[u8],
         amount_cipher: &[u8],
     ) -> Result<(Vec<u8>, Vec<u8>, Vec<u8>), Self::Error>;
-    // returns (from_new, to_new, new_total)
+    // returns (from_new_balance_cipher, to_new_balance_cipher, new_total_supply_cipher)
+
+    /// Verify transfer received to update receiver available balance
+    fn verify_transfer_received(
+        asset: &[u8],
+        to_pk: &[u8],
+        to_old: &[u8],
+        delta_ct: &[u8],
+        proof: &[u8],
+    ) -> Result<(Vec<u8>, Vec<u8>), Self::Error>;
+    // returns (to_new_balance_cipher, new_total_supply_cipher)
 
     /// Optional disclosure (policy dependent). Return plaintext amount or error.
     fn disclose(asset: &[u8], who_pk: &[u8], cipher: &[u8]) -> Result<u64, Self::Error>;

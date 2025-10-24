@@ -2192,6 +2192,8 @@ dependencies = [
  "pallet-balances",
  "parity-scale-codec",
  "primitives-zk-elgamal",
+ "rand 0.9.2",
+ "rand_chacha 0.9.0",
  "rand_core 0.6.4",
  "scale-info",
  "sha2 0.10.9",
