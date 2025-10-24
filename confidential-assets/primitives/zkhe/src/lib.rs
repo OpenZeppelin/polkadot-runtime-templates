@@ -1,4 +1,4 @@
-//! primitives-zk-elgamal
+//! zkhe-primitives
 //!
 //! Shared, `no_std`-friendly primitives for zk-ElGamal style confidential transfers.
 //! - Stable byte layouts (points/scalars) and ciphertext types

@@ -1,28 +1,23 @@
 [package]
-name = "primitives-zk-elgamal"
+name = "pallet-confidential-assets"
 authors = { workspace = true }
-description = "Primitives shared between ZK ElGamal Verifier and Prover"
+description = "pallet supporting confidential transfers"
 edition = { workspace = true }
 license = { workspace = true }
 repository = { workspace = true }
 version = "0.1.0"
 
 [dependencies]
+serde = { workspace = true, features = ["derive"], optional = true }
+
 parity-scale-codec = { workspace = true }
 scale-info = { workspace = true }
 frame-support = { workspace = true }
 frame-system  = { workspace = true }
 sp-runtime    = { workspace = true }
 sp-std = { workspace = true }
-serde = { workspace = true, optional = true }
 
-# no_std crypto
-curve25519-dalek = { version = "4.1", default-features = false, features = ["alloc"] }
-blake2 = { version = "0.10", default-features = false }
-merlin            = { version = "3", default-features = false }
-subtle            = { version = "2", default-features = false }
-
-sha2 = { version = "0.10.9", default-features = false }
+confidential-assets-primitives = { path = "../../primitives/confidential-assets", default-features = false }
 
 [features]
 default = ["std"]
@@ -33,9 +28,6 @@ std = [
   "sp-std/std",
   "parity-scale-codec/std",
   "scale-info/std",
-  "blake2/std",
-  "merlin/std",
-  "subtle/std",
-  "sha2/std",
   "dep:serde",
+  "confidential-assets-primitives/std",
 ]

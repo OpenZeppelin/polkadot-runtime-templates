@@ -28,7 +28,7 @@
 //!
 // TODO: on/off ramp functionality
 
-use ca_primitives::*;
+use confidential_assets_primitives::*;
 use frame_support::{dispatch::DispatchResult, pallet_prelude::*};
 use frame_system::pallet_prelude::*;
 use scale_info::TypeInfo;

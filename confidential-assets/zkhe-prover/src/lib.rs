@@ -19,6 +19,9 @@
 //! - For simplicity, `prove_receiver_accept` requires the receiver opening and the transfer
 //!   witnesses (Δv, ρ). In production, you can derive receiver opening via the ElGamal handle.
 
+#[cfg(test)]
+mod tests;
+
 use curve25519_dalek::{
     constants::RISTRETTO_BASEPOINT_POINT as G, ristretto::RistrettoPoint, scalar::Scalar,
     traits::Identity,
@@ -29,7 +32,7 @@ use rand_chacha::ChaCha20Rng;
 use sha2::Sha512;
 use thiserror::Error;
 
-use primitives_zk_elgamal::{
+use zkhe_primitives::{
     Ciphertext, PublicContext, SDK_VERSION, append_point, challenge_scalar as fs_chal, labels,
     new_transcript, point_to_bytes,
 };
@@ -165,11 +168,11 @@ pub struct SenderInput {
     pub sender_pk: RistrettoPoint,
     pub receiver_pk: RistrettoPoint,
 
-    pub from_old_C: RistrettoPoint,
+    pub from_old_c: RistrettoPoint,
     pub from_old_opening: (u64, Scalar),
 
     /// Receiver old commitment (opening not needed in sender phase).
-    pub to_old_C: RistrettoPoint,
+    pub to_old_c: RistrettoPoint,
 
     /// Δv to send.
     pub delta_value: u64,
@@ -178,15 +181,15 @@ pub struct SenderInput {
     pub rng_seed: [u8; 32],
 
     /// Optional fee commitment.
-    pub fee_C: Option<RistrettoPoint>,
+    pub fee_c: Option<RistrettoPoint>,
 }
 
 pub struct SenderOutput {
     pub delta_ct_bytes: [u8; 64],
     pub sender_bundle_bytes: Vec<u8>,
     pub delta_comm_bytes: [u8; 32],
-    pub from_new_C: [u8; 32],
-    pub to_new_C: [u8; 32], // computed for convenience (not applied on-chain in phase 1)
+    pub from_new_c: [u8; 32],
+    pub to_new_c: [u8; 32], // computed for convenience (not applied on-chain in phase 1)
 }
 
 pub fn prove_sender_transfer(inp: &SenderInput) -> Result<SenderOutput, ProverError> {
@@ -202,8 +205,8 @@ pub fn prove_sender_transfer(inp: &SenderInput) -> Result<SenderOutput, ProverEr
     let a_v = Scalar::from(rng.next_u64()); // CP blinding for v
     let a_r = Scalar::from(rng.next_u64()); // CP blinding for rho
 
-    let H = pedersen_h_generator();
-    let delta_C = dv * G + rho * H;
+    let h = pedersen_h_generator();
+    let delta_c = dv * G + rho * h;
     let delta_ct = elgamal_encrypt_delta(&inp.sender_pk, dv_u64, &k);
 
     // SDK interop check
@@ -231,20 +234,20 @@ pub fn prove_sender_transfer(inp: &SenderInput) -> Result<SenderOutput, ProverEr
         sender_pk: inp.sender_pk,
         receiver_pk: inp.receiver_pk,
         auditor_pk: None,
-        fee_commitment: inp.fee_C.unwrap_or_else(RistrettoPoint::identity),
+        fee_commitment: inp.fee_c.unwrap_or_else(RistrettoPoint::identity),
         ciphertext_out: delta_ct,
         ciphertext_in: None,
     };
     let mut t = transcript_for(&ctx);
 
     // Σ-commitments
-    let A1 = a_k * G;
-    let A2 = a_v * G + a_k * inp.sender_pk;
-    let A3 = a_v * G + a_r * H;
+    let a1 = a_k * G;
+    let a2 = a_v * G + a_k * inp.sender_pk;
+    let a3 = a_v * G + a_r * h;
 
-    append_point(&mut t, b"a1", &A1);
-    append_point(&mut t, b"a2", &A2);
-    append_point(&mut t, b"a3", &A3);
+    append_point(&mut t, b"a1", &a1);
+    append_point(&mut t, b"a2", &a2);
+    append_point(&mut t, b"a3", &a3);
 
     // Challenge
     let c = fs_chal(&mut t, labels::CHAL_EQ);
@@ -255,13 +258,13 @@ pub fn prove_sender_transfer(inp: &SenderInput) -> Result<SenderOutput, ProverEr
     let z_r = a_r + c * rho;
 
     // New commitments (sender new is applied in phase 1; receiver is postponed)
-    let from_new_C = (v_from_old - dv) * G + (r_from_old - rho) * H;
-    let to_new_C = inp.to_old_C + delta_C;
+    let from_new_c = (v_from_old - dv) * G + (r_from_old - rho) * h;
+    let to_new_c = inp.to_old_c + delta_c;
 
     // Sender range proof bound to sender transcript context bytes
     let ctx_bytes = transcript_context_bytes(&t);
-    let from_new_bytes = point_to_bytes(&from_new_C);
-    let to_new_bytes = point_to_bytes(&to_new_C);
+    let from_new_bytes = point_to_bytes(&from_new_c);
+    let to_new_bytes = point_to_bytes(&to_new_c);
 
     let range_from = prove_range_u64(
         &ctx_bytes,
@@ -274,21 +277,21 @@ pub fn prove_sender_transfer(inp: &SenderInput) -> Result<SenderOutput, ProverEr
 
     // Assemble sender bundle (receiver range len = 0)
     let mut bundle = Vec::with_capacity(32 + 192 + 2 + range_from.len() + 2);
-    bundle.extend_from_slice(delta_C.compress().as_bytes());
-    bundle.extend_from_slice(&encode_link(&A1, &A2, &A3, &z_k, &z_v, &z_r));
+    bundle.extend_from_slice(delta_c.compress().as_bytes());
+    bundle.extend_from_slice(&encode_link(&a1, &a2, &a3, &z_k, &z_v, &z_r));
     bundle.extend_from_slice(&(range_from.len() as u16).to_le_bytes());
     bundle.extend_from_slice(&range_from);
     bundle.extend_from_slice(&(0u16).to_le_bytes()); // len2 = 0
 
     let mut delta_comm_bytes = [0u8; 32];
-    delta_comm_bytes.copy_from_slice(delta_C.compress().as_bytes());
+    delta_comm_bytes.copy_from_slice(delta_c.compress().as_bytes());
 
     Ok(SenderOutput {
         delta_ct_bytes: delta_ct.to_bytes(),
         sender_bundle_bytes: bundle,
         delta_comm_bytes,
-        from_new_C: from_new_bytes,
-        to_new_C: to_new_bytes,
+        from_new_c: from_new_bytes,
+        to_new_c: to_new_bytes,
     })
 }
 
@@ -300,7 +303,7 @@ pub struct ReceiverAcceptInput {
 
     pub receiver_pk: RistrettoPoint,
 
-    pub to_old_C: RistrettoPoint,
+    pub to_old_c: RistrettoPoint,
     pub to_old_opening: (u64, Scalar),
 
     /// ΔC commitment and its transfer witnesses (Δv, ρ) to form the new opening.
@@ -313,7 +316,7 @@ pub struct ReceiverAcceptOutput {
     /// Envelope expected by verifier `verify_transfer_received`:
     ///   delta_comm(32) || len(u16) || range_to_new
     pub accept_envelope: Vec<u8>,
-    pub to_new_C: [u8; 32],
+    pub to_new_c: [u8; 32],
 }
 
 pub fn prove_receiver_accept(
@@ -326,19 +329,19 @@ pub fn prove_receiver_accept(
     let rho = inp.delta_rho;
 
     // Compute receiver new commitment/opening
-    let H = pedersen_h_generator();
-    let to_new_C = (v_to_old + dv) * G + (r_to_old + rho) * H;
+    let h = pedersen_h_generator();
+    let to_new_c = (v_to_old + dv) * G + (r_to_old + rho) * h;
 
     // Acceptance transcript context (must match verifier)
     let ctx_bytes = accept_ctx_bytes(
         inp.network_id,
         pad_or_trim_32(&inp.asset_id),
         &inp.receiver_pk,
-        &inp.to_old_C,
+        &inp.to_old_c,
         &inp.delta_comm,
     );
 
-    let to_new_bytes = point_to_bytes(&to_new_C);
+    let to_new_bytes = point_to_bytes(&to_new_c);
 
     // Produce receiver range proof
     let range_to = prove_range_u64(
@@ -358,74 +361,6 @@ pub fn prove_receiver_accept(
 
     Ok(ReceiverAcceptOutput {
         accept_envelope: env,
-        to_new_C: to_new_bytes,
+        to_new_c: to_new_bytes,
     })
-}
-
-// -------------------------- Tests (basic shape) --------------------------
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn sender_receiver_round_trip_shapes() {
-        let mut seed = [0u8; 32];
-        seed[0] = 7;
-
-        let sk_sender = Scalar::from(5u64);
-        let pk_sender = sk_sender * G;
-        let pk_receiver = Scalar::from(9u64) * G;
-
-        let H = pedersen_h_generator();
-        let from_old_v = 1234u64;
-        let from_old_r = Scalar::from(42u64);
-        let from_old_C = Scalar::from(from_old_v) * G + from_old_r * H;
-
-        let to_old_v = 0u64;
-        let to_old_r = Scalar::from(0u64);
-        let to_old_C = RistrettoPoint::identity();
-
-        let dv = 111u64;
-
-        let s_in = SenderInput {
-            asset_id: b"TEST_ASSET".to_vec(),
-            network_id: [1u8; 32],
-            sender_pk: pk_sender,
-            receiver_pk: pk_receiver,
-            from_old_C,
-            from_old_opening: (from_old_v, from_old_r),
-            to_old_C,
-            delta_value: dv,
-            rng_seed: seed,
-            fee_C: None,
-        };
-        let s_out = prove_sender_transfer(&s_in).expect("sender prove");
-
-        assert_eq!(s_out.delta_ct_bytes.len(), 64);
-        assert!(s_out.sender_bundle_bytes.len() >= 32 + 192 + 2 + 1 + 2);
-
-        // Receiver acceptance with known witnesses (KISS mode)
-        let r_in = ReceiverAcceptInput {
-            asset_id: b"TEST_ASSET".to_vec(),
-            network_id: [1u8; 32],
-            receiver_pk: pk_receiver,
-            to_old_C,
-            to_old_opening: (to_old_v, to_old_r),
-            delta_comm: {
-                use curve25519_dalek::ristretto::CompressedRistretto;
-                CompressedRistretto(s_out.delta_comm_bytes)
-                    .decompress()
-                    .unwrap()
-            },
-            delta_value: dv,
-            delta_rho: {
-                // Not exported from sender routine; in real usage receiver derives it.
-                // For this smoke test we just reuse seed to simulate consistent rho.
-                Scalar::from(ChaCha20Rng::from_seed(seed).next_u64())
-            },
-        };
-
-        let r_out = prove_receiver_accept(&r_in).expect("receiver accept");
-        assert!(r_out.accept_envelope.len() > 32 + 2);
-    }
 }

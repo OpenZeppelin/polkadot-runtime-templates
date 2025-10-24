@@ -1,6 +1,6 @@
 #![cfg_attr(not(feature = "std"), no_std)]
 
-//! # pallet-zk-elgamal (backend-only, ZK/crypto + storage)
+//! # pallet-zkhe (backend-only, ZK/crypto + storage)
 //!
 //! Backend pallet that implements the `ConfidentialBackend` trait from
 //! `pallet-confidential-assets`. It stores:
@@ -21,7 +21,7 @@
 //!
 //! This pallet remains a backend; front pallets should emit user-facing events.
 
-use ca_primitives::*;
+use confidential_assets_primitives::*;
 use frame_support::{pallet_prelude::*, Blake2_128Concat};
 use frame_system::pallet_prelude::*;
 use scale_info::TypeInfo;

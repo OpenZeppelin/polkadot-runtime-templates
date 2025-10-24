@@ -1,5 +1,5 @@
 [package]
-name = "zk-elgamal-prover"
+name = "zkhe-prover"
 version = "0.1.0"
 edition = "2024"
 
@@ -12,7 +12,7 @@ rand_chacha       = "0.9"
 serde             = { version = "1", features = ["derive"] }
 serde_json        = "1"
 thiserror         = "2.0.17"
-primitives-zk-elgamal = { path = "../primitives-zk-elgamal" }
+zkhe-primitives = { path = "../primitives/zkhe" }
 bulletproofs      = { version = "4", default-features = true }
 solana-zk-sdk = { version = "4" }
 sha2 = "0.10.9"

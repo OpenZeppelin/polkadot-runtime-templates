@@ -1,15 +1,13 @@
 [package]
-name = "pallet-confidential-assets"
+name = "pallet-zkhe"
 authors = { workspace = true }
-description = "pallet supporting confidential transfers"
+description = "confidential assets cryptographic backend implementing ZK El Gamal"
 edition = { workspace = true }
 license = { workspace = true }
 repository = { workspace = true }
 version = "0.1.0"
 
 [dependencies]
-serde = { workspace = true, features = ["derive"], optional = true }
-
 parity-scale-codec = { workspace = true }
 scale-info = { workspace = true }
 frame-support = { workspace = true }
@@ -17,7 +15,11 @@ frame-system  = { workspace = true }
 sp-runtime    = { workspace = true }
 sp-std = { workspace = true }
 
-ca-primitives = { path = "../ca-primitives", default-features = false }
+# no_std crypto
+curve25519-dalek = { version = "4.1", default-features = false, features = ["alloc"] }
+blake2 = { version = "0.10", default-features = false }
+
+confidential-assets-primitives = { path = "../../primitives/confidential-assets", default-features = false }
 
 [features]
 default = ["std"]
@@ -28,6 +30,6 @@ std = [
   "sp-std/std",
   "parity-scale-codec/std",
   "scale-info/std",
-  "dep:serde",
-  "ca-primitives/std",
+  "blake2/std",
+  "confidential-assets-primitives/std",
 ]

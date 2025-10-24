@@ -1,12 +1,11 @@
 [workspace]
 members = [
-    "ca-primitives",
-    "pallet-confidential-assets",
-	"primitives-zk-elgamal",
-    "pallet-zk-elgamal",
-	"pallet-zk-elgamal-verifier",
-	"zk-elgamal-prover",
-	"zk-elgamal-verifier",
+	"pallets/confidential-assets",
+    "pallets/zkhe",
+    "primitives/confidential-assets",
+	"primitives/zkhe",
+	"zkhe-prover",
+	"zkhe-verifier",
 ]
 resolver = "2"
 

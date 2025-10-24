@@ -2,8 +2,8 @@
 
 use core::result::Result;
 use merlin::Transcript;
-use primitives_zk_elgamal::RangeProofVerifier;
 use rand_core::{CryptoRng, Error as RandError, RngCore};
+use zkhe_primitives::RangeProofVerifier;
 
 #[inline]
 fn pedersen_h_generator_ng() -> curve25519_dalek_ng::ristretto::RistrettoPoint {
