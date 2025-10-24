@@ -6,6 +6,7 @@ members = [
     "pallet-zk-elgamal",
 	"pallet-zk-elgamal-verifier",
 	"zk-elgamal-prover",
+	"zk-elgamal-verifier",
 ]
 resolver = "2"
 

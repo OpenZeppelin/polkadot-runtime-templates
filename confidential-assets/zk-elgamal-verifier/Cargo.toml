@@ -1,7 +1,7 @@
 [package]
-name = "pallet-zk-elgamal-verifier"
+name = "zk-elgamal-verifier"
 authors = { workspace = true }
-description = "Pallet to verify ZK ElGamal Proofs by Prover"
+description = "no_std ZK ElGamal proof verification"
 edition = { workspace = true }
 license = { workspace = true }
 repository = { workspace = true }
@@ -28,15 +28,6 @@ ca-primitives = { path = "../ca-primitives", default-features = false }
 primitives-zk-elgamal = { path = "../primitives-zk-elgamal", default-features = false }
 sha2 = { version = "0.10.9", default-features = false }
 
-# only needed for tests but throws errors if put in dev-dependecies
-pallet-balances = { workspace = true, default-features = false }
-
-[dev-dependencies]
-zk-elgamal-verifier = { path = "../zk-elgamal-verifier" }
-zk-elgamal-prover = { path = "../zk-elgamal-prover" }
-sp-core = { workspace = true }
-sp-io = { workspace = true }
-
 [features]
 default = ["std"]
 std = [
@@ -55,5 +46,4 @@ std = [
   "curve25519-dalek-ng/std",
   "bulletproofs/std",
   "rand_core/std",
-  "pallet-balances/std",
 ]

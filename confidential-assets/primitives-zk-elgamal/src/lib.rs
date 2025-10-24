@@ -24,6 +24,16 @@ use curve25519_dalek::{
 use merlin::Transcript;
 use subtle::ConstantTimeEq;
 
+/// Trait for range proof verification compatible with `pallet-zk-elgamal-verifier::Config::RangeVerifier`.
+pub trait RangeProofVerifier {
+    fn verify_range_proof(
+        transcript_label: &[u8],
+        context: &[u8],
+        commit_compressed: &[u8; 32],
+        proof_bytes: &[u8],
+    ) -> Result<(), ()>;
+}
+
 /// 32-byte compressed Ristretto encoding.
 pub type CompressedPoint = [u8; 32];
 
@@ -218,7 +228,7 @@ pub fn point_to_bytes(p: &RistrettoPoint) -> CompressedPoint {
 pub fn scalar_from_canonical(bytes: &ScalarBytes) -> Result<Scalar, Error> {
     let maybe_scalar = Scalar::from_canonical_bytes(*bytes);
     if maybe_scalar.is_some().into() {
-        Ok(maybe_scalar.unwrap())   
+        Ok(maybe_scalar.unwrap())
     } else {
         Err(Error::Malformed)
     }

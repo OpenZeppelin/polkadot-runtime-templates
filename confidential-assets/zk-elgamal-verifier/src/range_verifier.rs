@@ -4,6 +4,7 @@ use bulletproofs::{BulletproofGens, PedersenGens, RangeProof};
 use core::result::Result;
 use curve25519_dalek_ng::ristretto::CompressedRistretto;
 use merlin::Transcript;
+use primitives_zk_elgamal::RangeProofVerifier;
 use rand_core::{CryptoRng, Error as RandError, RngCore};
 
 /// Simple deterministic RNG seeded once from a transcript to avoid lifetime aliasing.
@@ -85,20 +86,10 @@ fn verify_single_no_entropy(
         .map_err(|_| ())
 }
 
-/// Trait for range proof verification compatible with `pallet-zk-elgamal-verifier::Config::RangeVerifier`.
-pub trait RangeProofVerifier {
-    fn verify_range_proof(
-        transcript_label: &[u8],
-        context: &[u8],
-        commit_compressed: &[u8; 32],
-        proof_bytes: &[u8],
-    ) -> Result<(), ()>;
-}
-
 /// Bulletproofs-backed range verifier for 64-bit single-value proofs.
-pub struct BpRangeVerifier;
+pub struct BulletproofRangeVerifier;
 
-impl RangeProofVerifier for BpRangeVerifier {
+impl RangeProofVerifier for BulletproofRangeVerifier {
     fn verify_range_proof(
         transcript_label: &[u8],
         context: &[u8],

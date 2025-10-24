@@ -2,8 +2,8 @@
 
 extern crate alloc;
 
-mod range_verifier;
-pub use range_verifier::{BpRangeVerifier, RangeProofVerifier};
+#[cfg(test)]
+mod tests;
 
 use frame_support::pallet_prelude::*;
 use sp_std::vec::Vec;
@@ -17,9 +17,10 @@ use curve25519_dalek::{
 };
 use merlin::Transcript;
 
+pub use pallet::*;
 use primitives_zk_elgamal::{
     append_point, challenge_scalar as fs_chal, labels, new_transcript, point_from_bytes,
-    point_to_bytes, Ciphertext, FixedProof, PublicContext, SDK_VERSION,
+    point_to_bytes, Ciphertext, FixedProof, PublicContext, RangeProofVerifier, SDK_VERSION,
 };
 
 #[frame_support::pallet]
@@ -132,6 +133,9 @@ pub mod pallet {
             // TODO: replace with real chain/para id tag (e.g., blake2(genesis_hash||pallet_name))
             let network_id = [0u8; 32];
 
+            // TODO: extract Sigma proof to clean up pallet and isolate sigma verification
+            // SIGMA PROOF STARTS
+
             let ctx = PublicContext {
                 network_id,
                 sdk_version: SDK_VERSION,
@@ -179,6 +183,7 @@ pub mod pallet {
             if !(lhs3 - rhs3).is_identity() {
                 return Err(());
             }
+            // SIGMA PROOF END
 
             // --- Apply balance deltas (commitments add in the group) ---
             let from_new = from_old - proof.delta_comm;

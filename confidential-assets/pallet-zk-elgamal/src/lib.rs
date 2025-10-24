@@ -12,9 +12,7 @@
 //! `ConfidentialBackend` trait methods called by `pallet-confidential-assets`.
 //!
 //! ## Verifier
-//! The cryptography is abstracted by a `ZkVerifier` associated type. Start with a
-//! mock implementation and later plug in a real verifier that checks Solana-like
-//! relations (ElGamal delta tied to Pedersen balance deltas, range proofs, etc.).
+//! The cryptography is abstracted by a `ZkVerifier` associated type.
 
 use ca_primitives::*;
 use frame_support::{pallet_prelude::*, Blake2_128Concat};
