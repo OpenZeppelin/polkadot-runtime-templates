@@ -105,8 +105,8 @@ pub trait ZkVerifier {
         to_old: &[u8],
         delta_ct: &[u8],
         proof: &[u8],
-    ) -> Result<(Vec<u8>, Vec<u8>, Vec<u8>), Self::Error>;
-    // returns (from_new_balance_cipher, to_new_balance_cipher, new_total_supply_cipher)
+    ) -> Result<(Vec<u8>, Vec<u8>), Self::Error>;
+    // returns (from_new_balance_cipher, to_new_balance_cipher)
 
     /// ACL transfer: same as above but without proof. Implementation must enforce policy.
     fn acl_transfer_sent(
@@ -116,18 +116,17 @@ pub trait ZkVerifier {
         from_old: &[u8],
         to_old: &[u8],
         amount_cipher: &[u8],
-    ) -> Result<(Vec<u8>, Vec<u8>, Vec<u8>), Self::Error>;
-    // returns (from_new_balance_cipher, to_new_balance_cipher, new_total_supply_cipher)
+    ) -> Result<(Vec<u8>, Vec<u8>), Self::Error>;
+    // returns (from_new_balance_cipher, to_new_balance_cipher)
 
     /// Verify transfer received to update receiver available balance
     fn verify_transfer_received(
         asset: &[u8],
         to_pk: &[u8],
         to_old: &[u8],
-        delta_ct: &[u8],
         proof: &[u8],
-    ) -> Result<(Vec<u8>, Vec<u8>), Self::Error>;
-    // returns (to_new_balance_cipher, new_total_supply_cipher)
+    ) -> Result<Vec<u8>, Self::Error>;
+    // returns (to_new_balance_cipher)
 
     /// Optional disclosure (policy dependent). Return plaintext amount or error.
     fn disclose(asset: &[u8], who_pk: &[u8], cipher: &[u8]) -> Result<u64, Self::Error>;

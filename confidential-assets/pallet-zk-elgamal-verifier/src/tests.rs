@@ -128,7 +128,7 @@ fn verify_sender_and_receiver_happy_path() {
         assert!(s_out.sender_bundle_bytes.len() >= 32 + 192 + 2 + 1 + 2);
 
         // ----------------- Sender phase (verify) -----------------
-        let (from_new_bytes_v, to_new_bytes_v, total_v) =
+        let (from_new_bytes_v, to_new_bytes_v) =
             <pallet::Pallet<Test> as ZkVerifierTrait>::verify_transfer_sent(
                 &asset_id,
                 &compress(&pk_sender),
@@ -138,13 +138,11 @@ fn verify_sender_and_receiver_happy_path() {
                 &s_out.delta_ct_bytes,
                 &s_out.sender_bundle_bytes,
             )
-            .expect("sender-side verification should pass");
+            .expect("sender-side verification did not pass");
 
         // Check verifier matches prover's expected commitments
         assert_eq!(from_new_bytes_v.as_slice(), &s_out.from_new_C);
         assert_eq!(to_new_bytes_v.as_slice(), &s_out.to_new_C);
-        // For pure transfer, total is unchanged (empty sentinel)
-        assert!(total_v.is_empty());
 
         // ----------------- Receiver phase (prove) -----------------
         // For a KISS test, reuse the same seed to derive Δρ (see Prover test note).
@@ -176,19 +174,17 @@ fn verify_sender_and_receiver_happy_path() {
         assert!(r_out.accept_envelope.len() > 34); // 32 + 2 + >=1
 
         // ----------------- Receiver phase (verify) -----------------
-        let (to_new_bytes_recv_v, total_recv_v) =
+        let to_new_bytes_recv_v =
             <pallet::Pallet<Test> as ZkVerifierTrait>::verify_transfer_received(
                 &asset_id,
                 &compress(&pk_receiver),
                 &compress(&to_old_C),
-                &s_out.delta_ct_bytes, // not currently used by verifier but part of API
                 &r_out.accept_envelope,
             )
-            .expect("receiver acceptance should verify");
+            .expect("receiver acceptance did not verify");
 
         // Should match the prover's to_new commitment from sender computation / receiver recompute
         assert_eq!(to_new_bytes_recv_v.as_slice(), &r_out.to_new_C);
-        assert!(total_recv_v.is_empty()); // unchanged total
     });
 }
 

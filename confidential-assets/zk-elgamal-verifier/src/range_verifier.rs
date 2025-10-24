@@ -1,11 +1,19 @@
 //! Range Proof Verifier (no_std compatible)
 
-use bulletproofs::{BulletproofGens, PedersenGens, RangeProof};
 use core::result::Result;
-use curve25519_dalek_ng::ristretto::CompressedRistretto;
 use merlin::Transcript;
 use primitives_zk_elgamal::RangeProofVerifier;
 use rand_core::{CryptoRng, Error as RandError, RngCore};
+
+#[inline]
+fn pedersen_h_generator_ng() -> curve25519_dalek_ng::ristretto::RistrettoPoint {
+    use curve25519_dalek_ng::ristretto::CompressedRistretto as CompressedRistrettoNg;
+    let h_std = curve25519_dalek::ristretto::RistrettoPoint::hash_from_bytes::<sha2::Sha512>(
+        b"Zether/PedersenH",
+    );
+    let bytes = h_std.compress().to_bytes();
+    CompressedRistrettoNg(bytes).decompress().expect("valid H")
+}
 
 /// Simple deterministic RNG seeded once from a transcript to avoid lifetime aliasing.
 struct SeededXorShift64 {
@@ -66,26 +74,6 @@ impl RngCore for SeededXorShift64 {
 
 impl CryptoRng for SeededXorShift64 {}
 
-/// Verifies a single-party 2^n range proof deterministically with no external RNG or seed.
-/// Works in `no_std` and avoids mutable aliasing of the transcript.
-fn verify_single_no_entropy(
-    proof: &RangeProof,
-    bp_gens: &BulletproofGens,
-    pc_gens: &PedersenGens,
-    t: &mut Transcript,
-    v: &CompressedRistretto,
-    n: usize,
-) -> Result<(), ()> {
-    t.append_message(b"V", v.as_bytes());
-    t.append_u64(b"n_bits", n as u64);
-
-    let mut det_rng = SeededXorShift64::from_transcript(t);
-
-    proof
-        .verify_single_with_rng(bp_gens, pc_gens, t, v, n, &mut det_rng)
-        .map_err(|_| ())
-}
-
 /// Bulletproofs-backed range verifier for 64-bit single-value proofs.
 pub struct BulletproofRangeVerifier;
 
@@ -107,7 +95,11 @@ impl RangeProofVerifier for BulletproofRangeVerifier {
 
         let proof = RangeProof::from_bytes(proof_bytes).map_err(|_| ())?;
         let bp_gens = BulletproofGens::new(64, 1);
-        let pedersen_gens = PedersenGens::default();
+        use curve25519_dalek_ng::constants::RISTRETTO_BASEPOINT_POINT as G_NG;
+        let pedersen_gens = PedersenGens {
+            B: G_NG,
+            B_blinding: pedersen_h_generator_ng(),
+        };
         let v = CompressedRistretto(*commit_compressed);
 
         // Deterministic RNG seeded from transcript is fine; keep your helper

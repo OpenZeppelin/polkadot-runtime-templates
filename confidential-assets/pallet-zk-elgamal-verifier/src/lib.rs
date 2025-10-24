@@ -45,6 +45,7 @@ pub mod pallet {
         InvalidEncoding,
         InvalidPoint,
         InvalidProof,
+        TotalChanged,
     }
 
     // ========= Proof bundle shapes =========
@@ -130,7 +131,7 @@ pub mod pallet {
     // ========= Core verification (ZkVerifier trait) =========
 
     impl<T: Config> ZkVerifierTrait for Pallet<T> {
-        type Error = ();
+        type Error = (); // TODO: replace with Error<T>
 
         /// Sender phase: verify link proof (and optional range proofs) and compute new balances.
         fn verify_transfer_sent(
@@ -141,7 +142,7 @@ pub mod pallet {
             to_old_bytes: &[u8],
             delta_ct_bytes: &[u8],
             proof_bundle_bytes: &[u8],
-        ) -> Result<(Vec<u8>, Vec<u8>, Vec<u8>), Self::Error> {
+        ) -> Result<(Vec<u8>, Vec<u8>), Self::Error> {
             // --- Parse inputs ---
             let from_pk = parse_point32(from_pk_bytes).map_err(|_| ())?;
             let to_pk = parse_point32(to_pk_bytes).map_err(|_| ())?;
@@ -149,6 +150,8 @@ pub mod pallet {
             let to_old = parse_point32_allow_empty_identity(to_old_bytes).map_err(|_| ())?;
             let delta_ct = Ciphertext::from_bytes(delta_ct_bytes).map_err(|_| ())?;
             let proof = TransferProof::parse(proof_bundle_bytes).map_err(|_| ())?;
+
+            println!("--------------parsed inputs--------------");
 
             // --- Canonical public context for sender transcript binding ---
             let asset_id = pad_or_trim_32(asset);
@@ -176,12 +179,16 @@ pub mod pallet {
 
             let c: Scalar = fs_chal(&mut t, labels::CHAL_EQ);
 
+            println!("--------------parsed link from proof--------------");
+
             // Eq1: z_k·G == A1 + c·C
             let lhs1 = z_k * G;
             let rhs1 = a1 + c * delta_ct.C;
             if !(lhs1 - rhs1).is_identity() {
                 return Err(());
             }
+
+            println!("--------------Eq1 verified--------------");
 
             // Eq2: z_v·G + z_k·PK_from == A2 + c·D
             let lhs2 = z_v * G + z_k * from_pk;
@@ -190,6 +197,8 @@ pub mod pallet {
                 return Err(());
             }
 
+            println!("--------------Eq2 verified--------------");
+
             // Eq3: z_v·G + z_r·H == A3 + c·ΔC
             let h = pedersen_h_generator();
             let lhs3 = z_v * G + z_r * h;
@@ -197,6 +206,8 @@ pub mod pallet {
             if !(lhs3 - rhs3).is_identity() {
                 return Err(());
             }
+
+            println!("--------------Eq3 verified--------------");
 
             // --- Compute post-transfer commitments
             let from_new = from_old - proof.delta_comm;
@@ -207,7 +218,10 @@ pub mod pallet {
             let from_new_bytes = point_to_bytes(&from_new);
             let to_new_bytes = point_to_bytes(&to_new);
 
+            // TODO: ensure range proofs are non empty here
+
             if !proof.range_from_new.is_empty() {
+                println!("--------------RangeProof1 nonempty--------------");
                 T::RangeVerifier::verify_range_proof(
                     b"range_from_new",
                     &ctx_bytes,
@@ -216,7 +230,9 @@ pub mod pallet {
                 )
                 .map_err(|_| ())?;
             }
+            println!("--------------RangeProof1 verified--------------");
             if !proof.range_to_new.is_empty() {
+                println!("--------------RangeProof2 nonempty--------------");
                 T::RangeVerifier::verify_range_proof(
                     b"range_to_new",
                     &ctx_bytes,
@@ -225,9 +241,10 @@ pub mod pallet {
                 )
                 .map_err(|_| ())?;
             }
+            println!("--------------RangeProof2 verified--------------");
 
-            // Total unchanged for pure transfer — encode as empty vec sentinel.
-            Ok((from_new_bytes.to_vec(), to_new_bytes.to_vec(), Vec::new()))
+            // Total unchanged for pure transfer
+            Ok((from_new_bytes.to_vec(), to_new_bytes.to_vec()))
         }
 
         /// ACL/policy path (no proof). Intentionally left to the runtime policy.
@@ -238,7 +255,7 @@ pub mod pallet {
             _from_old: &[u8],
             _to_old: &[u8],
             _amount_cipher: &[u8],
-        ) -> Result<(Vec<u8>, Vec<u8>, Vec<u8>), Self::Error> {
+        ) -> Result<(Vec<u8>, Vec<u8>), Self::Error> {
             Err(()) // define policy rules here if needed
         }
 
@@ -247,12 +264,11 @@ pub mod pallet {
             asset: &[u8],
             to_pk_bytes: &[u8],
             to_old_bytes: &[u8],
-            _delta_ct_bytes: &[u8],
-            accept_envelope_bytes: &[u8],
-        ) -> Result<(Vec<u8>, Vec<u8>), Self::Error> {
+            proof: &[u8],
+        ) -> Result<Vec<u8>, Self::Error> {
             let to_pk = parse_point32(to_pk_bytes).map_err(|_| ())?;
             let to_old = parse_point32_allow_empty_identity(to_old_bytes).map_err(|_| ())?;
-            let env = AcceptEnvelope::parse(accept_envelope_bytes).map_err(|_| ())?;
+            let env = AcceptEnvelope::parse(proof).map_err(|_| ())?;
 
             // to_new = to_old + ΔC
             let to_new = to_old + env.delta_comm;
@@ -284,8 +300,8 @@ pub mod pallet {
             )
             .map_err(|_| ())?;
 
-            // Total remains unchanged for acceptance; return empty vec sentinel.
-            Ok((to_new_bytes.to_vec(), Vec::new()))
+            // Total remains unchanged for acceptance
+            Ok(to_new_bytes.to_vec())
         }
 
         fn disclose(_asset: &[u8], _who_pk: &[u8], _cipher: &[u8]) -> Result<u64, Self::Error> {

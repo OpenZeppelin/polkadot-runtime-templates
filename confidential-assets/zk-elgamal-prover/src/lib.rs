@@ -93,9 +93,9 @@ fn accept_ctx_bytes(
 /// Encrypt Δv under **sender_pk** (matches verifier Eq2).
 fn elgamal_encrypt_delta(sender_pk: &RistrettoPoint, delta_v: u64, k: &Scalar) -> Ciphertext {
     let v = Scalar::from(delta_v);
-    let C = k * G;
-    let D = v * G + (*k) * (*sender_pk);
-    Ciphertext { C, D }
+    let c = k * G;
+    let d = v * G + (*k) * (*sender_pk);
+    Ciphertext { C: c, D: d }
 }
 
 /// 192-byte link proof (A1||A2||A3||z_k||z_v||z_r).
@@ -126,13 +126,27 @@ fn prove_range_u64(
     use bulletproofs::{BulletproofGens, PedersenGens, RangeProof};
     use curve25519_dalek_ng as dalek_ng;
 
+    // derive H in non-ng dalek, then convert to ng
+    fn pedersen_h_generator_ng() -> dalek_ng::ristretto::RistrettoPoint {
+        let h_std = curve25519_dalek::ristretto::RistrettoPoint::hash_from_bytes::<sha2::Sha512>(
+            b"Zether/PedersenH",
+        );
+        let bytes = h_std.compress().to_bytes();
+        dalek_ng::ristretto::CompressedRistretto(bytes)
+            .decompress()
+            .expect("valid H")
+    }
+
     let mut t = merlin::Transcript::new(b"bp64");
     t.append_message(b"ctx", ctx_bytes);
     t.append_message(b"commit", commit_compressed);
 
     let blind_ng = dalek_ng::scalar::Scalar::from_bytes_mod_order(blind.to_bytes());
 
-    let pg = PedersenGens::default();
+    let pg = PedersenGens {
+        B: dalek_ng::constants::RISTRETTO_BASEPOINT_POINT,
+        B_blinding: pedersen_h_generator_ng(),
+    };
     let bp_gens = BulletproofGens::new(64, 1);
 
     let (proof, _bp_commit) =
