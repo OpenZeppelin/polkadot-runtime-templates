@@ -83,7 +83,6 @@ impl ZkVerifier for ZkheVerifier {
         if !(lhs1 - rhs1).is_identity() {
             return Err(());
         }
-
         println!("--------------Eq1 verified--------------");
 
         // Eq2: z_v·G + z_k·PK_from == A2 + c·D
@@ -92,7 +91,6 @@ impl ZkVerifier for ZkheVerifier {
         if !(lhs2 - rhs2).is_identity() {
             return Err(());
         }
-
         println!("--------------Eq2 verified--------------");
 
         // Eq3: z_v·G + z_r·H == A3 + c·ΔC
@@ -102,7 +100,6 @@ impl ZkVerifier for ZkheVerifier {
         if !(lhs3 - rhs3).is_identity() {
             return Err(());
         }
-
         println!("--------------Eq3 verified--------------");
 
         // --- Compute post-transfer commitments
@@ -113,8 +110,6 @@ impl ZkVerifier for ZkheVerifier {
         let ctx_bytes = transcript_context_bytes(&t);
         let from_new_bytes = point_to_bytes(&from_new);
         let to_new_bytes = point_to_bytes(&to_new);
-
-        // TODO: ensure range proofs are non empty here
 
         if !proof.range_from_new.is_empty() {
             println!("--------------RangeProof1 nonempty--------------");
@@ -127,6 +122,7 @@ impl ZkVerifier for ZkheVerifier {
             .map_err(|_| ())?;
         }
         println!("--------------RangeProof1 verified--------------");
+
         if !proof.range_to_new.is_empty() {
             println!("--------------RangeProof2 nonempty--------------");
             BulletproofRangeVerifier::verify_range_proof(
@@ -156,6 +152,7 @@ impl ZkVerifier for ZkheVerifier {
     }
 
     /// Receiver phase: verify acceptance envelope and compute new receiver commitment.
+    /// Receiver phase: verify acceptance envelope and compute new receiver commitment.
     fn verify_transfer_received(
         asset: &[u8],
         to_pk_bytes: &[u8],
@@ -166,12 +163,12 @@ impl ZkVerifier for ZkheVerifier {
         let to_old = parse_point32_allow_empty_identity(to_old_bytes).map_err(|_| ())?;
         let env = AcceptEnvelope::parse(proof).map_err(|_| ())?;
 
-        // to_new = to_old + ΔC
+        // Compute receiver's post-transfer commitment and its compressed form.
         let to_new = to_old + env.delta_comm;
         let to_new_bytes = point_to_bytes(&to_new);
+        let delta_comm_bytes = point_to_bytes(&env.delta_comm);
 
-        // Acceptance context binding (must match prover's accept_ctx_bytes):
-        // proto/version + sdk_version + network_id + asset_id + to_pk + to_old + delta_comm
+        // Build acceptance transcript context (must byte-for-byte match prover).
         let network_id = [0u8; 32];
         let asset_id = pad_or_trim_32(asset);
 
@@ -187,7 +184,8 @@ impl ZkVerifier for ZkheVerifier {
         let mut ctx_bytes = [0u8; 32];
         t.challenge_bytes(b"ctx", &mut ctx_bytes);
 
-        #[cfg(test)]
+        // ---------- DIAGNOSTICS ----------
+        #[cfg(any(test, feature = "std"))]
         {
             fn hex(x: &[u8]) -> String {
                 const T: &[u8; 16] = b"0123456789abcdef";
@@ -198,41 +196,124 @@ impl ZkVerifier for ZkheVerifier {
                 }
                 s
             }
-
             use curve25519_dalek::ristretto::CompressedRistretto;
 
+            eprintln!("-- ACCEPT VERIFY --");
             eprintln!(
-                "ACCEPT-CTX: receiver_pk = {}",
-                hex(&to_pk.compress().to_bytes())
+                "PROTO_LABEL      = {}",
+                core::str::from_utf8(labels::PROTOCOL).unwrap_or("?")
             );
             eprintln!(
-                "ACCEPT-CTX: to_old      = {}",
-                hex(&to_old.compress().to_bytes())
+                "PROTO_V          = {}",
+                core::str::from_utf8(labels::PROTOCOL_V).unwrap_or("?")
             );
+            eprintln!("SDK_VERSION      = {}", SDK_VERSION);
+            eprintln!("network_id       = {}", hex(&network_id));
+            eprintln!("asset_id         = {}", hex(&asset_id));
+            eprintln!("receiver_pk      = {}", hex(&to_pk.compress().to_bytes()));
+            eprintln!("to_old           = {}", hex(&to_old.compress().to_bytes()));
             eprintln!(
-                "ACCEPT-CTX: ΔC          = {}",
+                "ΔC               = {}",
                 hex(&env.delta_comm.compress().to_bytes())
             );
-            eprintln!("ACCEPT-CTX: ctx_bytes   = {}", hex(&ctx_bytes));
-            eprintln!("ACCEPT-CTX: to_new      = {}", hex(&to_new_bytes));
+            eprintln!("ctx_bytes (32)   = {}", hex(&ctx_bytes));
+            eprintln!("to_new (commit)  = {}", hex(&to_new_bytes));
 
-            // cross-check: to_new == to_old + ΔC (point arithmetic matches compressed bytes)
+            // Round-trip check on the commitment we will feed to Bulletproofs (ng)
+            {
+                use curve25519_dalek_ng::ristretto::CompressedRistretto as CNg;
+                let v_ng = CNg(array32(&to_new_bytes).unwrap());
+                let ok = v_ng.decompress().is_some();
+                eprintln!("to_new decompress ok? {}", ok);
+                if let Some(pt) = v_ng.decompress() {
+                    let rt = pt.compress().to_bytes();
+                    eprintln!("to_new roundtrip ok? {}", (rt == to_new_bytes));
+                }
+            }
+
+            // Extra guard: to_new matches algebraic recompute
             let to_new_recomp = (to_old + env.delta_comm).compress().to_bytes();
-            eprintln!("ACCEPT-CTX: to_new'     = {}", hex(&to_new_recomp));
             assert_eq!(to_new_recomp, to_new_bytes, "to_new mismatch (recomp)");
+
+            // Quick header dump for the proof
+            eprintln!("range_to_new.len = {}", env.range_to_new.len());
+            let head = &env
+                .range_to_new
+                .get(0..core::cmp::min(64, env.range_to_new.len()))
+                .unwrap_or(&[]);
+            eprintln!("range_to_new[0..64] = {}", hex(head));
         }
 
-        // Verify receiver range proof bound to acceptance context
-        BulletproofRangeVerifier::verify_range_proof(
+        // Empty range proof is invalid in acceptance path.
+        if env.range_to_new.is_empty() {
+            #[cfg(any(test, feature = "std"))]
+            eprintln!("ACCEPT-ERR: range_to_new is empty");
+            return Err(());
+        }
+
+        // Primary verification: bind to acceptance ctx and to_new commitment (matches prover).
+        #[cfg(any(test, feature = "std"))]
+        eprintln!("ACCEPT: verify against to_new");
+        let res_primary = BulletproofRangeVerifier::verify_range_proof(
             b"range_to_new",
             &ctx_bytes,
             &to_new_bytes,
             env.range_to_new,
-        )
-        .map_err(|_| ())?;
+        );
 
-        // Total remains unchanged for acceptance
-        Ok(to_new_bytes.to_vec())
+        if res_primary.is_ok() {
+            return Ok(to_new_bytes.to_vec());
+        }
+
+        // ---------- CONTROL (std-only): replicate verifier internals explicitly ----------
+        #[cfg(feature = "std")]
+        {
+            use bulletproofs::{BulletproofGens, PedersenGens, RangeProof};
+            use curve25519_dalek_ng::constants::RISTRETTO_BASEPOINT_POINT as G_NG;
+            use curve25519_dalek_ng::ristretto::CompressedRistretto as CNg;
+            use merlin::Transcript as MTranscript;
+            use rand_chacha::ChaCha20Rng;
+            use rand_core::SeedableRng;
+
+            eprintln!("ACCEPT-CTRL: entering explicit check with transcript RNG");
+            let proof = match RangeProof::from_bytes(env.range_to_new) {
+                Ok(p) => p,
+                Err(_) => {
+                    eprintln!("ACCEPT-CTRL: failed to parse RangeProof bytes");
+                    return Err(());
+                }
+            };
+
+            let pedersen_gens = {
+                // identical H derivation as prover/verifier (std dalek -> ng)
+                use curve25519_dalek_ng::ristretto::CompressedRistretto as CNgH;
+                let h_std = curve25519_dalek::ristretto::RistrettoPoint::hash_from_bytes::<
+                    sha2::Sha512,
+                >(b"Zether/PedersenH");
+                let bytes = h_std.compress().to_bytes();
+                PedersenGens {
+                    B: G_NG,
+                    B_blinding: CNgH(bytes).decompress().unwrap(),
+                }
+            };
+            let bp_gens = BulletproofGens::new(64, 1);
+
+            // Transcript identical to prover's: "bp64" + ctx + commit(to_new)
+            let mut t_bp = MTranscript::new(b"bp64");
+            t_bp.append_message(b"ctx", &ctx_bytes);
+            t_bp.append_message(b"commit", &to_new_bytes);
+
+            let mut rng = t_bp
+                .build_rng()
+                .finalize(&mut ChaCha20Rng::from_seed([0u8; 32]));
+            let v = CNg(array32(&to_new_bytes).unwrap());
+
+            let ctrl =
+                proof.verify_single_with_rng(&bp_gens, &pedersen_gens, &mut t_bp, &v, 64, &mut rng);
+            eprintln!("ACCEPT-CTRL: verify_single_with_rng => {:?}", ctrl);
+        }
+
+        Err(())
     }
 
     fn disclose(_asset: &[u8], _who_pk: &[u8], _cipher: &[u8]) -> Result<u64, Self::Error> {
@@ -356,16 +437,12 @@ fn parse_link_from_192(
     ),
     (),
 > {
-    // Pass a reference to the 32-byte array returned by array32(...)
     let a1 = point_from_bytes(&array32(&raw[0..32])?).map_err(|_| ())?;
     let a2 = point_from_bytes(&array32(&raw[32..64])?).map_err(|_| ())?;
     let a3 = point_from_bytes(&array32(&raw[64..96])?).map_err(|_| ())?;
-
-    // These take a value, so no & here
     let z_k = Scalar::from_bytes_mod_order(array32(&raw[96..128])?);
     let z_v = Scalar::from_bytes_mod_order(array32(&raw[128..160])?);
     let z_r = Scalar::from_bytes_mod_order(array32(&raw[160..192])?);
-
     Ok((a1, a2, a3, z_k, z_v, z_r))
 }
 

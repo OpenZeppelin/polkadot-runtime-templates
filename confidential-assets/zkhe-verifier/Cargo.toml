@@ -16,6 +16,7 @@ merlin            = { version = "3", default-features = false }
 subtle            = { version = "2", default-features = false }
 curve25519-dalek-ng = { version = "4.1.1", default-features = false, features = ["alloc"] }
 rand_core = { version = "0.6", default-features = false } # only for traits
+rand_chacha = { version = "0.3", default-features = false }
 
 confidential-assets-primitives = { path = "../primitives/confidential-assets", default-features = false }
 zkhe-primitives = { path = "../primitives/zkhe", default-features = false }
@@ -40,4 +41,5 @@ std = [
   "curve25519-dalek-ng/std",
   "bulletproofs/std",
   "rand_core/std",
+  "rand_chacha/std",
 ]

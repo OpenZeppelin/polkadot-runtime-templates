@@ -144,7 +144,6 @@ fn sender_range_context_from_bundle(
             s
         }
 
-        use curve25519_dalek::ristretto::CompressedRistretto;
         eprintln!("CTXBUILD: A1 = {}", hex(a1.compress().as_bytes()));
         eprintln!("CTXBUILD: A2 = {}", hex(a2.compress().as_bytes()));
         eprintln!("CTXBUILD: A3 = {}", hex(a3.compress().as_bytes()));
@@ -234,10 +233,11 @@ fn verify_sender_and_receiver_happy_path() {
     assert_eq!(to_new_bytes_v.as_slice(), &s_out.to_new_c);
 
     // ----------------- Receiver phase (prove) -----------------
-    use rand::{RngCore, SeedableRng};
     use rand_chacha::ChaCha20Rng;
+    use rand_core::{RngCore, SeedableRng};
 
-    let delta_rho = Scalar::from(ChaCha20Rng::from_seed(seed).next_u64());
+    let mut chacha = ChaCha20Rng::from_seed(seed);
+    let delta_rho = Scalar::from(chacha.next_u64());
 
     // Deserialize ΔC from sender output
     let delta_comm = {
@@ -387,6 +387,7 @@ fn range_proof_from_sender_bundle_verifies() {
     let v_pt = v.decompress().expect("commit dec");
     let rt = v_pt.compress().to_bytes();
     assert_eq!(rt, commit32, "commit roundtrip mismatch (ng)");
+
     // ==== EXTRA DEBUG: confirm from_new_c == (from_old_c - ΔC) and try alt-commit ====
     {
         use curve25519_dalek::ristretto::CompressedRistretto;
@@ -438,6 +439,7 @@ fn range_proof_from_sender_bundle_verifies() {
         );
         eprintln!("CONTROL: verify with to_new commit => {:?}", to_res);
     }
+
     {
         use curve25519_dalek_ng::ristretto::CompressedRistretto as CNg;
         let v_ng = CNg(commit32);
@@ -445,12 +447,16 @@ fn range_proof_from_sender_bundle_verifies() {
         let rt_ng = v_pt_ng.compress().to_bytes();
         assert_eq!(rt_ng, commit32, "ng roundtrip mismatch");
     }
+
+    // std-control: verify via bulletproofs using the same transcript RNG pattern
     #[cfg(feature = "std")]
     {
         use bulletproofs::{BulletproofGens, PedersenGens, RangeProof};
         use curve25519_dalek_ng::constants::RISTRETTO_BASEPOINT_POINT as G_NG;
         use curve25519_dalek_ng::ristretto::CompressedRistretto;
         use merlin::Transcript;
+        use rand_chacha::ChaCha20Rng;
+        use rand_core::SeedableRng;
 
         let mut t_std = Transcript::new(b"bp64");
         t_std.append_message(b"ctx", &ctx_bytes);
@@ -471,9 +477,14 @@ fn range_proof_from_sender_bundle_verifies() {
             },
         };
 
+        // build a transcript-derived RNG, like the verifier
+        let mut ext = ChaCha20Rng::from_seed([0u8; 32]);
+        let mut rng = t_std.build_rng().finalize(&mut ext);
+
         let v = CompressedRistretto(commit32);
-        let res_std = proof.verify_single(&bp_gens, &pedersen_gens, &mut t_std, &v, 64);
-        eprintln!("CONTROL: verify_single (no RNG) => {:?}", res_std);
+        let res_std =
+            proof.verify_single_with_rng(&bp_gens, &pedersen_gens, &mut t_std, &v, 64, &mut rng);
+        eprintln!("CONTROL: verify_single_with_rng => {:?}", res_std);
     }
 
     match BulletproofRangeVerifier::verify_range_proof(
