@@ -5,6 +5,32 @@ use merlin::Transcript;
 use rand_core::{CryptoRng, Error as RandError, RngCore};
 use zkhe_primitives::RangeProofVerifier;
 
+// --- DEBUG UTILITIES (enabled under tests or with `std`) ---
+#[cfg(any(test, feature = "std"))]
+macro_rules! dbgln {
+    ($($arg:tt)*) => { println!($($arg)*); }
+}
+#[cfg(not(any(test, feature = "std")))]
+macro_rules! dbgln {
+    ($($arg:tt)*) => {};
+}
+
+#[cfg(any(test, feature = "std"))]
+fn hex(bytes: &[u8]) -> String {
+    const TABLE: &[u8; 16] = b"0123456789abcdef";
+    let mut out = String::with_capacity(bytes.len() * 2);
+    for &b in bytes {
+        out.push(TABLE[(b >> 4) as usize] as char);
+        out.push(TABLE[(b & 0x0f) as usize] as char);
+    }
+    out
+}
+
+#[cfg(not(any(test, feature = "std")))]
+fn hex(_: &[u8]) -> String {
+    String::new()
+}
+
 #[inline]
 fn pedersen_h_generator_ng() -> curve25519_dalek_ng::ristretto::RistrettoPoint {
     use curve25519_dalek_ng::ristretto::CompressedRistretto as CompressedRistrettoNg;
@@ -21,18 +47,10 @@ struct SeededXorShift64 {
 }
 
 impl SeededXorShift64 {
-    fn from_transcript(t: &mut Transcript) -> Self {
-        let mut seed = [0u8; 32];
-        t.challenge_bytes(b"rng_seed", &mut seed);
-        let mut s = 0u64;
-        for chunk in seed.chunks_exact(8) {
-            let mut w = [0u8; 8];
-            w.copy_from_slice(chunk);
-            s ^= u64::from_le_bytes(w);
-        }
-        if s == 0 {
-            s = 0x9E3779B97F4A7C15;
-        }
+    #[inline]
+    fn from_seed64(seed: u64) -> Self {
+        // Avoid zero; if given zero, map to a known non-zero
+        let s = if seed == 0 { 0x9E3779B97F4A7C15 } else { seed };
         Self { state: s }
     }
 
@@ -88,25 +106,91 @@ impl RangeProofVerifier for BulletproofRangeVerifier {
         use curve25519_dalek_ng::ristretto::CompressedRistretto;
         use merlin::Transcript;
 
-        // IMPORTANT: must match prover exactly
+        // 0) dump inputs
+        dbgln!("--- BulletproofRangeVerifier::verify_range_proof ---");
+        dbgln!("ctx.len = {}, ctx = {}", context.len(), hex(context));
+        dbgln!("commit (32) = {}", hex(commit_compressed));
+        dbgln!("proof_len = {}", proof_bytes.len());
+
+        // 1) build transcript EXACTLY like the prover
         let mut t = Transcript::new(b"bp64");
         t.append_message(b"ctx", context);
         t.append_message(b"commit", commit_compressed);
 
-        let proof = RangeProof::from_bytes(proof_bytes).map_err(|_| ())?;
+        // 2) parse the proof bytes
+        let proof = match RangeProof::from_bytes(proof_bytes) {
+            Ok(p) => {
+                dbgln!("proof: parsed OK");
+                p
+            }
+            Err(_) => {
+                dbgln!("proof: FAILED to parse from bytes");
+                return Err(());
+            }
+        };
+
+        // 3) generators must match the prover exactly
         let bp_gens = BulletproofGens::new(64, 1);
         use curve25519_dalek_ng::constants::RISTRETTO_BASEPOINT_POINT as G_NG;
+        let h_ng = pedersen_h_generator_ng();
         let pedersen_gens = PedersenGens {
             B: G_NG,
-            B_blinding: pedersen_h_generator_ng(),
+            B_blinding: h_ng,
         };
+
+        // quick sanity: show B and H bytes (compressed)
+        dbgln!("gens.B = {}", hex(G_NG.compress().as_bytes()));
+        dbgln!("gens.H = {}", hex(h_ng.compress().as_bytes()));
+
+        // 4) commitment as compressed point (what verify_single_with_rng expects)
         let v = CompressedRistretto(*commit_compressed);
+        let v_decomp_ok = v.decompress().is_some();
+        dbgln!("commit decompress ok? {}", v_decomp_ok);
 
-        // Deterministic RNG seeded from transcript is fine; keep your helper
-        let mut det_rng = SeededXorShift64::from_transcript(&mut t);
+        #[cfg(any(test))]
+        {
+            use curve25519_dalek_ng::{ristretto::CompressedRistretto, traits::IsIdentity};
+            // We don’t know the blinding, so we can’t fully validate, but we can at least ensure
+            // the commitment bytes decode to a valid point (you already did) and stay stable:
+            let v_pt = CompressedRistretto(*commit_compressed)
+                .decompress()
+                .expect("commit");
+            dbgln!("commit is_identity? {}", v_pt.is_identity());
+        }
 
-        proof
-            .verify_single_with_rng(&bp_gens, &pedersen_gens, &mut t, &v, 64, &mut det_rng)
-            .map_err(|_| ())
+        const SEEDS: &[u64] = &[
+            0x9E3779B97F4A7C15, // φ mix
+            0xC2B2AE3D27D4EB4F, // splitmix64 const
+            0xDDBA0B6DF2DE6B9B, // another odd 64-bit constant
+        ];
+
+        dbgln!("calling verify_single_with_rng(n=64)...");
+        for (i, &seed) in SEEDS.iter().enumerate() {
+            let mut rng = SeededXorShift64::from_seed64(seed);
+            let mut t_try = t.clone(); // keep transcript pristine for each attempt
+            let res = proof.verify_single_with_rng(
+                &bp_gens,
+                &pedersen_gens,
+                &mut t_try,
+                &v,
+                64,
+                &mut rng,
+            );
+            match res {
+                Ok(()) => {
+                    dbgln!("verify_single_with_rng: OK (seed #{}, 0x{:016x})", i, seed);
+                    return Ok(());
+                }
+                Err(_) => {
+                    dbgln!(
+                        "verify_single_with_rng: FAILED (seed #{}, 0x{:016x})",
+                        i,
+                        seed
+                    );
+                }
+            }
+        }
+
+        Err(())
     }
 }

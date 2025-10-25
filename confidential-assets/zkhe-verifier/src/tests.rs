@@ -131,6 +131,27 @@ fn sender_range_context_from_bundle(
     append_point(&mut t, b"a2", &a2);
     append_point(&mut t, b"a3", &a3);
 
+    // inside sender_range_context_from_bundle, after decoding a1/a2/a3 and before fs_chal:
+    #[cfg(any(test, feature = "std"))]
+    {
+        fn hex(x: &[u8]) -> String {
+            const T: &[u8; 16] = b"0123456789abcdef";
+            let mut s = String::with_capacity(x.len() * 2);
+            for &b in x {
+                s.push(T[(b >> 4) as usize] as char);
+                s.push(T[(b & 0x0f) as usize] as char);
+            }
+            s
+        }
+
+        use curve25519_dalek::ristretto::CompressedRistretto;
+        eprintln!("CTXBUILD: A1 = {}", hex(a1.compress().as_bytes()));
+        eprintln!("CTXBUILD: A2 = {}", hex(a2.compress().as_bytes()));
+        eprintln!("CTXBUILD: A3 = {}", hex(a3.compress().as_bytes()));
+        eprintln!("CTXBUILD: Δct.C = {}", hex(&ct.C.compress().to_bytes()));
+        eprintln!("CTXBUILD: Δct.D = {}", hex(&ct.D.compress().to_bytes()));
+    }
+
     // Challenge for the Σ-link (this advances transcript)
     let _c = fs_chal(&mut t, labels::CHAL_EQ);
 
@@ -361,13 +382,149 @@ fn range_proof_from_sender_bundle_verifies() {
     // Verify the sender’s range proof against the prover-computed from_new commitment
     let mut commit32 = [0u8; 32];
     commit32.copy_from_slice(&s_out.from_new_c);
-    BulletproofRangeVerifier::verify_range_proof(
+    use curve25519_dalek_ng::ristretto::CompressedRistretto as CNg;
+    let v = CNg(commit32);
+    let v_pt = v.decompress().expect("commit dec");
+    let rt = v_pt.compress().to_bytes();
+    assert_eq!(rt, commit32, "commit roundtrip mismatch (ng)");
+    // ==== EXTRA DEBUG: confirm from_new_c == (from_old_c - ΔC) and try alt-commit ====
+    {
+        use curve25519_dalek::ristretto::CompressedRistretto;
+        // Reconstruct ΔC from bytes
+        let delta_c = CompressedRistretto(s_out.delta_comm_bytes)
+            .decompress()
+            .expect("ΔC dec");
+
+        // Recompute from_new' and to_new' algebraically
+        let from_new_recomp = from_old_c - delta_c;
+        let to_new_recomp = to_old_c + delta_c;
+
+        fn hex(x: &[u8]) -> String {
+            const T: &[u8; 16] = b"0123456789abcdef";
+            let mut s = String::with_capacity(x.len() * 2);
+            for &b in x {
+                s.push(T[(b >> 4) as usize] as char);
+                s.push(T[(b & 0x0f) as usize] as char);
+            }
+            s
+        }
+
+        let from_new_recomp_bytes = from_new_recomp.compress().to_bytes();
+        let to_new_recomp_bytes = to_new_recomp.compress().to_bytes();
+
+        eprintln!("CHECK: from_new(prover)   = {}", hex(&s_out.from_new_c));
+        eprintln!(
+            "CHECK: from_new(recomp)   = {}",
+            hex(&from_new_recomp_bytes)
+        );
+        eprintln!("CHECK: to_new(recomp)     = {}", hex(&to_new_recomp_bytes));
+
+        // Hard assert that prover's from_new equals recomputed
+        assert_eq!(
+            s_out.from_new_c, from_new_recomp_bytes,
+            "from_new bytes differ from (from_old - ΔC); this will break range proof binding"
+        );
+
+        // Control experiment: try verifying with to_new (should FAIL if proof is for from_new).
+        // If it PASSES with to_new, the prover accidentally bound the wrong commitment.
+        let mut to_commit32 = [0u8; 32];
+        to_commit32.copy_from_slice(&to_new_recomp_bytes);
+
+        let to_res = BulletproofRangeVerifier::verify_range_proof(
+            b"range_from_new",
+            &ctx_bytes,
+            &to_commit32,
+            parsed.range_from_new,
+        );
+        eprintln!("CONTROL: verify with to_new commit => {:?}", to_res);
+    }
+    {
+        use curve25519_dalek_ng::ristretto::CompressedRistretto as CNg;
+        let v_ng = CNg(commit32);
+        let v_pt_ng = v_ng.decompress().expect("commit dec (ng)");
+        let rt_ng = v_pt_ng.compress().to_bytes();
+        assert_eq!(rt_ng, commit32, "ng roundtrip mismatch");
+    }
+    #[cfg(feature = "std")]
+    {
+        use bulletproofs::{BulletproofGens, PedersenGens, RangeProof};
+        use curve25519_dalek_ng::constants::RISTRETTO_BASEPOINT_POINT as G_NG;
+        use curve25519_dalek_ng::ristretto::CompressedRistretto;
+        use merlin::Transcript;
+
+        let mut t_std = Transcript::new(b"bp64");
+        t_std.append_message(b"ctx", &ctx_bytes);
+        t_std.append_message(b"commit", &commit32);
+
+        let proof = RangeProof::from_bytes(parsed.range_from_new).expect("parse proof std");
+        let bp_gens = BulletproofGens::new(64, 1);
+        let pedersen_gens = PedersenGens {
+            B: G_NG,
+            B_blinding: {
+                // same H as prod:
+                use curve25519_dalek_ng::ristretto::CompressedRistretto as CompressedRistrettoNg;
+                let h_std = curve25519_dalek::ristretto::RistrettoPoint::hash_from_bytes::<
+                    sha2::Sha512,
+                >(b"Zether/PedersenH");
+                let bytes = h_std.compress().to_bytes();
+                CompressedRistrettoNg(bytes).decompress().unwrap()
+            },
+        };
+
+        let v = CompressedRistretto(commit32);
+        let res_std = proof.verify_single(&bp_gens, &pedersen_gens, &mut t_std, &v, 64);
+        eprintln!("CONTROL: verify_single (no RNG) => {:?}", res_std);
+    }
+
+    match BulletproofRangeVerifier::verify_range_proof(
         b"range_from_new",
         &ctx_bytes,
         &commit32,
         parsed.range_from_new,
-    )
-    .expect("range proof should verify");
+    ) {
+        Ok(()) => { /* great */ }
+        Err(()) => {
+            // helper hex (copy these two tiny helpers at the top of the test file if you don't already have them)
+            fn hex(bytes: &[u8]) -> String {
+                const T: &[u8; 16] = b"0123456789abcdef";
+                let mut out = String::with_capacity(bytes.len() * 2);
+                for &b in bytes {
+                    out.push(T[(b >> 4) as usize] as char);
+                    out.push(T[(b & 0x0f) as usize] as char);
+                }
+                out
+            }
+
+            let a1b = &parsed.link_raw_192[0..32];
+            let a2b = &parsed.link_raw_192[32..64];
+            let a3b = &parsed.link_raw_192[64..96];
+            let delta_ct_c = &s_out.delta_ct_bytes[0..32];
+            let delta_ct_d = &s_out.delta_ct_bytes[32..64];
+
+            eprintln!("TEST: A1     = {}", hex(a1b));
+            eprintln!("TEST: A2     = {}", hex(a2b));
+            eprintln!("TEST: A3     = {}", hex(a3b));
+            eprintln!("TEST: Δct.C  = {}", hex(delta_ct_c));
+            eprintln!("TEST: Δct.D  = {}", hex(delta_ct_d));
+
+            eprintln!("---- RANGE VERIFY DEBUG ----");
+            eprintln!("ctx (32)     = {}", hex(&ctx_bytes));
+            eprintln!("commit (32)  = {}", hex(&commit32));
+            eprintln!("proof_len    = {}", parsed.range_from_new.len());
+            eprintln!(
+                "proof_head   = {}",
+                hex(&parsed
+                    .range_from_new
+                    .get(0..core::cmp::min(64, parsed.range_from_new.len()))
+                    .unwrap_or(&[]))
+            );
+            eprintln!("sender_pk    = {}", hex(&pk_sender.compress().to_bytes()));
+            eprintln!("receiver_pk  = {}", hex(&pk_receiver.compress().to_bytes()));
+            eprintln!("Δct (64)     = {}", hex(&s_out.delta_ct_bytes));
+            eprintln!("ΔC (32)      = {}", hex(&s_out.delta_comm_bytes));
+            panic!("range proof should verify (see dumps above)");
+        }
+    }
 }
 
 // (Optional) tiny sanity for pedersen identity commitment path.

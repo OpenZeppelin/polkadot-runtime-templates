@@ -10,7 +10,7 @@ version = "0.1.0"
 [dependencies]
 # no_std crypto
 bulletproofs      = { version = "4", default-features = false }
-curve25519-dalek = { version = "4.1", default-features = false, features = ["alloc"] }
+curve25519-dalek = { version = "4.1.3", default-features = false, features = ["alloc"] }
 blake2 = { version = "0.10", default-features = false }
 merlin            = { version = "3", default-features = false }
 subtle            = { version = "2", default-features = false }

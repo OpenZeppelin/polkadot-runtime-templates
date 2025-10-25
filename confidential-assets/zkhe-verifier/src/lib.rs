@@ -187,6 +187,41 @@ impl ZkVerifier for ZkheVerifier {
         let mut ctx_bytes = [0u8; 32];
         t.challenge_bytes(b"ctx", &mut ctx_bytes);
 
+        #[cfg(test)]
+        {
+            fn hex(x: &[u8]) -> String {
+                const T: &[u8; 16] = b"0123456789abcdef";
+                let mut s = String::with_capacity(x.len() * 2);
+                for &b in x {
+                    s.push(T[(b >> 4) as usize] as char);
+                    s.push(T[(b & 0x0f) as usize] as char);
+                }
+                s
+            }
+
+            use curve25519_dalek::ristretto::CompressedRistretto;
+
+            eprintln!(
+                "ACCEPT-CTX: receiver_pk = {}",
+                hex(&to_pk.compress().to_bytes())
+            );
+            eprintln!(
+                "ACCEPT-CTX: to_old      = {}",
+                hex(&to_old.compress().to_bytes())
+            );
+            eprintln!(
+                "ACCEPT-CTX: ΔC          = {}",
+                hex(&env.delta_comm.compress().to_bytes())
+            );
+            eprintln!("ACCEPT-CTX: ctx_bytes   = {}", hex(&ctx_bytes));
+            eprintln!("ACCEPT-CTX: to_new      = {}", hex(&to_new_bytes));
+
+            // cross-check: to_new == to_old + ΔC (point arithmetic matches compressed bytes)
+            let to_new_recomp = (to_old + env.delta_comm).compress().to_bytes();
+            eprintln!("ACCEPT-CTX: to_new'     = {}", hex(&to_new_recomp));
+            assert_eq!(to_new_recomp, to_new_bytes, "to_new mismatch (recomp)");
+        }
+
         // Verify receiver range proof bound to acceptance context
         BulletproofRangeVerifier::verify_range_proof(
             b"range_to_new",
