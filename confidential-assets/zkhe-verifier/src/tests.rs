@@ -32,6 +32,7 @@ fn compress(pt: &RistrettoPoint) -> [u8; 32] {
 }
 
 // ---------- Bundle parsing (mirrors the on-chain verifier’s parsing logic) ----------
+#[allow(unused)]
 #[derive(Debug)]
 struct ParsedSenderBundle<'a> {
     delta_comm: RistrettoPoint, // ΔC
@@ -237,7 +238,8 @@ fn verify_sender_and_receiver_happy_path() {
     use rand_core::{RngCore, SeedableRng};
 
     let mut chacha = ChaCha20Rng::from_seed(seed);
-    let delta_rho = Scalar::from(chacha.next_u64());
+    let _k_ignore = chacha.next_u64(); // 1st draw: k (ignored here)
+    let delta_rho = Scalar::from(chacha.next_u64()); // 2nd draw: rho (must match prover)
 
     // Deserialize ΔC from sender output
     let delta_comm = {

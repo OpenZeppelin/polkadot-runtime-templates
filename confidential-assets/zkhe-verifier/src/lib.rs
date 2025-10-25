@@ -166,7 +166,8 @@ impl ZkVerifier for ZkheVerifier {
         // Compute receiver's post-transfer commitment and its compressed form.
         let to_new = to_old + env.delta_comm;
         let to_new_bytes = point_to_bytes(&to_new);
-        let delta_comm_bytes = point_to_bytes(&env.delta_comm);
+        // Sigma not verified here, verified by sender TODO: is this safe with new available/pending balance split?
+        let _delta_comm_bytes = point_to_bytes(&env.delta_comm);
 
         // Build acceptance transcript context (must byte-for-byte match prover).
         let network_id = [0u8; 32];
@@ -196,7 +197,6 @@ impl ZkVerifier for ZkheVerifier {
                 }
                 s
             }
-            use curve25519_dalek::ristretto::CompressedRistretto;
 
             eprintln!("-- ACCEPT VERIFY --");
             eprintln!(

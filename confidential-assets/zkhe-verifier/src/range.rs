@@ -45,7 +45,7 @@ pub struct BulletproofRangeVerifier;
 
 impl RangeProofVerifier for BulletproofRangeVerifier {
     fn verify_range_proof(
-        _transcript_label: &[u8], // kept for API parity with the prover, not used here
+        transcript_label: &[u8],
         context: &[u8],
         commit_compressed: &[u8; 32],
         proof_bytes: &[u8],
@@ -61,6 +61,8 @@ impl RangeProofVerifier for BulletproofRangeVerifier {
 
         // 1) Rebuild the transcript exactly like the prover
         let mut t = Transcript::new(b"bp64");
+        // IMPORTANT: fold in the caller-provided label to make verifier RNG unique per call-site.
+        t.append_message(b"label", transcript_label);
         t.append_message(b"ctx", context);
         t.append_message(b"commit", commit_compressed);
 
@@ -87,13 +89,6 @@ impl RangeProofVerifier for BulletproofRangeVerifier {
         dbgln!("commit decompress ok? {}", v_ok);
 
         // 5) Deterministic verifier RNG derived from the transcript
-        //
-        // Important: The verifier does not have secret witness bytes to rekey with, so we finalize
-        // the builder with a deterministic, fixed external RNG seed. This produces an RNG that is
-        // *fully pinned* by the transcript state (which already absorbed public context/commitment).
-        //
-        // The transcript rng implements `RngCore + CryptoRng` and is suitable for
-        // `verify_single_with_rng` in no_std.
         use rand_chacha::ChaCha20Rng;
         use rand_core::SeedableRng;
         let mut ext = ChaCha20Rng::from_seed([0u8; 32]);

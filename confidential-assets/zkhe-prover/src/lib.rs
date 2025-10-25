@@ -120,7 +120,11 @@ fn encode_link(
     out
 }
 
+/// Produce a 64-bit single-value Bulletproof range proof, with an explicit
+/// `transcript_label` folded into the transcript so sender/receiver proofs use
+/// distinct transcript RNG streams.
 fn prove_range_u64(
+    transcript_label: &[u8],
     ctx_bytes: &[u8],
     commit_compressed: &[u8; 32],
     value_u64: u64,
@@ -141,6 +145,8 @@ fn prove_range_u64(
     }
 
     let mut t = merlin::Transcript::new(b"bp64");
+    // IMPORTANT: fold in the caller-provided label (must match verifier usage).
+    t.append_message(b"label", transcript_label);
     t.append_message(b"ctx", ctx_bytes);
     t.append_message(b"commit", commit_compressed);
 
@@ -267,6 +273,7 @@ pub fn prove_sender_transfer(inp: &SenderInput) -> Result<SenderOutput, ProverEr
     let to_new_bytes = point_to_bytes(&to_new_c);
 
     let range_from = prove_range_u64(
+        b"range_from_new", // MUST match verifier call-site label
         &ctx_bytes,
         &from_new_bytes,
         v_from_old_u64
@@ -343,8 +350,9 @@ pub fn prove_receiver_accept(
 
     let to_new_bytes = point_to_bytes(&to_new_c);
 
-    // Produce receiver range proof
+    // Produce receiver range proof; label MUST match verifier call-site.
     let range_to = prove_range_u64(
+        b"range_to_new",
         &ctx_bytes,
         &to_new_bytes,
         v_to_old_u64
