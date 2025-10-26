@@ -6,17 +6,18 @@
 
 ## Impl TODO
 
+### Pending Balance Impl without Griefing + Fixed UX
+1. pending deposits stored as UTXO set
+2. accept_pending passes in range of pending notes
+3. 
+
+
+
 ### E2E solution mirroring Solana CT backend as is
 - update pallets
 - runtime tests
 - node tests
 - increase prover + verifier test coverage in general
-
-### HIGH: detail and explain accept_pending UX issue with prospective solutions
-- should be a way ideally to include the accept_pending in the send so accept_pending does NOT add an additional step (UX)
-
-Add sigma proof for verify accept pending path:
-- add sigma proof to verify_transfer_received which may need to be renamed to verify_accept_pending if it is used that way
 
 ### LOW
 - more tests of the prover/verifier functionality

@@ -1,10 +1,30 @@
-# Confidential Assets Design
+# Confidential Assets Design Trade-offs and Rationale
 
-TODO Update since most recent refactor especially the Impl Risks and Mitigations section at the bottom.
+Confidential Assets Overview:
+```
+\pallets
+	\zkhe:
+		ZK proof authenticated storage of encrypted balances verified on-chain
+	\confidential-assets:
+		confidential multi-assets pallet supporting encrypted transfers
+\primitives
+	\zkhe:
+		shared primitives between zkhe prover and verifier crates
+	\confidential-assets:
+		shared primitives between decoupled, interoperable pallets
+\zkhe-prover
+	off-chain client library to construct ZK proofs of encrypted transfers
+\zkhe-verifier
+	no_std library to verify ZK proofs on-chain
+```
 
-# Design Trade-offs and Rationale
+- `pallet-confidential-assets` public interface follows the Confidential Transfers Standard (ERC 7984) by OpenZeppelin
+- `pallet-confidential-assets` has a generic backend for its cryptography
+	- generic backend is assigned at runtime to `Zkhe`, runtime instance of `pallet_zkhe` representing the runtime's implementation of `pallet_zkhe::Config`
+- `pallet-zkhe` has a generic verifier for its cryptography
+	- generic verifier assigned at runtime to `zkhe_verifier::ZkheVerifier`
 
-Choice of ZK-ElGamal Backend
+## Choice of ZK-ElGamal Backend
 
 The ZK-ElGamal scheme was selected for its close alignment with the ERC-7984 Confidential Contracts standard and its proven use in Solana’s Confidential Token implementation.
 
@@ -19,11 +39,3 @@ Compared to MimbleWimble
 	•	MimbleWimble hides sender and receiver information, making it unsuitable for general-purpose on-chain use or composable smart contract environments.
 	•	MimbleWimble’s cut-through model favors off-chain transaction aggregation rather than real-time execution and event emission expected in ERC-compatible systems.
 	•	ZK-ElGamal provides deterministic, verifiable encrypted transactions that integrate smoothly with runtime logic, governance, and cross-chain standards.
-
-# Implementation Risks and Mitigations
-
-Risk	Description	Mitigation
-Cryptographic correctness	Incorrect elliptic-curve definitions, domain parameters, or point decompression logic could cause consensus divergence or asset loss.	Seek early review from OpenZeppelin internal experts and external cryptographers; reuse proven libraries (e.g., curve25519-dalek); add extensive property tests.
-no_std verification bugs	Limited runtime debugging and serialization complexity may cause subtle verification mismatches.	Maintain symmetry tests between zk-elgamal-prover and pallet-zk-elgamal-verifier; integrate CI pipelines for cross-checking proof/verification pairs.
-Proof size and weight overhead	On-chain verification may increase block weight and storage usage.	Use benchmark-driven optimization; parameterize proof size limits via runtime constants.
-Cross-pallet coupling	Tight coupling between pallet-confidential-assets and pallet-zk-elgamal could complicate upgrades.	Maintain backend abstraction traits; use feature gating and versioned trait interfaces.
