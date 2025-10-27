@@ -141,3 +141,24 @@ pub trait ZkVerifier {
     /// Optional disclosure (policy dependent).
     fn disclose(asset: &[u8], who_pk: &[u8], cipher: &[u8]) -> Result<u64, Self::Error>;
 }
+
+pub trait OperatorRegistry<AccountId, AssetId, BlockNumber> {
+    /// Return true if `operator` is currently authorized to operate for (`holder`, `asset`) at `now`.
+    fn is_operator(
+        holder: &AccountId,
+        asset: &AssetId,
+        operator: &AccountId,
+        now: BlockNumber,
+    ) -> bool;
+}
+
+impl<AccountId, AssetId, BlockNumber> OperatorRegistry<AccountId, AssetId, BlockNumber> for () {
+    fn is_operator(
+        _holder: &AccountId,
+        _asset: &AssetId,
+        _operator: &AccountId,
+        _now: BlockNumber,
+    ) -> bool {
+        false
+    }
+}
