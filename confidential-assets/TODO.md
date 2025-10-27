@@ -7,11 +7,8 @@
 ## Impl TODO
 
 ### Pending Balance Impl without Griefing + Fixed UX
-1. pending deposits stored as UTXO set
-2. accept_pending passes in range of pending notes
-3. 
-
-
+1. update verifier for verify_transfer_received since latest changes
+2. 
 
 ### E2E solution mirroring Solana CT backend as is
 - update pallets

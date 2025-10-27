@@ -96,6 +96,7 @@ pub mod pallet {
     >;
 
     /// **Pending** balance deposits per (asset, account).
+    // optimize by storing in a merkle tree which also prevents id leakage
     #[pallet::storage]
     pub type PendingDeposits<T: Config> = StorageNMap<
         _,
