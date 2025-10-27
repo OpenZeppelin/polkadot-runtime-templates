@@ -84,12 +84,6 @@ pub mod pallet {
     >;
 
     /// **Pending** balance ciphertext per (asset, account).
-    ///
-    /// Semantics:
-    /// - If `Some(x)`, it is the receiver's **post-accumulation** ciphertext after applying
-    ///   all yet-unaccepted deltas to the prior available.
-    /// - When additional transfers arrive, sender-side verification uses `pending` as
-    ///   the receiver "old" value (if present) to keep accumulating.
     #[pallet::storage]
     pub type PendingBalanceCipher<T: Config> = StorageDoubleMap<
         _,
@@ -99,6 +93,30 @@ pub mod pallet {
         T::AccountId,
         EncryptedAmount, // opaque bytes
         OptionQuery,
+    >;
+
+    /// **Pending** balance deposits per (asset, account).
+    #[pallet::storage]
+    pub type PendingDeposits<T: Config> = StorageNMap<
+        _,
+        (
+            NMapKey<Blake2_128Concat, T::AccountId>, // holder
+            NMapKey<Blake2_128Concat, T::AssetId>,   // asset
+            NMapKey<Blake2_128Concat, u64>,          // PendingDepositId
+        ),
+        EncryptedAmount,
+        OptionQuery,
+    >;
+
+    #[pallet::storage]
+    pub type NextPendingDepositId<T: Config> = StorageDoubleMap<
+        _,
+        Blake2_128Concat,
+        T::AccountId,
+        Blake2_128Concat,
+        T::AssetId,
+        u64, //pub type PendingDepositId = u64
+        ValueQuery,
     >;
 
     /// Opaque total supply per asset.
@@ -149,40 +167,49 @@ pub mod pallet {
             // todo emit event
             Ok(())
         }
-        #[pallet::call_index(1)]
-        #[pallet::weight(T::WeightInfo::transfer_from_available())]
-        pub fn transfer_from_available(
-            origin: T::RuntimeOrigin,
-            asset: T::AssetId,
-            to: T::AccountId,
-            encrypted_amount: ExternalEncryptedAmount,
-            proof: InputProof,
-        ) -> DispatchResult {
-            let from = ensure_signed(origin)?;
-            let _transferred_amt =
-                Self::do_transfer_from_available(asset, &from, &to, encrypted_amount, proof)?;
-            // todo emit event
-            Ok(())
-        }
-        /// Accept all pending for `(asset, origin)` by verifying a receiver-side proof
-        /// over the provided delta-ciphertext and moving:
-        /// - `available := verified_to_new`
-        /// - `pending := None`
+        /// Accept pending deposits for `(asset, origin)`
         ///
         /// Inputs:
         /// - `asset`: target asset id
+        /// - `deposits`: deposits that are being accepted from pending deposits
         /// - `encrypted_amount`: the Δ ElGamal ciphertext (opaque envelope from sender phase)
         /// - `proof`: receiver-side acceptance proof/envelope
-        #[pallet::call_index(2)]
+        #[pallet::call_index(1)]
         #[pallet::weight(T::WeightInfo::accept_pending())]
         pub fn accept_pending(
             origin: T::RuntimeOrigin,
             asset: T::AssetId,
-            encrypted_amount: ExternalEncryptedAmount, //may be unnecessary if in proof envelope already
+            deposits: Vec<u64>, //deposit ids
+            encrypted_amount: ExternalEncryptedAmount,
             proof: InputProof,
         ) -> DispatchResult {
-            let who = ensure_signed(origin)?;
-            Self::do_accept_pending(who, asset, encrypted_amount, proof)
+            let to = ensure_signed(origin)?;
+            Self::do_accept_pending(to, asset, deposits, encrypted_amount, proof)
+        }
+        /// Extrinsic for advanced users to make pending deposits immediately
+        /// spendable for transfer (vs. split call for accept_pending + transfer)
+        /// Requires specifying the pending deposits that the sender intends to make liquid
+        /// before transferring a separate amount out of their available balance.
+        // TODO: make extrinsic atomic so either fails or doesn't write to storage
+        // TODO: impl could be more efficient if logic shared between paths
+        #[pallet::call_index(2)]
+        #[pallet::weight(T::WeightInfo::transfer_from_available())] //TODO
+        pub fn accept_pending_and_transfer(
+            origin: T::RuntimeOrigin,
+            asset: T::AssetId,
+            to: T::AccountId,
+            deposit_ids: Vec<u64>, //deposit ids
+            accept_sum: ExternalEncryptedAmount,
+            accept_proof: InputProof,
+            transfer_amount: ExternalEncryptedAmount,
+            transfer_proof: InputProof,
+        ) -> DispatchResult {
+            let from = ensure_signed(origin)?;
+            Self::do_accept_pending(from.clone(), asset, deposit_ids, accept_sum, accept_proof)?;
+            let _transferred_amt =
+                Self::transfer_encrypted(asset, &from, &to, transfer_amount, transfer_proof)?;
+            // todo emit event
+            Ok(())
         }
     }
 
@@ -215,7 +242,6 @@ pub mod pallet {
         // --- Core ops ---
 
         /// Sender-initiated confidential transfer:
-        /// - TODO: if pending(from).is_some then from.accept_pending() first.
         /// - Sender available decreases according to proof-verified delta.
         /// - Receiver **pending** is set to the new post-delta ciphertext, using the
         ///   current pending (if any) as the "old" base to accumulate multiple in-flight transfers.
@@ -226,15 +252,40 @@ pub mod pallet {
             encrypted_amount: ExternalEncryptedAmount,
             input_proof: InputProof,
         ) -> Result<EncryptedAmount, DispatchError> {
-            // TODO: this
-            // fn split_proof(_p: InputProof) -> (InputProof, InputProof) {
-            //     todo!()
-            // }
-            // let (accept_proof, send_proof) = split_proof(input_proof);
-            if let Some(delta) = PendingBalanceCipher::<T>::get(asset, &from) {
-                Self::do_accept_pending(from.clone(), asset, delta, accept_proof)?;
-            }
-            Self::do_transfer_from_available(asset, from, to, encrypted_amount, send_proof)
+            let from_pk = PublicKey::<T>::get(from).ok_or(Error::<T>::NoPublicKey)?;
+            let to_pk = PublicKey::<T>::get(to).ok_or(Error::<T>::NoPublicKey)?;
+
+            // Old balances:
+            let from_old_avail = AvailableBalanceCipher::<T>::get(asset, from)
+                .unwrap_or_else(|| BoundedVec::try_from(Vec::new()).ok().unwrap());
+            let to_old_pending = PendingBalanceCipher::<T>::get(asset, &to)
+                .unwrap_or_else(|| BoundedVec::try_from(Vec::new()).ok().unwrap());
+
+            // Verify & compute new opaque balances (total unchanged on transfer).
+            let (from_new_raw, to_new_pending_raw) = T::Verifier::verify_transfer_sent(
+                &asset.using_encoded(|b| b.to_vec()),
+                &from_pk,
+                &to_pk,
+                from_old_avail.as_slice(),
+                to_old_pending.as_slice(),
+                encrypted_amount.as_slice(),
+                input_proof.as_slice(),
+            )
+            .map_err(|_| Error::<T>::InvalidProof)?;
+
+            let from_new: EncryptedAmount =
+                BoundedVec::try_from(from_new_raw).map_err(|_| Error::<T>::BadCipher)?;
+            let to_new_pending: EncryptedAmount =
+                BoundedVec::try_from(to_new_pending_raw).map_err(|_| Error::<T>::BadCipher)?;
+            // Commit state: update available and pending
+            AvailableBalanceCipher::<T>::insert(asset, &from, from_new);
+            PendingBalanceCipher::<T>::insert(asset, &from, to_new_pending);
+            let deposit_id = NextPendingDepositId::<T>::get(to, &asset);
+            PendingDeposits::<T>::insert((to, asset, deposit_id), &encrypted_amount);
+            NextPendingDepositId::<T>::insert(to, asset, deposit_id + 1);
+
+            // Return canonicalized delta envelope back to caller/front pallet.
+            Ok(BoundedVec::try_from(encrypted_amount.into_inner()).expect("len checked"))
         }
 
         /// Policy/ACL transfer path **without ZK proof** (old signature).
@@ -253,30 +304,29 @@ pub mod pallet {
 
             let from_old_avail = AvailableBalanceCipher::<T>::get(asset, from)
                 .unwrap_or_else(|| BoundedVec::try_from(Vec::new()).ok().unwrap());
+            let to_old_pending = PendingBalanceCipher::<T>::get(asset, &to)
+                .unwrap_or_else(|| BoundedVec::try_from(Vec::new()).ok().unwrap());
 
-            let to_base = PendingBalanceCipher::<T>::get(asset, to).unwrap_or_else(|| {
-                AvailableBalanceCipher::<T>::get(asset, to)
-                    .unwrap_or_else(|| BoundedVec::try_from(Vec::new()).ok().unwrap())
-            });
-
-            let (from_new_raw, to_new_raw) = T::Verifier::acl_transfer_sent(
+            let (from_new_raw, to_new_pending_raw) = T::Verifier::acl_transfer_sent(
                 &asset.using_encoded(|b| b.to_vec()),
                 &from_pk,
                 &to_pk,
                 from_old_avail.as_slice(),
-                to_base.as_slice(),
+                to_old_pending.as_slice(),
                 amount.as_slice(),
             )
             .map_err(|_| Error::<T>::BackendPolicy)?;
 
             let from_new: EncryptedAmount =
                 BoundedVec::try_from(from_new_raw).map_err(|_| Error::<T>::BadCipher)?;
-            let to_new_accumulated: EncryptedAmount =
-                BoundedVec::try_from(to_new_raw).map_err(|_| Error::<T>::BadCipher)?;
-
-            // Commit:
-            AvailableBalanceCipher::<T>::insert(asset, from, from_new);
-            PendingBalanceCipher::<T>::insert(asset, to, to_new_accumulated);
+            let to_new_pending: EncryptedAmount =
+                BoundedVec::try_from(to_new_pending_raw).map_err(|_| Error::<T>::BadCipher)?;
+            // Commit state: update available and pending
+            AvailableBalanceCipher::<T>::insert(asset, &from, from_new);
+            PendingBalanceCipher::<T>::insert(asset, &from, to_new_pending);
+            let deposit_id = NextPendingDepositId::<T>::get(to, &asset);
+            PendingDeposits::<T>::insert((to, asset, deposit_id), &amount);
+            NextPendingDepositId::<T>::insert(to, asset, deposit_id + 1);
 
             Ok(amount)
         }
@@ -298,96 +348,58 @@ pub mod pallet {
     }
 
     impl<T: Config> Pallet<T> {
-        /// Sender-initiated confidential transfer:
-        /// - Sender available decreases according to proof-verified delta.
-        /// - Receiver **pending** is set to the new post-delta ciphertext, using the
-        ///   current pending (if any) as the "old" base to accumulate multiple in-flight transfers.
-        fn do_transfer_from_available(
-            asset: T::AssetId,
-            from: &T::AccountId,
-            to: &T::AccountId,
-            encrypted_amount: ExternalEncryptedAmount,
-            input_proof: InputProof,
-        ) -> Result<EncryptedAmount, DispatchError> {
-            let from_pk = PublicKey::<T>::get(from).ok_or(Error::<T>::NoPublicKey)?;
-            let to_pk = PublicKey::<T>::get(to).ok_or(Error::<T>::NoPublicKey)?;
-
-            // Old balances:
-            let from_old_avail = AvailableBalanceCipher::<T>::get(asset, from)
-                .unwrap_or_else(|| BoundedVec::try_from(Vec::new()).ok().unwrap());
-
-            // Receiver base = pending if present, else available.
-            let to_base = PendingBalanceCipher::<T>::get(asset, to).unwrap_or_else(|| {
-                AvailableBalanceCipher::<T>::get(asset, to)
-                    .unwrap_or_else(|| BoundedVec::try_from(Vec::new()).ok().unwrap())
-            });
-
-            // Verify & compute new opaque balances (total unchanged on transfer).
-            let (from_new_raw, to_new_raw) = T::Verifier::verify_transfer_sent(
-                &asset.using_encoded(|b| b.to_vec()),
-                &from_pk,
-                &to_pk,
-                from_old_avail.as_slice(),
-                to_base.as_slice(),
-                encrypted_amount.as_slice(),
-                input_proof.as_slice(),
-            )
-            .map_err(|_| Error::<T>::InvalidProof)?;
-
-            let from_new: EncryptedAmount =
-                BoundedVec::try_from(from_new_raw).map_err(|_| Error::<T>::BadCipher)?;
-            let to_new_accumulated: EncryptedAmount =
-                BoundedVec::try_from(to_new_raw).map_err(|_| Error::<T>::BadCipher)?;
-
-            // Commit:
-            // - Sender available := from_new
-            // - Receiver pending := to_new_accumulated (accumulates over time)
-            AvailableBalanceCipher::<T>::insert(asset, from, from_new);
-            PendingBalanceCipher::<T>::insert(asset, to, to_new_accumulated);
-
-            // Return canonicalized delta envelope back to caller/front pallet.
-            Ok(BoundedVec::try_from(encrypted_amount.into_inner()).expect("len checked"))
-        }
-
         fn do_accept_pending(
-            who: T::AccountId,
+            from: T::AccountId,
             asset: T::AssetId,
-            _delta_ct: ExternalEncryptedAmount, //included in proof envelope?
+            deposits: Vec<u64>, //DepositId
+            deposits_sum: ExternalEncryptedAmount,
             proof: InputProof,
         ) -> DispatchResult {
-            let to_pk = PublicKey::<T>::get(&who).ok_or(Error::<T>::NoPublicKey)?;
+            let from_pk = PublicKey::<T>::get(&from).ok_or(Error::<T>::NoPublicKey)?;
 
             // Current available and pending states
-            let to_avail = AvailableBalanceCipher::<T>::get(asset, &who)
+            let from_avail = AvailableBalanceCipher::<T>::get(asset, &from)
+                .unwrap_or_else(|| BoundedVec::try_from(Vec::new()).ok().unwrap());
+            let from_pending = PendingBalanceCipher::<T>::get(asset, &from)
                 .unwrap_or_else(|| BoundedVec::try_from(Vec::new()).ok().unwrap());
 
-            let to_pending =
-                PendingBalanceCipher::<T>::get(asset, &who).ok_or(Error::<T>::NoPending)?;
-            // TODO: need to check that if the proof contains delta_ct and
-            // delta_ct <= to_pending
-            // Verify receiver acceptance: computes (to_new, total_new)
-            let (to_new_raw, to_new_pending_raw) = T::Verifier::verify_transfer_received(
+            let mut deposit_amounts: Vec<u8> = Vec::new();
+            for id in deposits.clone() {
+                if let Some(deposit) = PendingDeposits::<T>::get((from.clone(), asset, id)) {
+                    // TODO: verifier must know how to decode accordingly
+                    deposit_amounts.extend_from_slice(deposit.as_slice());
+                }
+            }
+            ensure!(!deposit_amounts.is_empty(), Error::<T>::NoPending);
+            let (from_new_raw, from_new_pending_raw) = T::Verifier::verify_transfer_received(
                 &asset.using_encoded(|b| b.to_vec()),
-                &to_pk,
-                to_avail.as_slice(),
-                to_pending.as_slice(),
-                proof.as_slice(), // does verification need delta_ct or is it included in proof envelope
+                &from_pk,
+                from_avail.as_slice(),
+                from_pending.as_slice(),
+                deposit_amounts.as_slice(),
+                deposits_sum.as_slice(),
+                proof.as_slice(),
             )
             .map_err(|_| Error::<T>::InvalidProof)?;
-            // maybe make to_new_pending_raw an option on return
 
             // Bound them
-            let to_new: EncryptedAmount =
-                BoundedVec::try_from(to_new_raw).map_err(|_| Error::<T>::BadCipher)?;
-            let to_new_pending: EncryptedAmount =
-                BoundedVec::try_from(to_new_pending_raw).map_err(|_| Error::<T>::BadCipher)?;
-
-            // Commit state: available := verified new; pending := None.
-            AvailableBalanceCipher::<T>::insert(asset, &who, to_new);
-            // if to_new_pending.is_zero() {  PendingBalanceCipher::<T>::remove(asset, &who); } else:
-            PendingBalanceCipher::<T>::insert(asset, &who, to_new_pending_raw);
-
-            Self::deposit_event(Event::PendingAccepted(who, asset));
+            let from_new: EncryptedAmount =
+                BoundedVec::try_from(from_new_raw).map_err(|_| Error::<T>::BadCipher)?;
+            let from_new_pending: EncryptedAmount =
+                BoundedVec::try_from(from_new_pending_raw).map_err(|_| Error::<T>::BadCipher)?;
+            deposits
+                .into_iter()
+                .for_each(|id| PendingDeposits::<T>::remove((from.clone(), asset, id)));
+            // Commit state: update available and pending
+            AvailableBalanceCipher::<T>::insert(asset, &from, from_new);
+            if from_new_pending.is_empty()
+            /* == 0*/
+            {
+                PendingBalanceCipher::<T>::remove(asset, &from);
+            } else {
+                PendingBalanceCipher::<T>::insert(asset, &from, from_new_pending);
+            }
+            Self::deposit_event(Event::PendingAccepted(from, asset));
             Ok(())
         }
     }

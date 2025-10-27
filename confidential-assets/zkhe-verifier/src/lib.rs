@@ -139,24 +139,14 @@ impl ZkVerifier for ZkheVerifier {
         Ok((from_new_bytes.to_vec(), to_new_bytes.to_vec()))
     }
 
-    /// ACL/policy path (no proof). Intentionally left to the runtime policy.
-    fn acl_transfer_sent(
-        _asset: &[u8],
-        _from_pk: &[u8],
-        _to_pk: &[u8],
-        _from_old: &[u8],
-        _to_old: &[u8],
-        _amount_cipher: &[u8],
-    ) -> Result<(Vec<u8>, Vec<u8>), Self::Error> {
-        Err(()) // define policy rules here if needed
-    }
-
-    /// Receiver phase: verify acceptance envelope and compute new receiver commitment.
     /// Receiver phase: verify acceptance envelope and compute new receiver commitment.
     fn verify_transfer_received(
         asset: &[u8],
-        to_pk_bytes: &[u8],
-        to_old_bytes: &[u8],
+        from_pk_bytes: &[u8],
+        from_old_avail_bytes: &[u8],
+        from_old_pending_bytes: &[u8],
+        deposit_amounts: &[u8],
+        deposits_sum: &[u8],
         proof: &[u8],
     ) -> Result<Vec<u8>, Self::Error> {
         let to_pk = parse_point32(to_pk_bytes).map_err(|_| ())?;
@@ -314,6 +304,18 @@ impl ZkVerifier for ZkheVerifier {
         }
 
         Err(())
+    }
+
+    /// ACL/policy path (no proof). Intentionally left to the runtime policy.
+    fn acl_transfer_sent(
+        _asset: &[u8],
+        _from_pk: &[u8],
+        _to_pk: &[u8],
+        _from_old: &[u8],
+        _to_old: &[u8],
+        _amount_cipher: &[u8],
+    ) -> Result<(Vec<u8>, Vec<u8>), Self::Error> {
+        Err(()) // define policy rules here if needed
     }
 
     fn disclose(_asset: &[u8], _who_pk: &[u8], _cipher: &[u8]) -> Result<u64, Self::Error> {
