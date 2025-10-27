@@ -10,14 +10,15 @@
 //!
 //! Phase 2 (receiver accepts):
 //!   - `prove_receiver_accept(...)`
-//!     Emits a compact envelope:
-//!       * delta_comm(32) || len(u16) || range_to_new(len)
+//!     Emits a compact envelope (Option A to match verifier):
+//!       * delta_comm(32) || len1(2) || range_avail_new || len2(2) || range_pending_new
 //!
 //! Notes:
 //! - Bulletproofs are single 64-bit range proofs bound to a transcript context identical to
 //!   the verifier's binding logic.
-//! - For simplicity, `prove_receiver_accept` requires the receiver opening and the transfer
-//!   witnesses (Δv, ρ). In production, you can derive receiver opening via the ElGamal handle.
+//! - For simplicity, `prove_receiver_accept` requires the receiver openings for both
+//!   available and pending commitments, plus the transfer witnesses (Δv, ρ). In production,
+//!   the Δv, ρ can be reconstructed from consumed UTXOs if desired.
 
 #[cfg(test)]
 mod tests;
@@ -73,11 +74,13 @@ fn transcript_context_bytes(t: &Transcript) -> [u8; 32] {
     out
 }
 
+// Updated: acceptance context must match verifier (receiver_pk, avail_old, pending_old, delta_comm)
 fn accept_ctx_bytes(
     network_id: [u8; 32],
     asset_id: [u8; 32],
     receiver_pk: &RistrettoPoint,
-    to_old: &RistrettoPoint,
+    avail_old: &RistrettoPoint,
+    pending_old: &RistrettoPoint,
     delta_comm: &RistrettoPoint,
 ) -> [u8; 32] {
     let mut t = Transcript::new(labels::PROTOCOL);
@@ -86,7 +89,8 @@ fn accept_ctx_bytes(
     t.append_message(b"network_id", &network_id);
     t.append_message(b"asset_id", &asset_id);
     append_point(&mut t, b"receiver_pk", receiver_pk);
-    append_point(&mut t, b"to_old", to_old);
+    append_point(&mut t, b"avail_old", avail_old);
+    append_point(&mut t, b"pending_old", pending_old);
     append_point(&mut t, b"delta_comm", delta_comm);
     let mut out = [0u8; 32];
     t.challenge_bytes(b"ctx", &mut out);
@@ -165,7 +169,7 @@ fn prove_range_u64(
     Ok(proof.to_bytes())
 }
 
-// ========================= Sender Phase =========================
+// ========================= Sender Phase (unchanged) =========================
 
 pub struct SenderInput {
     pub asset_id: Vec<u8>,
@@ -263,7 +267,7 @@ pub fn prove_sender_transfer(inp: &SenderInput) -> Result<SenderOutput, ProverEr
     let z_v = a_v + c * dv;
     let z_r = a_r + c * rho;
 
-    // New commitments (sender new is applied in phase 1; receiver is postponed)
+    // New commitments
     let from_new_c = (v_from_old - dv) * G + (r_from_old - rho) * h;
     let to_new_c = inp.to_old_c + delta_c;
 
@@ -302,7 +306,7 @@ pub fn prove_sender_transfer(inp: &SenderInput) -> Result<SenderOutput, ProverEr
     })
 }
 
-// ========================= Receiver Phase =========================
+// ========================= Receiver Phase (updated) =========================
 
 pub struct ReceiverAcceptInput {
     pub asset_id: Vec<u8>,
@@ -310,10 +314,14 @@ pub struct ReceiverAcceptInput {
 
     pub receiver_pk: RistrettoPoint,
 
-    pub to_old_c: RistrettoPoint,
-    pub to_old_opening: (u64, Scalar),
+    // Old commitments and their openings:
+    pub avail_old_c: RistrettoPoint,
+    pub avail_old_opening: (u64, Scalar),
 
-    /// ΔC commitment and its transfer witnesses (Δv, ρ) to form the new opening.
+    pub pending_old_c: RistrettoPoint,
+    pub pending_old_opening: (u64, Scalar),
+
+    /// ΔC commitment (sum of selected pending-UTXO C parts) and its witnesses (Δv, ρ).
     pub delta_comm: RistrettoPoint,
     pub delta_value: u64,
     pub delta_rho: Scalar,
@@ -321,54 +329,80 @@ pub struct ReceiverAcceptInput {
 
 pub struct ReceiverAcceptOutput {
     /// Envelope expected by verifier `verify_transfer_received`:
-    ///   delta_comm(32) || len(u16) || range_to_new
+    ///   delta_comm(32) || len1(2) || rp_avail_new || len2(2) || rp_pending_new
     pub accept_envelope: Vec<u8>,
-    pub to_new_c: [u8; 32],
+    pub avail_new_c: [u8; 32],
+    pub pending_new_c: [u8; 32],
 }
 
 pub fn prove_receiver_accept(
     inp: &ReceiverAcceptInput,
 ) -> Result<ReceiverAcceptOutput, ProverError> {
-    let (v_to_old_u64, r_to_old) = inp.to_old_opening;
-    let v_to_old = Scalar::from(v_to_old_u64);
+    let (v_av_u64, r_av_old) = inp.avail_old_opening;
+    let (v_pend_u64, r_pend_old) = inp.pending_old_opening;
+
     let dv_u64 = inp.delta_value;
     let dv = Scalar::from(dv_u64);
     let rho = inp.delta_rho;
 
-    // Compute receiver new commitment/opening
+    // Sanity: ΔC = dv*G + rho*H (not strictly required by verifier, but catches input bugs)
     let h = pedersen_h_generator();
-    let to_new_c = (v_to_old + dv) * G + (r_to_old + rho) * h;
+    let delta_c_recomputed = dv * G + rho * h;
+    debug_assert_eq!(
+        delta_c_recomputed.compress().to_bytes(),
+        inp.delta_comm.compress().to_bytes()
+    );
 
-    // Acceptance transcript context (must match verifier)
+    // Compute new commitments/openings (must match verifier semantics):
+    // avail_new = avail_old + ΔC, pending_new = pending_old - ΔC
+    let avail_new_c = inp.avail_old_c + inp.delta_comm;
+    let pending_new_c = inp.pending_old_c - inp.delta_comm;
+
+    // Acceptance transcript context (shared by both proofs; MUST match verifier)
     let ctx_bytes = accept_ctx_bytes(
         inp.network_id,
         pad_or_trim_32(&inp.asset_id),
         &inp.receiver_pk,
-        &inp.to_old_c,
+        &inp.avail_old_c,
+        &inp.pending_old_c,
         &inp.delta_comm,
     );
 
-    let to_new_bytes = point_to_bytes(&to_new_c);
+    let avail_new_bytes = point_to_bytes(&avail_new_c);
+    let pending_new_bytes = point_to_bytes(&pending_new_c);
 
-    // Produce receiver range proof; label MUST match verifier call-site.
-    let range_to = prove_range_u64(
-        b"range_to_new",
+    // Produce both range proofs with the exact labels the verifier expects.
+    let rp_avail_new = prove_range_u64(
+        b"range_avail_new",
         &ctx_bytes,
-        &to_new_bytes,
-        v_to_old_u64
+        &avail_new_bytes,
+        v_av_u64
             .checked_add(dv_u64)
             .ok_or(ProverError::RangeProof)?,
-        &(r_to_old + rho),
+        &(r_av_old + rho),
     )?;
 
-    // Envelope: ΔC(32) || len(u16) || proof
-    let mut env = Vec::with_capacity(32 + 2 + range_to.len());
+    let rp_pending_new = prove_range_u64(
+        b"range_pending_new",
+        &ctx_bytes,
+        &pending_new_bytes,
+        v_pend_u64
+            .checked_sub(dv_u64)
+            .ok_or(ProverError::RangeProof)?,
+        &(r_pend_old - rho),
+    )?;
+
+    // Envelope: ΔC(32) || len1(2) || rp_avail_new || len2(2) || rp_pending_new
+    let mut env = Vec::with_capacity(32 + 2 + rp_avail_new.len() + 2 + rp_pending_new.len());
     env.extend_from_slice(inp.delta_comm.compress().as_bytes());
-    env.extend_from_slice(&(range_to.len() as u16).to_le_bytes());
-    env.extend_from_slice(&range_to);
+    env.extend_from_slice(&(rp_avail_new.len() as u16).to_le_bytes());
+    env.extend_from_slice(&rp_avail_new);
+    env.extend_from_slice(&(rp_pending_new.len() as u16).to_le_bytes());
+    env.extend_from_slice(&rp_pending_new);
 
     Ok(ReceiverAcceptOutput {
         accept_envelope: env,
-        to_new_c: to_new_bytes,
+        avail_new_c: avail_new_bytes,
+        pending_new_c: pending_new_bytes,
     })
 }

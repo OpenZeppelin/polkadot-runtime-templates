@@ -1,4 +1,4 @@
-//! Unit tests for the no_std Zk ElGamal verifier.
+//! Unit tests for the no_std ZK ElGamal verifier.
 //! - Uses the root `ZkheVerifier` marker struct implementing `ZkVerifier`.
 //! - Prover is std-only and used here to generate test vectors.
 //!
@@ -173,25 +173,24 @@ fn verify_sender_and_receiver_happy_path() {
 
     let h = pedersen_h_generator();
 
-    // Sender starts with a positive balance
+    // Sender starts with a positive balance (available)
     let from_old_v = 1_234u64;
     let from_old_r = Scalar::from(42u64);
     let from_old_c = Scalar::from(from_old_v) * G + from_old_r * h;
 
-    // Receiver starts at zero (identity commitment)
-    let to_old_v = 0u64;
-    let to_old_r = Scalar::from(0u64);
-    let to_old_c = RistrettoPoint::default(); // identity
+    // Receiver starts at avail=0; pending will be built as ΔC for accept
+    let avail_old_v = 0u64;
+    let avail_old_r = Scalar::from(0u64);
+    let avail_old_c = RistrettoPoint::default(); // identity
 
     // Transfer amount
     let dv = 111u64;
 
-    // IMPORTANT: The verifier currently fixes `network_id = [0;32]`.
-    // So we pass the same `[0;32]` here to the prover to match transcript binding.
+    // Verifier fixes network_id=[0;32]; use same for prover
     let network_id = [0u8; 32];
     let asset_id = b"TEST_ASSET".to_vec();
 
-    // Deterministic seed so sender and receiver agree on witnesses for the test
+    // Deterministic seed so rho matches
     let mut seed = [0u8; 32];
     seed[0] = 7;
 
@@ -203,7 +202,7 @@ fn verify_sender_and_receiver_happy_path() {
         receiver_pk: pk_receiver,
         from_old_c,
         from_old_opening: (from_old_v, from_old_r),
-        to_old_c,
+        to_old_c: RistrettoPoint::identity(),
         delta_value: dv,
         rng_seed: seed,
         fee_c: None,
@@ -213,35 +212,33 @@ fn verify_sender_and_receiver_happy_path() {
 
     // Quick shape sanity
     assert_eq!(s_out.delta_ct_bytes.len(), 64);
-    // bundle = 32 + 192 + 2 + range_from_len + 2
     assert!(s_out.sender_bundle_bytes.len() >= 32 + 192 + 2 + 1 + 2);
 
     // ----------------- Sender phase (verify) -----------------
-    let (from_new_bytes_v, to_new_bytes_v) =
+    let (from_new_bytes_v, to_new_pending_bytes_v) =
         <ZkheVerifier as ZkVerifierTrait>::verify_transfer_sent(
             &asset_id,
             &compress(&pk_sender),
             &compress(&pk_receiver),
             &compress(&from_old_c),
-            &compress(&to_old_c),
+            &compress(&RistrettoPoint::identity()),
             &s_out.delta_ct_bytes,
             &s_out.sender_bundle_bytes,
         )
         .expect("sender-side verification did not pass");
 
-    // Check verifier matches prover's expected commitments
     assert_eq!(from_new_bytes_v.as_slice(), &s_out.from_new_c);
-    assert_eq!(to_new_bytes_v.as_slice(), &s_out.to_new_c);
+    assert_eq!(to_new_pending_bytes_v.as_slice(), &s_out.to_new_c);
 
     // ----------------- Receiver phase (prove) -----------------
     use rand_chacha::ChaCha20Rng;
     use rand_core::{RngCore, SeedableRng};
 
     let mut chacha = ChaCha20Rng::from_seed(seed);
-    let _k_ignore = chacha.next_u64(); // 1st draw: k (ignored here)
-    let delta_rho = Scalar::from(chacha.next_u64()); // 2nd draw: rho (must match prover)
+    let _k_ignore = chacha.next_u64(); // 1st draw: k
+    let delta_rho = Scalar::from(chacha.next_u64()); // 2nd draw: rho
 
-    // Deserialize ΔC from sender output
+    // ΔC from sender output
     let delta_comm = {
         use curve25519_dalek::ristretto::CompressedRistretto;
         CompressedRistretto(s_out.delta_comm_bytes)
@@ -249,12 +246,19 @@ fn verify_sender_and_receiver_happy_path() {
             .expect("valid ΔC")
     };
 
+    // Build pending_old equal to ΔC so accept will move it to available
+    let pending_old_v = dv;
+    let pending_old_r = delta_rho;
+    let pending_old_c = delta_comm;
+
     let r_in = ReceiverAcceptInput {
         asset_id: asset_id.clone(),
         network_id,
         receiver_pk: pk_receiver,
-        to_old_c, // same as sender used
-        to_old_opening: (to_old_v, to_old_r),
+        avail_old_c,
+        avail_old_opening: (avail_old_v, avail_old_r),
+        pending_old_c,
+        pending_old_opening: (pending_old_v, pending_old_r),
         delta_comm,
         delta_value: dv,
         delta_rho,
@@ -264,16 +268,24 @@ fn verify_sender_and_receiver_happy_path() {
     assert!(r_out.accept_envelope.len() > 34); // 32 + 2 + >=1
 
     // ----------------- Receiver phase (verify) -----------------
-    let to_new_bytes_recv_v = <ZkheVerifier as ZkVerifierTrait>::verify_transfer_received(
-        &asset_id,
-        &compress(&pk_receiver),
-        &compress(&to_old_c),
-        &r_out.accept_envelope,
-    )
-    .expect("receiver acceptance did not verify");
+    // pending_commits is the list of consumed pending commitments (compressed points).
+    // For this test we consume exactly one UTXO equal to ΔC.
+    let pending_commits: Vec<[u8; 32]> = vec![compress(&delta_comm)];
 
-    // Should match the prover's to_new commitment from sender computation / receiver recompute
-    assert_eq!(to_new_bytes_recv_v.as_slice(), &r_out.to_new_c);
+    let (avail_new_bytes_v, pending_new_bytes_v) =
+        <ZkheVerifier as ZkVerifierTrait>::verify_transfer_received(
+            &asset_id,
+            &compress(&pk_receiver),
+            &compress(&avail_old_c),
+            &compress(&pending_old_c),
+            &pending_commits,
+            &r_out.accept_envelope,
+        )
+        .expect("receiver acceptance did not verify");
+
+    // Should match the prover's availability/pending results
+    assert_eq!(avail_new_bytes_v.as_slice(), &r_out.avail_new_c);
+    assert_eq!(pending_new_bytes_v.as_slice(), &r_out.pending_new_c);
 }
 
 #[test]
@@ -422,14 +434,12 @@ fn range_proof_from_sender_bundle_verifies() {
         );
         eprintln!("CHECK: to_new(recomp)     = {}", hex(&to_new_recomp_bytes));
 
-        // Hard assert that prover's from_new equals recomputed
         assert_eq!(
             s_out.from_new_c, from_new_recomp_bytes,
             "from_new bytes differ from (from_old - ΔC); this will break range proof binding"
         );
 
-        // Control experiment: try verifying with to_new (should FAIL if proof is for from_new).
-        // If it PASSES with to_new, the prover accidentally bound the wrong commitment.
+        // Control: verifying with to_new must fail for a from_new-bound proof
         let mut to_commit32 = [0u8; 32];
         to_commit32.copy_from_slice(&to_new_recomp_bytes);
 
@@ -479,7 +489,6 @@ fn range_proof_from_sender_bundle_verifies() {
             },
         };
 
-        // build a transcript-derived RNG, like the verifier
         let mut ext = ChaCha20Rng::from_seed([0u8; 32]);
         let mut rng = t_std.build_rng().finalize(&mut ext);
 
@@ -497,7 +506,6 @@ fn range_proof_from_sender_bundle_verifies() {
     ) {
         Ok(()) => { /* great */ }
         Err(()) => {
-            // helper hex (copy these two tiny helpers at the top of the test file if you don't already have them)
             fn hex(bytes: &[u8]) -> String {
                 const T: &[u8; 16] = b"0123456789abcdef";
                 let mut out = String::with_capacity(bytes.len() * 2);
@@ -540,7 +548,6 @@ fn range_proof_from_sender_bundle_verifies() {
     }
 }
 
-// (Optional) tiny sanity for pedersen identity commitment path.
 #[test]
 fn identity_commitment_is_zero_point() {
     let zero = RistrettoPoint::default();
