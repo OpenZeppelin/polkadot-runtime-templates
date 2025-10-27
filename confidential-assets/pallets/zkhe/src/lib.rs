@@ -2,24 +2,19 @@
 
 //! # pallet-zkhe (backend-only, ZK/crypto + storage)
 //!
-//! Backend pallet that implements the `ConfidentialBackend` trait from
-//! `pallet-confidential-assets`. It stores:
-//! - per-account **public keys**,
-//! - per-(asset,account) **available balance** ciphertext,
-//! - per-(asset,account) **pending balance** ciphertext,
-//! - per-asset **total supply** ciphertext.
+//! Stores:
+//! - per-account public key
+//! - per-(asset,account) available commitment (32B)
+//! - per-(asset,account) pending commitment (32B)
+//! - per-asset total supply commitment (32B)
+//! - per-(account,asset,id) pending deposits as 64B ElGamal ciphertexts (UTXO-like)
 //!
 //! Dispatchables:
-//! - `accept_pending`: receiver-side acceptance that verifies a provided delta+proof,
-//!   zeroes pending, and updates available to the verified sum.
+//! - `accept_pending`: consume selected UTXOs, prove ΔC, move pending → available
 //!
 //! Notes:
-//! - Proof verification is delegated to the `ZkVerifier` associated type.
-//! - Sender-side transfers only update: sender.available ↓ and receiver.pending ↑ (by
-//!   setting receiver.pending to the new post-delta ciphertext, accumulating across
-//!   transfers by using pending-as-base when present).
-//!
-//! This pallet remains a backend; front pallets should emit user-facing events.
+//! - All cryptographic checks live in `Config::Verifier`.
+//! - Sender transfer updates: available(from) ↓, pending(to) ↑.
 
 use confidential_assets_primitives::*;
 use frame_support::{pallet_prelude::*, Blake2_128Concat};
@@ -33,20 +28,18 @@ pub mod pallet {
 
     #[pallet::config]
     pub trait Config: frame_system::Config {
-        /// Runtime event
         type RuntimeEvent: From<Event<Self>> + IsType<<Self as frame_system::Config>::RuntimeEvent>;
-
-        /// Asset identifier type.
         type AssetId: Parameter + Member + MaxEncodedLen + Copy + Default + TypeInfo;
 
-        /// ZK verifier to validate/apply transfers and receiver acceptance.
+        /// Verifier boundary (no_std on-chain).
+        /// - verify_transfer_sent(..) -> (from_new_commit, to_new_pending_commit)
+        /// - verify_transfer_received(.., pending_commits: &[[u8;32]], accept_envelope: &[u8])
         type Verifier: ZkVerifier;
 
-        /// Call weights
         type WeightInfo: WeightData;
     }
 
-    /// Weight
+    /// Weights
     pub trait WeightData {
         fn transfer() -> Weight;
         fn transfer_from_available() -> Weight;
@@ -66,46 +59,42 @@ pub mod pallet {
 
     // -------------------- Storage --------------------
 
-    /// Per-account public key (ElGamal-like).
     #[pallet::storage]
     pub type PublicKey<T: Config> =
         StorageMap<_, Blake2_128Concat, T::AccountId, PublicKeyBytes, OptionQuery>;
 
-    /// **Available** balance ciphertext per (asset, account).
     #[pallet::storage]
-    pub type AvailableBalanceCipher<T: Config> = StorageDoubleMap<
+    pub type AvailableBalanceCommit<T: Config> = StorageDoubleMap<
         _,
         Blake2_128Concat,
         T::AssetId,
         Blake2_128Concat,
         T::AccountId,
-        EncryptedAmount, // opaque bytes
+        Commitment,
         OptionQuery,
     >;
 
-    /// **Pending** balance ciphertext per (asset, account).
     #[pallet::storage]
-    pub type PendingBalanceCipher<T: Config> = StorageDoubleMap<
+    pub type PendingBalanceCommit<T: Config> = StorageDoubleMap<
         _,
         Blake2_128Concat,
         T::AssetId,
         Blake2_128Concat,
         T::AccountId,
-        EncryptedAmount, // opaque bytes
+        Commitment,
         OptionQuery,
     >;
 
-    /// **Pending** balance deposits per (asset, account).
-    // optimize by storing in a merkle tree which also prevents id leakage
+    /// UTXO-like pending deposits as 64B ElGamal ciphertexts.
     #[pallet::storage]
     pub type PendingDeposits<T: Config> = StorageNMap<
         _,
         (
-            NMapKey<Blake2_128Concat, T::AccountId>, // holder
-            NMapKey<Blake2_128Concat, T::AssetId>,   // asset
-            NMapKey<Blake2_128Concat, u64>,          // PendingDepositId
+            NMapKey<Blake2_128Concat, T::AccountId>,
+            NMapKey<Blake2_128Concat, T::AssetId>,
+            NMapKey<Blake2_128Concat, u64>,
         ),
-        EncryptedAmount,
+        EncryptedAmount, // [u8; 64]
         OptionQuery,
     >;
 
@@ -116,14 +105,13 @@ pub mod pallet {
         T::AccountId,
         Blake2_128Concat,
         T::AssetId,
-        u64, //pub type PendingDepositId = u64
+        u64,
         ValueQuery,
     >;
 
-    /// Opaque total supply per asset.
     #[pallet::storage]
-    pub type TotalSupplyCipher<T: Config> =
-        StorageMap<_, Blake2_128Concat, T::AssetId, EncryptedAmount, OptionQuery>;
+    pub type TotalSupplyCommit<T: Config> =
+        StorageMap<_, Blake2_128Concat, T::AssetId, Commitment, OptionQuery>;
 
     #[pallet::pallet]
     pub struct Pallet<T>(_);
@@ -133,9 +121,7 @@ pub mod pallet {
     #[pallet::event]
     #[pallet::generate_deposit(pub(super) fn deposit_event)]
     pub enum Event<T: Config> {
-        /// Pending accepted: (who, asset)
         PendingAccepted(T::AccountId, T::AssetId),
-        /// Public key set: (who)
         PublicKeySet(T::AccountId),
     }
 
@@ -159,57 +145,45 @@ pub mod pallet {
             origin: T::RuntimeOrigin,
             asset: T::AssetId,
             to: T::AccountId,
-            encrypted_amount: ExternalEncryptedAmount,
-            proof: InputProof,
+            encrypted_amount: EncryptedAmount, // 64B Δciphertext
+            proof: InputProof,                 // sender bundle
         ) -> DispatchResult {
             let from = ensure_signed(origin)?;
-            let _transferred_amt =
-                Self::transfer_encrypted(asset, &from, &to, encrypted_amount, proof)?;
-            // todo emit event
+            let _ = Self::transfer_encrypted(asset, &from, &to, encrypted_amount, proof)?;
             Ok(())
         }
-        /// Accept pending deposits for `(asset, origin)`
+
+        /// Accept selected UTXO deposits; prove ΔC; update (avail, pending) for caller.
         ///
-        /// Inputs:
-        /// - `asset`: target asset id
-        /// - `deposits`: deposits that are being accepted from pending deposits
-        /// - `encrypted_amount`: the Δ ElGamal ciphertext (opaque envelope from sender phase)
-        /// - `proof`: receiver-side acceptance proof/envelope
+        /// `accept_envelope` layout (Option A):
+        ///   delta_comm(32) || len1(2) || rp_avail_new || len2(2) || rp_pending_new
         #[pallet::call_index(1)]
         #[pallet::weight(T::WeightInfo::accept_pending())]
         pub fn accept_pending(
             origin: T::RuntimeOrigin,
             asset: T::AssetId,
-            deposits: Vec<u64>, //deposit ids
-            encrypted_amount: ExternalEncryptedAmount,
-            proof: InputProof,
+            deposits: Vec<u64>, // UTXO ids
+            accept_envelope: InputProof,
         ) -> DispatchResult {
-            let to = ensure_signed(origin)?;
-            Self::do_accept_pending(to, asset, deposits, encrypted_amount, proof)
+            let who = ensure_signed(origin)?;
+            Self::do_accept_pending(who, asset, deposits, accept_envelope)
         }
-        /// Extrinsic for advanced users to make pending deposits immediately
-        /// spendable for transfer (vs. split call for accept_pending + transfer)
-        /// Requires specifying the pending deposits that the sender intends to make liquid
-        /// before transferring a separate amount out of their available balance.
-        // TODO: make extrinsic atomic so either fails or doesn't write to storage
-        // TODO: impl could be more efficient if logic shared between paths
+
+        /// Atomic: accept pending then transfer from available.
         #[pallet::call_index(2)]
-        #[pallet::weight(T::WeightInfo::transfer_from_available())] //TODO
+        #[pallet::weight(T::WeightInfo::transfer_from_available())]
         pub fn accept_pending_and_transfer(
             origin: T::RuntimeOrigin,
             asset: T::AssetId,
             to: T::AccountId,
-            deposit_ids: Vec<u64>, //deposit ids
-            accept_sum: ExternalEncryptedAmount,
-            accept_proof: InputProof,
-            transfer_amount: ExternalEncryptedAmount,
+            deposit_ids: Vec<u64>,
+            accept_envelope: InputProof,
+            transfer_amount: EncryptedAmount,
             transfer_proof: InputProof,
         ) -> DispatchResult {
             let from = ensure_signed(origin)?;
-            Self::do_accept_pending(from.clone(), asset, deposit_ids, accept_sum, accept_proof)?;
-            let _transferred_amt =
-                Self::transfer_encrypted(asset, &from, &to, transfer_amount, transfer_proof)?;
-            // todo emit event
+            Self::do_accept_pending(from.clone(), asset, deposit_ids, accept_envelope)?;
+            let _ = Self::transfer_encrypted(asset, &from, &to, transfer_amount, transfer_proof)?;
             Ok(())
         }
     }
@@ -217,7 +191,6 @@ pub mod pallet {
     // -------------------- Backend Trait Impl --------------------
 
     impl<T: Config> ConfidentialBackend<T::AccountId, T::AssetId> for Pallet<T> {
-        // --- Key management ---
         fn set_public_key(
             who: &T::AccountId,
             elgamal_pk: &PublicKeyBytes,
@@ -228,72 +201,70 @@ pub mod pallet {
             Ok(())
         }
 
-        // --- Read helpers ---
-        fn total_supply(asset: T::AssetId) -> EncryptedAmount {
-            TotalSupplyCipher::<T>::get(asset)
-                .unwrap_or_else(|| BoundedVec::try_from(Vec::new()).ok().unwrap())
+        fn total_supply(asset: T::AssetId) -> [u8; 32] {
+            TotalSupplyCommit::<T>::get(asset).unwrap_or([0u8; 32])
         }
 
-        fn balance_of(asset: T::AssetId, who: &T::AccountId) -> EncryptedAmount {
-            // For compatibility, expose the **available** balance via this helper.
-            AvailableBalanceCipher::<T>::get(asset, who)
-                .unwrap_or_else(|| BoundedVec::try_from(Vec::new()).ok().unwrap())
+        fn balance_of(asset: T::AssetId, who: &T::AccountId) -> [u8; 32] {
+            AvailableBalanceCommit::<T>::get(asset, who).unwrap_or([0u8; 32])
         }
 
-        // --- Core ops ---
-
-        /// Sender-initiated confidential transfer:
-        /// - Sender available decreases according to proof-verified delta.
-        /// - Receiver **pending** is set to the new post-delta ciphertext, using the
-        ///   current pending (if any) as the "old" base to accumulate multiple in-flight transfers.
         fn transfer_encrypted(
             asset: T::AssetId,
             from: &T::AccountId,
             to: &T::AccountId,
-            encrypted_amount: ExternalEncryptedAmount,
+            encrypted_amount: EncryptedAmount,
             input_proof: InputProof,
         ) -> Result<EncryptedAmount, DispatchError> {
             let from_pk = PublicKey::<T>::get(from).ok_or(Error::<T>::NoPublicKey)?;
             let to_pk = PublicKey::<T>::get(to).ok_or(Error::<T>::NoPublicKey)?;
 
-            // Old balances:
-            let from_old_avail = AvailableBalanceCipher::<T>::get(asset, from)
-                .unwrap_or_else(|| BoundedVec::try_from(Vec::new()).ok().unwrap());
-            let to_old_pending = PendingBalanceCipher::<T>::get(asset, &to)
-                .unwrap_or_else(|| BoundedVec::try_from(Vec::new()).ok().unwrap());
+            // lifetime-safe buffers
+            let from_old_avail_opt = AvailableBalanceCommit::<T>::get(asset, from);
+            let from_old_avail_buf;
+            let from_old_avail: &[u8] = match from_old_avail_opt {
+                Some(c) => {
+                    from_old_avail_buf = c;
+                    &from_old_avail_buf[..]
+                }
+                None => &[],
+            };
 
-            // Verify & compute new opaque balances (total unchanged on transfer).
+            let to_old_pending_opt = PendingBalanceCommit::<T>::get(asset, to);
+            let to_old_pending_buf;
+            let to_old_pending: &[u8] = match to_old_pending_opt {
+                Some(c) => {
+                    to_old_pending_buf = c;
+                    &to_old_pending_buf[..]
+                }
+                None => &[],
+            };
+
             let (from_new_raw, to_new_pending_raw) = T::Verifier::verify_transfer_sent(
                 &asset.using_encoded(|b| b.to_vec()),
                 &from_pk,
                 &to_pk,
-                from_old_avail.as_slice(),
-                to_old_pending.as_slice(),
-                encrypted_amount.as_slice(),
+                from_old_avail,
+                to_old_pending,
+                &encrypted_amount, // Δciphertext bytes
                 input_proof.as_slice(),
             )
             .map_err(|_| Error::<T>::InvalidProof)?;
 
-            let from_new: EncryptedAmount =
-                BoundedVec::try_from(from_new_raw).map_err(|_| Error::<T>::BadCipher)?;
-            let to_new_pending: EncryptedAmount =
-                BoundedVec::try_from(to_new_pending_raw).map_err(|_| Error::<T>::BadCipher)?;
-            // Commit state: update available and pending
-            AvailableBalanceCipher::<T>::insert(asset, &from, from_new);
-            PendingBalanceCipher::<T>::insert(asset, &from, to_new_pending);
-            let deposit_id = NextPendingDepositId::<T>::get(to, &asset);
-            PendingDeposits::<T>::insert((to, asset, deposit_id), &encrypted_amount);
-            NextPendingDepositId::<T>::insert(to, asset, deposit_id + 1);
+            let from_new = vec32(from_new_raw).map_err(|_| Error::<T>::BadCipher)?;
+            let to_new_pending = vec32(to_new_pending_raw).map_err(|_| Error::<T>::BadCipher)?;
 
-            // Return canonicalized delta envelope back to caller/front pallet.
-            Ok(BoundedVec::try_from(encrypted_amount.into_inner()).expect("len checked"))
+            AvailableBalanceCommit::<T>::insert(asset, from, from_new);
+            PendingBalanceCommit::<T>::insert(asset, to, to_new_pending);
+
+            // record UTXO for receiver
+            let id = NextPendingDepositId::<T>::get(to, &asset);
+            PendingDeposits::<T>::insert((to, asset, id), encrypted_amount);
+            NextPendingDepositId::<T>::insert(to, asset, id + 1);
+
+            Ok(encrypted_amount)
         }
 
-        /// Policy/ACL transfer path **without ZK proof** (old signature).
-        ///
-        /// Behavior mirrors `transfer_encrypted` semantics:
-        /// - Sender available updated from `from_old_avail`.
-        /// - Receiver pending uses `pending` as base when present, else `available`.
         fn transfer_acl(
             asset: T::AssetId,
             from: &T::AccountId,
@@ -303,36 +274,50 @@ pub mod pallet {
             let from_pk = PublicKey::<T>::get(from).ok_or(Error::<T>::NoPublicKey)?;
             let to_pk = PublicKey::<T>::get(to).ok_or(Error::<T>::NoPublicKey)?;
 
-            let from_old_avail = AvailableBalanceCipher::<T>::get(asset, from)
-                .unwrap_or_else(|| BoundedVec::try_from(Vec::new()).ok().unwrap());
-            let to_old_pending = PendingBalanceCipher::<T>::get(asset, &to)
-                .unwrap_or_else(|| BoundedVec::try_from(Vec::new()).ok().unwrap());
+            // lifetime-safe buffers
+            let from_old_avail_opt = AvailableBalanceCommit::<T>::get(asset, from);
+            let from_old_avail_buf;
+            let from_old_avail: &[u8] = match from_old_avail_opt {
+                Some(c) => {
+                    from_old_avail_buf = c;
+                    &from_old_avail_buf[..]
+                }
+                None => &[],
+            };
+
+            let to_old_pending_opt = PendingBalanceCommit::<T>::get(asset, to);
+            let to_old_pending_buf;
+            let to_old_pending: &[u8] = match to_old_pending_opt {
+                Some(c) => {
+                    to_old_pending_buf = c;
+                    &to_old_pending_buf[..]
+                }
+                None => &[],
+            };
 
             let (from_new_raw, to_new_pending_raw) = T::Verifier::acl_transfer_sent(
                 &asset.using_encoded(|b| b.to_vec()),
                 &from_pk,
                 &to_pk,
-                from_old_avail.as_slice(),
-                to_old_pending.as_slice(),
-                amount.as_slice(),
+                from_old_avail,
+                to_old_pending,
+                &amount,
             )
             .map_err(|_| Error::<T>::BackendPolicy)?;
 
-            let from_new: EncryptedAmount =
-                BoundedVec::try_from(from_new_raw).map_err(|_| Error::<T>::BadCipher)?;
-            let to_new_pending: EncryptedAmount =
-                BoundedVec::try_from(to_new_pending_raw).map_err(|_| Error::<T>::BadCipher)?;
-            // Commit state: update available and pending
-            AvailableBalanceCipher::<T>::insert(asset, &from, from_new);
-            PendingBalanceCipher::<T>::insert(asset, &from, to_new_pending);
-            let deposit_id = NextPendingDepositId::<T>::get(to, &asset);
-            PendingDeposits::<T>::insert((to, asset, deposit_id), &amount);
-            NextPendingDepositId::<T>::insert(to, asset, deposit_id + 1);
+            let from_new = vec32(from_new_raw).map_err(|_| Error::<T>::BadCipher)?;
+            let to_new_pending = vec32(to_new_pending_raw).map_err(|_| Error::<T>::BadCipher)?;
+
+            AvailableBalanceCommit::<T>::insert(asset, from, from_new);
+            PendingBalanceCommit::<T>::insert(asset, to, to_new_pending);
+
+            let id = NextPendingDepositId::<T>::get(to, &asset);
+            PendingDeposits::<T>::insert((to, asset, id), amount);
+            NextPendingDepositId::<T>::insert(to, asset, id + 1);
 
             Ok(amount)
         }
 
-        /// Optional disclosure (policy dependent). Returns plaintext amount or error.
         fn disclose_amount(
             asset: T::AssetId,
             encrypted_amount: &EncryptedAmount,
@@ -342,66 +327,100 @@ pub mod pallet {
             T::Verifier::disclose(
                 &asset.using_encoded(|b| b.to_vec()),
                 &pk,
-                encrypted_amount.as_slice(),
+                &encrypted_amount[..],
             )
             .map_err(|_| Error::<T>::BackendPolicy.into())
         }
     }
 
+    // -------------------- Internal helpers --------------------
+
     impl<T: Config> Pallet<T> {
-        fn do_accept_pending(
-            from: T::AccountId,
-            asset: T::AssetId,
-            deposits: Vec<u64>, //DepositId
-            deposits_sum: ExternalEncryptedAmount,
-            proof: InputProof,
-        ) -> DispatchResult {
-            let from_pk = PublicKey::<T>::get(&from).ok_or(Error::<T>::NoPublicKey)?;
-
-            // Current available and pending states
-            let from_avail = AvailableBalanceCipher::<T>::get(asset, &from)
-                .unwrap_or_else(|| BoundedVec::try_from(Vec::new()).ok().unwrap());
-            let from_pending = PendingBalanceCipher::<T>::get(asset, &from)
-                .unwrap_or_else(|| BoundedVec::try_from(Vec::new()).ok().unwrap());
-
-            let mut deposit_amounts: Vec<u8> = Vec::new();
-            for id in deposits.clone() {
-                if let Some(deposit) = PendingDeposits::<T>::get((from.clone(), asset, id)) {
-                    // TODO: verifier must know how to decode accordingly
-                    deposit_amounts.extend_from_slice(deposit.as_slice());
-                }
+        /// Build the list of 32B commitments (C) from selected UTXO deposits.
+        fn build_pending_commit_list(
+            who: &T::AccountId,
+            asset: &T::AssetId,
+            deposit_ids: &[u64],
+        ) -> Result<Vec<[u8; 32]>, Error<T>> {
+            ensure!(!deposit_ids.is_empty(), Error::<T>::NoPending);
+            let mut out = Vec::with_capacity(deposit_ids.len());
+            for &id in deposit_ids {
+                let dep = PendingDeposits::<T>::get((who.clone(), *asset, id))
+                    .ok_or(Error::<T>::NoPending)?;
+                let mut c = [0u8; 32];
+                c.copy_from_slice(&dep[0..32]); // C part of ElGamal
+                out.push(c);
             }
-            ensure!(!deposit_amounts.is_empty(), Error::<T>::NoPending);
-            let (from_new_raw, from_new_pending_raw) = T::Verifier::verify_transfer_received(
+            Ok(out)
+        }
+
+        fn do_accept_pending(
+            who: T::AccountId,
+            asset: T::AssetId,
+            deposits: Vec<u64>,
+            accept_envelope: InputProof, // ΔC + 2 range proofs
+        ) -> DispatchResult {
+            let who_pk = PublicKey::<T>::get(&who).ok_or(Error::<T>::NoPublicKey)?;
+
+            let avail_old_opt = AvailableBalanceCommit::<T>::get(asset, &who);
+            let avail_old_buf;
+            let avail_old: &[u8] = match avail_old_opt {
+                Some(c) => {
+                    avail_old_buf = c;
+                    &avail_old_buf[..]
+                }
+                None => &[],
+            };
+
+            let pending_old_opt = PendingBalanceCommit::<T>::get(asset, &who);
+            let pending_old_buf;
+            let pending_old: &[u8] = match pending_old_opt {
+                Some(c) => {
+                    pending_old_buf = c;
+                    &pending_old_buf[..]
+                }
+                None => &[],
+            };
+
+            let commits = Self::build_pending_commit_list(&who, &asset, &deposits)?;
+
+            let (avail_new_raw, pending_new_raw) = T::Verifier::verify_transfer_received(
                 &asset.using_encoded(|b| b.to_vec()),
-                &from_pk,
-                from_avail.as_slice(),
-                from_pending.as_slice(),
-                deposit_amounts.as_slice(),
-                deposits_sum.as_slice(),
-                proof.as_slice(),
+                &who_pk,
+                avail_old,
+                pending_old,
+                &commits,
+                accept_envelope.as_slice(),
             )
             .map_err(|_| Error::<T>::InvalidProof)?;
 
-            // Bound them
-            let from_new: EncryptedAmount =
-                BoundedVec::try_from(from_new_raw).map_err(|_| Error::<T>::BadCipher)?;
-            let from_new_pending: EncryptedAmount =
-                BoundedVec::try_from(from_new_pending_raw).map_err(|_| Error::<T>::BadCipher)?;
-            deposits
-                .into_iter()
-                .for_each(|id| PendingDeposits::<T>::remove((from.clone(), asset, id)));
-            // Commit state: update available and pending
-            AvailableBalanceCipher::<T>::insert(asset, &from, from_new);
-            if from_new_pending.is_empty()
-            /* == 0*/
-            {
-                PendingBalanceCipher::<T>::remove(asset, &from);
-            } else {
-                PendingBalanceCipher::<T>::insert(asset, &from, from_new_pending);
+            let avail_new = vec32(avail_new_raw).map_err(|_| Error::<T>::BadCipher)?;
+            let pending_new = vec32(pending_new_raw).map_err(|_| Error::<T>::BadCipher)?;
+
+            for id in deposits {
+                PendingDeposits::<T>::remove((who.clone(), asset, id));
             }
-            Self::deposit_event(Event::PendingAccepted(from, asset));
+
+            AvailableBalanceCommit::<T>::insert(asset, &who, avail_new);
+            if pending_new == [0u8; 32] {
+                PendingBalanceCommit::<T>::remove(asset, &who);
+            } else {
+                PendingBalanceCommit::<T>::insert(asset, &who, pending_new);
+            }
+
+            Self::deposit_event(Event::PendingAccepted(who, asset));
             Ok(())
         }
+    }
+
+    // -------------------- Tiny util --------------------
+
+    fn vec32(v: Vec<u8>) -> Result<[u8; 32], ()> {
+        if v.len() != 32 {
+            return Err(());
+        }
+        let mut out = [0u8; 32];
+        out.copy_from_slice(&v);
+        Ok(out)
     }
 }

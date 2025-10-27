@@ -2,12 +2,12 @@
 use frame_support::{pallet_prelude::*, BoundedVec};
 use sp_std::prelude::*;
 
-/// Opaque ciphertext representing a "confidential" amount.
-pub type MaxCiphertextLen = ConstU32<128>;
-pub type EncryptedAmount = BoundedVec<u8, MaxCiphertextLen>;
-
-/// Opaque "external" encrypted amount (e.g., envelope sent with proof).
-pub type ExternalEncryptedAmount = BoundedVec<u8, MaxCiphertextLen>;
+/// ZK El Gamal Ciphertext
+/// bytes 0..32 = Pederson commitment
+/// bytes 33..64 = El Gamal decrypt handle
+pub type EncryptedAmount = [u8; 64];
+/// Commitment type (compressed Ristretto)
+pub type Commitment = [u8; 32];
 
 /// Proof/aux data blob used by the backend to validate encrypted transfers.
 pub type MaxProofLen = ConstU32<8192>;
@@ -23,19 +23,19 @@ pub type PublicKeyBytes = BoundedVec<u8, MaxPubKeyLen>;
 
 /// Backend that holds the **truth** for totals, balances, public keys, and executes transfers.
 pub trait ConfidentialBackend<AccountId, AssetId> {
-    // --- Key management (Solana/Zether-like) ---
+    // --- Key management ---
     fn set_public_key(who: &AccountId, elgamal_pk: &PublicKeyBytes) -> Result<(), DispatchError>;
 
     // --- Read helpers ---
-    fn total_supply(asset: AssetId) -> EncryptedAmount;
-    fn balance_of(asset: AssetId, who: &AccountId) -> EncryptedAmount;
+    fn total_supply(asset: AssetId) -> Commitment;
+    fn balance_of(asset: AssetId, who: &AccountId) -> Commitment;
 
     // --- Core ops ---
     fn transfer_encrypted(
         asset: AssetId,
         from: &AccountId,
         to: &AccountId,
-        encrypted_amount: ExternalEncryptedAmount,
+        encrypted_amount: EncryptedAmount,
         input_proof: InputProof,
     ) -> Result<EncryptedAmount, DispatchError>;
 
@@ -93,44 +93,51 @@ impl<AccountId, AssetId> OnConfidentialTransfer<AccountId, AssetId> for () {
 pub trait ZkVerifier {
     type Error;
 
-    /// Verify a transfer and **compute the new opaque per-account ciphertexts**.
-    /// Requires receiver to call `pallet_zk_elgamal::accept_pending` to move from
-    /// pending to available confidential balance for sending which internally calls
-    /// `verify_transfer_to_receiver`.
+    /// Sender phase: verify link/range (as implemented) and compute new commitments.
+    /// Inputs:
+    /// - `from_old_avail_commit`, `to_old_pending_commit`: 0 or 32 bytes
+    /// - `delta_ct`: 64B ElGamal ciphertext (C||D)
+    /// - `proof_bundle`: sender bundle bytes
+    ///
+    /// Returns:
+    /// - (from_new_available_commit, to_new_pending_commit), both 32B
     fn verify_transfer_sent(
         asset: &[u8],
         from_pk: &[u8],
         to_pk: &[u8],
-        from_old: &[u8],
-        to_old: &[u8],
-        delta_ct: &[u8],
-        proof: &[u8],
+        from_old_avail_commit: &[u8], // empty => identity
+        to_old_pending_commit: &[u8], // empty => identity
+        delta_ct: &[u8],              // 64B
+        proof_bundle: &[u8],
     ) -> Result<(Vec<u8>, Vec<u8>), Self::Error>;
-    // returns (from_new_balance_cipher, to_new_balance_cipher)
 
-    /// Verify transfer received to update receiver available balance
+    /// Receiver phase (Option A): accept selected UTXO deposits.
+    /// Inputs:
+    /// - `avail_old_commit`, `pending_old_commit`: 0 or 32 bytes
+    /// - `pending_commits`: slice of 32B commitments for the consumed UTXOs (Σ must equal ΔC)
+    /// - `accept_envelope`: delta_comm(32) || len1(2) || rp_avail_new || len2(2) || rp_pending_new
+    ///
+    /// Returns:
+    /// - (avail_new_commit, pending_new_commit), both 32B
     fn verify_transfer_received(
         asset: &[u8],
-        from_pk_bytes: &[u8],
-        from_old_avail_bytes: &[u8],
-        from_old_pending_bytes: &[u8],
-        deposit_amounts: &[u8],
-        deposits_sum: &[u8],
-        proof: &[u8],
+        who_pk: &[u8],
+        avail_old_commit: &[u8],      // empty => identity
+        pending_old_commit: &[u8],    // empty => identity
+        pending_commits: &[[u8; 32]], // UTXO C’s to sum
+        accept_envelope: &[u8],
     ) -> Result<(Vec<u8>, Vec<u8>), Self::Error>;
-    // returns (from_new_available_balance_cipher, from_new_pending_balance_cipher)
 
-    /// ACL transfer: same as above but without proof. Implementation must enforce policy.
+    /// ACL transfer path (no ZK proof). Must enforce policy in implementation.
     fn acl_transfer_sent(
         asset: &[u8],
         from_pk: &[u8],
         to_pk: &[u8],
-        from_old: &[u8],
-        to_old: &[u8],
-        amount_cipher: &[u8],
+        from_old_avail_commit: &[u8],
+        to_old_pending_commit: &[u8],
+        amount_cipher: &[u8], // 64B
     ) -> Result<(Vec<u8>, Vec<u8>), Self::Error>;
-    // returns (from_new_balance_cipher, to_new_balance_cipher)
 
-    /// Optional disclosure (policy dependent). Return plaintext amount or error.
+    /// Optional disclosure (policy dependent).
     fn disclose(asset: &[u8], who_pk: &[u8], cipher: &[u8]) -> Result<u64, Self::Error>;
 }

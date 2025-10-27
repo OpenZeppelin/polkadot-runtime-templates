@@ -231,7 +231,7 @@ pub mod pallet {
             origin: OriginFor<T>,
             asset: T::AssetId,
             to: T::AccountId,
-            encrypted_amount: ExternalEncryptedAmount,
+            encrypted_amount: EncryptedAmount,
             input_proof: InputProof,
         ) -> DispatchResult {
             let from = ensure_signed(origin)?;
@@ -278,7 +278,7 @@ pub mod pallet {
             asset: T::AssetId,
             from: T::AccountId,
             to: T::AccountId,
-            encrypted_amount: ExternalEncryptedAmount,
+            encrypted_amount: EncryptedAmount,
             input_proof: InputProof,
         ) -> DispatchResult {
             let caller = ensure_signed(origin)?;
@@ -327,7 +327,7 @@ pub mod pallet {
             origin: OriginFor<T>,
             asset: T::AssetId,
             to: T::AccountId,
-            encrypted_amount: ExternalEncryptedAmount,
+            encrypted_amount: EncryptedAmount,
             input_proof: InputProof,
             data: CallbackData,
         ) -> DispatchResult {
@@ -394,7 +394,7 @@ pub mod pallet {
             asset: T::AssetId,
             from: T::AccountId,
             to: T::AccountId,
-            encrypted_amount: ExternalEncryptedAmount,
+            encrypted_amount: EncryptedAmount,
             input_proof: InputProof,
             data: CallbackData,
         ) -> DispatchResult {
