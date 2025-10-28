@@ -25,7 +25,7 @@ pub mod pallet {
 
         type OnConfidentialTransfer: OnConfidentialTransfer<Self::AccountId, Self::AssetId>;
 
-        /// OPTIONAL operator layer. Defaults to no-ops (always false).
+        /// Operator layer. Defaults to always returning false when assigned ().
         type Operators: OperatorRegistry<Self::AccountId, Self::AssetId, BlockNumberFor<Self>>;
 
         type WeightInfo: WeightData;
@@ -147,26 +147,6 @@ pub mod pallet {
         }
 
         #[pallet::call_index(2)]
-        #[pallet::weight(T::WeightInfo::confidential_transfer())]
-        pub fn confidential_transfer_acl(
-            origin: OriginFor<T>,
-            asset: T::AssetId,
-            to: T::AccountId,
-            amount: EncryptedAmount,
-        ) -> DispatchResult {
-            let from = ensure_signed(origin)?;
-            let transferred = T::Backend::transfer_acl(asset, &from, &to, amount)
-                .map_err(|_| Error::<T>::BackendError)?;
-            Self::deposit_event(Event::ConfidentialTransfer {
-                asset,
-                from: from.clone(),
-                to: to.clone(),
-                encrypted_amount: transferred.clone(),
-            });
-            Ok(())
-        }
-
-        #[pallet::call_index(3)]
         #[pallet::weight(T::WeightInfo::confidential_transfer_from())]
         pub fn confidential_transfer_from_encrypted(
             origin: OriginFor<T>,
@@ -190,153 +170,7 @@ pub mod pallet {
             Ok(())
         }
 
-        #[pallet::call_index(4)]
-        #[pallet::weight(T::WeightInfo::confidential_transfer_from())]
-        pub fn confidential_transfer_from_acl(
-            origin: OriginFor<T>,
-            asset: T::AssetId,
-            from: T::AccountId,
-            to: T::AccountId,
-            amount: EncryptedAmount,
-        ) -> DispatchResult {
-            let caller = ensure_signed(origin)?;
-            Self::ensure_is_self_or_operator(&from, &asset, &caller)?;
-            let transferred = T::Backend::transfer_acl(asset, &from, &to, amount)
-                .map_err(|_| Error::<T>::BackendError)?;
-            Self::deposit_event(Event::ConfidentialTransfer {
-                asset,
-                from: from.clone(),
-                to: to.clone(),
-                encrypted_amount: transferred.clone(),
-            });
-            Ok(())
-        }
-
-        #[pallet::call_index(5)]
-        #[pallet::weight(T::WeightInfo::confidential_transfer_and_call())]
-        pub fn confidential_transfer_and_call_encrypted(
-            origin: OriginFor<T>,
-            asset: T::AssetId,
-            to: T::AccountId,
-            encrypted_amount: EncryptedAmount,
-            input_proof: InputProof,
-            data: CallbackData,
-        ) -> DispatchResult {
-            let from = ensure_signed(origin)?;
-            let transferred =
-                T::Backend::transfer_encrypted(asset, &from, &to, encrypted_amount, input_proof)
-                    .map_err(|_| Error::<T>::BackendError)?;
-            T::OnConfidentialTransfer::on_confidential_transfer_received(
-                &from,
-                &to,
-                &asset,
-                &transferred,
-                &data,
-            )
-            .map_err(|_| Error::<T>::ReceiverRejected)?;
-            Self::deposit_event(Event::ConfidentialTransfer {
-                asset,
-                from: from.clone(),
-                to: to.clone(),
-                encrypted_amount: transferred.clone(),
-            });
-            Ok(())
-        }
-
-        #[pallet::call_index(6)]
-        #[pallet::weight(T::WeightInfo::confidential_transfer_and_call())]
-        pub fn confidential_transfer_and_call_acl(
-            origin: OriginFor<T>,
-            asset: T::AssetId,
-            to: T::AccountId,
-            amount: EncryptedAmount,
-            data: CallbackData,
-        ) -> DispatchResult {
-            let from = ensure_signed(origin)?;
-            let transferred = T::Backend::transfer_acl(asset, &from, &to, amount)
-                .map_err(|_| Error::<T>::BackendError)?;
-            T::OnConfidentialTransfer::on_confidential_transfer_received(
-                &from,
-                &to,
-                &asset,
-                &transferred,
-                &data,
-            )
-            .map_err(|_| Error::<T>::ReceiverRejected)?;
-            Self::deposit_event(Event::ConfidentialTransfer {
-                asset,
-                from: from.clone(),
-                to: to.clone(),
-                encrypted_amount: transferred.clone(),
-            });
-            Ok(())
-        }
-
-        #[pallet::call_index(7)]
-        #[pallet::weight(T::WeightInfo::confidential_transfer_from_and_call())]
-        pub fn confidential_transfer_from_and_call_encrypted(
-            origin: OriginFor<T>,
-            asset: T::AssetId,
-            from: T::AccountId,
-            to: T::AccountId,
-            encrypted_amount: EncryptedAmount,
-            input_proof: InputProof,
-            data: CallbackData,
-        ) -> DispatchResult {
-            let caller = ensure_signed(origin)?;
-            Self::ensure_is_self_or_operator(&from, &asset, &caller)?;
-            let transferred =
-                T::Backend::transfer_encrypted(asset, &from, &to, encrypted_amount, input_proof)
-                    .map_err(|_| Error::<T>::BackendError)?;
-            T::OnConfidentialTransfer::on_confidential_transfer_received(
-                &from,
-                &to,
-                &asset,
-                &transferred,
-                &data,
-            )
-            .map_err(|_| Error::<T>::ReceiverRejected)?;
-            Self::deposit_event(Event::ConfidentialTransfer {
-                asset,
-                from: from.clone(),
-                to: to.clone(),
-                encrypted_amount: transferred.clone(),
-            });
-            Ok(())
-        }
-
-        #[pallet::call_index(8)]
-        #[pallet::weight(T::WeightInfo::confidential_transfer_from_and_call())]
-        pub fn confidential_transfer_from_and_call_acl(
-            origin: OriginFor<T>,
-            asset: T::AssetId,
-            from: T::AccountId,
-            to: T::AccountId,
-            amount: EncryptedAmount,
-            data: CallbackData,
-        ) -> DispatchResult {
-            let caller = ensure_signed(origin)?;
-            Self::ensure_is_self_or_operator(&from, &asset, &caller)?;
-            let transferred = T::Backend::transfer_acl(asset, &from, &to, amount)
-                .map_err(|_| Error::<T>::BackendError)?;
-            T::OnConfidentialTransfer::on_confidential_transfer_received(
-                &from,
-                &to,
-                &asset,
-                &transferred,
-                &data,
-            )
-            .map_err(|_| Error::<T>::ReceiverRejected)?;
-            Self::deposit_event(Event::ConfidentialTransfer {
-                asset,
-                from: from.clone(),
-                to: to.clone(),
-                encrypted_amount: transferred.clone(),
-            });
-            Ok(())
-        }
-
-        #[pallet::call_index(9)]
+        #[pallet::call_index(3)]
         #[pallet::weight(T::WeightInfo::disclose_amount())]
         pub fn disclose_amount(
             origin: OriginFor<T>,

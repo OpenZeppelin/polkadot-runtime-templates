@@ -190,17 +190,6 @@ impl ZkVerifier for ZkheVerifier {
         Ok((avail_new_bytes.to_vec(), pending_new_bytes.to_vec()))
     }
 
-    fn acl_transfer_sent(
-        _asset: &[u8],
-        _from_pk: &[u8],
-        _to_pk: &[u8],
-        _from_old: &[u8],
-        _to_old: &[u8],
-        _amount_cipher: &[u8],
-    ) -> Result<(Vec<u8>, Vec<u8>), Self::Error> {
-        Err(())
-    }
-
     fn disclose(_asset: &[u8], _who_pk: &[u8], _cipher: &[u8]) -> Result<u64, Self::Error> {
         Err(())
     }

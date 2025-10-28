@@ -169,7 +169,8 @@ pub mod pallet {
             Self::do_accept_pending(who, asset, deposits, accept_envelope)
         }
 
-        /// Atomic: accept pending then transfer from available.
+        /// Accept pending then transfer from available.
+        /// Enables spend of pending deposits in one transaction.
         #[pallet::call_index(2)]
         #[pallet::weight(T::WeightInfo::transfer_from_available())]
         pub fn accept_pending_and_transfer(
@@ -187,8 +188,6 @@ pub mod pallet {
             Ok(())
         }
     }
-
-    // -------------------- Backend Trait Impl --------------------
 
     impl<T: Config> ConfidentialBackend<T::AccountId, T::AssetId> for Pallet<T> {
         fn set_public_key(
@@ -263,59 +262,6 @@ pub mod pallet {
             NextPendingDepositId::<T>::insert(to, asset, id + 1);
 
             Ok(encrypted_amount)
-        }
-
-        fn transfer_acl(
-            asset: T::AssetId,
-            from: &T::AccountId,
-            to: &T::AccountId,
-            amount: EncryptedAmount,
-        ) -> Result<EncryptedAmount, DispatchError> {
-            let from_pk = PublicKey::<T>::get(from).ok_or(Error::<T>::NoPublicKey)?;
-            let to_pk = PublicKey::<T>::get(to).ok_or(Error::<T>::NoPublicKey)?;
-
-            // lifetime-safe buffers
-            let from_old_avail_opt = AvailableBalanceCommit::<T>::get(asset, from);
-            let from_old_avail_buf;
-            let from_old_avail: &[u8] = match from_old_avail_opt {
-                Some(c) => {
-                    from_old_avail_buf = c;
-                    &from_old_avail_buf[..]
-                }
-                None => &[],
-            };
-
-            let to_old_pending_opt = PendingBalanceCommit::<T>::get(asset, to);
-            let to_old_pending_buf;
-            let to_old_pending: &[u8] = match to_old_pending_opt {
-                Some(c) => {
-                    to_old_pending_buf = c;
-                    &to_old_pending_buf[..]
-                }
-                None => &[],
-            };
-
-            let (from_new_raw, to_new_pending_raw) = T::Verifier::acl_transfer_sent(
-                &asset.using_encoded(|b| b.to_vec()),
-                &from_pk,
-                &to_pk,
-                from_old_avail,
-                to_old_pending,
-                &amount,
-            )
-            .map_err(|_| Error::<T>::BackendPolicy)?;
-
-            let from_new = vec32(from_new_raw).map_err(|_| Error::<T>::BadCipher)?;
-            let to_new_pending = vec32(to_new_pending_raw).map_err(|_| Error::<T>::BadCipher)?;
-
-            AvailableBalanceCommit::<T>::insert(asset, from, from_new);
-            PendingBalanceCommit::<T>::insert(asset, to, to_new_pending);
-
-            let id = NextPendingDepositId::<T>::get(to, &asset);
-            PendingDeposits::<T>::insert((to, asset, id), amount);
-            NextPendingDepositId::<T>::insert(to, asset, id + 1);
-
-            Ok(amount)
         }
 
         fn disclose_amount(

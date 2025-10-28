@@ -39,13 +39,6 @@ pub trait ConfidentialBackend<AccountId, AssetId> {
         input_proof: InputProof,
     ) -> Result<EncryptedAmount, DispatchError>;
 
-    fn transfer_acl(
-        asset: AssetId,
-        from: &AccountId,
-        to: &AccountId,
-        amount: EncryptedAmount,
-    ) -> Result<EncryptedAmount, DispatchError>;
-
     // --- Optional (policy-dependent) ---
     fn disclose_amount(
         asset: AssetId,
@@ -128,17 +121,7 @@ pub trait ZkVerifier {
         accept_envelope: &[u8],
     ) -> Result<(Vec<u8>, Vec<u8>), Self::Error>;
 
-    /// ACL transfer path (no ZK proof). Must enforce policy in implementation.
-    fn acl_transfer_sent(
-        asset: &[u8],
-        from_pk: &[u8],
-        to_pk: &[u8],
-        from_old_avail_commit: &[u8],
-        to_old_pending_commit: &[u8],
-        amount_cipher: &[u8], // 64B
-    ) -> Result<(Vec<u8>, Vec<u8>), Self::Error>;
-
-    /// Optional disclosure (policy dependent).
+    /// Optional disclosure
     fn disclose(asset: &[u8], who_pk: &[u8], cipher: &[u8]) -> Result<u64, Self::Error>;
 }
 

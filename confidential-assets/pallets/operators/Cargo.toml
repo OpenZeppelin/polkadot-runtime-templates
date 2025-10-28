@@ -1,5 +1,5 @@
 [package]
-name = "pallet-acl"
+name = "pallet-operators"
 authors = { workspace = true }
 description = "pallet implementing operator oriented ACL"
 edition = { workspace = true }

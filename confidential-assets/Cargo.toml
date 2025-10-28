@@ -1,6 +1,6 @@
 [workspace]
 members = [
-	"pallets/acl",
+	"pallets/operators",
 	"pallets/confidential-assets",
     "pallets/zkhe",
     "primitives/confidential-assets",
