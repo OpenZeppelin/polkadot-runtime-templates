@@ -16,6 +16,7 @@ frame-support = { workspace = true }
 frame-system  = { workspace = true }
 sp-runtime    = { workspace = true }
 sp-std = { workspace = true }
+sp-io = { workspace = true }
 
 confidential-assets-primitives = { path = "../../primitives/confidential-assets", default-features = false }
 
@@ -25,6 +26,7 @@ std = [
   "frame-support/std",
   "frame-system/std",
   "sp-runtime/std",
+  "sp-io/std",
   "sp-std/std",
   "parity-scale-codec/std",
   "scale-info/std",
