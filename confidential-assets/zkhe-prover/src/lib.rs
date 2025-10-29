@@ -406,3 +406,264 @@ pub fn prove_receiver_accept(
         pending_new_c: pending_new_bytes,
     })
 }
+
+// ... (file header + existing code unchanged above)
+
+// ========================= Mint (public -> confidential) =========================
+
+pub struct MintInput {
+    pub asset_id: Vec<u8>,
+    pub network_id: [u8; 32],
+
+    pub to_pk: RistrettoPoint,
+
+    // Old commitments + openings
+    pub to_pending_old_c: RistrettoPoint,
+    pub to_pending_old_opening: (u64, Scalar),
+
+    pub total_old_c: RistrettoPoint,
+    pub total_old_opening: (u64, Scalar),
+
+    /// Amount to mint (move from transparent into confidential)
+    pub mint_value: u64,
+
+    /// Deterministic seed for tests
+    pub rng_seed: [u8; 32],
+}
+
+pub struct MintOutput {
+    pub minted_ct_bytes: [u8; 64],
+    pub proof_bytes: Vec<u8>,       // matches verifier's verify_mint layout
+    pub to_pending_new_c: [u8; 32], // convenience
+    pub total_new_c: [u8; 32],      // convenience
+}
+
+pub fn prove_mint(inp: &MintInput) -> Result<MintOutput, ProverError> {
+    let (v_to_old_u64, r_to_old) = inp.to_pending_old_opening;
+    let (v_total_old_u64, r_total_old) = inp.total_old_opening;
+
+    // Randomness
+    let mut rng = ChaCha20Rng::from_seed(inp.rng_seed);
+    let k = Scalar::from(rng.next_u64()); // ElGamal nonce
+    let rho = Scalar::from(rng.next_u64()); // ΔC blind
+
+    // ΔC and ciphertext to `to_pk`
+    let h = pedersen_h_generator();
+    let dv_u64 = inp.mint_value;
+    let dv = Scalar::from(dv_u64);
+
+    let delta_c = dv * G + rho * h;
+    let minted_ct = elgamal_encrypt_delta(&inp.to_pk, dv_u64, &k);
+
+    // Public context identical to verifier binding
+    let ctx = PublicContext {
+        network_id: inp.network_id,
+        sdk_version: SDK_VERSION,
+        asset_id: pad_or_trim_32(&inp.asset_id),
+        sender_pk: inp.to_pk,   // bind to to_pk
+        receiver_pk: inp.to_pk, // domain sep (harmless duplicate)
+        auditor_pk: None,
+        fee_commitment: RistrettoPoint::identity(),
+        ciphertext_out: minted_ct,
+        ciphertext_in: None,
+    };
+    let mut t = transcript_for(&ctx);
+
+    // Σ-proof commitments
+    let a_k = Scalar::from(rng.next_u64());
+    let a_v = Scalar::from(rng.next_u64());
+    let a_r = Scalar::from(rng.next_u64());
+
+    let a1 = a_k * G;
+    let a2 = a_v * G + a_k * inp.to_pk;
+    let a3 = a_v * G + a_r * h;
+
+    append_point(&mut t, b"a1", &a1);
+    append_point(&mut t, b"a2", &a2);
+    append_point(&mut t, b"a3", &a3);
+
+    let c = fs_chal(&mut t, labels::CHAL_EQ);
+    let z_k = a_k + c * k;
+    let z_v = a_v + c * dv;
+    let z_r = a_r + c * rho;
+
+    // New commitments
+    let to_new = inp.to_pending_old_c + delta_c;
+    let total_new = inp.total_old_c + delta_c;
+
+    let ctx_bytes = transcript_context_bytes(&t);
+    let to_new_bytes = point_to_bytes(&to_new);
+    let total_new_bytes = point_to_bytes(&total_new);
+
+    // Range proofs
+    let rp_to_new = prove_range_u64(
+        b"range_to_pending_new",
+        &ctx_bytes,
+        &to_new_bytes,
+        v_to_old_u64
+            .checked_add(dv_u64)
+            .ok_or(ProverError::RangeProof)?,
+        &(r_to_old + rho),
+    )?;
+
+    let rp_total_new = prove_range_u64(
+        b"range_total_new",
+        &ctx_bytes,
+        &total_new_bytes,
+        v_total_old_u64
+            .checked_add(dv_u64)
+            .ok_or(ProverError::RangeProof)?,
+        &(r_total_old + rho),
+    )?;
+
+    // Assemble proof bytes:
+    // minted_ct(64) || delta_comm(32) || link(192) || len1 || rp_to_new || len2 || rp_total_new
+    let mut proof =
+        Vec::with_capacity(64 + 32 + 192 + 2 + rp_to_new.len() + 2 + rp_total_new.len());
+    {
+        let ct_bytes = minted_ct.to_bytes();
+        proof.extend_from_slice(&ct_bytes);
+    }
+    proof.extend_from_slice(delta_c.compress().as_bytes());
+    proof.extend_from_slice(&encode_link(&a1, &a2, &a3, &z_k, &z_v, &z_r));
+
+    proof.extend_from_slice(&(rp_to_new.len() as u16).to_le_bytes());
+    proof.extend_from_slice(&rp_to_new);
+
+    proof.extend_from_slice(&(rp_total_new.len() as u16).to_le_bytes());
+    proof.extend_from_slice(&rp_total_new);
+
+    Ok(MintOutput {
+        minted_ct_bytes: minted_ct.to_bytes(),
+        proof_bytes: proof,
+        to_pending_new_c: to_new_bytes,
+        total_new_c: total_new_bytes,
+    })
+}
+
+// ========================= Burn (confidential -> public) =========================
+
+pub struct BurnInput {
+    pub asset_id: Vec<u8>,
+    pub network_id: [u8; 32],
+
+    pub from_pk: RistrettoPoint,
+
+    // Old commitments + openings
+    pub from_avail_old_c: RistrettoPoint,
+    pub from_avail_old_opening: (u64, Scalar),
+
+    pub total_old_c: RistrettoPoint,
+    pub total_old_opening: (u64, Scalar),
+
+    /// Amount to burn (move from confidential into transparent)
+    pub burn_value: u64,
+
+    /// Deterministic seed for tests
+    pub rng_seed: [u8; 32],
+}
+
+pub struct BurnOutput {
+    pub amount_ct_bytes: [u8; 64],  // ciphertext of v to from_pk
+    pub proof_bytes: Vec<u8>,       // matches verifier's verify_burn layout
+    pub from_avail_new_c: [u8; 32], // convenience
+    pub total_new_c: [u8; 32],      // convenience
+}
+
+pub fn prove_burn(inp: &BurnInput) -> Result<BurnOutput, ProverError> {
+    let (v_from_old_u64, r_from_old) = inp.from_avail_old_opening;
+    let (v_total_old_u64, r_total_old) = inp.total_old_opening;
+
+    let mut rng = ChaCha20Rng::from_seed(inp.rng_seed);
+    let k = Scalar::from(rng.next_u64()); // ElGamal nonce
+    let rho = Scalar::from(rng.next_u64()); // ΔC blind
+
+    let h = pedersen_h_generator();
+    let dv_u64 = inp.burn_value;
+    let dv = Scalar::from(dv_u64);
+
+    let delta_c = dv * G + rho * h;
+    let amount_ct = elgamal_encrypt_delta(&inp.from_pk, dv_u64, &k);
+
+    let ctx = PublicContext {
+        network_id: inp.network_id,
+        sdk_version: SDK_VERSION,
+        asset_id: pad_or_trim_32(&inp.asset_id),
+        sender_pk: inp.from_pk,
+        receiver_pk: inp.from_pk,
+        auditor_pk: None,
+        fee_commitment: RistrettoPoint::identity(),
+        ciphertext_out: amount_ct,
+        ciphertext_in: None,
+    };
+    let mut t = transcript_for(&ctx);
+
+    // Σ-proof commitments
+    let a_k = Scalar::from(rng.next_u64());
+    let a_v = Scalar::from(rng.next_u64());
+    let a_r = Scalar::from(rng.next_u64());
+
+    let a1 = a_k * G;
+    let a2 = a_v * G + a_k * inp.from_pk;
+    let a3 = a_v * G + a_r * h;
+
+    append_point(&mut t, b"a1", &a1);
+    append_point(&mut t, b"a2", &a2);
+    append_point(&mut t, b"a3", &a3);
+
+    let c = fs_chal(&mut t, labels::CHAL_EQ);
+    let z_k = a_k + c * k;
+    let z_v = a_v + c * dv;
+    let z_r = a_r + c * rho;
+
+    // New commitments (subtract Δ)
+    let from_new = inp.from_avail_old_c - delta_c;
+    let total_new = inp.total_old_c - delta_c;
+
+    let ctx_bytes = transcript_context_bytes(&t);
+    let from_new_bytes = point_to_bytes(&from_new);
+    let total_new_bytes = point_to_bytes(&total_new);
+
+    // Range proofs for decreased values
+    let rp_from_new = prove_range_u64(
+        b"range_from_avail_new",
+        &ctx_bytes,
+        &from_new_bytes,
+        v_from_old_u64
+            .checked_sub(dv_u64)
+            .ok_or(ProverError::RangeProof)?,
+        &(r_from_old - rho),
+    )?;
+
+    let rp_total_new = prove_range_u64(
+        b"range_total_new",
+        &ctx_bytes,
+        &total_new_bytes,
+        v_total_old_u64
+            .checked_sub(dv_u64)
+            .ok_or(ProverError::RangeProof)?,
+        &(r_total_old - rho),
+    )?;
+
+    // Assemble proof:
+    // delta_comm(32) || link(192) || len1 || rp_from_new || len2 || rp_total_new || v_le_u64(8)
+    let mut proof =
+        Vec::with_capacity(32 + 192 + 2 + rp_from_new.len() + 2 + rp_total_new.len() + 8);
+    proof.extend_from_slice(delta_c.compress().as_bytes());
+    proof.extend_from_slice(&encode_link(&a1, &a2, &a3, &z_k, &z_v, &z_r));
+
+    proof.extend_from_slice(&(rp_from_new.len() as u16).to_le_bytes());
+    proof.extend_from_slice(&rp_from_new);
+
+    proof.extend_from_slice(&(rp_total_new.len() as u16).to_le_bytes());
+    proof.extend_from_slice(&rp_total_new);
+
+    proof.extend_from_slice(&dv_u64.to_le_bytes());
+
+    Ok(BurnOutput {
+        amount_ct_bytes: amount_ct.to_bytes(),
+        proof_bytes: proof,
+        from_avail_new_c: from_new_bytes,
+        total_new_c: total_new_bytes,
+    })
+}

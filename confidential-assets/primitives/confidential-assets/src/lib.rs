@@ -22,15 +22,19 @@ pub type MaxPubKeyLen = ConstU32<64>;
 pub type PublicKeyBytes = BoundedVec<u8, MaxPubKeyLen>;
 
 /// Backend that holds the **truth** for totals, balances, public keys, and executes transfers.
-pub trait ConfidentialBackend<AccountId, AssetId> {
-    // --- Key management ---
+pub trait ConfidentialBackend<AccountId, AssetId, Balance> {
     fn set_public_key(who: &AccountId, elgamal_pk: &PublicKeyBytes) -> Result<(), DispatchError>;
 
-    // --- Read helpers ---
+    // Read encrypted balances state
     fn total_supply(asset: AssetId) -> Commitment;
     fn balance_of(asset: AssetId, who: &AccountId) -> Commitment;
 
-    // --- Core ops ---
+    fn disclose_amount(
+        asset: AssetId,
+        encrypted_amount: &EncryptedAmount,
+        who: &AccountId,
+    ) -> Result<Balance, DispatchError>;
+
     fn transfer_encrypted(
         asset: AssetId,
         from: &AccountId,
@@ -39,12 +43,39 @@ pub trait ConfidentialBackend<AccountId, AssetId> {
         input_proof: InputProof,
     ) -> Result<EncryptedAmount, DispatchError>;
 
-    // --- Optional (policy-dependent) ---
-    fn disclose_amount(
+    fn claim_encrypted(
         asset: AssetId,
-        encrypted_amount: &EncryptedAmount,
-        who: &AccountId,
-    ) -> Result<u64, DispatchError>;
+        from: &AccountId,
+        encrypted_amount: EncryptedAmount,
+        input_proof: InputProof,
+    ) -> Result<EncryptedAmount, DispatchError>;
+
+    fn mint_encrypted(
+        asset: AssetId,
+        to: &AccountId,
+        amount: Balance,
+        input_proof: InputProof,
+    ) -> Result<EncryptedAmount, DispatchError>;
+
+    fn burn_encrypted(
+        asset: AssetId,
+        from: &AccountId,
+        amount: EncryptedAmount,
+        input_proof: InputProof,
+    ) -> Result<Balance, DispatchError>;
+}
+
+/// Off/On-ramp for the public side of an asset.
+/// Semantics:
+/// - `burn` = move *public* funds from `who` into the pallet's custody
+///             (so we can mint confidential).
+/// - `mint` = move *public* funds from the pallet's custody out to `who`
+///             (after we burn/debit confidential).
+pub trait Ramp<AccountId, AssetId, Amount> {
+    type Error;
+
+    fn burn(who: &AccountId, asset: &AssetId, amount: Amount) -> Result<(), Self::Error>;
+    fn mint(who: &AccountId, asset: &AssetId, amount: Amount) -> Result<(), Self::Error>;
 }
 
 /// Metadata provider per asset (names, symbols, etc.).
@@ -120,6 +151,30 @@ pub trait ZkVerifier {
         pending_commits: &[[u8; 32]], // UTXO C’s to sum
         accept_envelope: &[u8],
     ) -> Result<(Vec<u8>, Vec<u8>), Self::Error>;
+
+    /// Mint: prove v ≥ 0, update pending(to) and total supply.
+    /// The prover chooses a fresh ElGamal nonce for the minted ciphertext.
+    /// Returns (to_new_pending_commit, total_new_commit, minted_ciphertext_64B).
+    fn verify_mint(
+        asset: &[u8],
+        to_pk: &PublicKeyBytes,
+        to_old_pending: &[u8],
+        total_old: &[u8],
+        amount_be: &[u8], // SCALE-encoded T::Balance (you used .using_encoded)
+        proof: &[u8],
+    ) -> Result<(Vec<u8>, Vec<u8>, EncryptedAmount), ()>;
+
+    /// Burn: prove ciphertext encrypts v under `from_pk`, v ≥ 0,
+    /// and update available(from) and total supply downward by v.
+    /// Returns (from_new_available_commit, total_new_commit, disclosed_amount_u64).
+    fn verify_burn(
+        asset: &[u8],
+        from_pk: &PublicKeyBytes,
+        from_old_available: &[u8],
+        total_old: &[u8],
+        amount_ciphertext: &EncryptedAmount,
+        proof: &[u8],
+    ) -> Result<(Vec<u8>, Vec<u8>, u64), ()>;
 
     /// Optional disclosure
     fn disclose(asset: &[u8], who_pk: &[u8], cipher: &[u8]) -> Result<u64, Self::Error>;

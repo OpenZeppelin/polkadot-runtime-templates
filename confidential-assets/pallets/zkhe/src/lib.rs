@@ -30,10 +30,13 @@ pub mod pallet {
     pub trait Config: frame_system::Config {
         type RuntimeEvent: From<Event<Self>> + IsType<<Self as frame_system::Config>::RuntimeEvent>;
         type AssetId: Parameter + Member + MaxEncodedLen + Copy + Default + TypeInfo;
+        type Balance: Parameter + Member + Copy + Ord + MaxEncodedLen + TypeInfo + From<u64>;
 
         /// Verifier boundary (no_std on-chain).
         /// - verify_transfer_sent(..) -> (from_new_commit, to_new_pending_commit)
         /// - verify_transfer_received(.., pending_commits: &[[u8;32]], accept_envelope: &[u8])
+        /// - verify_mint(..) -> (to_new_pending_commit, total_new_commit, minted_ciphertext)
+        /// - verify_burn(..) -> (from_new_available_commit, total_new_commit, disclosed_amount_u64)
         type Verifier: ZkVerifier;
 
         type WeightInfo: WeightData;
@@ -133,6 +136,7 @@ pub mod pallet {
         BadCipher,
         NoPending,
         SupplyMismatch,
+        MalformedEnvelope,
     }
 
     // -------------------- Dispatchables --------------------
@@ -189,7 +193,7 @@ pub mod pallet {
         }
     }
 
-    impl<T: Config> ConfidentialBackend<T::AccountId, T::AssetId> for Pallet<T> {
+    impl<T: Config> ConfidentialBackend<T::AccountId, T::AssetId, T::Balance> for Pallet<T> {
         fn set_public_key(
             who: &T::AccountId,
             elgamal_pk: &PublicKeyBytes,
@@ -206,6 +210,21 @@ pub mod pallet {
 
         fn balance_of(asset: T::AssetId, who: &T::AccountId) -> [u8; 32] {
             AvailableBalanceCommit::<T>::get(asset, who).unwrap_or([0u8; 32])
+        }
+
+        fn disclose_amount(
+            asset: T::AssetId,
+            encrypted_amount: &EncryptedAmount,
+            who: &T::AccountId,
+        ) -> Result<T::Balance, DispatchError> {
+            let pk = PublicKey::<T>::get(who).ok_or(Error::<T>::NoPublicKey)?;
+            let amount = T::Verifier::disclose(
+                &asset.using_encoded(|b| b.to_vec()),
+                &pk,
+                &encrypted_amount[..],
+            )
+            .map_err(|_| Error::<T>::BackendPolicy)?;
+            Ok(amount.into())
         }
 
         fn transfer_encrypted(
@@ -264,18 +283,131 @@ pub mod pallet {
             Ok(encrypted_amount)
         }
 
-        fn disclose_amount(
+        fn claim_encrypted(
             asset: T::AssetId,
-            encrypted_amount: &EncryptedAmount,
-            who: &T::AccountId,
-        ) -> Result<u64, DispatchError> {
-            let pk = PublicKey::<T>::get(who).ok_or(Error::<T>::NoPublicKey)?;
-            T::Verifier::disclose(
+            from: &T::AccountId,
+            _encrypted_amount: EncryptedAmount,
+            input_proof: InputProof,
+        ) -> Result<EncryptedAmount, DispatchError> {
+            // Thin wrapper around accept_pending:
+            // input_proof is assumed to be:
+            //   count:u16 || ids[count]*u64 || accept_envelope:bytes
+            let (ids, accept_envelope) = Self::parse_ids_and_accept_envelope(&input_proof)
+                .map_err(|_| Error::<T>::MalformedEnvelope)?;
+
+            // Perform the same logic as accept_pending for `from`.
+            Self::do_accept_pending(from.clone(), asset, ids, accept_envelope)?;
+
+            // Interface returns an EncryptedAmount; for a pure "claim"/"unlock" there is no new
+            // ciphertext to return. Return 64 zero bytes to signal "no new UTXO created".
+            Ok([0u8; 64])
+        }
+
+        fn mint_encrypted(
+            asset: T::AssetId,
+            to: &T::AccountId,
+            amount: T::Balance,
+            input_proof: InputProof,
+        ) -> Result<EncryptedAmount, DispatchError> {
+            // KISS mint path:
+            // - verify_mint proves: pending(to) += v, total_supply(asset) += v
+            // - it also returns the freshly minted ciphertext for the recipient UTXO list
+            let to_pk = PublicKey::<T>::get(to).ok_or(Error::<T>::NoPublicKey)?;
+
+            let to_old_pending_opt = PendingBalanceCommit::<T>::get(asset, to);
+            let to_old_pending_buf;
+            let to_old_pending: &[u8] = match to_old_pending_opt {
+                Some(c) => {
+                    to_old_pending_buf = c;
+                    &to_old_pending_buf[..]
+                }
+                None => &[],
+            };
+
+            let total_old_opt = TotalSupplyCommit::<T>::get(asset);
+            let total_old_buf;
+            let total_old: &[u8] = match total_old_opt {
+                Some(c) => {
+                    total_old_buf = c;
+                    &total_old_buf[..]
+                }
+                None => &[],
+            };
+
+            let (to_new_pending_raw, total_new_raw, minted_ct) = T::Verifier::verify_mint(
                 &asset.using_encoded(|b| b.to_vec()),
-                &pk,
-                &encrypted_amount[..],
+                &to_pk,
+                to_old_pending,
+                total_old,
+                &amount.using_encoded(|b| b.to_vec()),
+                input_proof.as_slice(),
             )
-            .map_err(|_| Error::<T>::BackendPolicy.into())
+            .map_err(|_| Error::<T>::InvalidProof)?;
+
+            let to_new_pending = vec32(to_new_pending_raw).map_err(|_| Error::<T>::BadCipher)?;
+            let total_new = vec32(total_new_raw).map_err(|_| Error::<T>::BadCipher)?;
+
+            // Update storage
+            PendingBalanceCommit::<T>::insert(asset, to, to_new_pending);
+            TotalSupplyCommit::<T>::insert(asset, total_new);
+
+            // Record the minted UTXO for `to`
+            let id = NextPendingDepositId::<T>::get(to, &asset);
+            PendingDeposits::<T>::insert((to, asset, id), minted_ct);
+            NextPendingDepositId::<T>::insert(to, asset, id + 1);
+
+            Ok(minted_ct)
+        }
+
+        fn burn_encrypted(
+            asset: T::AssetId,
+            from: &T::AccountId,
+            amount_ciphertext: EncryptedAmount,
+            input_proof: InputProof,
+        ) -> Result<T::Balance, DispatchError> {
+            // KISS burn path:
+            // - verify_burn proves: available(from) -= v, total_supply(asset) -= v,
+            //   and that `amount_ciphertext` indeed encrypts v under `from`'s key (or policy key).
+            // - it returns new commits and the disclosed v (u64 -> T::Balance).
+            let from_pk = PublicKey::<T>::get(from).ok_or(Error::<T>::NoPublicKey)?;
+
+            let from_old_avail_opt = AvailableBalanceCommit::<T>::get(asset, from);
+            let from_old_avail_buf;
+            let from_old_avail: &[u8] = match from_old_avail_opt {
+                Some(c) => {
+                    from_old_avail_buf = c;
+                    &from_old_avail_buf[..]
+                }
+                None => &[],
+            };
+
+            let total_old_opt = TotalSupplyCommit::<T>::get(asset);
+            let total_old_buf;
+            let total_old: &[u8] = match total_old_opt {
+                Some(c) => {
+                    total_old_buf = c;
+                    &total_old_buf[..]
+                }
+                None => &[],
+            };
+
+            let (from_new_raw, total_new_raw, disclosed_u64) = T::Verifier::verify_burn(
+                &asset.using_encoded(|b| b.to_vec()),
+                &from_pk,
+                from_old_avail,
+                total_old,
+                &amount_ciphertext,
+                input_proof.as_slice(),
+            )
+            .map_err(|_| Error::<T>::InvalidProof)?;
+
+            let from_new = vec32(from_new_raw).map_err(|_| Error::<T>::BadCipher)?;
+            let total_new = vec32(total_new_raw).map_err(|_| Error::<T>::BadCipher)?;
+
+            AvailableBalanceCommit::<T>::insert(asset, from, from_new);
+            TotalSupplyCommit::<T>::insert(asset, total_new);
+
+            Ok(disclosed_u64.into())
         }
     }
 
@@ -298,6 +430,35 @@ pub mod pallet {
                 out.push(c);
             }
             Ok(out)
+        }
+
+        /// Parse `[ids]*` + envelope from a single `InputProof`.
+        /// Layout:
+        ///   - u16: count
+        ///   - count * u64: deposit ids (LE)
+        ///   - remaining bytes: accept envelope (opaque for verifier)
+        fn parse_ids_and_accept_envelope(input: &InputProof) -> Result<(Vec<u64>, InputProof), ()> {
+            let bytes = input.as_slice();
+            if bytes.len() < 2 {
+                return Err(());
+            }
+            let count = u16::from_le_bytes([bytes[0], bytes[1]]) as usize;
+            let need = 2 + count * 8;
+            if bytes.len() < need {
+                return Err(());
+            }
+            let mut ids = Vec::with_capacity(count);
+            let mut off = 2;
+            for _ in 0..count {
+                let mut le = [0u8; 8];
+                le.copy_from_slice(&bytes[off..off + 8]);
+                ids.push(u64::from_le_bytes(le));
+                off += 8;
+            }
+            let rest = &bytes[off..];
+            // Re-wrap remainder into InputProof
+            let env: InputProof = rest.to_vec().try_into().map_err(|_| ())?;
+            Ok((ids, env))
         }
 
         fn do_accept_pending(

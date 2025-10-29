@@ -10,7 +10,7 @@ pub use range::BulletproofRangeVerifier;
 mod tests;
 
 use alloc::vec::Vec;
-use confidential_assets_primitives::ZkVerifier;
+use confidential_assets_primitives::{EncryptedAmount, PublicKeyBytes, ZkVerifier};
 use curve25519_dalek::{
     constants::RISTRETTO_BASEPOINT_POINT as G,
     ristretto::RistrettoPoint,
@@ -192,6 +192,260 @@ impl ZkVerifier for ZkheVerifier {
 
     fn disclose(_asset: &[u8], _who_pk: &[u8], _cipher: &[u8]) -> Result<u64, Self::Error> {
         Err(())
+    }
+
+    // ---------------- Mint path ----------------
+    //
+    // proof layout:
+    //   minted_ct(64) || delta_comm(32) || link(192) || len1(2) || rp_to_pending_new || len2(2) || rp_total_new
+    //
+    // returns (to_new_pending_commit, total_new_commit, minted_ct_64B)
+    fn verify_mint(
+        asset: &[u8],
+        to_pk_bytes: &PublicKeyBytes,
+        to_old_pending_bytes: &[u8],
+        total_old_bytes: &[u8],
+        _amount_be: &[u8],
+        proof_bytes: &[u8],
+    ) -> Result<(Vec<u8>, Vec<u8>, EncryptedAmount), Self::Error> {
+        // parse keys/olds
+        let to_pk = parse_point32(to_pk_bytes.as_slice()).map_err(|_| ())?;
+        let to_old = parse_point32_allow_empty_identity(to_old_pending_bytes).map_err(|_| ())?;
+        let total_old = parse_point32_allow_empty_identity(total_old_bytes).map_err(|_| ())?;
+
+        // parse proof blob
+        if proof_bytes.len() < 64 + 32 + 192 + 2 + 2 {
+            return Err(());
+        }
+        let minted_ct = {
+            let ct =
+                zkhe_primitives::Ciphertext::from_bytes(&proof_bytes[0..64]).map_err(|_| ())?;
+            ct
+        };
+        let delta_comm = {
+            let mut b = [0u8; 32];
+            b.copy_from_slice(&proof_bytes[64..96]);
+            point_from_bytes(&b).map_err(|_| ())?
+        };
+        let link_raw = {
+            let mut a = [0u8; 192];
+            a.copy_from_slice(&proof_bytes[96..96 + 192]);
+            a
+        };
+
+        // offsets for range proofs
+        let mut off = 96 + 192;
+        if proof_bytes.len() < off + 2 {
+            return Err(());
+        }
+        let len1 = u16::from_le_bytes([proof_bytes[off], proof_bytes[off + 1]]) as usize;
+        off += 2;
+        if proof_bytes.len() < off + len1 + 2 {
+            return Err(());
+        }
+        let rp_to_pending_new = &proof_bytes[off..off + len1];
+        off += len1;
+
+        let len2 = u16::from_le_bytes([proof_bytes[off], proof_bytes[off + 1]]) as usize;
+        off += 2;
+        if proof_bytes.len() < off + len2 {
+            return Err(());
+        }
+        let rp_total_new = &proof_bytes[off..off + len2];
+
+        // Public context (reuse sender-style transcript, binding ciphertext_out)
+        let asset_id = pad_or_trim_32(asset);
+        let network_id = [0u8; 32];
+        let ctx = zkhe_primitives::PublicContext {
+            network_id,
+            sdk_version: SDK_VERSION,
+            asset_id,
+            sender_pk: to_pk,   // bind to recipient key (encryption under to_pk)
+            receiver_pk: to_pk, // harmless duplicate; domain sep
+            auditor_pk: None,
+            fee_commitment: RistrettoPoint::identity(),
+            ciphertext_out: minted_ct,
+            ciphertext_in: None,
+        };
+        let mut t = new_transcript(&ctx);
+
+        // link proof check (same equations as sender path)
+        let (a1, a2, a3, z_k, z_v, z_r) = parse_link_from_192(&link_raw).map_err(|_| ())?;
+        append_point(&mut t, b"a1", &a1);
+        append_point(&mut t, b"a2", &a2);
+        append_point(&mut t, b"a3", &a3);
+        let c: Scalar = fs_chal(&mut t, labels::CHAL_EQ);
+
+        // Eq1: z_k*G == a1 + c*C
+        if !((z_k * G) - (a1 + c * minted_ct.C)).is_identity() {
+            return Err(());
+        }
+        // Eq2: z_v*G + z_k*to_pk == a2 + c*D
+        if !((z_v * G + z_k * to_pk) - (a2 + c * minted_ct.D)).is_identity() {
+            return Err(());
+        }
+        // Eq3: z_v*G + z_r*H == a3 + c*ΔC
+        let h = pedersen_h_generator();
+        if !((z_v * G + z_r * h) - (a3 + c * delta_comm)).is_identity() {
+            return Err(());
+        }
+
+        // compute new commits
+        let to_new = to_old + delta_comm;
+        let total_new = total_old + delta_comm;
+
+        // verify range proofs for both new commitments
+        let ctx_bytes = transcript_context_bytes(&t);
+        let to_new_bytes = point_to_bytes(&to_new);
+        let total_new_bytes = point_to_bytes(&total_new);
+
+        BulletproofRangeVerifier::verify_range_proof(
+            b"range_to_pending_new",
+            &ctx_bytes,
+            &to_new_bytes,
+            rp_to_pending_new,
+        )
+        .map_err(|_| ())?;
+
+        BulletproofRangeVerifier::verify_range_proof(
+            b"range_total_new",
+            &ctx_bytes,
+            &total_new_bytes,
+            rp_total_new,
+        )
+        .map_err(|_| ())?;
+
+        Ok((
+            to_new_bytes.to_vec(),
+            total_new_bytes.to_vec(),
+            minted_ct.to_bytes(),
+        ))
+    }
+
+    // ---------------- Burn path ----------------
+    //
+    // proof layout:
+    //   delta_comm(32) || link(192) || len1(2) || rp_from_avail_new || len2(2) || rp_total_new || amount_le_u64(8)
+    //
+    // returns (from_new_available_commit, total_new_commit, disclosed_amount_u64)
+    fn verify_burn(
+        asset: &[u8],
+        from_pk_bytes: &PublicKeyBytes,
+        from_old_available_bytes: &[u8],
+        total_old_bytes: &[u8],
+        amount_ciphertext_bytes: &EncryptedAmount,
+        proof_bytes: &[u8],
+    ) -> Result<(Vec<u8>, Vec<u8>, u64), Self::Error> {
+        // parse inputs
+        let from_pk = parse_point32(from_pk_bytes.as_slice()).map_err(|_| ())?;
+        let from_old =
+            parse_point32_allow_empty_identity(from_old_available_bytes).map_err(|_| ())?;
+        let total_old = parse_point32_allow_empty_identity(total_old_bytes).map_err(|_| ())?;
+        let amount_ct = zkhe_primitives::Ciphertext::from_bytes(&amount_ciphertext_bytes[..])
+            .map_err(|_| ())?;
+
+        // parse proof blob
+        if proof_bytes.len() < 32 + 192 + 2 + 2 + 8 {
+            return Err(());
+        }
+        let delta_comm = {
+            let mut b = [0u8; 32];
+            b.copy_from_slice(&proof_bytes[0..32]);
+            point_from_bytes(&b).map_err(|_| ())?
+        };
+        let link_raw = {
+            let mut a = [0u8; 192];
+            a.copy_from_slice(&proof_bytes[32..32 + 192]);
+            a
+        };
+
+        let mut off = 32 + 192;
+        if proof_bytes.len() < off + 2 {
+            return Err(());
+        }
+        let len1 = u16::from_le_bytes([proof_bytes[off], proof_bytes[off + 1]]) as usize;
+        off += 2;
+        if proof_bytes.len() < off + len1 + 2 {
+            return Err(());
+        }
+        let rp_from_avail_new = &proof_bytes[off..off + len1];
+        off += len1;
+
+        let len2 = u16::from_le_bytes([proof_bytes[off], proof_bytes[off + 1]]) as usize;
+        off += 2;
+        if proof_bytes.len() < off + len2 + 8 {
+            return Err(());
+        }
+        let rp_total_new = &proof_bytes[off..off + len2];
+        off += len2;
+
+        let mut amount_le = [0u8; 8];
+        amount_le.copy_from_slice(&proof_bytes[off..off + 8]);
+        let disclosed = u64::from_le_bytes(amount_le);
+
+        // Public context (bind to ciphertext_out = amount_ct under from_pk)
+        let asset_id = pad_or_trim_32(asset);
+        let network_id = [0u8; 32];
+        let ctx = zkhe_primitives::PublicContext {
+            network_id,
+            sdk_version: SDK_VERSION,
+            asset_id,
+            sender_pk: from_pk,
+            receiver_pk: from_pk,
+            auditor_pk: None,
+            fee_commitment: RistrettoPoint::identity(),
+            ciphertext_out: amount_ct,
+            ciphertext_in: None,
+        };
+        let mut t = new_transcript(&ctx);
+
+        // link proof check (same equations)
+        let (a1, a2, a3, z_k, z_v, z_r) = parse_link_from_192(&link_raw).map_err(|_| ())?;
+        append_point(&mut t, b"a1", &a1);
+        append_point(&mut t, b"a2", &a2);
+        append_point(&mut t, b"a3", &a3);
+        let c: Scalar = fs_chal(&mut t, labels::CHAL_EQ);
+
+        // Eq1: z_k*G == a1 + c*C
+        if !((z_k * G) - (a1 + c * amount_ct.C)).is_identity() {
+            return Err(());
+        }
+        // Eq2: z_v*G + z_k*from_pk == a2 + c*D
+        if !((z_v * G + z_k * from_pk) - (a2 + c * amount_ct.D)).is_identity() {
+            return Err(());
+        }
+        // Eq3: z_v*G + z_r*H == a3 + c*ΔC
+        let h = pedersen_h_generator();
+        if !((z_v * G + z_r * h) - (a3 + c * delta_comm)).is_identity() {
+            return Err(());
+        }
+
+        // compute new commits (subtract Δ)
+        let from_new = from_old - delta_comm;
+        let total_new = total_old - delta_comm;
+
+        // verify ranges
+        let ctx_bytes = transcript_context_bytes(&t);
+        let from_new_bytes = point_to_bytes(&from_new);
+        let total_new_bytes = point_to_bytes(&total_new);
+
+        BulletproofRangeVerifier::verify_range_proof(
+            b"range_from_avail_new",
+            &ctx_bytes,
+            &from_new_bytes,
+            rp_from_avail_new,
+        )
+        .map_err(|_| ())?;
+
+        BulletproofRangeVerifier::verify_range_proof(
+            b"range_total_new",
+            &ctx_bytes,
+            &total_new_bytes,
+            rp_total_new,
+        )
+        .map_err(|_| ())?;
+
+        Ok((from_new_bytes.to_vec(), total_new_bytes.to_vec(), disclosed))
     }
 }
 

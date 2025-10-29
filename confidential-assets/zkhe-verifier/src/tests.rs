@@ -8,6 +8,8 @@
 //!   3) Range proof only: parse sender bundle, reconstruct transcript context, and verify range proof
 
 use confidential_assets_primitives::ZkVerifier as ZkVerifierTrait;
+use confidential_assets_primitives::{EncryptedAmount, PublicKeyBytes};
+use core::convert::TryFrom;
 use curve25519_dalek::{
     constants::RISTRETTO_BASEPOINT_POINT as G,
     ristretto::RistrettoPoint,
@@ -16,6 +18,7 @@ use curve25519_dalek::{
 };
 use sha2::Sha512;
 use zkhe_primitives::RangeProofVerifier;
+use zkhe_prover::{prove_burn, prove_mint, BurnInput, MintInput};
 
 // Import the verifier marker struct from the crate root and its range verifier.
 use crate::{BulletproofRangeVerifier, ZkheVerifier};
@@ -552,4 +555,131 @@ fn range_proof_from_sender_bundle_verifies() {
 fn identity_commitment_is_zero_point() {
     let zero = RistrettoPoint::default();
     assert!(zero.is_identity());
+}
+
+#[test]
+fn mint_round_trip() {
+    // Keys
+    let sk_to = Scalar::from(13u64);
+    let pk_to = sk_to * G;
+
+    // Start with zero pending and zero total (identity commitments, zero openings)
+    let to_pending_old_v = 0u64;
+    let to_pending_old_r = Scalar::from(0u64);
+    let to_pending_old_c = RistrettoPoint::identity();
+
+    let total_old_v = 0u64;
+    let total_old_r = Scalar::from(0u64);
+    let total_old_c = RistrettoPoint::identity();
+
+    // Mint amount
+    let dv = 77u64;
+
+    // Canonical context (verifier fixes network_id = [0;32])
+    let asset_id = b"MINT_ASSET".to_vec();
+    let network_id = [0u8; 32];
+
+    // Deterministic seed so rho/k are fixed
+    let mut seed = [0u8; 32];
+    seed[0] = 0xA5;
+
+    // -------- Prove (std) --------
+    let minp = MintInput {
+        asset_id: asset_id.clone(),
+        network_id,
+        to_pk: pk_to,
+        to_pending_old_c,
+        to_pending_old_opening: (to_pending_old_v, to_pending_old_r),
+        total_old_c,
+        total_old_opening: (total_old_v, total_old_r),
+        mint_value: dv,
+        rng_seed: seed,
+    };
+    let mout = prove_mint(&minp).expect("mint prover");
+
+    // -------- Verify (no_std) --------
+    // to_pk as bounded PublicKeyBytes
+    let to_pk_bv = PublicKeyBytes::try_from(compress(&pk_to).to_vec()).expect("pk bv");
+
+    // old commits are identity => pass empty slices
+    let amount_be: [u8; 0] = []; // verifier ignores for now
+    let (to_new_bytes, total_new_bytes, minted_ct_bytes) =
+        <ZkheVerifier as ZkVerifierTrait>::verify_mint(
+            &asset_id,
+            &to_pk_bv,
+            &[], // to_old_pending
+            &[], // total_old
+            &amount_be,
+            &mout.proof_bytes,
+        )
+        .expect("mint verify");
+
+    // Shapes & equality to prover outputs
+    assert_eq!(minted_ct_bytes, mout.minted_ct_bytes);
+    assert_eq!(to_new_bytes.as_slice(), &mout.to_pending_new_c);
+    assert_eq!(total_new_bytes.as_slice(), &mout.total_new_c);
+}
+
+#[test]
+fn burn_round_trip() {
+    // Keys
+    let sk_from = Scalar::from(23u64);
+    let pk_from = sk_from * G;
+
+    // Start with available = 500, total = 500
+    let h = pedersen_h_generator();
+
+    let from_old_v = 500u64;
+    let from_old_r = Scalar::from(333u64);
+    let from_old_c = Scalar::from(from_old_v) * G + from_old_r * h;
+
+    let total_old_v = 500u64;
+    let total_old_r = Scalar::from(111u64);
+    let total_old_c = Scalar::from(total_old_v) * G + total_old_r * h;
+
+    // Burn amount
+    let dv = 120u64;
+
+    // Canonical context
+    let asset_id = b"BURN_ASSET".to_vec();
+    let network_id = [0u8; 32];
+
+    // Deterministic seed
+    let mut seed = [0u8; 32];
+    seed[1] = 0x5C;
+
+    // -------- Prove (std) --------
+    let binp = BurnInput {
+        asset_id: asset_id.clone(),
+        network_id,
+        from_pk: pk_from,
+        from_avail_old_c: from_old_c,
+        from_avail_old_opening: (from_old_v, from_old_r),
+        total_old_c,
+        total_old_opening: (total_old_v, total_old_r),
+        burn_value: dv,
+        rng_seed: seed,
+    };
+    let bout = prove_burn(&binp).expect("burn prover");
+
+    // -------- Verify (no_std) --------
+    // from_pk and ciphertext as bounded types
+    let from_pk_bv = PublicKeyBytes::try_from(compress(&pk_from).to_vec()).expect("pk bv");
+    let amount_ct_bv = EncryptedAmount::try_from(bout.amount_ct_bytes.to_vec()).expect("ct bv");
+
+    let (from_new_bytes, total_new_bytes, disclosed) =
+        <ZkheVerifier as ZkVerifierTrait>::verify_burn(
+            &asset_id,
+            &from_pk_bv,
+            &compress(&from_old_c),  // from_old_available
+            &compress(&total_old_c), // total_old
+            &amount_ct_bv,           // ciphertext of dv under from_pk
+            &bout.proof_bytes,
+        )
+        .expect("burn verify");
+
+    // Check disclosed amount and new commits match prover’s
+    assert_eq!(disclosed, dv);
+    assert_eq!(from_new_bytes.as_slice(), &bout.from_avail_new_c);
+    assert_eq!(total_new_bytes.as_slice(), &bout.total_new_c);
 }

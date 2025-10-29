@@ -1,28 +1,28 @@
 # TODO
 
-1. Impl
-2. Bench
-3. Docs
+## Impl TODOs In Progress
 
-## Impl TODO
-
-### Pending Balance Impl without Griefing + Fixed UX
-1. update verifier for verify_transfer_received since latest changes
-2. 
-
-### E2E solution mirroring Solana CT backend as is
-- update pallets
-- runtime tests
-- node tests
-- increase prover + verifier test coverage in general
-
-### LOW
-- more tests of the prover/verifier functionality
+### Now
+- ramp v0
+- ERC 7984: swaps between confidential <> regular && confidential <> confidential
 - configurable NetworkId pallet config (move out of hardcoded)
+- pallet-confidential-xcm-bridge
+- demo using xcm-simulator with runtimes running in CLI
+
+### Next
+- extract acl pallet for ERC 7984
+- remove hardcode NetworkId and make configurable by pallet
+
+### Future
+- rampv1 with privacy (using merkle trees + batched execution)
+- impl view keys like Solana for read-only actions (auditor key)
+- pay for transaction fee design with confidential asset
+- pay for gas fee with confidential asset
+- more tests of the prover/verifier functionality
 - maximize size of zkhe-primitives to minimize non-overlapping helper surface area used in zkhe prover and verifier
 
 
-## Bench TODO
+## Bench TODOs
 1. benchmarks per pallet using production configured runtime
 2. micro-benchmark for pure crypto verification in no_std `--target=wasm32-unknown-unknown`
 
@@ -30,7 +30,3 @@ Micro-benchmarks for sigma and bulletproof verification which varies:
 - dalek backend: u32 vs fiat
 - SIMD on/off
 Use the results to determine the best cargo features for the prover and verifier and pin them in both.
-
-## Docs TODO
-
-TODO Update to match latest code refactor outlined above
