@@ -1,5 +1,5 @@
 [package]
-name = "pallet-confidential-swap"
+name = "pallet-confidential-swaps"
 authors = { workspace = true }
 description = "pallet supporting confidential swaps"
 edition = { workspace = true }

@@ -8,6 +8,10 @@ Confidential Assets Overview:
 		ZK proof authenticated storage of encrypted balances verified on-chain
 	\confidential-assets:
 		confidential multi-assets pallet supporting encrypted transfers
+	\confidential-swaps:
+		confidential multi-assets pallet supporting encrypted swaps
+	\confidential-xcm-bridge:
+		confidential multi-assets pallet supporting xcm operations
 	\operators:
 		operator-level permissions registry matching ERC 7984
 	\acl:

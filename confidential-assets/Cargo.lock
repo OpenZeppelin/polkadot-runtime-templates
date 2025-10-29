@@ -2074,7 +2074,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "pallet-confidential-swap"
+name = "pallet-confidential-swaps"
 version = "0.1.0"
 dependencies = [
  "confidential-assets-primitives",
