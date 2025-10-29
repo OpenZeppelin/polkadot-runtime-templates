@@ -1,4 +1,3 @@
-// pallets/confidential-swaps/src/lib.rs
 #![cfg_attr(not(feature = "std"), no_std)]
 
 extern crate alloc;
@@ -8,7 +7,9 @@ use frame_system::pallet_prelude::*;
 use sp_runtime::RuntimeDebug;
 use sp_std::prelude::*;
 
-use confidential_assets_primitives::{ConfidentialBackend, EncryptedAmount, InputProof, Ramp};
+use confidential_assets_primitives::{
+    ConfidentialBackend, ConfidentialSwap, EncryptedAmount, InputProof, Ramp,
+};
 
 #[frame_support::pallet]
 pub mod pallet {
@@ -34,7 +35,7 @@ pub mod pallet {
     }
 
     /// Confidential→Public maker intent (maker sends confidential, expects public).
-    #[derive(Encode, Decode, Clone, PartialEq, Eq, TypeInfo, MaxEncodedLen)]
+    #[derive(Encode, Decode, Clone, PartialEq, Eq, TypeInfo, MaxEncodedLen, RuntimeDebug)]
     pub struct SwapIntentCp<AccountId, AssetId, Balance> {
         pub proposer: AccountId,
         pub counterparty: AccountId,
@@ -166,6 +167,85 @@ pub mod pallet {
         RampFailed,
     }
 
+    impl<T: Config> Pallet<T> {
+        /// Core C↔C execution with checks (no events). Used by both extrinsic & trait.
+        fn exec_cc_inner(
+            id: u64,
+            counterparty: &T::AccountId,
+            b_to_a_ct: EncryptedAmount,
+            b_to_a_proof: InputProof,
+        ) -> Result<SwapIntentCc<T::AccountId, T::AssetId>, DispatchError> {
+            let intent = CcSwaps::<T>::take(id).ok_or(Error::<T>::UnknownSwap)?;
+            ensure!(
+                &intent.counterparty == counterparty,
+                Error::<T>::NotCounterparty
+            );
+
+            // Optional predicate: bind taker leg (asset_b, b_to_a_ct).
+            if intent.terms_hash.0 != [0u8; 32] {
+                let mut enc = intent.asset_b.encode();
+                enc.extend_from_slice(&b_to_a_ct);
+                let h = sp_io::hashing::blake2_256(&enc);
+                ensure!(h == intent.terms_hash.0, Error::<T>::TermsMismatch);
+            }
+
+            // Leg 1: proposer -> counterparty on asset_a
+            T::Backend::transfer_encrypted(
+                intent.asset_a,
+                &intent.proposer,
+                counterparty,
+                intent.a_to_b_ct,
+                intent.a_to_b_proof.clone(),
+            )
+            .map_err(|_| Error::<T>::BackendError)?;
+
+            // Leg 2: counterparty -> proposer on asset_b
+            T::Backend::transfer_encrypted(
+                intent.asset_b,
+                counterparty,
+                &intent.proposer,
+                b_to_a_ct,
+                b_to_a_proof,
+            )
+            .map_err(|_| Error::<T>::BackendError)?;
+
+            Ok(intent)
+        }
+
+        /// Core C→P execution with checks (no events). Used by both extrinsic & trait.
+        fn exec_cp_inner(
+            id: u64,
+            counterparty: &T::AccountId,
+        ) -> Result<SwapIntentCp<T::AccountId, T::AssetId, T::Balance>, DispatchError> {
+            let intent = CpSwaps::<T>::take(id).ok_or(Error::<T>::UnknownSwap)?;
+            ensure!(
+                &intent.counterparty == counterparty,
+                Error::<T>::NotCounterparty
+            );
+
+            // Confidential leg
+            T::Backend::transfer_encrypted(
+                intent.asset_conf,
+                &intent.proposer,
+                counterparty,
+                intent.a_to_b_ct,
+                intent.a_to_b_proof.clone(),
+            )
+            .map_err(|_| Error::<T>::BackendError)?;
+
+            // Public leg (escrowless): taker pays maker directly.
+            T::Ramp::transfer_from(
+                counterparty,
+                &intent.proposer,
+                intent.asset_public,
+                intent.amount_public,
+            )
+            .map_err(|_| Error::<T>::RampFailed)?;
+
+            Ok(intent)
+        }
+    }
+
     // ---- Calls ----
     #[pallet::call]
     impl<T: Config> Pallet<T> {
@@ -226,8 +306,6 @@ pub mod pallet {
         }
 
         /// Accept and atomically execute a C↔C swap.
-        ///
-        /// Atomicity is enforced with FRAME's transactional storage layer.
         #[pallet::call_index(2)]
         #[pallet::weight(T::WeightInfo::accept_cc())]
         #[transactional]
@@ -238,40 +316,7 @@ pub mod pallet {
             b_to_a_proof: InputProof,
         ) -> DispatchResult {
             let counterparty = ensure_signed(origin)?;
-            let intent = CcSwaps::<T>::take(id).ok_or(Error::<T>::UnknownSwap)?;
-            ensure!(
-                intent.counterparty == counterparty,
-                Error::<T>::NotCounterparty
-            );
-
-            // Optional predicate: bind taker leg (asset_b, b_to_a_ct).
-            if intent.terms_hash.0 != [0u8; 32] {
-                let mut enc = intent.asset_b.encode();
-                enc.extend_from_slice(&b_to_a_ct);
-                let h = sp_io::hashing::blake2_256(&enc);
-                ensure!(h == intent.terms_hash.0, Error::<T>::TermsMismatch);
-            }
-
-            // Leg 1: proposer -> counterparty on asset_a
-            T::Backend::transfer_encrypted(
-                intent.asset_a,
-                &intent.proposer,
-                &counterparty,
-                intent.a_to_b_ct,
-                intent.a_to_b_proof,
-            )
-            .map_err(|_| Error::<T>::BackendError)?;
-
-            // Leg 2: counterparty -> proposer on asset_b
-            T::Backend::transfer_encrypted(
-                intent.asset_b,
-                &counterparty,
-                &intent.proposer,
-                b_to_a_ct,
-                b_to_a_proof,
-            )
-            .map_err(|_| Error::<T>::BackendError)?;
-
+            let intent = Self::exec_cc_inner(id, &counterparty, b_to_a_ct, b_to_a_proof)?;
             Self::deposit_event(Event::CcExecuted {
                 id,
                 proposer: intent.proposer,
@@ -338,38 +383,14 @@ pub mod pallet {
 
         /// Accept and atomically execute a C→P swap.
         ///
-        /// Leg 1: confidential transfer (maker → taker).  
+        /// Leg 1: confidential transfer (maker → taker).
         /// Leg 2: public transfer_from (taker → maker) for the exact `amount_public`.
         #[pallet::call_index(5)]
         #[pallet::weight(T::WeightInfo::accept_cp())]
         #[transactional]
         pub fn accept_swap_cp(origin: OriginFor<T>, id: u64) -> DispatchResult {
             let counterparty = ensure_signed(origin)?;
-            let intent = CpSwaps::<T>::take(id).ok_or(Error::<T>::UnknownSwap)?;
-            ensure!(
-                intent.counterparty == counterparty,
-                Error::<T>::NotCounterparty
-            );
-
-            // Confidential leg
-            T::Backend::transfer_encrypted(
-                intent.asset_conf,
-                &intent.proposer,
-                &counterparty,
-                intent.a_to_b_ct,
-                intent.a_to_b_proof,
-            )
-            .map_err(|_| Error::<T>::BackendError)?;
-
-            // Public leg (escrowless): taker pays maker directly.
-            T::Ramp::transfer_from(
-                &counterparty,
-                &intent.proposer,
-                intent.asset_public,
-                intent.amount_public,
-            )
-            .map_err(|_| Error::<T>::RampFailed)?;
-
+            let intent = Self::exec_cp_inner(id, &counterparty)?;
             Self::deposit_event(Event::CpExecuted {
                 id,
                 proposer: intent.proposer,
@@ -377,6 +398,49 @@ pub mod pallet {
                 amount_public: intent.amount_public,
             });
             Ok(())
+        }
+    }
+
+    // -------- Trait impl exposed to other pallets (e.g., bridge) --------
+
+    impl<T: Config> ConfidentialSwap<T::AccountId, T::AssetId, T::Balance> for Pallet<T> {
+        type SwapId = u64;
+
+        /// Accept a C↔C intent on behalf of `who`.
+        /// Returns the encrypted amount `who` received: this is the maker's `a_to_b_ct` in the intent.
+        #[transactional]
+        fn swap_confidential_exact_in(
+            who: &T::AccountId,
+            id: Self::SwapId,
+            b_to_a_ct: EncryptedAmount,
+            b_to_a_proof: InputProof,
+        ) -> Result<(Self::SwapId, EncryptedAmount), DispatchError> {
+            // Execute inner (no events), then emit the same event for parity.
+            let intent = Self::exec_cc_inner(id, who, b_to_a_ct, b_to_a_proof)?;
+            <Pallet<T>>::deposit_event(Event::CcExecuted {
+                id,
+                proposer: intent.proposer.clone(),
+                counterparty: who.clone(),
+            });
+            // The receiver (`who`) received maker's a_to_b_ct on asset_a
+            Ok((id, intent.a_to_b_ct))
+        }
+
+        /// Accept a C→P intent on behalf of `who`.
+        /// Returns the public amount `who` paid.
+        #[transactional]
+        fn swap_conf_to_transparent_exact_in(
+            who: &T::AccountId,
+            id: Self::SwapId,
+        ) -> Result<(Self::SwapId, T::Balance), DispatchError> {
+            let intent = Self::exec_cp_inner(id, who)?;
+            <Pallet<T>>::deposit_event(Event::CpExecuted {
+                id,
+                proposer: intent.proposer.clone(),
+                counterparty: who.clone(),
+                amount_public: intent.amount_public,
+            });
+            Ok((id, intent.amount_public))
         }
     }
 }

@@ -64,6 +64,45 @@ pub trait ConfidentialBackend<AccountId, AssetId, Balance> {
     ) -> Result<Balance, DispatchError>;
 }
 
+/// Trait to expose functionality implemented in confidential swaps pallet
+pub trait ConfidentialSwap<AccountId, AssetId, Balance> {
+    type SwapId: Parameter + Copy + Default;
+
+    /// Execute a Confidential↔Confidential swap by accepting an existing intent `id`.
+    /// The caller (`who`) must be the `counterparty` stored in the intent.
+    ///
+    /// Returns (id, encrypted_amount_received_by_who).
+    fn swap_confidential_exact_in(
+        who: &AccountId,
+        id: Self::SwapId,
+        b_to_a_ct: EncryptedAmount,
+        b_to_a_proof: InputProof,
+    ) -> Result<(Self::SwapId, EncryptedAmount), DispatchError>;
+
+    /// Execute a Confidential→Public swap by accepting an existing intent `id`.
+    /// The caller (`who`) must be the `counterparty` stored in the intent.
+    ///
+    /// Returns (id, public_amount_paid_by_who).
+    fn swap_conf_to_transparent_exact_in(
+        who: &AccountId,
+        id: Self::SwapId,
+    ) -> Result<(Self::SwapId, Balance), DispatchError>;
+
+    /// Transparent→Confidential single-shot swap: NOT supported (no P→C intent yet).
+    /// This is left as a deliberate `Unsupported` so the bridge won’t silently mint/burn.
+    fn swap_transparent_to_conf_exact_in(
+        _who: &AccountId,
+        _give_asset_public: AssetId,
+        _want_asset_conf: AssetId,
+        _give_amount_public: Balance,
+        _min_recv_hint: Option<u128>,
+    ) -> Result<(Self::SwapId, EncryptedAmount), DispatchError> {
+        Err(sp_runtime::DispatchError::Other(
+            "unsupported_transparent_to_conf",
+        ))
+    }
+}
+
 /// Off/On-ramp for the public side of an asset.
 /// Semantics:
 /// - `transfer` = move `amount` of `asset` from `who` to `to`.

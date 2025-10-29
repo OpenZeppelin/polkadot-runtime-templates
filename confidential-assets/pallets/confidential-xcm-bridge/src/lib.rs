@@ -11,9 +11,16 @@ pub mod pallet {
     use sp_runtime::RuntimeDebug;
     use sp_std::prelude::*;
 
-    use confidential_assets_primitives::{ConfidentialBackend, EncryptedAmount, InputProof, Ramp};
+    use confidential_assets_primitives::{
+        ConfidentialBackend, ConfidentialSwap, EncryptedAmount, InputProof, Ramp,
+    };
 
-    // --------- Glue traits (bridge stays ignorant of crypto/swap math/XCM impl) ---------
+    // Helper: associated SwapId type of the configured swap pallet
+    pub type SwapIdOf<T> = <<T as Config>::Swap as ConfidentialSwap<
+        <T as frame_system::Config>::AccountId,
+        <T as Config>::AssetId,
+        <T as Config>::Balance,
+    >>::SwapId;
 
     /// Backend extension used when crediting an incoming encrypted delta on the destination chain.
     pub trait BridgeBackend<AccountId, AssetId, Balance>:
@@ -25,37 +32,6 @@ pub mod pallet {
             delta: EncryptedAmount,
             proof: InputProof,
         ) -> Result<EncryptedAmount, DispatchError>;
-    }
-
-    /// Minimal swap interface the bridge will call on the destination chain.
-    pub trait ConfidentialSwap<AccountId, AssetId, Balance> {
-        type SwapId: Parameter + Copy + Default;
-
-        fn swap_confidential_exact_in(
-            who: &AccountId,
-            give_asset: AssetId,
-            want_asset: AssetId,
-            give_delta: EncryptedAmount,
-            give_proof: InputProof,
-            min_recv_hint: Option<u128>,
-        ) -> Result<(Self::SwapId, EncryptedAmount), DispatchError>;
-
-        fn swap_conf_to_transparent_exact_in(
-            who: &AccountId,
-            give_asset: AssetId,
-            want_asset: AssetId,
-            give_delta: EncryptedAmount,
-            give_proof: InputProof,
-            min_recv_amount: u128,
-        ) -> Result<(Self::SwapId, Balance), DispatchError>;
-
-        fn swap_transparent_to_conf_exact_in(
-            who: &AccountId,
-            give_asset: AssetId,
-            want_asset: AssetId,
-            give_amount: Balance,
-            min_recv_hint: Option<u128>,
-        ) -> Result<(Self::SwapId, EncryptedAmount), DispatchError>;
     }
 
     /// Very small abstraction so this pallet doesn’t hard-code any XCM version or pallet.
@@ -78,7 +54,7 @@ pub mod pallet {
     // --------- SCALE payloads carried by XCM::Transact ---------
 
     #[derive(Encode, Decode, Clone, PartialEq, Eq, TypeInfo, RuntimeDebug)]
-    pub enum RemoteCall<AccountId, AssetId, Balance> {
+    pub enum RemoteCall<AccountId, AssetId, Balance, SwapId> {
         ReceiveConfidentialTransfer {
             sender_on_src: [u8; 32],
             dest_account: AccountId,
@@ -86,27 +62,22 @@ pub mod pallet {
             delta_ciphertext: EncryptedAmount,
             proof: InputProof,
         },
-        ExecuteConfidentialSwap(RemoteSwap<AccountId, AssetId, Balance>),
+        ExecuteConfidentialSwap(RemoteSwap<AccountId, AssetId, Balance, SwapId>),
     }
 
     #[derive(Encode, Decode, Clone, PartialEq, Eq, TypeInfo, RuntimeDebug)]
-    pub enum RemoteSwap<AccountId, AssetId, Balance> {
-        ConfToConf {
+    pub enum RemoteSwap<AccountId, AssetId, Balance, SwapId> {
+        /// Accept an existing C↔C intent by id on the destination chain.
+        ConfToConfById {
             who: AccountId,
-            give_asset: AssetId,
-            want_asset: AssetId,
-            give_delta: EncryptedAmount,
-            give_proof: InputProof,
-            min_recv_hint: Option<u128>,
+            id: SwapId,
+            // taker leg (counterparty -> proposer) to satisfy maker's terms
+            b_to_a_ct: EncryptedAmount,
+            b_to_a_proof: InputProof,
         },
-        ConfToTrans {
-            who: AccountId,
-            give_asset: AssetId,
-            want_asset: AssetId,
-            give_delta: EncryptedAmount,
-            give_proof: InputProof,
-            min_recv_amount: u128,
-        },
+        /// Accept an existing C→P intent by id on the destination chain.
+        ConfToTransById { who: AccountId, id: SwapId },
+        /// Transparent→Confidential single-shot (optional / may be unsupported).
         TransToConf {
             who: AccountId,
             give_asset: AssetId,
@@ -232,14 +203,13 @@ pub mod pallet {
         ) -> DispatchResult {
             let _who = ensure_signed(origin)?;
 
-            let call =
-                RemoteCall::<T::AccountId, T::AssetId, T::Balance>::ReceiveConfidentialTransfer {
-                    sender_on_src: sender_tag,
-                    dest_account: beneficiary,
-                    asset,
-                    delta_ciphertext,
-                    proof,
-                };
+            let call = RemoteCall::<T::AccountId, T::AssetId, T::Balance, SwapIdOf<T>>::ReceiveConfidentialTransfer {
+                sender_on_src: sender_tag,
+                dest_account: beneficiary,
+                asset,
+                delta_ciphertext,
+                proof,
+            };
             let payload = call.encode();
             let payload_hash = sp_io::hashing::blake2_256(&payload);
 
@@ -266,16 +236,14 @@ pub mod pallet {
         pub fn send_confidential_swap(
             origin: OriginFor<T>,
             dest: T::ParaId,
-            payload: RemoteSwap<T::AccountId, T::AssetId, T::Balance>,
+            payload: RemoteSwap<T::AccountId, T::AssetId, T::Balance, SwapIdOf<T>>,
             fee_asset: T::FeeAssetId,
             fee: T::FeeBalance,
             weight_limit: T::XcmWeight,
         ) -> DispatchResult {
             let _who = ensure_signed(origin)?;
 
-            let call = RemoteCall::<T::AccountId, T::AssetId, T::Balance>::ExecuteConfidentialSwap(
-                payload,
-            );
+            let call = RemoteCall::<T::AccountId, T::AssetId, T::Balance, SwapIdOf<T>>::ExecuteConfidentialSwap(payload);
             let encoded = call.encode();
             let payload_hash = sp_io::hashing::blake2_256(&encoded);
 
@@ -309,7 +277,6 @@ pub mod pallet {
             delta_ciphertext: EncryptedAmount,
             proof: InputProof,
         ) -> DispatchResult {
-            // For smoke tests; in runtime, replace with EnsureXcm<ExpectedLocation>.
             ensure_root(origin).map_err(|_| Error::<T>::BadOriginForXcm)?;
 
             T::Backend::credit_incoming_encrypted(asset, &dest_account, delta_ciphertext, proof)
@@ -328,54 +295,30 @@ pub mod pallet {
         #[pallet::weight(T::WeightInfo::xcm_execute_confidential_swap())]
         pub fn xcm_execute_confidential_swap(
             origin: OriginFor<T>,
-            payload: RemoteSwap<T::AccountId, T::AssetId, T::Balance>,
+            payload: RemoteSwap<T::AccountId, T::AssetId, T::Balance, SwapIdOf<T>>,
         ) -> DispatchResult {
             ensure_root(origin).map_err(|_| Error::<T>::BadOriginForXcm)?;
 
-            // 1) Borrow once to capture `who` for the event (no moves).
+            // Capture `who` for event.
             let who_for_event: T::AccountId = match &payload {
-                RemoteSwap::ConfToConf { who, .. } => who.clone(),
-                RemoteSwap::ConfToTrans { who, .. } => who.clone(),
+                RemoteSwap::ConfToConfById { who, .. } => who.clone(),
+                RemoteSwap::ConfToTransById { who, .. } => who.clone(),
                 RemoteSwap::TransToConf { who, .. } => who.clone(),
             };
 
-            // 2) Now consume `payload` so we pass values (not &refs) to the trait fns.
             match payload {
-                RemoteSwap::ConfToConf {
+                RemoteSwap::ConfToConfById {
                     who,
-                    give_asset,
-                    want_asset,
-                    give_delta,
-                    give_proof,
-                    min_recv_hint,
+                    id,
+                    b_to_a_ct,
+                    b_to_a_proof,
                 } => {
-                    T::Swap::swap_confidential_exact_in(
-                        &who,
-                        give_asset,
-                        want_asset,
-                        give_delta,
-                        give_proof,
-                        min_recv_hint,
-                    )
-                    .map_err(|_| Error::<T>::SwapFailed)?;
+                    T::Swap::swap_confidential_exact_in(&who, id, b_to_a_ct, b_to_a_proof)
+                        .map_err(|_| Error::<T>::SwapFailed)?;
                 }
-                RemoteSwap::ConfToTrans {
-                    who,
-                    give_asset,
-                    want_asset,
-                    give_delta,
-                    give_proof,
-                    min_recv_amount,
-                } => {
-                    T::Swap::swap_conf_to_transparent_exact_in(
-                        &who,
-                        give_asset,
-                        want_asset,
-                        give_delta,
-                        give_proof,
-                        min_recv_amount,
-                    )
-                    .map_err(|_| Error::<T>::SwapFailed)?;
+                RemoteSwap::ConfToTransById { who, id } => {
+                    T::Swap::swap_conf_to_transparent_exact_in(&who, id)
+                        .map_err(|_| Error::<T>::SwapFailed)?;
                 }
                 RemoteSwap::TransToConf {
                     who,
