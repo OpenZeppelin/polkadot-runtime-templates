@@ -5,6 +5,7 @@ members = [
 	"pallets/operators",
 	# core
 	"pallets/confidential-assets",
+	"pallets/confidential-xcm-bridge",
 	# backend
     "pallets/zkhe",
 	# primitives

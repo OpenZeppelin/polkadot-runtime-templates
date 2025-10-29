@@ -1,5 +1,6 @@
 # Polkadot Confidential Assets
 
+
 Confidential Assets Overview:
 ```
 \pallets
@@ -7,11 +8,15 @@ Confidential Assets Overview:
 		ZK proof authenticated storage of encrypted balances verified on-chain
 	\confidential-assets:
 		confidential multi-assets pallet supporting encrypted transfers
+	\operators:
+		operator-level permissions registry matching ERC 7984
+	\acl:
+		ACL permissions registry matching ERC 7984
 \primitives
 	\zkhe:
-		shared primitives between zkhe prover and verifier crates
+		shared primitives between prover and verifier
 	\confidential-assets:
-		shared primitives between decoupled, interoperable pallets
+		shared primitives between pallets
 \zkhe-prover
 	off-chain client library to construct ZK proofs of encrypted transfers
 \zkhe-verifier

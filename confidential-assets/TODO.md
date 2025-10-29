@@ -2,27 +2,23 @@
 
 ## Impl TODOs In Progress
 
-### Now
-
+### Current TODO
 - pallet-confidential-xcm-bridge
 - demo using xcm-simulator with runtimes running in CLI
 
-### Next
-- extract acl pallet for ERC 7984
+### Remaining TODO for Exact ERC 7984 Parity
 - ERC 7984: swaps between confidential <> regular && confidential <> confidential
 - configurable NetworkId pallet config (move out of hardcoded)
-
-### Future
 - Frontier precompile
-- PolkaVM precompile
 - Per precompile: Optional receiver hook (like IERC7984Receiver.onConfidentialTransferReceived)
-- rampv1 with privacy (using merkle trees + batched execution)
+
+### Next Steps
+- PolkaVM precompile
 - impl view keys like Solana for read-only actions (auditor key)
 - pay for transaction fee design with confidential asset
 - pay for gas fee with confidential asset
-- more tests of the prover/verifier functionality
+- rampv1 with privacy (using merkle trees + batched execution)
 - maximize size of zkhe-primitives to minimize non-overlapping helper surface area used in zkhe prover and verifier
-
 
 ## Bench TODOs
 1. benchmarks per pallet using production configured runtime

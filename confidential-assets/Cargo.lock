@@ -2074,6 +2074,20 @@ dependencies = [
 ]
 
 [[package]]
+name = "pallet-confidential-xcm-bridge"
+version = "0.1.0"
+dependencies = [
+ "confidential-assets-primitives",
+ "frame-support",
+ "frame-system",
+ "parity-scale-codec",
+ "scale-info",
+ "serde",
+ "sp-runtime",
+ "sp-std",
+]
+
+[[package]]
 name = "pallet-operators"
 version = "0.1.0"
 dependencies = [
