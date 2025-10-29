@@ -19,19 +19,17 @@ pub mod pallet {
 
         type AssetId: Parameter + Member + Copy + Ord + MaxEncodedLen + TypeInfo;
 
-        type Balance: Parameter + Member + Copy + Ord + MaxEncodedLen + TypeInfo;
+        type Balance: Parameter + Member + Copy + Ord + MaxEncodedLen + TypeInfo + Default;
 
         type Backend: ConfidentialBackend<Self::AccountId, Self::AssetId, Self::Balance>;
 
         type AssetMetadata: AssetMetadataProvider<Self::AssetId>;
 
-        // Remove trait if unused, not sure yet may want it alongside OnConfidentialClaim for accept_pending path
-        // Maybe one trait `OnConfidentialOp` which implements it for each op in one impl to not bloat this trait which
-        // is already large
-        //type OnConfidentialTransfer: OnConfidentialTransfer<Self::AccountId, Self::AssetId>;
-
         /// Plug in any ramp you want (naive now, Merkle/batched later).
         type Ramp: Ramp<Self::AccountId, Self::AssetId, Self::Balance>;
+
+        /// Optional ACL (default = ()).
+        type Acl: AclProvider<Self::AccountId, Self::AssetId, Self::Balance>;
 
         /// Operator layer. Defaults to always returning false when assigned ().
         type Operators: OperatorRegistry<Self::AccountId, Self::AssetId, BlockNumberFor<Self>>;
@@ -92,6 +90,11 @@ pub mod pallet {
             asset: T::AssetId,
             from: T::AccountId,
             to: T::AccountId,
+            encrypted_amount: EncryptedAmount,
+        },
+        ConfidentialClaimed {
+            asset: T::AssetId,
+            who: T::AccountId,
             encrypted_amount: EncryptedAmount,
         },
         AmountDisclosed {
@@ -223,65 +226,7 @@ pub mod pallet {
             Ok(())
         }
 
-        /// Allows users to accept pending deposits to make received confidential
-        /// balances available to transfer. TODO: link to doc explaining
         #[pallet::call_index(4)]
-        #[pallet::weight(T::WeightInfo::confidential_transfer())] // TODO
-        pub fn confidential_claim(
-            origin: OriginFor<T>,
-            asset: T::AssetId,
-            encrypted_amount: EncryptedAmount,
-            input_proof: InputProof,
-        ) -> DispatchResult {
-            let from = ensure_signed(origin)?;
-            let _claimed = T::Backend::claim_encrypted(asset, &from, encrypted_amount, input_proof)
-                .map_err(|_| Error::<T>::BackendError)?;
-            // emit event
-            Ok(())
-        }
-
-        #[pallet::call_index(5)]
-        #[pallet::weight(T::WeightInfo::confidential_transfer())] // TODO
-        pub fn confidential_claim_and_transfer(
-            origin: OriginFor<T>,
-            asset: T::AssetId,
-            encrypted_amount: EncryptedAmount,
-            input_proof: InputProof,
-        ) -> DispatchResult {
-            let from = ensure_signed(origin)?;
-            let _claimed = T::Backend::claim_encrypted(asset, &from, encrypted_amount, input_proof)
-                .map_err(|_| Error::<T>::BackendError)?;
-            // transfer
-            // emit event
-            // TODO: update pallet-zkhe extrinsics to match names used herein
-            Ok(())
-        }
-
-        #[pallet::call_index(6)]
-        #[pallet::weight(T::WeightInfo::confidential_transfer_from())]
-        pub fn confidential_transfer_from_encrypted(
-            origin: OriginFor<T>,
-            asset: T::AssetId,
-            from: T::AccountId,
-            to: T::AccountId,
-            encrypted_amount: EncryptedAmount,
-            input_proof: InputProof,
-        ) -> DispatchResult {
-            let caller = ensure_signed(origin)?;
-            Self::ensure_is_self_or_operator(&from, &asset, &caller)?;
-            let transferred =
-                T::Backend::transfer_encrypted(asset, &from, &to, encrypted_amount, input_proof)
-                    .map_err(|_| Error::<T>::BackendError)?;
-            Self::deposit_event(Event::ConfidentialTransfer {
-                asset,
-                from: from.clone(),
-                to: to.clone(),
-                encrypted_amount: transferred.clone(),
-            });
-            Ok(())
-        }
-
-        #[pallet::call_index(7)]
         #[pallet::weight(T::WeightInfo::disclose_amount())]
         pub fn disclose_amount(
             origin: OriginFor<T>,
@@ -296,6 +241,102 @@ pub mod pallet {
                 encrypted_amount,
                 amount,
                 discloser: who,
+            });
+            Ok(())
+        }
+
+        /// Allows users to accept pending deposits to make received confidential
+        /// balances available to transfer. TODO: link to longer explanation
+        // TODO: consider exposing confidential_claim_and_transfer aka pallet_zkhe::accept_pending_and_transfer
+        #[pallet::call_index(5)]
+        #[pallet::weight(T::WeightInfo::confidential_transfer())] // TODO
+        pub fn confidential_claim(
+            origin: OriginFor<T>,
+            asset: T::AssetId,
+            input_proof: InputProof,
+        ) -> DispatchResult {
+            let from = ensure_signed(origin)?;
+            let claimed = T::Backend::claim_encrypted(asset, &from, input_proof)
+                .map_err(|_| Error::<T>::BackendError)?;
+            Self::deposit_event(Event::ConfidentialClaimed {
+                asset,
+                who: from,
+                encrypted_amount: claimed,
+            });
+            Ok(())
+        }
+
+        // ---------- Operator + ACL permutations for all extrinsics ----------
+
+        /// Operator and/or ACL-driven confidential transfer
+        // TODO: impl for deposit, withraw, claim(accept_pending), etc
+        #[pallet::call_index(6)]
+        #[pallet::weight(T::WeightInfo::confidential_transfer_from())]
+        pub fn confidential_transfer_from(
+            origin: OriginFor<T>,
+            asset: T::AssetId,
+            from: T::AccountId,
+            to: T::AccountId,
+            encrypted_amount: EncryptedAmount,
+            input_proof: InputProof,
+        ) -> DispatchResult {
+            let caller = ensure_signed(origin)?;
+            Self::ensure_is_self_or_operator(&from, &asset, &caller)?;
+            T::Acl::authorize(
+                Op::Transfer,
+                &AclCtx {
+                    amount: Default::default(),
+                    asset,
+                    caller: caller.clone(),
+                    owner: Some(from.clone()),
+                    counterparty: Some(to.clone()),
+                    opaque: sp_std::vec![],
+                },
+            )?;
+            let transferred =
+                T::Backend::transfer_encrypted(asset, &from, &to, encrypted_amount, input_proof)
+                    .map_err(|_| Error::<T>::BackendError)?;
+            Self::deposit_event(Event::ConfidentialTransfer {
+                asset,
+                from: from.clone(),
+                to: to.clone(),
+                encrypted_amount: transferred.clone(),
+            });
+            Ok(())
+        }
+
+        /// ACL-driven confidential transfer
+        // TODO: for prod impl for deposit, withraw, claim(accept_pending)
+        #[pallet::call_index(7)]
+        #[pallet::weight(T::WeightInfo::confidential_transfer_from())]
+        pub fn confidential_transfer_acl(
+            origin: OriginFor<T>,
+            asset: T::AssetId,
+            from: T::AccountId,
+            to: T::AccountId,
+            encrypted_amount: EncryptedAmount,
+            input_proof: InputProof,
+        ) -> DispatchResult {
+            let caller = ensure_signed(origin)?;
+            T::Acl::authorize(
+                Op::Transfer,
+                &AclCtx {
+                    amount: Default::default(),
+                    asset,
+                    caller: caller.clone(),
+                    owner: Some(from.clone()),
+                    counterparty: Some(to.clone()),
+                    opaque: sp_std::vec![],
+                },
+            )?;
+            let transferred =
+                T::Backend::transfer_encrypted(asset, &from, &to, encrypted_amount, input_proof)
+                    .map_err(|_| Error::<T>::BackendError)?;
+            Self::deposit_event(Event::ConfidentialTransfer {
+                asset,
+                from: from.clone(),
+                to: to.clone(),
+                encrypted_amount: transferred.clone(),
             });
             Ok(())
         }

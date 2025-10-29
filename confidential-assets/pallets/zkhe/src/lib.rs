@@ -124,8 +124,23 @@ pub mod pallet {
     #[pallet::event]
     #[pallet::generate_deposit(pub(super) fn deposit_event)]
     pub enum Event<T: Config> {
-        PendingAccepted(T::AccountId, T::AssetId),
-        PublicKeySet(T::AccountId),
+        Transferred {
+            asset: T::AssetId,
+            from: T::AccountId,
+            to: T::AccountId,
+            encrypted_amount: EncryptedAmount,
+        },
+        PendingAccepted {
+            asset: T::AssetId,
+            who: T::AccountId,
+            encrypted_amount: EncryptedAmount,
+        },
+        PendingAcceptedAndTransferred {
+            asset: T::AssetId,
+            from: T::AccountId,
+            to: T::AccountId,
+            encrypted_amount: EncryptedAmount,
+        },
     }
 
     #[pallet::error]
@@ -149,11 +164,17 @@ pub mod pallet {
             origin: T::RuntimeOrigin,
             asset: T::AssetId,
             to: T::AccountId,
-            encrypted_amount: EncryptedAmount, // 64B Δciphertext
-            proof: InputProof,                 // sender bundle
+            encrypted_amount: EncryptedAmount,
+            proof: InputProof,
         ) -> DispatchResult {
             let from = ensure_signed(origin)?;
-            let _ = Self::transfer_encrypted(asset, &from, &to, encrypted_amount, proof)?;
+            let transferred = Self::transfer_encrypted(asset, &from, &to, encrypted_amount, proof)?;
+            Self::deposit_event(Event::Transferred {
+                asset,
+                from,
+                to,
+                encrypted_amount: transferred,
+            });
             Ok(())
         }
 
@@ -166,11 +187,16 @@ pub mod pallet {
         pub fn accept_pending(
             origin: T::RuntimeOrigin,
             asset: T::AssetId,
-            deposits: Vec<u64>, // UTXO ids
             accept_envelope: InputProof,
         ) -> DispatchResult {
             let who = ensure_signed(origin)?;
-            Self::do_accept_pending(who, asset, deposits, accept_envelope)
+            let claimed = Self::claim_encrypted(asset, &who, accept_envelope)?;
+            Self::deposit_event(Event::PendingAccepted {
+                asset,
+                who,
+                encrypted_amount: claimed,
+            });
+            Ok(())
         }
 
         /// Accept pending then transfer from available.
@@ -181,14 +207,18 @@ pub mod pallet {
             origin: T::RuntimeOrigin,
             asset: T::AssetId,
             to: T::AccountId,
-            deposit_ids: Vec<u64>,
             accept_envelope: InputProof,
-            transfer_amount: EncryptedAmount,
             transfer_proof: InputProof,
         ) -> DispatchResult {
             let from = ensure_signed(origin)?;
-            Self::do_accept_pending(from.clone(), asset, deposit_ids, accept_envelope)?;
-            let _ = Self::transfer_encrypted(asset, &from, &to, transfer_amount, transfer_proof)?;
+            let claimed = Self::claim_encrypted(asset, &from, accept_envelope)?;
+            let transferred = Self::transfer_encrypted(asset, &from, &to, claimed, transfer_proof)?;
+            Self::deposit_event(Event::PendingAcceptedAndTransferred {
+                asset,
+                from,
+                to,
+                encrypted_amount: transferred,
+            });
             Ok(())
         }
     }
@@ -200,7 +230,6 @@ pub mod pallet {
         ) -> Result<(), DispatchError> {
             ensure!(!elgamal_pk.is_empty(), Error::<T>::BadCipher);
             PublicKey::<T>::insert(who, elgamal_pk.clone());
-            Self::deposit_event(Event::PublicKeySet(who.clone()));
             Ok(())
         }
 
@@ -286,7 +315,6 @@ pub mod pallet {
         fn claim_encrypted(
             asset: T::AssetId,
             from: &T::AccountId,
-            _encrypted_amount: EncryptedAmount,
             input_proof: InputProof,
         ) -> Result<EncryptedAmount, DispatchError> {
             // Thin wrapper around accept_pending:
@@ -515,7 +543,6 @@ pub mod pallet {
                 PendingBalanceCommit::<T>::insert(asset, &who, pending_new);
             }
 
-            Self::deposit_event(Event::PendingAccepted(who, asset));
             Ok(())
         }
     }

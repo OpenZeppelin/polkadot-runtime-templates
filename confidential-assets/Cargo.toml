@@ -1,11 +1,18 @@
 [workspace]
 members = [
+	# permissions
+	"pallets/acl",
 	"pallets/operators",
+	# core
 	"pallets/confidential-assets",
+	# backend
     "pallets/zkhe",
+	# primitives
     "primitives/confidential-assets",
 	"primitives/zkhe",
+	# client
 	"zkhe-prover",
+	# no_std on-chain verifier
 	"zkhe-verifier",
 ]
 resolver = "2"

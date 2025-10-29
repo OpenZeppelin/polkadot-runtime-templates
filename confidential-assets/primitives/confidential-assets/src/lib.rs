@@ -46,7 +46,6 @@ pub trait ConfidentialBackend<AccountId, AssetId, Balance> {
     fn claim_encrypted(
         asset: AssetId,
         from: &AccountId,
-        encrypted_amount: EncryptedAmount,
         input_proof: InputProof,
     ) -> Result<EncryptedAmount, DispatchError>;
 
@@ -84,30 +83,6 @@ pub trait AssetMetadataProvider<AssetId> {
     fn symbol(asset: AssetId) -> Vec<u8>;
     fn decimals(asset: AssetId) -> u8;
     fn contract_uri(asset: AssetId) -> Vec<u8>;
-}
-
-/// Optional receiver hook (like IERC7984Receiver.onConfidentialTransferReceived).
-pub trait OnConfidentialTransfer<AccountId, AssetId> {
-    /// Called after successful transfer if the extrinsic is an `*_and_call` variant.
-    /// Return `Ok(())` to accept; `Err` to revert (pallet will bubble up error).
-    fn on_confidential_transfer_received(
-        from: &AccountId,
-        to: &AccountId,
-        asset: &AssetId,
-        transferred: &EncryptedAmount,
-        data: &CallbackData,
-    ) -> Result<(), DispatchError>;
-}
-impl<AccountId, AssetId> OnConfidentialTransfer<AccountId, AssetId> for () {
-    fn on_confidential_transfer_received(
-        _from: &AccountId,
-        _to: &AccountId,
-        _asset: &AssetId,
-        _transferred: &EncryptedAmount,
-        _data: &CallbackData,
-    ) -> Result<(), DispatchError> {
-        Ok(())
-    }
 }
 
 /// Abstract verifier boundary. Implement in the runtime.
@@ -180,6 +155,8 @@ pub trait ZkVerifier {
     fn disclose(asset: &[u8], who_pk: &[u8], cipher: &[u8]) -> Result<u64, Self::Error>;
 }
 
+// Operator
+
 pub trait OperatorRegistry<AccountId, AssetId, BlockNumber> {
     /// Return true if `operator` is currently authorized to operate for (`holder`, `asset`) at `now`.
     fn is_operator(
@@ -198,5 +175,41 @@ impl<AccountId, AssetId, BlockNumber> OperatorRegistry<AccountId, AssetId, Block
         _now: BlockNumber,
     ) -> bool {
         false
+    }
+}
+
+// ACL
+
+#[derive(Clone, Copy, Encode, Decode, scale_info::TypeInfo)]
+pub enum Op {
+    Mint,
+    Burn,
+    Transfer,
+    TransferFrom,
+    Shield,   // public -> confidential
+    Unshield, // confidential -> public
+    AcceptPending,
+    SetOperator,
+}
+
+#[derive(Encode, Decode, scale_info::TypeInfo, Default)]
+pub struct AclCtx<Balance, AccountId, AssetId> {
+    pub amount: Balance, // plaintext amount if relevant; 0 if not
+    pub asset: AssetId,
+    pub caller: AccountId,               // origin who signed the extrinsic
+    pub owner: Option<AccountId>,        // on-behalf-of (transfer_from etc.)
+    pub counterparty: Option<AccountId>, // receiver/sender if applicable
+    pub opaque: sp_std::vec::Vec<u8>,    // future-proof (proof bytes, memo, etc.)
+}
+
+pub trait AclProvider<AccountId, AssetId, Balance> {
+    /// Return Ok(()) to allow; Err(..) to block.
+    fn authorize(op: Op, ctx: &AclCtx<Balance, AccountId, AssetId>) -> Result<(), DispatchError>;
+}
+
+impl<AccountId, AssetId, Balance> AclProvider<AccountId, AssetId, Balance> for () {
+    #[inline]
+    fn authorize(_: Op, _: &AclCtx<Balance, AccountId, AssetId>) -> Result<(), DispatchError> {
+        Ok(())
     }
 }

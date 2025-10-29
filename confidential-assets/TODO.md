@@ -3,17 +3,19 @@
 ## Impl TODOs In Progress
 
 ### Now
-- ramp v0
-- ERC 7984: swaps between confidential <> regular && confidential <> confidential
-- configurable NetworkId pallet config (move out of hardcoded)
+
 - pallet-confidential-xcm-bridge
 - demo using xcm-simulator with runtimes running in CLI
 
 ### Next
 - extract acl pallet for ERC 7984
-- remove hardcode NetworkId and make configurable by pallet
+- ERC 7984: swaps between confidential <> regular && confidential <> confidential
+- configurable NetworkId pallet config (move out of hardcoded)
 
 ### Future
+- Frontier precompile
+- PolkaVM precompile
+- Per precompile: Optional receiver hook (like IERC7984Receiver.onConfidentialTransferReceived)
 - rampv1 with privacy (using merkle trees + batched execution)
 - impl view keys like Solana for read-only actions (auditor key)
 - pay for transaction fee design with confidential asset

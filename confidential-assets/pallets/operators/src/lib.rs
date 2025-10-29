@@ -1,4 +1,4 @@
-// pallets/acl/src/lib.rs
+//! Operators pallet
 #![cfg_attr(not(feature = "std"), no_std)]
 
 extern crate alloc;
