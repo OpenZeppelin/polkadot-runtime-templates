@@ -1,0 +1,35 @@
+[package]
+name = "pallet-confidential-swap"
+authors = { workspace = true }
+description = "pallet supporting confidential swaps"
+edition = { workspace = true }
+license = { workspace = true }
+repository = { workspace = true }
+version = "0.1.0"
+
+[dependencies]
+serde = { workspace = true, features = ["derive"], optional = true }
+
+parity-scale-codec = { workspace = true }
+scale-info = { workspace = true }
+frame-support = { workspace = true }
+frame-system  = { workspace = true }
+sp-runtime    = { workspace = true }
+sp-std = { workspace = true }
+sp-io = { workspace = true }
+
+confidential-assets-primitives = { path = "../../primitives/confidential-assets", default-features = false }
+
+[features]
+default = ["std"]
+std = [
+  "frame-support/std",
+  "frame-system/std",
+  "sp-runtime/std",
+  "sp-io/std",
+  "sp-std/std",
+  "parity-scale-codec/std",
+  "scale-info/std",
+  "dep:serde",
+  "confidential-assets-primitives/std",
+]

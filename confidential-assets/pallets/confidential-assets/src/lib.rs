@@ -4,9 +4,10 @@
 extern crate alloc;
 
 use confidential_assets_primitives::*;
-use frame_support::{dispatch::DispatchResult, pallet_prelude::*};
+use frame_support::{dispatch::DispatchResult, pallet_prelude::*, PalletId};
 use frame_system::pallet_prelude::*;
 use scale_info::TypeInfo;
+use sp_runtime::traits::AccountIdConversion;
 use sp_std::prelude::*;
 
 #[frame_support::pallet]
@@ -17,22 +18,31 @@ pub mod pallet {
     pub trait Config: frame_system::Config {
         type RuntimeEvent: From<Event<Self>> + IsType<<Self as frame_system::Config>::RuntimeEvent>;
 
+        /// Asset identifier
         type AssetId: Parameter + Member + Copy + Ord + MaxEncodedLen + TypeInfo;
 
+        /// Balance value type
         type Balance: Parameter + Member + Copy + Ord + MaxEncodedLen + TypeInfo + Default;
 
+        /// Cryptographic backend implementing a encrypted balances store. Examples
+        /// of backends used in practice may include ZK El Gamal, FHE, TEE.
         type Backend: ConfidentialBackend<Self::AccountId, Self::AssetId, Self::Balance>;
-
-        type AssetMetadata: AssetMetadataProvider<Self::AssetId>;
 
         /// Plug in any ramp you want (naive now, Merkle/batched later).
         type Ramp: Ramp<Self::AccountId, Self::AssetId, Self::Balance>;
+
+        /// PalletId to derive the custodial account used for holding escrowed
+        /// balances iff `Self::Ramp` is implemented accordingly
+        #[pallet::constant]
+        type PalletId: Get<PalletId>;
 
         /// Optional ACL (default = ()).
         type Acl: AclProvider<Self::AccountId, Self::AssetId, Self::Balance>;
 
         /// Operator layer. Defaults to always returning false when assigned ().
         type Operators: OperatorRegistry<Self::AccountId, Self::AssetId, BlockNumberFor<Self>>;
+
+        type AssetMetadata: AssetMetadataProvider<Self::AssetId>;
 
         type WeightInfo: WeightData;
     }
@@ -343,6 +353,10 @@ pub mod pallet {
     }
 
     impl<T: Config> Pallet<T> {
+        /// Pallet custodial account.
+        pub fn account_id() -> T::AccountId {
+            T::PalletId::get().into_account_truncating()
+        }
         #[inline]
         fn ensure_is_self_or_operator(
             holder: &T::AccountId,

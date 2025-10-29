@@ -17,7 +17,7 @@
 //! - Sender transfer updates: available(from) ↓, pending(to) ↑.
 
 use confidential_assets_primitives::*;
-use frame_support::{pallet_prelude::*, Blake2_128Concat};
+use frame_support::{pallet_prelude::*, transactional, Blake2_128Concat};
 use frame_system::pallet_prelude::*;
 use scale_info::TypeInfo;
 use sp_std::prelude::*;
@@ -203,6 +203,7 @@ pub mod pallet {
         /// Enables spend of pending deposits in one transaction.
         #[pallet::call_index(2)]
         #[pallet::weight(T::WeightInfo::transfer_from_available())]
+        #[transactional]
         pub fn accept_pending_and_transfer(
             origin: T::RuntimeOrigin,
             asset: T::AssetId,

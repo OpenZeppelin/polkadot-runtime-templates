@@ -66,6 +66,7 @@ pub trait ConfidentialBackend<AccountId, AssetId, Balance> {
 
 /// Off/On-ramp for the public side of an asset.
 /// Semantics:
+/// - `transfer` = move `amount` of `asset` from `who` to `to`.
 /// - `burn` = move *public* funds from `who` into the pallet's custody
 ///             (so we can mint confidential).
 /// - `mint` = move *public* funds from the pallet's custody out to `who`
@@ -73,8 +74,14 @@ pub trait ConfidentialBackend<AccountId, AssetId, Balance> {
 pub trait Ramp<AccountId, AssetId, Amount> {
     type Error;
 
-    fn burn(who: &AccountId, asset: &AssetId, amount: Amount) -> Result<(), Self::Error>;
-    fn mint(who: &AccountId, asset: &AssetId, amount: Amount) -> Result<(), Self::Error>;
+    fn transfer_from(
+        from: &AccountId,
+        to: &AccountId,
+        asset: AssetId,
+        amount: Amount,
+    ) -> Result<(), Self::Error>;
+    fn burn(from: &AccountId, asset: &AssetId, amount: Amount) -> Result<(), Self::Error>;
+    fn mint(to: &AccountId, asset: &AssetId, amount: Amount) -> Result<(), Self::Error>;
 }
 
 /// Metadata provider per asset (names, symbols, etc.).
