@@ -6,6 +6,7 @@ members = [
 	# core
 	"pallets/confidential-assets",
 	"pallets/confidential-swaps",
+	"pallets/hash-timelock",
 	"pallets/confidential-xcm-bridge",
 	# backend
     "pallets/zkhe",

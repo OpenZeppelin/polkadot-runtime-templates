@@ -401,8 +401,6 @@ pub mod pallet {
         }
     }
 
-    // -------- Trait impl exposed to other pallets (e.g., bridge) --------
-
     impl<T: Config> ConfidentialSwap<T::AccountId, T::AssetId, T::Balance> for Pallet<T> {
         type SwapId = u64;
 
@@ -424,23 +422,6 @@ pub mod pallet {
             });
             // The receiver (`who`) received maker's a_to_b_ct on asset_a
             Ok((id, intent.a_to_b_ct))
-        }
-
-        /// Accept a C→P intent on behalf of `who`.
-        /// Returns the public amount `who` paid.
-        #[transactional]
-        fn swap_conf_to_transparent_exact_in(
-            who: &T::AccountId,
-            id: Self::SwapId,
-        ) -> Result<(Self::SwapId, T::Balance), DispatchError> {
-            let intent = Self::exec_cp_inner(id, who)?;
-            <Pallet<T>>::deposit_event(Event::CpExecuted {
-                id,
-                proposer: intent.proposer.clone(),
-                counterparty: who.clone(),
-                amount_public: intent.amount_public,
-            });
-            Ok((id, intent.amount_public))
         }
     }
 }

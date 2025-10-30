@@ -54,7 +54,7 @@ pub mod pallet {
     // --------- SCALE payloads carried by XCM::Transact ---------
 
     #[derive(Encode, Decode, Clone, PartialEq, Eq, TypeInfo, RuntimeDebug)]
-    pub enum RemoteCall<AccountId, AssetId, Balance, SwapId> {
+    pub enum RemoteCall<AccountId, AssetId, SwapId> {
         ReceiveConfidentialTransfer {
             sender_on_src: [u8; 32],
             dest_account: AccountId,
@@ -62,11 +62,12 @@ pub mod pallet {
             delta_ciphertext: EncryptedAmount,
             proof: InputProof,
         },
-        ExecuteConfidentialSwap(RemoteSwap<AccountId, AssetId, Balance, SwapId>),
+        ExecuteConfidentialSwap(RemoteSwap<AccountId, SwapId>),
     }
 
+    // Only implement confidential to confidential for now.
     #[derive(Encode, Decode, Clone, PartialEq, Eq, TypeInfo, RuntimeDebug)]
-    pub enum RemoteSwap<AccountId, AssetId, Balance, SwapId> {
+    pub enum RemoteSwap<AccountId, SwapId> {
         /// Accept an existing C↔C intent by id on the destination chain.
         ConfToConfById {
             who: AccountId,
@@ -74,16 +75,6 @@ pub mod pallet {
             // taker leg (counterparty -> proposer) to satisfy maker's terms
             b_to_a_ct: EncryptedAmount,
             b_to_a_proof: InputProof,
-        },
-        /// Accept an existing C→P intent by id on the destination chain.
-        ConfToTransById { who: AccountId, id: SwapId },
-        /// Transparent→Confidential single-shot (optional / may be unsupported).
-        TransToConf {
-            who: AccountId,
-            give_asset: AssetId,
-            want_asset: AssetId,
-            give_amount: Balance,
-            min_recv_hint: Option<u128>,
         },
     }
 
@@ -203,13 +194,14 @@ pub mod pallet {
         ) -> DispatchResult {
             let _who = ensure_signed(origin)?;
 
-            let call = RemoteCall::<T::AccountId, T::AssetId, T::Balance, SwapIdOf<T>>::ReceiveConfidentialTransfer {
-                sender_on_src: sender_tag,
-                dest_account: beneficiary,
-                asset,
-                delta_ciphertext,
-                proof,
-            };
+            let call =
+                RemoteCall::<T::AccountId, T::AssetId, SwapIdOf<T>>::ReceiveConfidentialTransfer {
+                    sender_on_src: sender_tag,
+                    dest_account: beneficiary,
+                    asset,
+                    delta_ciphertext,
+                    proof,
+                };
             let payload = call.encode();
             let payload_hash = sp_io::hashing::blake2_256(&payload);
 
@@ -236,14 +228,16 @@ pub mod pallet {
         pub fn send_confidential_swap(
             origin: OriginFor<T>,
             dest: T::ParaId,
-            payload: RemoteSwap<T::AccountId, T::AssetId, T::Balance, SwapIdOf<T>>,
+            payload: RemoteSwap<T::AccountId, SwapIdOf<T>>,
             fee_asset: T::FeeAssetId,
             fee: T::FeeBalance,
             weight_limit: T::XcmWeight,
         ) -> DispatchResult {
             let _who = ensure_signed(origin)?;
 
-            let call = RemoteCall::<T::AccountId, T::AssetId, T::Balance, SwapIdOf<T>>::ExecuteConfidentialSwap(payload);
+            let call = RemoteCall::<T::AccountId, T::AssetId, SwapIdOf<T>>::ExecuteConfidentialSwap(
+                payload,
+            );
             let encoded = call.encode();
             let payload_hash = sp_io::hashing::blake2_256(&encoded);
 
@@ -295,15 +289,13 @@ pub mod pallet {
         #[pallet::weight(T::WeightInfo::xcm_execute_confidential_swap())]
         pub fn xcm_execute_confidential_swap(
             origin: OriginFor<T>,
-            payload: RemoteSwap<T::AccountId, T::AssetId, T::Balance, SwapIdOf<T>>,
+            payload: RemoteSwap<T::AccountId, SwapIdOf<T>>,
         ) -> DispatchResult {
             ensure_root(origin).map_err(|_| Error::<T>::BadOriginForXcm)?;
 
             // Capture `who` for event.
             let who_for_event: T::AccountId = match &payload {
                 RemoteSwap::ConfToConfById { who, .. } => who.clone(),
-                RemoteSwap::ConfToTransById { who, .. } => who.clone(),
-                RemoteSwap::TransToConf { who, .. } => who.clone(),
             };
 
             match payload {
@@ -315,26 +307,6 @@ pub mod pallet {
                 } => {
                     T::Swap::swap_confidential_exact_in(&who, id, b_to_a_ct, b_to_a_proof)
                         .map_err(|_| Error::<T>::SwapFailed)?;
-                }
-                RemoteSwap::ConfToTransById { who, id } => {
-                    T::Swap::swap_conf_to_transparent_exact_in(&who, id)
-                        .map_err(|_| Error::<T>::SwapFailed)?;
-                }
-                RemoteSwap::TransToConf {
-                    who,
-                    give_asset,
-                    want_asset,
-                    give_amount,
-                    min_recv_hint,
-                } => {
-                    T::Swap::swap_transparent_to_conf_exact_in(
-                        &who,
-                        give_asset,
-                        want_asset,
-                        give_amount,
-                        min_recv_hint,
-                    )
-                    .map_err(|_| Error::<T>::SwapFailed)?;
                 }
             }
 
