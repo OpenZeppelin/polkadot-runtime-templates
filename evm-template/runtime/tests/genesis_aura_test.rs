@@ -68,10 +68,7 @@ mod genesis_aura_tests {
 
         // Configure balances
         pallet_balances::GenesisConfig::<Runtime> {
-            balances: vec![
-                (alice_account, 1u128 << 60),
-                (bob_account, 1u128 << 60),
-            ],
+            balances: vec![(alice_account, 1u128 << 60), (bob_account, 1u128 << 60)],
         }
         .assimilate_storage(&mut storage)
         .expect("balances storage");
@@ -96,16 +93,8 @@ mod genesis_aura_tests {
         // Configure session with keys - this is the critical part
         pallet_session::GenesisConfig::<Runtime> {
             keys: vec![
-                (
-                    alice_account,
-                    alice_account,
-                    SessionKeys { aura: alice_aura.clone() },
-                ),
-                (
-                    bob_account,
-                    bob_account,
-                    SessionKeys { aura: bob_aura.clone() },
-                ),
+                (alice_account, alice_account, SessionKeys { aura: alice_aura.clone() }),
+                (bob_account, bob_account, SessionKeys { aura: bob_aura.clone() }),
             ],
             ..Default::default()
         }
@@ -113,26 +102,19 @@ mod genesis_aura_tests {
         .expect("session storage");
 
         // Configure Aura (empty genesis, authorities come from session)
-        pallet_aura::GenesisConfig::<Runtime> {
-            authorities: vec![],
-        }
-        .assimilate_storage(&mut storage)
-        .expect("aura storage");
+        pallet_aura::GenesisConfig::<Runtime> { authorities: vec![] }
+            .assimilate_storage(&mut storage)
+            .expect("aura storage");
 
         // Configure AuraExt (this reads from pallet_aura::Authorities)
-        cumulus_pallet_aura_ext::GenesisConfig::<Runtime> {
-            _config: Default::default(),
-        }
-        .assimilate_storage(&mut storage)
-        .expect("aura_ext storage");
+        cumulus_pallet_aura_ext::GenesisConfig::<Runtime> { _config: Default::default() }
+            .assimilate_storage(&mut storage)
+            .expect("aura_ext storage");
 
         // Configure EVM chain id
-        pallet_evm_chain_id::GenesisConfig::<Runtime> {
-            chain_id: 9999u64,
-            ..Default::default()
-        }
-        .assimilate_storage(&mut storage)
-        .expect("evm_chain_id storage");
+        pallet_evm_chain_id::GenesisConfig::<Runtime> { chain_id: 9999u64, ..Default::default() }
+            .assimilate_storage(&mut storage)
+            .expect("evm_chain_id storage");
 
         let mut ext: sp_io::TestExternalities = storage.into();
         ext.execute_with(|| {
@@ -145,27 +127,20 @@ mod genesis_aura_tests {
             // Aura authorities (either Session ran after Aura, or there's a config issue)
             assert!(
                 !aura_authorities.is_empty(),
-                "Aura authorities should not be empty at genesis. \
-                This indicates that Session pallet did not populate Aura authorities. \
-                Check pallet ordering: Session must come BEFORE Aura."
+                "Aura authorities should not be empty at genesis. This indicates that Session \
+                 pallet did not populate Aura authorities. Check pallet ordering: Session must \
+                 come BEFORE Aura."
             );
 
             // Verify we have the expected number of authorities
-            assert_eq!(
-                aura_authorities.len(),
-                2,
-                "Expected 2 authorities (Alice and Bob)"
-            );
+            assert_eq!(aura_authorities.len(), 2, "Expected 2 authorities (Alice and Bob)");
 
             // Verify the specific authorities are present
             assert!(
                 aura_authorities.contains(&alice_aura),
                 "Alice's AuraId should be in authorities"
             );
-            assert!(
-                aura_authorities.contains(&bob_aura),
-                "Bob's AuraId should be in authorities"
-            );
+            assert!(aura_authorities.contains(&bob_aura), "Bob's AuraId should be in authorities");
         });
     }
 
@@ -192,10 +167,7 @@ mod genesis_aura_tests {
             .expect("frame_system storage");
 
         pallet_balances::GenesisConfig::<Runtime> {
-            balances: vec![
-                (alice_account, 1u128 << 60),
-                (bob_account, 1u128 << 60),
-            ],
+            balances: vec![(alice_account, 1u128 << 60), (bob_account, 1u128 << 60)],
         }
         .assimilate_storage(&mut storage)
         .expect("balances storage");
@@ -218,16 +190,8 @@ mod genesis_aura_tests {
         // Configure session with keys
         pallet_session::GenesisConfig::<Runtime> {
             keys: vec![
-                (
-                    alice_account,
-                    alice_account,
-                    SessionKeys { aura: alice_aura.clone() },
-                ),
-                (
-                    bob_account,
-                    bob_account,
-                    SessionKeys { aura: bob_aura.clone() },
-                ),
+                (alice_account, alice_account, SessionKeys { aura: alice_aura.clone() }),
+                (bob_account, bob_account, SessionKeys { aura: bob_aura.clone() }),
             ],
             ..Default::default()
         }
@@ -235,25 +199,18 @@ mod genesis_aura_tests {
         .expect("session storage");
 
         // Aura genesis with empty authorities - they should come from Session
-        pallet_aura::GenesisConfig::<Runtime> {
-            authorities: vec![],
-        }
-        .assimilate_storage(&mut storage)
-        .expect("aura storage");
+        pallet_aura::GenesisConfig::<Runtime> { authorities: vec![] }
+            .assimilate_storage(&mut storage)
+            .expect("aura storage");
 
         // AuraExt genesis
-        cumulus_pallet_aura_ext::GenesisConfig::<Runtime> {
-            _config: Default::default(),
-        }
-        .assimilate_storage(&mut storage)
-        .expect("aura_ext storage");
+        cumulus_pallet_aura_ext::GenesisConfig::<Runtime> { _config: Default::default() }
+            .assimilate_storage(&mut storage)
+            .expect("aura_ext storage");
 
-        pallet_evm_chain_id::GenesisConfig::<Runtime> {
-            chain_id: 9999u64,
-            ..Default::default()
-        }
-        .assimilate_storage(&mut storage)
-        .expect("evm_chain_id storage");
+        pallet_evm_chain_id::GenesisConfig::<Runtime> { chain_id: 9999u64, ..Default::default() }
+            .assimilate_storage(&mut storage)
+            .expect("evm_chain_id storage");
 
         let mut ext: sp_io::TestExternalities = storage.into();
         ext.execute_with(|| {
@@ -266,9 +223,9 @@ mod genesis_aura_tests {
             // call Aura's SessionHandler::on_genesis_session
             assert!(
                 !aura_authorities.is_empty(),
-                "Aura authorities should not be empty after genesis. \
-                Session pallet should have populated them via SessionHandler. \
-                This may indicate incorrect pallet ordering in construct_runtime."
+                "Aura authorities should not be empty after genesis. Session pallet should have \
+                 populated them via SessionHandler. This may indicate incorrect pallet ordering \
+                 in construct_runtime."
             );
 
             // Verify both authorities are present
@@ -283,10 +240,7 @@ mod genesis_aura_tests {
                 aura_authorities.contains(&alice_aura),
                 "Alice's AuraId should be in authorities"
             );
-            assert!(
-                aura_authorities.contains(&bob_aura),
-                "Bob's AuraId should be in authorities"
-            );
+            assert!(aura_authorities.contains(&bob_aura), "Bob's AuraId should be in authorities");
         });
     }
 }
