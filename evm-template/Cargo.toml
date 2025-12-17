@@ -29,8 +29,8 @@ smallvec = "1.11.0"
 
 # TODO: update to release once fix/consensus-pallet-ordering is merged
 # Fix: correct consensus pallet ordering for genesis build (Session before Aura/AuraExt)
-openzeppelin-pallet-abstractions = { git = "https://github.com/OpenZeppelin/openzeppelin-pallet-abstractions", default-features = false, rev = "927eae6c8ae0a0d9c85a8b26e9618ac07d783a2b" }
-openzeppelin-pallet-abstractions-proc = { git = "https://github.com/OpenZeppelin/openzeppelin-pallet-abstractions", default-features = false, rev = "927eae6c8ae0a0d9c85a8b26e9618ac07d783a2b" }
+openzeppelin-pallet-abstractions = { git = "https://github.com/OpenZeppelin/openzeppelin-pallet-abstractions", rev = "927eae6c8ae0a0d9c85a8b26e9618ac07d783a2b", default-features = false }
+openzeppelin-pallet-abstractions-proc = { git = "https://github.com/OpenZeppelin/openzeppelin-pallet-abstractions", rev = "927eae6c8ae0a0d9c85a8b26e9618ac07d783a2b", default-features = false }
 
 # Substrate
 frame-benchmarking = { git = "https://github.com/paritytech/polkadot-sdk", default-features = false, tag = "polkadot-stable2407-1" }

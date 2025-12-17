@@ -96,7 +96,6 @@ mod genesis_aura_tests {
                 (alice_account, alice_account, SessionKeys { aura: alice_aura.clone() }),
                 (bob_account, bob_account, SessionKeys { aura: bob_aura.clone() }),
             ],
-            ..Default::default()
         }
         .assimilate_storage(&mut storage)
         .expect("session storage");
@@ -193,7 +192,6 @@ mod genesis_aura_tests {
                 (alice_account, alice_account, SessionKeys { aura: alice_aura.clone() }),
                 (bob_account, bob_account, SessionKeys { aura: bob_aura.clone() }),
             ],
-            ..Default::default()
         }
         .assimilate_storage(&mut storage)
         .expect("session storage");
