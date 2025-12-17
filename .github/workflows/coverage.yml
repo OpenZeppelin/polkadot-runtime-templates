@@ -41,7 +41,7 @@ jobs:
         working-directory: ./
     steps:
       - name: git checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Run sccache
         uses: mozilla-actions/sccache-action@v0.0.4
