@@ -48,7 +48,7 @@ jobs:
         run: zip artifacts.zip evm-template/template-fuzzer/output/* -r
       
       - name: Save Artifacts
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: fuzzing-artifacts
           path: artifacts.zip
