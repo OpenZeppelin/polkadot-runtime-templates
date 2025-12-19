@@ -63,7 +63,10 @@ mod genesis_aura_tests {
 
         // Configure balances
         pallet_balances::GenesisConfig::<Runtime> {
-            balances: vec![(alice_account.clone(), 1u128 << 60), (bob_account.clone(), 1u128 << 60)],
+            balances: vec![
+                (alice_account.clone(), 1u128 << 60),
+                (bob_account.clone(), 1u128 << 60),
+            ],
             ..Default::default()
         }
         .assimilate_storage(&mut storage)
@@ -89,7 +92,11 @@ mod genesis_aura_tests {
         // Configure session with keys - this is the critical part
         pallet_session::GenesisConfig::<Runtime> {
             keys: vec![
-                (alice_account.clone(), alice_account.clone(), SessionKeys { aura: alice_aura.clone() }),
+                (
+                    alice_account.clone(),
+                    alice_account.clone(),
+                    SessionKeys { aura: alice_aura.clone() },
+                ),
                 (bob_account.clone(), bob_account.clone(), SessionKeys { aura: bob_aura.clone() }),
             ],
             ..Default::default()
@@ -158,7 +165,10 @@ mod genesis_aura_tests {
             .expect("frame_system storage");
 
         pallet_balances::GenesisConfig::<Runtime> {
-            balances: vec![(alice_account.clone(), 1u128 << 60), (bob_account.clone(), 1u128 << 60)],
+            balances: vec![
+                (alice_account.clone(), 1u128 << 60),
+                (bob_account.clone(), 1u128 << 60),
+            ],
             ..Default::default()
         }
         .assimilate_storage(&mut storage)
@@ -182,7 +192,11 @@ mod genesis_aura_tests {
         // Configure session with keys
         pallet_session::GenesisConfig::<Runtime> {
             keys: vec![
-                (alice_account.clone(), alice_account.clone(), SessionKeys { aura: alice_aura.clone() }),
+                (
+                    alice_account.clone(),
+                    alice_account.clone(),
+                    SessionKeys { aura: alice_aura.clone() },
+                ),
                 (bob_account.clone(), bob_account.clone(), SessionKeys { aura: bob_aura.clone() }),
             ],
             ..Default::default()
