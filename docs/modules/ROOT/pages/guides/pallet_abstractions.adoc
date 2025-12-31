@@ -63,6 +63,11 @@ impl GovernanceConfig for OpenZeppelinRuntime {
     // Additional configurations...
 }
 
+// If you need to add a custom pallet you can do it like this:
+impl PalletConfig for Runtime { // That part is important, for Runtime and not OpenZeppelinRuntime
+  // configure the pallet as usual
+}
+
 // Further configuration implementations...
 
 impl_openzeppelin_assets!(OpenZeppelinRuntime);
