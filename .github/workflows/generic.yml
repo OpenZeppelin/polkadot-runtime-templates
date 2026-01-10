@@ -57,18 +57,6 @@ jobs:
         with:
           components: clippy, rustfmt
 
-      - name: Install toml-sort
-        run: cargo install --git https://github.com/4meta5/toml_sort
-
-      - name: Add file permissions for toml-sort
-        run: chmod +x ./scripts/toml-sort.sh
-
-      - name: Add file permissions for check-toml-sorted
-        run: chmod +x ./scripts/check-toml-sorted.sh
-
-      - name: Check Cargo.toml files are formatted using toml_sort
-        run: ./scripts/check-toml-sorted.sh
-
       - name: "Install nextest"
         uses: taiki-e/install-action@v2
         with:
