@@ -33,7 +33,7 @@ use governance::{origins::Treasurer, tracks, Spender, WhitelistedCaller};
 use openzeppelin_pallet_abstractions::{
     impl_openzeppelin_assets, impl_openzeppelin_governance, impl_openzeppelin_system,
     impl_openzeppelin_xcm, AssetsConfig, AssetsWeight, GovernanceConfig, GovernanceWeight,
-    SystemConfig, SystemWeight, XcmConfig, XcmWeight,
+    SystemConfig, SystemWeight, XcmConfig, XcmWeightFull,
 };
 #[cfg(not(feature = "tanssi"))]
 use openzeppelin_pallet_abstractions::{
@@ -191,7 +191,10 @@ impl AssetsConfig for OpenZeppelinRuntime {
     type AssetRegistrar = AssetRegistrar;
     type AssetRegistrarMetadata = AssetRegistrarMetadata;
     type AssetType = AssetType;
+    #[cfg(not(feature = "tanssi"))]
     type AssetsToBlockAuthor = parachains_common::impls::AssetsToBlockAuthor<Runtime, ()>;
+    #[cfg(feature = "tanssi")]
+    type AssetsToBlockAuthor = ();
     type CreateOrigin = AsEnsureOriginWithArg<EnsureSigned<AccountId>>;
     type ForceOrigin = EnsureRoot<AccountId>;
     type ForeignAssetModifierOrigin = EnsureRoot<AccountId>;
@@ -206,6 +209,7 @@ impl TanssiConfig for OpenZeppelinRuntime {
     type AuthorInherent = pallet_author_inherent::weights::SubstrateWeight<Runtime>;
     type AuthoritiesNothing = pallet_cc_authorities_noting::weights::SubstrateWeight<Runtime>;
 }
+
 impl_openzeppelin_system!(OpenZeppelinRuntime);
 #[cfg(not(feature = "tanssi"))]
 impl_openzeppelin_consensus!(OpenZeppelinRuntime);
