@@ -32,15 +32,12 @@ pub use governance::origins::pallet_custom_origins;
 use governance::{origins::Treasurer, tracks, Spender, WhitelistedCaller};
 use openzeppelin_pallet_abstractions::{
     impl_openzeppelin_assets, impl_openzeppelin_governance, impl_openzeppelin_system,
-    impl_openzeppelin_xcm, AssetsConfig, AssetsWeight, GovernanceConfig, GovernanceWeight,
-    SystemConfig, SystemWeight, XcmConfig, XcmWeightFull,
+    impl_openzeppelin_xcm, AssetsConfig, GovernanceConfig, SystemConfig, XcmConfig,
 };
 #[cfg(not(feature = "tanssi"))]
-use openzeppelin_pallet_abstractions::{
-    impl_openzeppelin_consensus, ConsensusConfig, ConsensusWeight,
-};
+use openzeppelin_pallet_abstractions::{impl_openzeppelin_consensus, ConsensusConfig};
 #[cfg(feature = "tanssi")]
-use openzeppelin_pallet_abstractions::{impl_openzeppelin_tanssi, TanssiConfig, TanssiWeight};
+use openzeppelin_pallet_abstractions::{impl_openzeppelin_tanssi, TanssiConfig};
 use parachains_common::message_queue::{NarrowOriginToSibling, ParaIdToSibling};
 use polkadot_runtime_common::{BlockHashCount, SlowAdjustingFeeUpdate};
 #[cfg(not(feature = "tanssi"))]
