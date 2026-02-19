@@ -2,7 +2,9 @@
 use openzeppelin_pallet_abstractions::ConsensusWeightFull;
 #[cfg(feature = "tanssi")]
 use openzeppelin_pallet_abstractions::TanssiWeightFull;
-use openzeppelin_pallet_abstractions::{AssetsWeightFull, SystemWeightFull, XcmWeightFull, GovernanceWeightFull};
+use openzeppelin_pallet_abstractions::{
+    AssetsWeightFull, GovernanceWeightFull, SystemWeightFull, XcmWeightFull,
+};
 
 use crate::{
     configs::OpenZeppelinRuntime,

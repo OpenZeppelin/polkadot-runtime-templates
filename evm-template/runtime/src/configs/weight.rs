@@ -32,12 +32,13 @@ impl ConsensusWeightFull for OpenZeppelinRuntime {
 
 impl AssetsWeightFull for OpenZeppelinRuntime {
     type AssetManager = weights::pallet_asset_manager::WeightInfo<Runtime>;
+    type AssetTxPayment = ();
     type Assets = weights::pallet_assets::WeightInfo<Runtime>;
     // TODO: fix weight
     type OracleMembership = ();
-    type OrmlOracle = (); // TODO: fix weight
+    type OrmlOracle = ();
+    // TODO: fix weight
     type TransactionPayment = ();
-    type AssetTxPayment = ();
 }
 
 impl GovernanceWeightFull for OpenZeppelinRuntime {

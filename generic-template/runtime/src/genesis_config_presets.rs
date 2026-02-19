@@ -8,11 +8,9 @@ use sp_genesis_builder::PresetId;
 use sp_keyring::Sr25519Keyring;
 
 use crate::{
-    constants::currency::EXISTENTIAL_DEPOSIT, AccountId, BalancesConfig,
-    ParachainInfoConfig, PolkadotXcmConfig, RuntimeGenesisConfig, SessionKeys,
-    SudoConfig,
+    constants::currency::EXISTENTIAL_DEPOSIT, AccountId, BalancesConfig, ParachainInfoConfig,
+    PolkadotXcmConfig, RuntimeGenesisConfig, SessionKeys, SudoConfig,
 };
-
 #[cfg(not(feature = "tanssi"))]
 use crate::{CollatorSelectionConfig, SessionConfig};
 
@@ -29,7 +27,6 @@ pub const PARACHAIN_ID: u32 = 1000;
 pub fn template_session_keys(keys: AuraId) -> SessionKeys {
     SessionKeys { aura: keys }
 }
-
 
 #[cfg(not(feature = "tanssi"))]
 fn testnet_genesis(
