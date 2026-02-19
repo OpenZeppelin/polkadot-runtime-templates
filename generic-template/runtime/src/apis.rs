@@ -12,12 +12,19 @@ use crate::{constants::SLOT_DURATION, types::ConsensusHook};
 use crate::{
     constants::VERSION,
     types::{AccountId, AssetId, Balance, Block, Executive, Nonce},
-    InherentDataExt, Oracle, ParachainSystem, Runtime, RuntimeBlockWeights, RuntimeCall,
+    InherentDataExt, Oracle, ParachainSystem, Runtime, RuntimeCall,
     RuntimeGenesisConfig, SessionKeys, System, TransactionPayment,
 };
 
+#[cfg(feature = "try-runtime")]
+use crate::RuntimeBlockWeights;
+
 #[cfg(feature = "runtime-benchmarks")]
 type ExistentialDeposit = sp_core::ConstU128<EXISTENTIAL_DEPOSIT>;
+
+
+#[cfg(feature = "try-runtime")]
+type BlockWeights = RuntimeBlockWeights;
 
 #[cfg(not(feature = "tanssi"))]
 #[openzeppelin_runtime_apis]
@@ -51,7 +58,8 @@ mod apis {
         type AccountId = AccountId;
         type Nonce = Nonce;
         type RuntimeGenesisConfig = RuntimeGenesisConfig;
-        type RuntimeBlockWeights = RuntimeBlockWeights;
+        #[cfg(feature = "try-runtime")]
+        type RuntimeBlockWeights = BlockWeights;
     }
 
     mod benchmarks {
@@ -101,7 +109,7 @@ mod apis {
         type AccountId = AccountId;
         type Nonce = Nonce;
         type RuntimeGenesisConfig = RuntimeGenesisConfig;
-        type RuntimeBlockWeights = RuntimeBlockWeights;
+        type RuntimeBlockWeights = BlockWeights;
     }
 
     mod benchmarks {
