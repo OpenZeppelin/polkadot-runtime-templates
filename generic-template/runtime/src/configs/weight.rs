@@ -1,8 +1,10 @@
 #[cfg(not(feature = "tanssi"))]
-use openzeppelin_pallet_abstractions::ConsensusWeight;
+use openzeppelin_pallet_abstractions::ConsensusWeightFull;
 #[cfg(feature = "tanssi")]
-use openzeppelin_pallet_abstractions::TanssiWeight;
-use openzeppelin_pallet_abstractions::{AssetsWeight, GovernanceWeight, SystemWeight, XcmWeight};
+use openzeppelin_pallet_abstractions::TanssiWeightFull;
+use openzeppelin_pallet_abstractions::{
+    AssetsWeightFull, GovernanceWeightFull, SystemWeightFull, XcmWeightFull,
+};
 
 use crate::{
     configs::OpenZeppelinRuntime,
@@ -10,7 +12,7 @@ use crate::{
     Runtime,
 };
 
-impl SystemWeight for OpenZeppelinRuntime {
+impl SystemWeightFull for OpenZeppelinRuntime {
     type Balances = weights::pallet_balances::WeightInfo<Runtime>;
     type DbWeight = RocksDbWeight;
     type Multisig = weights::pallet_multisig::WeightInfo<Runtime>;
@@ -23,12 +25,12 @@ impl SystemWeight for OpenZeppelinRuntime {
 }
 
 #[cfg(not(feature = "tanssi"))]
-impl ConsensusWeight for OpenZeppelinRuntime {
+impl ConsensusWeightFull for OpenZeppelinRuntime {
     type CollatorSelection = weights::pallet_collator_selection::WeightInfo<Runtime>;
     type Session = weights::pallet_session::WeightInfo<Runtime>;
 }
 
-impl AssetsWeight for OpenZeppelinRuntime {
+impl AssetsWeightFull for OpenZeppelinRuntime {
     type AssetManager = weights::pallet_asset_manager::WeightInfo<Runtime>;
     //TODO: fix weight
     type AssetTxPayment = ();
@@ -40,7 +42,7 @@ impl AssetsWeight for OpenZeppelinRuntime {
     type TransactionPayment = weights::pallet_transaction_payment::WeightInfo<Runtime>;
 }
 
-impl GovernanceWeight for OpenZeppelinRuntime {
+impl GovernanceWeightFull for OpenZeppelinRuntime {
     type ConvictionVoting = weights::pallet_conviction_voting::WeightInfo<Runtime>;
     type Referenda = weights::pallet_referenda::WeightInfo<Runtime>;
     type Sudo = weights::pallet_sudo::WeightInfo<Runtime>;
@@ -48,7 +50,7 @@ impl GovernanceWeight for OpenZeppelinRuntime {
     type Whitelist = weights::pallet_whitelist::WeightInfo<Runtime>;
 }
 
-impl XcmWeight for OpenZeppelinRuntime {
+impl XcmWeightFull for OpenZeppelinRuntime {
     type MessageQueue = weights::pallet_message_queue::WeightInfo<Runtime>;
     type Xcm = weights::pallet_xcm::WeightInfo<Runtime>;
     type XcmTransactor = weights::pallet_xcm_transactor::WeightInfo<Runtime>;
@@ -57,7 +59,7 @@ impl XcmWeight for OpenZeppelinRuntime {
 }
 
 #[cfg(feature = "tanssi")]
-impl TanssiWeight for OpenZeppelinRuntime {
+impl TanssiWeightFull for OpenZeppelinRuntime {
     type AuthorInherent = pallet_author_inherent::weights::SubstrateWeight<Runtime>;
     type AuthoritiesNoting = pallet_cc_authorities_noting::weights::SubstrateWeight<Runtime>;
 }

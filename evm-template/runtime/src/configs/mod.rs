@@ -33,16 +33,13 @@ use governance::{origins::Treasurer, tracks, Spender, WhitelistedCaller};
 use nimbus_primitives::NimbusId;
 use openzeppelin_pallet_abstractions::{
     impl_openzeppelin_assets, impl_openzeppelin_evm, impl_openzeppelin_governance,
-    impl_openzeppelin_system, impl_openzeppelin_xcm, AssetsConfig, AssetsWeight, EvmConfig,
-    EvmWeight, GovernanceConfig, GovernanceWeight, SystemConfig, SystemWeight, XcmConfig,
-    XcmWeight,
+    impl_openzeppelin_system, impl_openzeppelin_xcm, AssetsConfig, EvmConfig, GovernanceConfig,
+    SystemConfig, XcmConfig,
 };
 #[cfg(not(feature = "tanssi"))]
-use openzeppelin_pallet_abstractions::{
-    impl_openzeppelin_consensus, ConsensusConfig, ConsensusWeight,
-};
+use openzeppelin_pallet_abstractions::{impl_openzeppelin_consensus, ConsensusConfig};
 #[cfg(feature = "tanssi")]
-use openzeppelin_pallet_abstractions::{impl_openzeppelin_tanssi, TanssiConfig, TanssiWeight};
+use openzeppelin_pallet_abstractions::{impl_openzeppelin_tanssi, TanssiConfig};
 use pallet_asset_tx_payment::HandleCredit;
 use pallet_ethereum::PostLogContent;
 use pallet_evm::{

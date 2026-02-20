@@ -26,8 +26,6 @@ env:
   CARGO_TERM_COLOR: always
   # Remove unnecessary WASM build artifacts
   WASM_BUILD_CLEAN_TARGET: 1
-  # stripping symbols and optimizing for binary size
-  RUSTFLAGS: -C strip=symbols -C opt-level=s
   # Disable sscache until migrate backend from legacy service
   # RUSTC_WRAPPER: "sccache"
   # SCCACHE_CACHE_SIZE: "50GB"
@@ -54,7 +52,7 @@ jobs:
       - name: install rust toolchain
         uses: actions-rust-lang/setup-rust-toolchain@v1
         with:
-          components: clippy, rustfmt
+          components: clippy, rustfmt, llvm-tools-preview
 
       - name: "Install cargo-llvm-cov"
         uses: taiki-e/install-action@v2
@@ -62,6 +60,8 @@ jobs:
           tool: cargo-llvm-cov
 
       - name: Generate generic runtime coverage
+        env:
+          SKIP_WASM_BUILD: 1
         run: |
           ls -l
           cd generic-template/runtime
@@ -69,6 +69,8 @@ jobs:
           cargo clean
 
       - name: Generate EVM runtime coverage
+        env:
+          SKIP_WASM_BUILD: 1
         run: |
           cd evm-template/runtime
           cargo llvm-cov --features="runtime-benchmarks" --ignore-filename-regex ".*(weights|benchmark).*" --codecov --output-path lcov.info

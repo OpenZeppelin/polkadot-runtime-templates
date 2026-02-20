@@ -8,10 +8,11 @@ use sp_genesis_builder::PresetId;
 use sp_keyring::Sr25519Keyring;
 
 use crate::{
-    constants::currency::EXISTENTIAL_DEPOSIT, AccountId, BalancesConfig, CollatorSelectionConfig,
-    ParachainInfoConfig, PolkadotXcmConfig, RuntimeGenesisConfig, SessionConfig, SessionKeys,
-    SudoConfig,
+    constants::currency::EXISTENTIAL_DEPOSIT, AccountId, BalancesConfig, ParachainInfoConfig,
+    PolkadotXcmConfig, RuntimeGenesisConfig, SessionKeys, SudoConfig,
 };
+#[cfg(not(feature = "tanssi"))]
+use crate::{CollatorSelectionConfig, SessionConfig};
 
 /// The default XCM version to set in genesis config.
 const SAFE_XCM_VERSION: u32 = xcm::prelude::XCM_VERSION;
@@ -22,10 +23,12 @@ pub const PARACHAIN_ID: u32 = 1000;
 /// Generate the session keys from individual elements.
 ///
 /// The input must be a tuple of individual keys (a single arg for now since we have just one key).
+#[cfg(not(feature = "tanssi"))]
 pub fn template_session_keys(keys: AuraId) -> SessionKeys {
     SessionKeys { aura: keys }
 }
 
+#[cfg(not(feature = "tanssi"))]
 fn testnet_genesis(
     invulnerables: Vec<(AccountId, AuraId)>,
     endowed_accounts: Vec<AccountId>,
@@ -57,6 +60,27 @@ fn testnet_genesis(
                 })
                 .collect::<Vec<_>>(),
         },
+        polkadot_xcm: PolkadotXcmConfig { safe_xcm_version: Some(SAFE_XCM_VERSION) },
+        sudo: SudoConfig { key: Some(root) },
+    })
+}
+
+#[cfg(feature = "tanssi")]
+fn testnet_genesis(
+    _invulnerables: Vec<(AccountId, AuraId)>,
+    endowed_accounts: Vec<AccountId>,
+    root: AccountId,
+    id: ParaId,
+) -> Value {
+    build_struct_json_patch!(RuntimeGenesisConfig {
+        balances: BalancesConfig {
+            balances: endowed_accounts
+                .iter()
+                .cloned()
+                .map(|k| (k, 1u128 << 60))
+                .collect::<Vec<_>>(),
+        },
+        parachain_info: ParachainInfoConfig { parachain_id: id },
         polkadot_xcm: PolkadotXcmConfig { safe_xcm_version: Some(SAFE_XCM_VERSION) },
         sudo: SudoConfig { key: Some(root) },
     })
