@@ -31,6 +31,9 @@ env:
   # SCCACHE_CACHE_SIZE: "50GB"
   SCCACHE_GHA_ENABLED: "false"
 
+permissions:
+  contents: read
+
 jobs:
   clippy-fmt-test:
     runs-on: ubuntu-22.04
