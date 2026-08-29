@@ -6,6 +6,9 @@ on:
     - cron: '0 0 * * 0'
   workflow_dispatch:
 
+permissions:
+  contents: read
+
 jobs:
   generic-template-fuzzer:
     runs-on: ubuntu-latest
